@@ -146,7 +146,7 @@ NULL
 #' @examples 
 #' \dontshow{
 #'   Bacon(run=FALSE)
-#'   Bacon(ssize=100)}
+#'   Bacon(ssize=100, ask=F)}
 #' \donttest{
 #'   Bacon(ask=FALSE)
 #'   Bacon(cc=2, deltaR=80, deltaSTD=40)
@@ -311,7 +311,6 @@ Bacon <- function(core="MSB2K", thick=5, coredir=c(), prob=0.95, d.min=NA, d.max
     agedepth(info, BCAD=BCAD, depths.file=depths.file, depths=depths, ...)
     if(plot.pdf) {
       pdf(file=paste(info$prefix, ".pdf", sep=""))
-      cat("... but... ")
       agedepth(info, BCAD=BCAD, depths.file=depths.file, depths=depths, talk=FALSE, ...)
       dev.off()
     }  
@@ -1059,7 +1058,7 @@ proxy.ghost <- function(proxy=1, proxy.lab=c(), proxy.res=200, yr.res=200, grey.
 #' agedepth(yr.res=50)
 #' d20 <- accrate.depth(20)
 #' hist(d20)
-#' accrate.depth(20, cmyr=TRUE) # to calculate accumulation rates in cm/yr
+#' d20 <- accrate.depth(20, cmyr=TRUE) # to calculate accumulation rates in cm/yr
 #' @seealso \url{http://www.chrono.qub.ac.uk/blaauw/manualBacon_2.3.pdf}
 #' @references
 #' Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive 

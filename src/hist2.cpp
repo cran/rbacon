@@ -207,8 +207,8 @@ void hist2(std::string MCMCsamplesfname1,int  samplesize, int c0 , double Dc, in
 	if (0 < Hi.Get_extrapol_warnings())
         Rprintf("hist: WARNING: %d extrapolation warnings.\n", Hi.Get_extrapol_warnings());
 
-	delete hi;
-	delete depth;
+	delete[] hi;
+	delete[] depth;
 	fclose(F);
 }
 

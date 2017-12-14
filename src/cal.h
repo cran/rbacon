@@ -325,7 +325,7 @@ public:
 			}
 
         }
-        else
+        else {
             if (fcmp(theta, 13900.0) != 1)
                 {	//************** NB: In the official IntCal13 year 0 is node 1 (node 0 is -5)
                         k = 1 + (int) floor(theta/5.0);
@@ -353,6 +353,7 @@ public:
 							mu = CC(k,1) + (theta-CC(k,0))*(CC(k+1,1)-CC(k,1))/100.0;
 							sig = CC(k,2);
 						}
+        }					
             return mu;
 	}
 
@@ -601,7 +602,7 @@ public:
 			}
 
         }
-        else
+        else {
                 if (fcmp(theta, 13900.0) != 1)
                 {				//************** NB: In the official SHCal13 year 0 is node 1 (node 0 is -5)
                         k = 1 + (int) floor(theta/5.0);
@@ -629,7 +630,7 @@ public:
 							mu = CC(k,1) + (theta-CC(k,0))*(CC(k+1,1)-CC(k,1))/100.0;
 							sig = CC(k,2);
 						}
-
+        }
 		return mu;
 	}
 

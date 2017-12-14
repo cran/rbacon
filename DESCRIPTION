@@ -1,23 +1,23 @@
 Package: rbacon
 Type: Package
 Title: Age-Depth Modelling using Bayesian Statistics
-Version: 2.3.0
-Date: 2017-12-2
+Version: 2.3.1
+Date: 2017-12-14
 Authors@R: c(
     person("Maarten", "Blaauw", email = "maarten.blaauw@qub.ac.uk", role = c("aut", "cre")),
     person("J. Andres", "Christen", email = "jac@cimat.mx", role = "aut"),
-    person("Ted", "Belding", role = "cph"),
-    person("James", "Theiler", email = "", role = "cph"),
-    person("Brian", "Gough", email = "", role = "cph"),
-    person("Charles", "Karney", email = "", role = "cph"))
-Description: Bacon is an approach to age-depth modelling that uses Bayesian statistics to reconstruct accumulation histories for deposits, through combining radiocarbon and other dates with prior information. See Blaauw and Christen (2011) <doi:10.1214/11-BA618>.
+	person("Ted", "Belding", role = "cph"),
+	person("James", "Theiler", email = "", role = "cph"),
+	person("Brian", "Gough", email = "", role = "cph"),
+	person("Charles", "Karney", email = "", role = "cph"))
+Description: Bacon is an approach to age-depth modelling that uses Bayesian statistics to reconstruct accumulation histories for deposits, through combining radiocarbon and other dates with prior information. See Blaauw & Christen (2011) <doi:10.1214/11-BA618>.
 License: GPL (>= 2)
 NeedsCompilation: yes
 Imports: Rcpp (>= 0.12.12), coda (>= 0.19-1), grDevices, graphics,
         stats, utils
 LinkingTo: Rcpp
 RoxygenNote: 6.0.1
-Packaged: 2017-12-13 09:42:25 UTC; maarten
+Packaged: 2017-12-14 11:23:39 UTC; maarten
 Author: Maarten Blaauw [aut, cre],
   J. Andres Christen [aut],
   Ted Belding [cph],
@@ -26,4 +26,4 @@ Author: Maarten Blaauw [aut, cre],
   Charles Karney [cph]
 Maintainer: Maarten Blaauw <maarten.blaauw@qub.ac.uk>
 Repository: CRAN
-Date/Publication: 2017-12-13 18:15:03 UTC
+Date/Publication: 2017-12-14 15:56:18 UTC
