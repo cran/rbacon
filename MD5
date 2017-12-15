@@ -1,4 +1,4 @@
-2aa40d6975c680637583bd19c062ada6 *DESCRIPTION
+c003430a99b3365c59c60e7a37dccaae *DESCRIPTION
 558592f1c5e0337398ffdffad5eedd66 *NAMESPACE
 35fb00b59421068d45a76a80acd7f40e *R/Bacon.R
 49e485a8492b1bfa7ecfb5d4ac84ebb1 *R/RcppExports.R
@@ -47,14 +47,14 @@ fe765a83f8edf648714672a69a7c549a *man/copyCalibrationCurve.Rd
 ca492b626282120526df7d1bfed43e0d *man/rbacon.Rd
 21ba9ec6cd83381bae34393c725a24b9 *man/scissors.Rd
 32b812aa7a8be8b8e69ba5276edd7fc0 *man/thinner.Rd
-4b38431a071337f07b1b7b281c836f64 *src/Matrix.cpp
+4d218ff97b0d7e5c45148e4697161669 *src/Matrix.cpp
 70492f7b8bd3387bb7be172a456ea638 *src/Matrix.h
 78ea92baa8388f4a0948d5260390da3a *src/RcppExports.cpp
 86b24fa121c166d9110b42755cf7c048 *src/bacon.cpp
 f5198346f3c1d1349e99e2f2e993634b *src/bacon.h
 02fe56368dd9e89ce380fe586bf3604f *src/cal.h
 5efaff314dcac1b3e9e4730e45e20dc0 *src/events.cpp
-dbe9a3ff2003ba268cf3f9334c486576 *src/hist2.cpp
+334d367bd32cea4da8b52e02a94963a7 *src/hist2.cpp
 6f0b76ac213592b88516de18875ffabe *src/input.cpp
 a18aac7607a88445d90e842fad402f62 *src/input.h
 d2c5e6e039b220a1a74357fc1d953db0 *src/kernel.cpp

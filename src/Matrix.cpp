@@ -24,7 +24,7 @@ gsl_matrix * gsl_matrix_alloc (size_t n1, size_t n2) {
 }
 
 void gsl_matrix_free (gsl_matrix * m) {
-	delete m->data;
+	delete [] m->data;
 	delete m; 
 }
 

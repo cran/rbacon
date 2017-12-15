@@ -209,6 +209,9 @@ void hist2(std::string MCMCsamplesfname1,int  samplesize, int c0 , double Dc, in
 
 	delete[] hi;
 	delete[] depth;
+	delete[] dfin;
+	delete[] fout;
+	delete[] MCMCsamplesfname;
 	fclose(F);
 }
 
