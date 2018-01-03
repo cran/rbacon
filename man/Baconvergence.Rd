@@ -32,7 +32,7 @@ indicate poor MCMC mixing. Robust MCMC mixing is indicated by a Gelman and Rubin
 }
 \examples{
   \donttest{
-    Baconvergence(runs=2, ssize=100) # a quick-and-dirty toy example, using far too few iterations
+    Baconvergence(runs=2, ssize=100, coredir=tempfile()) # a quick-and-dirty toy example
   }
 }
 \references{

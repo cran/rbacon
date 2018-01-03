@@ -16,7 +16,7 @@ Lists all folders located within the core's directory.
 The directory is either "Bacon_runs", "Cores" or a custom-named one.
 }
 \examples{
-  Bacon(run=FALSE)
+  Bacon(run=FALSE, coredir=tempfile())
   Bacon_runs()
 }
 \seealso{

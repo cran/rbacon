@@ -4,7 +4,7 @@
 \alias{Bacon}
 \title{Main age-depth modelling function}
 \usage{
-Bacon(core = "MSB2K", thick = 5, coredir = c(), prob = 0.95,
+Bacon(core = "MSB2K", thick = 5, coredir = "", prob = 0.95,
   d.min = NA, d.max = NA, d.by = 1, depths.file = FALSE, depths = c(),
   unit = "cm", acc.shape = 1.5, acc.mean = 20, mem.strength = 4,
   mem.mean = 0.7, hiatus.depths = NA, hiatus.shape = 1,
@@ -182,15 +182,6 @@ postbomb curve you need. If Bacon finds postbomb dates (negative 14C ages) and y
 you will be prompted. Provide postbomb curves as, e.g., \code{postbomb=1} for the NH1 postbomb curve (2 for NH2, 3 for NH3, 4 for SH1-2, 5 for SH3).
 
 For calendar dates, i.e. dates that are already on the calendar scale and thus should not be calibrated, set\code{cc=0}.
-}
-\examples{
-\dontshow{
-  Bacon(run=FALSE)
-  Bacon(ssize=100)}
-\donttest{
-  Bacon(ask=FALSE)
-  Bacon(cc=2, deltaR=80, deltaSTD=40)
-}
 }
 \references{
 Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474. 

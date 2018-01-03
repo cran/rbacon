@@ -1,15 +1,16 @@
 Package: rbacon
 Type: Package
 Title: Age-Depth Modelling using Bayesian Statistics
-Version: 2.3.1.1
-Date: 2017-12-15
+Version: 2.3.1.2
+Date: 2018-01-01
 Authors@R: c(
     person("Maarten", "Blaauw", email = "maarten.blaauw@qub.ac.uk", role = c("aut", "cre")),
     person("J. Andres", "Christen", email = "jac@cimat.mx", role = "aut"),
+	person("Judith", "Esquivel Vazquez", email = "", role = "ctb"),
 	person("Ted", "Belding", role = "cph"),
-	person("James", "Theiler", email = "", role = "cph"),
-	person("Brian", "Gough", email = "", role = "cph"),
-	person("Charles", "Karney", email = "", role = "cph"))
+	person("James", "Theiler", role = "cph"),
+	person("Brian", "Gough", role = "cph"),
+	person("Charles", "Karney", role = "cph"))
 Description: Bacon is an approach to age-depth modelling that uses Bayesian statistics to reconstruct accumulation histories for deposits, through combining radiocarbon and other dates with prior information. See Blaauw & Christen (2011) <doi:10.1214/11-BA618>.
 License: GPL (>= 2)
 NeedsCompilation: yes
@@ -17,13 +18,14 @@ Imports: Rcpp (>= 0.12.12), coda (>= 0.19-1), grDevices, graphics,
         stats, utils
 LinkingTo: Rcpp
 RoxygenNote: 6.0.1
-Packaged: 2017-12-15 15:49:49 UTC; ripley
+Packaged: 2018-01-03 19:45:40 UTC; maarten
 Author: Maarten Blaauw [aut, cre],
   J. Andres Christen [aut],
+  Judith Esquivel Vazquez [ctb],
   Ted Belding [cph],
   James Theiler [cph],
   Brian Gough [cph],
   Charles Karney [cph]
 Maintainer: Maarten Blaauw <maarten.blaauw@qub.ac.uk>
 Repository: CRAN
-Date/Publication: 2017-12-15 16:29:36 UTC
+Date/Publication: 2018-01-03 19:56:53 UTC

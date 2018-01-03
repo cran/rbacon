@@ -36,7 +36,7 @@ calib.plot(set = get("info"), rotate.axes = FALSE, rev.d = FALSE,
 
 \item{cutoff}{Avoid plotting very low probabilities of date distributions (default \code{cutoff=0.001}).}
 
-\item{C14.col}{Colour of the calibrated ranges of the dates. Default is semi-transparent blue: \code{rgb(0,0,1,.35)}.}
+\item{C14.col}{Colour of the calibrated distributions of the dates. Default is semi-transparent blue: \code{rgb(0,0,1,.35)}.}
 
 \item{C14.border}{Colours of the borders of calibrated 14C dates. Default is transparent dark blue: cal.col}
 
@@ -61,8 +61,8 @@ This function is generally called internally to produce the age-depth graph.
 It can be used to produce custom-built graphs.
 }
 \examples{
-Bacon(run=FALSE)
-calib.plot()
+  Bacon(run=FALSE, coredir=tempfile())
+  calib.plot()
 
 }
 \references{

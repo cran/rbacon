@@ -26,10 +26,10 @@ Obtaining an age-depth model is often only a step towards a goal, e.g., plotting
 fossil series ('proxies') against calendar time. Bacon.Age.d can be used to list all MCMC-derived age estimates for a given (single) depth, for example to calculate mean ages for a depth.
 }
 \examples{
-Bacon(run=FALSE)
-agedepth(yr.res=50)
-ages.d20 = Bacon.Age.d(20)
-mean(ages.d20)
+  Bacon(run=FALSE, coredir=tempfile())
+  agedepth(yr.res=50)
+  ages.d20 = Bacon.Age.d(20)
+  mean(ages.d20)
 }
 \references{
 Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive 

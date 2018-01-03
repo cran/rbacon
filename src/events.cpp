@@ -74,7 +74,7 @@ public:
         X.~SubMatrix();
         //A.~SubMatrix();
         Out.~SubMatrix();
-        delete OutB;
+        delete OutB; // delete[] OutB crashes events
     }
 
 

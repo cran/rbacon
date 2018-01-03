@@ -320,7 +320,7 @@ class twalk {
 		free_vector(mapx);
 		free_vector(y);
 		free_vector(yp);
-		delete phi;
+		delete[] phi; // tmp MB
 	}
 
 		/* select a kernel accordingly with krl_probs */
@@ -777,26 +777,3 @@ void Remain(int Tr, int it, long sec1, long sec2) {
 
 
 #endif
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

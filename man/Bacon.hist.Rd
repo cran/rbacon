@@ -4,11 +4,11 @@
 \alias{Bacon.hist}
 \title{Calculate age distributions of depths.}
 \usage{
-Bacon.hist(d, set = get("info"), bins = c(), tmpfile = "tempfile1",
-  depthfile = "tempfile2", yr.lab = c(), yr.lim = c(),
+Bacon.hist(d, set = get("info"), bins = c(), yr.lab = c(), yr.lim = c(),
   hist.lab = "Frequency", hist.lim = c(), Plot = TRUE, yr.res = 200,
   prob = set$prob, hist.col = grey(0.5), hist.border = grey(0.2),
-  range.col = "blue", med.col = "green", mn.col = "red", cleanup = TRUE)
+  range.col = "blue", med.col = "green", mean.col = "red",
+  cleanup = TRUE)
 }
 \arguments{
 \item{d}{The depth or depths for which a histogram and age ranges should be provided. If multiple depths are given, then just the age ranges, median and means (no graphs) are provided for each depth.}
@@ -16,10 +16,6 @@ Bacon.hist(d, set = get("info"), bins = c(), tmpfile = "tempfile1",
 \item{set}{Detailed information of the current run, stored within this session's memory as variable info.}
 
 \item{bins}{Bacon will try to automatically estimate reasonable bin sizes. Changing the histograms bin size could alter the shape of the histogram considerably. Values below c. 50 are generally not recommended.}
-
-\item{tmpfile}{Name and location of a temporary file. By default uses the location suggested by R's function \link{tempfile}.}
-
-\item{depthfile}{Name and location of a temporary file. By default uses the location suggested by R's function \link{tempfile}.}
 
 \item{yr.lab}{The labels for the calendar axis (default \code{yr.lab="cal BP"} or \code{"BC/AD"} if \code{BCAD=TRUE}).}
 
@@ -42,9 +38,9 @@ If \code{Plot=FALSE}, then the age ranges, median and mean are given for each de
 
 \item{range.col}{Colour of confidence ranges. Defaults to \code{range.col="blue"}.}
 
-\item{med.col}{Colour of the weighted mean. Defaults to \code{med.col="green"}.}
+\item{med.col}{Colour of the median. Defaults to \code{med.col="green"}.}
 
-\item{mn.col}{Colour of the mean. Defaults to \code{mn.col="red"}.}
+\item{mean.col}{Colour of the mean. Defaults to \code{mn.col="red"}.}
 
 \item{cleanup}{The drawing of the plot uses temporary files, which are removed afterward by default (\code{cleanup=TRUE}).}
 }
@@ -58,7 +54,7 @@ Calculate the distribution of age estimates of single or multiple depths.
 Age estimates of specific depths can also be plotted.
 }
 \examples{
-  Bacon(run=FALSE)
+  Bacon(run=FALSE, coredir=tempfile())
   agedepth(yr.res=50)
   Bacon.hist(20) 
   Bacon.hist(20:30) 

@@ -6,7 +6,9 @@
 \usage{
 accrate.depth.ghost(set = get("info"), d = set$d, d.lim = c(),
   acc.lim = c(), d.lab = c(), cmyr = FALSE, acc.lab = c(), dark = 1,
-  grey.res = 100, rotate.axes = FALSE, rev.d = FALSE, rev.acc = FALSE)
+  grey.res = 100, prob = 0.95, plot.range = TRUE, range.col = grey(0.5),
+  range.lty = 2, plot.mean = TRUE, mean.col = "red", mean.lty = 2,
+  rotate.axes = FALSE, rev.d = FALSE, rev.acc = FALSE)
 }
 \arguments{
 \item{set}{Detailed information of the current run, stored within this session's memory as variable info.}
@@ -27,6 +29,20 @@ accrate.depth.ghost(set = get("info"), d = set$d, d.lim = c(),
 
 \item{grey.res}{Grey-scale resolution. Default \code{grey.res=100}. See also \code{bins}.}
 
+\item{prob}{Probability ranges. Defaults to \code{prob=0.95}.}
+
+\item{plot.range}{If \code{plot.range=TRUE}, the confidence ranges (two-tailed; half of the probability at each side) are plotted.}
+
+\item{range.col}{Colour of the confidence ranges.}
+
+\item{range.lty}{Line type of the confidence ranges.}
+
+\item{plot.mean}{If \code{plot.mean=TRUE}, the means are plotted.}
+
+\item{mean.col}{Colour of the mean accumulation rates.}
+
+\item{mean.lty}{Type of the mean lines.}
+
 \item{rotate.axes}{The default is to plot the accumulation rates horizontally and the depth vertically (\code{rotate.axes=FALSE}). Change rotate.axes value to rotate axes.}
 
 \item{rev.d}{The direction of the depth axis can be reversed from the default (\code{rev.d=TRUE}.}
@@ -45,10 +61,10 @@ Axis limits for accumulation rates are estimated automatically, however upper li
 if calculated in cm/yr; therefore you might want to manually adapt the axis limits after plotting with default settings (e.g., \code{acc.lim=c(0,1)}). See also \code{accrate.age.ghost}, \code{accrate.depth} and \code{accrate.age}.
 }
 \examples{
-Bacon(run=FALSE)
-agedepth(yr.res=50)
-layout(1)
-accrate.depth.ghost()
+  Bacon(run=FALSE, coredir=tempfile())
+  agedepth(yr.res=50)
+  layout(1)
+  accrate.depth.ghost()
 }
 \references{
 Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive 

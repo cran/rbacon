@@ -28,12 +28,12 @@ This will remove these iterations in the run's output file.
 }
 \examples{
 \dontshow{
-  Bacon(run=FALSE)
+  Bacon(run=FALSE, coredir=tempfile())
   scissors(100)
   agedepth(d.res=50)
 }
 \donttest{
-  Bacon(ask=FALSE)
+  Bacon(ask=FALSE, coredir=tempfile())
   scissors(100)
   agedepth()
 }

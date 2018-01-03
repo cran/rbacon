@@ -27,11 +27,11 @@ This function obtains accumulation rates (in years per cm, so actually sedimenta
 by the MCMC iterations for any age of a core. Deals with only 1 age at a time. See also \code{accrate.depth}.
 }
 \examples{
-Bacon(run=FALSE)
-agedepth(yr.res=50)
-accrate.a5000 = accrate.age(5000)
-plot(accrate.a5000, pch='.')   
-hist(accrate.a5000)
+  Bacon(run=FALSE, coredir=tempfile())
+  agedepth(yr.res=50)
+  accrate.a5000 = accrate.age(5000)
+  plot(accrate.a5000, pch='.')   
+  hist(accrate.a5000)
 }
 \references{
 Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive 

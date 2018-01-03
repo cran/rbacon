@@ -22,12 +22,12 @@ From all iterations, a proportion is removed with to-be-removed iterations sampl
 }
 \examples{
 \dontshow{
-  Bacon(run=FALSE)
+  Bacon(run=FALSE, coredir=tempfile())
   thinner(.1)
   agedepth(d.res=50)
 }
 \donttest{
-  Bacon(ask=FALSE)
+  Bacon(ask=FALSE, coredir=tempfile())
   thinner(.2)
   agedepth()
 }

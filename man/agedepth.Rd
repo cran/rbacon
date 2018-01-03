@@ -98,13 +98,13 @@ and its name should start with the core's name and end with '_depths.txt'. Then 
 
 \item{med.lty}{The line type of the median age-depth model. Default \code{med.lty=12}.}
 
-\item{C14.col}{The colour of the calibrated ranges of the dates. Default is semi-transparent blue: \code{rgb(0,0,1,.35)}.}
+\item{C14.col}{The colour of the calibrated ranges of the dates. Default is semi-transparent blue: \code{C14.col=rgb(0,0,1,.35)}.}
 
 \item{C14.border}{The colours of the borders of calibrated 14C dates. Default is semi-transparent dark blue: \code{C14.border=rgb(0, 0, 1, 0.5)}.}
 
-\item{cal.col}{The colour of the non-14C dates. Default is semi-transparent blue-green: \code{rgb(0,.5,.5,.35)}.}
+\item{cal.col}{The colour of the non-14C dates. Default is semi-transparent blue-green: \code{cal.col=rgb(0,.5,.5,.35)}.}
 
-\item{cal.border}{The colour of the border of non-14C dates in the age-depth plot: default semi-transparent dark blue-green: \code{rgb(0,.5,.5,.5)}.}
+\item{cal.border}{The colour of the border of non-14C dates in the age-depth plot: default semi-transparent dark blue-green: \code{cal.border=rgb(0,.5,.5,.5)}.}
 
 \item{hiatus.col}{The colour of the depths of any hiatuses. Default \code{hiatus.col=grey(0.5)}.}
 
@@ -158,10 +158,10 @@ again using the command \code{agedepth()}.
 }
 \examples{
 \dontshow{
-  Bacon(run=FALSE)}
+  Bacon(run=FALSE, coredir=tempfile())}
   agedepth(yr.res=50)
 \donttest{
-  Bacon(ask=FALSE)
+  Bacon(ask=FALSE, coredir=tempfile())
   agedepth()
 }
 }

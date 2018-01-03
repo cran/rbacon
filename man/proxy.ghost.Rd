@@ -7,7 +7,7 @@
 proxy.ghost(proxy = 1, proxy.lab = c(), proxy.res = 200, yr.res = 200,
   grey.res = 100, set = get("info"), bins = c(), dark = 1,
   darkest = 1, rotate.axes = FALSE, proxy.rev = FALSE, yr.rev = FALSE,
-  plot.mn = FALSE, mn.col = "red", yr.lim = c(), proxy.lim = c(),
+  plot.mean = FALSE, mean.col = "red", yr.lim = c(), proxy.lim = c(),
   sep = ",", xaxs = "i", yaxs = "i", xaxt = "s", yaxt = "s",
   bty = "l", BCAD = set$BCAD, yr.lab = ifelse(BCAD, "BC/AD", "cal yr BP"),
   cleanup = TRUE)
@@ -37,9 +37,9 @@ proxy.ghost(proxy = 1, proxy.lab = c(), proxy.res = 200, yr.res = 200,
 
 \item{yr.rev}{The calendar axis can be reversed using \code{yr.rev=TRUE}.}
 
-\item{plot.mn}{The mean ages of the proxy values can be added using \code{plot.mn=TRUE}.}
+\item{plot.mean}{The mean ages of the proxy values can be added using \code{plot.mean=TRUE}.}
 
-\item{mn.col}{Colour of the weighted mean ages of the proxy values.}
+\item{mean.col}{Colour of the weighted mean ages of the proxy values.}
 
 \item{yr.lim}{Minimum and maximum calendar age ranges, calculated automatically by default (\code{yr.lim=c()}).}
 
@@ -75,9 +75,9 @@ The file name should start with the core's name and end with "_proxies.csv". For
 }
 \examples{
 \donttest{
-Bacon(ask=FALSE)
-layout(1)
-proxy.ghost()
+  Bacon(ask=FALSE, coredir=tempfile())
+  layout(1)
+  proxy.ghost()
 }
 }
 \references{

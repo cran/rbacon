@@ -59,9 +59,9 @@ does not yet deal correctly with hiatuses.
 }
 \examples{
 \donttest{
-Bacon(run=FALSE)
-agedepth(yr.res=50)
-AgesOfEvents(100, 10)
+  Bacon(run=FALSE, coredir=tempfile())
+  agedepth(yr.res=50)
+  AgesOfEvents(100, 10)
 }
 }
 \references{

@@ -20,7 +20,7 @@ If cores behave badly, you can try cleaning up previous runs and settings, by
 removing files .bacon, .out, .pdf, _ages.txt, and _settings.txt of current core.
 }
 \examples{
-  Bacon(run=FALSE)
+  Bacon(run=FALSE, coredir=tempfile())
   Bacon.cleanup()
 }
 \seealso{
