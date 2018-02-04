@@ -27,7 +27,7 @@ accrate.depth.ghost(set = get("info"), d = set$d, d.lim = c(),
 
 \item{dark}{The darkest grey value is dark=1 by default; lower values will result in lighter grey but values >1 are not advised.}
 
-\item{grey.res}{Grey-scale resolution. Default \code{grey.res=100}. See also \code{bins}.}
+\item{grey.res}{Grey-scale resolution. Default \code{grey.res=100}.}
 
 \item{prob}{Probability ranges. Defaults to \code{prob=0.95}.}
 

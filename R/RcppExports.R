@@ -9,7 +9,3 @@ events <- function(th1, th2, th_shift, window, outputfname1, MCMCsamplesfname1, 
     invisible(.Call('_rbacon_events', PACKAGE = 'rbacon', th1, th2, th_shift, window, outputfname1, MCMCsamplesfname1, samplesize, K, c0, Dc, eventprobsfname1, depths_size))
 }
 
-hist2 <- function(MCMCsamplesfname1, samplesize, c0, Dc, K, n, fout1, n_depths, dfin1) {
-    invisible(.Call('_rbacon_hist2', PACKAGE = 'rbacon', MCMCsamplesfname1, samplesize, c0, Dc, K, n, fout1, n_depths, dfin1))
-}
-

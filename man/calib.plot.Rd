@@ -4,15 +4,17 @@
 \alias{calib.plot}
 \title{Plot the dates}
 \usage{
-calib.plot(set = get("info"), rotate.axes = FALSE, rev.d = FALSE,
-  rev.yr = FALSE, yr.lim = c(), date.res = 100, d.lab = c(),
-  yr.lab = c(), height = 15, mirror = TRUE, up = TRUE, cutoff = 0.001,
-  C14.col = rgb(0, 0, 1, 0.5), C14.border = rgb(0, 0, 1, 0.75),
-  cal.col = rgb(0, 0.5, 0.5, 0.5), cal.border = rgb(0, 0.5, 0.5, 0.75),
-  new.plot = TRUE, plot.dists = TRUE, normalise.dists = TRUE)
+calib.plot(set = get("info"), BCAD = set$BCAD, rotate.axes = FALSE,
+  rev.d = FALSE, rev.yr = FALSE, yr.lim = c(), date.res = 100,
+  d.lab = c(), yr.lab = c(), height = 15, mirror = TRUE, up = TRUE,
+  cutoff = 0.001, C14.col = rgb(0, 0, 1, 0.5), C14.border = rgb(0, 0, 1,
+  0.75), cal.col = rgb(0, 0.5, 0.5, 0.5), cal.border = rgb(0, 0.5, 0.5,
+  0.75), new.plot = TRUE, plot.dists = TRUE, normalise.dists = TRUE)
 }
 \arguments{
 \item{set}{Detailed information of the current run, stored within this session's memory as variable \code{info}.}
+
+\item{BCAD}{The calendar scale of graphs is in \code{cal BP} by default, but can be changed to BC/AD using \code{BCAD=TRUE}.}
 
 \item{rotate.axes}{The default of plotting age on the horizontal axis and event probability on the vertical one can be changed with \code{rotate.axes=TRUE}.}
 

@@ -4,7 +4,7 @@
 \alias{accrate.age}
 \title{Obtain estimated accumulation rates for any age of a core.}
 \usage{
-accrate.age(age, set = get("info"), cmyr = FALSE)
+accrate.age(age, set = get("info"), cmyr = FALSE, BCAD = set$BCAD)
 }
 \arguments{
 \item{age}{The age for which the accumulation rates need to be returned.}
@@ -12,6 +12,8 @@ accrate.age(age, set = get("info"), cmyr = FALSE)
 \item{set}{Detailed information of the current run, stored within this session's memory as variable \code{info}.}
 
 \item{cmyr}{Accumulation rates can be calculated in cm/year or year/cm. By default \code{cmyr=FALSE} and accumulation rates are calculated in year per cm.}
+
+\item{BCAD}{The calendar scale of graphs and age output-files is in \code{cal BP} by default, but can be changed to BC/AD using \code{BCAD=TRUE}.}
 }
 \value{
 all MCMC estimates of accumulation rate of the chosen age.

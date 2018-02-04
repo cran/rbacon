@@ -4,23 +4,23 @@
 \alias{agedepth}
 \title{Plot an age-depth model}
 \usage{
-agedepth(set = get("info"), BCAD = FALSE, unit = "cm", d.lab = c(),
+agedepth(set = get("info"), BCAD = set$BCAD, unit = "cm", d.lab = c(),
   yr.lab = c(), d.min = set$d.min, d.max = set$d.max, d.by = set$d.by,
   depths = c(), depths.file = FALSE, yr.min = c(), yr.max = c(),
-  bins = c(), dark = set$dark, prob = set$prob, rounded = 0,
-  d.res = 200, yr.res = 200, date.res = 100, grey.res = 100,
-  rotate.axes = FALSE, rev.yr = FALSE, rev.d = FALSE, maxcalc = 500,
-  height = 15, mirror = TRUE, up = TRUE, cutoff = 0.001,
-  plot.range = TRUE, panels = layout(1), range.col = grey(0.5),
-  range.lty = "12", mn.col = "red", mn.lty = "12", med.col = NA,
-  med.lty = "12", C14.col = rgb(0, 0, 1, 0.35), C14.border = rgb(0, 0, 1,
-  0.5), cal.col = rgb(0, 0.5, 0.5, 0.35), cal.border = rgb(0, 0.5, 0.5,
-  0.5), hiatus.col = grey(0.5), hiatus.lty = "12", greyscale = function(x)
-  grey(1 - x), normalise.dists = TRUE, cc = set$cc, title = set$core,
-  title.location = "topleft", after = set$after, bty = "l", mar = c(3,
-  3, 1, 1), mgp = c(1.5, 0.7, 0), xaxs = "r", yaxs = "r", xaxt = "s",
-  yaxt = "s", plot.pdf = FALSE, dates.only = FALSE, model.only = FALSE,
-  cleanup = TRUE, talk = TRUE)
+  dark = set$dark, prob = set$prob, rounded = 0, d.res = 400,
+  yr.res = 400, date.res = 100, grey.res = 100, rotate.axes = FALSE,
+  rev.yr = FALSE, rev.d = FALSE, maxcalc = 500, height = 15,
+  mirror = TRUE, up = TRUE, cutoff = 0.001, plot.range = TRUE,
+  panels = layout(1), range.col = grey(0.5), range.lty = "12",
+  mn.col = "red", mn.lty = "12", med.col = NA, med.lty = "12",
+  C14.col = rgb(0, 0, 1, 0.35), C14.border = rgb(0, 0, 1, 0.5),
+  cal.col = rgb(0, 0.5, 0.5, 0.35), cal.border = rgb(0, 0.5, 0.5, 0.5),
+  hiatus.col = grey(0.5), hiatus.lty = "12", greyscale = grey(seq(1, 0,
+  length = grey.res)), normalise.dists = TRUE, cc = set$cc,
+  title = set$core, title.location = "topleft", after = set$after,
+  bty = "l", mar = c(3, 3, 1, 1), mgp = c(1.5, 0.7, 0), xaxs = "r",
+  yaxs = "r", xaxt = "s", yaxt = "s", plot.pdf = FALSE,
+  dates.only = FALSE, model.only = FALSE, talk = FALSE)
 }
 \arguments{
 \item{set}{Detailed information of the current run, stored within this session's memory as variable \code{info}.}
@@ -49,8 +49,6 @@ and its name should start with the core's name and end with '_depths.txt'. Then 
 \item{yr.min}{Minimum calendar age of the age-depth plot.}
 
 \item{yr.max}{Maximum calendar age of the age-depth plot.}
-
-\item{bins}{The amount of bins in histograms. Calculated automatically by default: \code{bins=c()}. See also \code{yr.res}.}
 
 \item{dark}{Darkness of the greyscale age-depth model. The darkest grey value is \code{dark=1} by default; lower values will result in lighter grey but values >1 are not allowed.}
 
@@ -110,7 +108,7 @@ and its name should start with the core's name and end with '_depths.txt'. Then 
 
 \item{hiatus.lty}{The line type of the depths of any hiatuses. Default \code{hiatus.lty=12}.}
 
-\item{greyscale}{The function to produce a grey-scale representation of all age-models. Default \code{greyscale=function(x) grey(1-x)}.}
+\item{greyscale}{The function to produce a coloured representation of all age-models. Defaults to grey-scales: \code{greyscale=function(x) grey(1-x)}.}
 
 \item{normalise.dists}{By default, the distributions of more precise dates will cover less time and will thus peak higher than less precise dates. This can be avoided by specifying \code{normalise.dists=FALSE}.}
 
@@ -142,9 +140,7 @@ and its name should start with the core's name and end with '_depths.txt'. Then 
 
 \item{model.only}{By default, panels showing the MCMC iterations and the priors and posteriors for accumulation rate and memory are plotted above the main age-depth model panel. This can be avoided by supplying \code{model.only=TRUE}. Note however that this removes relevant information to evaluate the age-depth model, so we do recommend to present age-models together with these upper panels.}
 
-\item{cleanup}{Temporary files used to produce the plot are removed automatically after the plot has been made by default; \code{cleanup=TRUE}.}
-
-\item{talk}{Provide a summary of the age ranges after producing the age-depth model graph; default \code{talk=TRUE}.}
+\item{talk}{Provide a summary of the age ranges after producing the age-depth model graph; default \code{talk=FALSE}.}
 }
 \value{
 A plot of the age-depth model, and estimated ages incl. confidence ranges for each depth.

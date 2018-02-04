@@ -40,29 +40,10 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
-// hist2
-void hist2(std::string MCMCsamplesfname1, int samplesize, int c0, double Dc, int K, int n, std::string fout1, int n_depths, std::string dfin1);
-RcppExport SEXP _rbacon_hist2(SEXP MCMCsamplesfname1SEXP, SEXP samplesizeSEXP, SEXP c0SEXP, SEXP DcSEXP, SEXP KSEXP, SEXP nSEXP, SEXP fout1SEXP, SEXP n_depthsSEXP, SEXP dfin1SEXP) {
-BEGIN_RCPP
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< std::string >::type MCMCsamplesfname1(MCMCsamplesfname1SEXP);
-    Rcpp::traits::input_parameter< int >::type samplesize(samplesizeSEXP);
-    Rcpp::traits::input_parameter< int >::type c0(c0SEXP);
-    Rcpp::traits::input_parameter< double >::type Dc(DcSEXP);
-    Rcpp::traits::input_parameter< int >::type K(KSEXP);
-    Rcpp::traits::input_parameter< int >::type n(nSEXP);
-    Rcpp::traits::input_parameter< std::string >::type fout1(fout1SEXP);
-    Rcpp::traits::input_parameter< int >::type n_depths(n_depthsSEXP);
-    Rcpp::traits::input_parameter< std::string >::type dfin1(dfin1SEXP);
-    hist2(MCMCsamplesfname1, samplesize, c0, Dc, K, n, fout1, n_depths, dfin1);
-    return R_NilValue;
-END_RCPP
-}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_rbacon_bacon", (DL_FUNC) &_rbacon_bacon, 4},
     {"_rbacon_events", (DL_FUNC) &_rbacon_events, 12},
-    {"_rbacon_hist2", (DL_FUNC) &_rbacon_hist2, 9},
     {NULL, NULL, 0}
 };
 

@@ -4,7 +4,10 @@
 \alias{Bacon_runs}
 \title{List the folders present in the current core directory.}
 \usage{
-Bacon_runs()
+Bacon_runs(coredir = get("info")$coredir)
+}
+\arguments{
+\item{coredir}{The directory where the Bacon runs reside. Defaults to \code{coredir="Bacon_runs"}.}
 }
 \value{
 A list of folders

@@ -4,11 +4,13 @@
 \alias{copyCalibrationCurve}
 \title{Copy a calibration curve.}
 \usage{
-copyCalibrationCurve(cc = 1)
+copyCalibrationCurve(cc = 1, postbomb = FALSE)
 }
 \arguments{
 \item{cc}{Calibration curve for 14C dates: \code{cc=1} for IntCal13 (northern hemisphere terrestrial), \code{cc=2} for Marine13 (marine), 
 \code{cc=3} for SHCal13 (southern hemisphere terrestrial).}
+
+\item{postbomb}{Use \code{postbomb=TRUE} to get a postbomb calibration curve (default \code{postbbomb=FALSE}).}
 }
 \value{
 The calibration curve (invisible).

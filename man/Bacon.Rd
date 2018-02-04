@@ -7,16 +7,15 @@
 Bacon(core = "MSB2K", thick = 5, coredir = "", prob = 0.95,
   d.min = NA, d.max = NA, d.by = 1, depths.file = FALSE, depths = c(),
   unit = "cm", acc.shape = 1.5, acc.mean = 20, mem.strength = 4,
-  mem.mean = 0.7, hiatus.depths = NA, hiatus.shape = 1,
-  hiatus.mean = 1000, after = 1e-04, cc = 1, cc1 = "IntCal13",
-  cc2 = "Marine13", cc3 = "SHCal13", cc4 = "ConstCal", ccdir = "",
-  postbomb = 0, deltaR = 0, deltaSTD = 0, t.a = 3, t.b = 4,
-  normal = FALSE, suggest = TRUE, reswarn = c(10, 200), remember = TRUE,
-  ask = TRUE, run = TRUE, defaults = "default_settings.txt", sep = ",",
-  dec = ".", runname = "", slump = NA, BCAD = FALSE, ssize = 2000,
-  th0 = c(), burnin = min(200, ssize), MinYr = c(), MaxYr = c(),
-  find.round = 4, cutoff = 0.001, plot.pdf = TRUE, dark = 1,
-  date.res = 100, yr.res = 200, ...)
+  mem.mean = 0.7, boundary = NA, hiatus.depths = NA, hiatus.max = 10000,
+  add = 0, after = 1e-04, cc = 1, cc1 = "IntCal13", cc2 = "Marine13",
+  cc3 = "SHCal13", cc4 = "ConstCal", ccdir = "", postbomb = 0,
+  delta.R = 0, delta.STD = 0, t.a = 3, t.b = 4, normal = FALSE,
+  suggest = TRUE, reswarn = c(10, 200), remember = TRUE, ask = TRUE,
+  run = TRUE, defaults = "default_settings.txt", sep = ",", dec = ".",
+  runname = "", slump = NA, BCAD = FALSE, ssize = 2000, th0 = c(),
+  burnin = min(200, ssize), MinYr = c(), MaxYr = c(), cutoff = 0.001,
+  plot.pdf = TRUE, dark = 1, date.res = 100, yr.res = 200, ...)
 }
 \arguments{
 \item{core}{Name of the core, given using quotes. Defaults to one of the cores provided with rbacon, \code{core="MSB2K"}. 
@@ -25,7 +24,7 @@ To run your own core, produce a .csv file with the dates as outlined in the manu
 
 \item{thick}{Bacon will divide the core into sections of equal thickness specified by thick (default \code{thick=5}).}
 
-\item{coredir}{Subfolder where the core's files \code{core} are and will be located. This will be a folder with the core's name, within either the folder \code{coredir='Bacon_runs/'}, or the folder Cores/ if it already exists within R's working directory, or a custom-built folder. For example, use \code{coredir="."} to place the core's folder within the current working directory, or \code{coredir="F:"} if you want to put the core's folder and files on a USB drive loaded under F:.
+\item{coredir}{Folder where the core's files \code{core} are and/or will be located. This will be a folder with the core's name, within either the folder \code{coredir='Bacon_runs/'}, or the folder Cores/ if it already exists within R's working directory, or a custom-built folder. For example, use \code{coredir="."} to place the core's folder within the current working directory, or \code{coredir="F:"} if you want to put the core's folder and files on a USB drive loaded under F:.
 Thinner (and thus more) sections will result in smoother age-models, but too many sections can cause 'run-away' models.}
 
 \item{prob}{Confidence interval to report. This should lie between 0 and 1, default 0.95 (95 \%).}
@@ -52,7 +51,7 @@ Its shape is set by acc.shape (default \code{acc.shape=1.5}; higher values resul
 \item{acc.mean}{The accumulation rate prior consists of a gamma distribution with two parameters. Its mean is set by acc.mean (default \code{acc.mean=20} yr/cm, 
 which can be changed to, e.g., 5, 10 or 50 for different kinds of deposits).}
 
-\item{mem.strength}{The prior for the memory is a beta distribution, which looks much like the gamma distribution
+\item{mem.strength}{The prior for the memory (dependence of accumulation rate between neighbouring depths) is a beta distribution, which looks much like the gamma distribution.
 but its values are always between 0 (no assumed memory) and 1 (100 \% memory). Its default settings of \code{mem.strength=4}
 (higher values result in more peaked shapes) allow for a large range of posterior memory values.}
 
@@ -60,14 +59,14 @@ but its values are always between 0 (no assumed memory) and 1 (100 \% memory). I
 its values are always between 0 (no assumed memory) and 1 (100\% memory). Its default settings of \code{mem.mean=0.7}
 allow for a large range of posterior memory values.}
 
+\item{boundary}{The assumed depths of any boundary, which divides sections of different accumulation rate regimes (e.g., as indicated by major change in the stratigraphy). No hiatus is assumed between these sections, and memory is reset crossing the boundary. Different accumulation priors can be set for the sections above and below the boundary, e.g., \code{acc.mean=c(5, 20)}. See also \code{hiatus.depths}, \code{mem.mean}, \code{acc.mean} and \code{acc.shape}.}
+
 \item{hiatus.depths}{The assumed depths for any hiatus should be provided as, e.g., 
 \code{hiatus.depths=20} for one at 20cm depth, and \code{hiatus.depths=c(20,40)} for two hiatuses at 20 and 40 cm depth.}
 
-\item{hiatus.shape}{The prior for the length of the hiatus, which is a gamma distribution with two parameters. 
-Its shape is set by hiatus.shape (default \code{acc.shape=1}).}
+\item{hiatus.max}{The prior for the maximum length of the hiatus. Hiatus length is a uniform distribution, with equal probabilities between 0 and \code{hiatus.max} yr.}
 
-\item{hiatus.mean}{The prior for the length of the hiatus, which is a gamma distribution with two parameters. 
-Its mean is set by hiatus.mean (default \code{acc.mean=1000}).}
+\item{add}{Add a value to the maximum hiatus length if a boundary is chosen. Defaults to \code{add=0}. Can be used if Bacon complains that the parameters are out of support.}
 
 \item{after}{Sets a short section above and below hiatus.depths within which to calculate ages. For internal calculations - do not change.}
 
@@ -87,9 +86,9 @@ Use \code{ccdir="."} to choose current working directory. Use \code{ccdir="Curve
 
 \item{postbomb}{Use a postbomb curve for negative (i.e. postbomb) 14C ages. \code{0 = none, 1 = NH1, 2 = NH2, 3 = NH3, 4 = SH1-2, 5 = SH3}}
 
-\item{deltaR}{Mean of core-wide age offsets (e.g., regional marine offsets).}
+\item{delta.R}{Mean of core-wide age offsets (e.g., regional marine offsets).}
 
-\item{deltaSTD}{Error of core-wide age offsets (e.g., regional marine offsets).}
+\item{delta.STD}{Error of core-wide age offsets (e.g., regional marine offsets).}
 
 \item{t.a}{The dates are treated using the student's t distribution by default (\code{normal=FALSE}). 
 The student's t-distribution has two parameters, t.a and t.b, set at 3 and 4 by default (see Christen and Perez, 2010). 
@@ -140,8 +139,6 @@ try running your core again with \code{remember=FALSE}, or, start cleanly by typ
 
 \item{MaxYr}{Maximum age limit for Bacon runs, default at 1,000,000 cal BP. To set plot limits, use \code{yr.max} instead.}
 
-\item{find.round}{Temporary internal measure to deal with rounding problems at hiatuses; default 4.}
-
 \item{cutoff}{Avoid plotting very low probabilities of date distributions (default \code{cutoff=0.001}).}
 
 \item{plot.pdf}{Produce a pdf file of the age-depth plot. Defaults to \code{plot.pdf=TRUE} after a Bacon run.}
@@ -170,7 +167,7 @@ and through millions of Markov Chain Monte Carlo (MCMC) iterations estimates
 the accumulation rate (in years/cm; so more correctly, sedimentation times) for each of these sections. 
 Combined with an estimated starting date for the first section, these accumulation rates then form the age-depth model. 
 The accumulation rates are constrained by prior information on the accumulation rate (\code{acc.mean, acc.shape)} and its 
-variability between neighbouring depths, or 'memory' (\code{mem.mean, mem.strength}). Hiatuses can be introduced as well, also constrained by prior information (\code{hiatus.mean, hiatus.strength}).
+variability between neighbouring depths, or 'memory' (\code{mem.mean, mem.strength}). Hiatuses can be introduced as well, also constrained by prior information (\code{hiatus.max}).
 
 Although Bacon works with any kind of absolute dates (e.g., OSL, tephra or other dates on a calendar scale), 
 it is often used to age-model 14C-dated sequences. Radiocarbon dates should be calibrated using either IntCal13 
@@ -182,6 +179,15 @@ postbomb curve you need. If Bacon finds postbomb dates (negative 14C ages) and y
 you will be prompted. Provide postbomb curves as, e.g., \code{postbomb=1} for the NH1 postbomb curve (2 for NH2, 3 for NH3, 4 for SH1-2, 5 for SH3).
 
 For calendar dates, i.e. dates that are already on the calendar scale and thus should not be calibrated, set\code{cc=0}.
+}
+\examples{
+\dontshow{
+  Bacon(run=FALSE, coredir=tempfile()) 
+}
+\donttest{
+  Bacon(ask=FALSE, coredir=tempfile())
+  Bacon(cc=2, delta.R=80, delta.STD=40, coredir=tempfile())
+}
 }
 \references{
 Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474. 

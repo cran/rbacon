@@ -4,13 +4,12 @@
 \alias{proxy.ghost}
 \title{Proxies analysed along the depths of a core can be plotted as 'proxy-ghost' graphs against calendar time while taking into account chronological uncertainties. Here darker grey indicates more likely calendar ages for specific proxy values.}
 \usage{
-proxy.ghost(proxy = 1, proxy.lab = c(), proxy.res = 200, yr.res = 200,
-  grey.res = 100, set = get("info"), bins = c(), dark = 1,
-  darkest = 1, rotate.axes = FALSE, proxy.rev = FALSE, yr.rev = FALSE,
+proxy.ghost(proxy = 1, proxy.lab = c(), proxy.res = 250, yr.res = 250,
+  grey.res = 100, set = get("info"), dark = 1, darkest = 1,
+  rotate.axes = FALSE, proxy.rev = FALSE, yr.rev = FALSE,
   plot.mean = FALSE, mean.col = "red", yr.lim = c(), proxy.lim = c(),
   sep = ",", xaxs = "i", yaxs = "i", xaxt = "s", yaxt = "s",
-  bty = "l", BCAD = set$BCAD, yr.lab = ifelse(BCAD, "BC/AD", "cal yr BP"),
-  cleanup = TRUE)
+  bty = "l", BCAD = set$BCAD, yr.lab = ifelse(BCAD, "BC/AD", "cal yr BP"))
 }
 \arguments{
 \item{proxy}{Which proxy to use (counting from the column number in the .csv file after the depths column).}
@@ -21,11 +20,9 @@ proxy.ghost(proxy = 1, proxy.lab = c(), proxy.res = 200, yr.res = 200,
 
 \item{yr.res}{Resolution or amount of greyscale pixels to cover the age scale of the age-model plot. Default \code{yr.res=200}.}
 
-\item{grey.res}{Grey-scale resolution of the proxy graph. Default \code{grey.res=100}. See also \code{bins}.}
+\item{grey.res}{Grey-scale resolution of the proxy graph. Default \code{grey.res=100}.}
 
 \item{set}{Detailed information of the current run, stored within this session's memory as variable info.}
-
-\item{bins}{Bin sizes to calculate the grey-scales are calculated automatically. See also \code{grey.res}.}
 
 \item{dark}{By default, the darkest grey value is assigned to the most likely value within the entire core (normalised to 1; \code{dark=1}). By setting dark to, e.g., \code{dark=.8}, all values of and above 0.8 will be darkest (and values below that threshold will be lighter grey the lower their probabilities).}
 
@@ -60,8 +57,6 @@ proxy.ghost(proxy = 1, proxy.lab = c(), proxy.res = 200, yr.res = 200,
 \item{BCAD}{The calendar scale of graphs and age output-files is in \code{cal BP} by default, but can be changed to BC/AD using \code{BCAD=TRUE}.}
 
 \item{yr.lab}{The labels for the calendar axis (default \code{yr.lab="cal BP"} or \code{"BC/AD"} if \code{BCAD=TRUE}).}
-
-\item{cleanup}{Temporary files to produce the greyscales are removed automatically after the plot has been produced (\code{cleanup=TRUE}).}
 }
 \value{
 A grey-scale graph of the proxy against calendar age.

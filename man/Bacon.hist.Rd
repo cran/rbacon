@@ -4,18 +4,17 @@
 \alias{Bacon.hist}
 \title{Calculate age distributions of depths.}
 \usage{
-Bacon.hist(d, set = get("info"), bins = c(), yr.lab = c(), yr.lim = c(),
-  hist.lab = "Frequency", hist.lim = c(), Plot = TRUE, yr.res = 200,
+Bacon.hist(d, set = get("info"), BCAD = set$BCAD, yr.lab = c(),
+  yr.lim = c(), hist.lab = "Frequency", hist.lim = c(), draw = TRUE,
   prob = set$prob, hist.col = grey(0.5), hist.border = grey(0.2),
-  range.col = "blue", med.col = "green", mean.col = "red",
-  cleanup = TRUE)
+  range.col = "blue", med.col = "green", mean.col = "red")
 }
 \arguments{
 \item{d}{The depth or depths for which a histogram and age ranges should be provided. If multiple depths are given, then just the age ranges, median and means (no graphs) are provided for each depth.}
 
 \item{set}{Detailed information of the current run, stored within this session's memory as variable info.}
 
-\item{bins}{Bacon will try to automatically estimate reasonable bin sizes. Changing the histograms bin size could alter the shape of the histogram considerably. Values below c. 50 are generally not recommended.}
+\item{BCAD}{The calendar scale of graphs and age output-files is in \code{cal BP} by default, but can be changed to BC/AD using \code{BCAD=TRUE}.}
 
 \item{yr.lab}{The labels for the calendar axis (default \code{yr.lab="cal BP"} or \code{"BC/AD"} if \code{BCAD=TRUE}).}
 
@@ -25,10 +24,8 @@ Bacon.hist(d, set = get("info"), bins = c(), yr.lab = c(), yr.lim = c(),
 
 \item{hist.lim}{Limits of the y-axis.}
 
-\item{Plot}{Make a plot or not. Defaults to \code{Plot=TRUE}, however no plots are made if more than one depth \code{d} is provided.
-If \code{Plot=FALSE}, then the age ranges, median and mean are given for each depth (as four columns).}
-
-\item{yr.res}{Bacon will try to automatically estimate reasonable bin sizes. Changing the histograms bin size could alter the shape of the histogram considerably. Values below c. 50 are generally not recommended. See also \code{bins}.}
+\item{draw}{Draw a plot or not. Defaults to \code{draw=TRUE}, however no plots are made if more than one depth \code{d} is provided.
+If \code{draw=FALSE}, then the age ranges, median and mean are given for each depth (as four columns).}
 
 \item{prob}{Age ranges are given as quantiles, e.g., 2.5\% and 97.5\% for the default of 95\% confidence limits (\code{prob=0.95})).}
 
@@ -41,8 +38,6 @@ If \code{Plot=FALSE}, then the age ranges, median and mean are given for each de
 \item{med.col}{Colour of the median. Defaults to \code{med.col="green"}.}
 
 \item{mean.col}{Colour of the mean. Defaults to \code{mn.col="red"}.}
-
-\item{cleanup}{The drawing of the plot uses temporary files, which are removed afterward by default (\code{cleanup=TRUE}).}
 }
 \value{
 A plot with the histogram and the age ranges, median and mean, or just the age ranges, medians and means if more than one depth \code{d} is given.

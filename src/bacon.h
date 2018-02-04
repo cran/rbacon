@@ -91,7 +91,8 @@ class BaconFix: public Bacon {
 
 
 			double *ha, *hb; //a priori pars for the gamma prior on hiatus jumps in each inter hiatus
-			double priorHU(int i, const double x) { return (1.0-ha[i])*log(x) + hb[i]*Dc*x; }
+//H Change			double priorHU(int i, const double x) { return (1.0-ha[i])*log(x) + hb[i]*Dc*x; }
+			double priorHU(int i, const double x) { return 1.0; } //Uniform
 			
 			int WarnBeyondLimits;
 			//Sets the thetas and verifies correct limits
@@ -286,7 +287,8 @@ class BaconFix: public Bacon {
 					for (int k=K-1; k>0; k--) { 
 						//printf("B: %d  %f  %f\n", k, x[k], (x[k]-w*x[k+1])/(1.0-w)); 
 						if ((fcmp( c(k-1), h[l]) == -1) && (fcmp( h[l], c(k)) != 1)) { //forgets
-							if (fcmp( x[k], 0.0) != 1) //we only require x[k] greater than 0
+//H Change							if (fcmp( x[k], 0.0) != 1) //we only require x[k] greater than 0
+							if ((fcmp( x[k], 0.0) != 1) || (fcmp( hb[l], x[k]) != 1)) //we require 0.0 < x[k] < hb[l]
 								return 0;
 							l++; //jump to next hiatus, but max one hiatus in each section.
 						}

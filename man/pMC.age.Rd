@@ -2,7 +2,7 @@
 % Please edit documentation in R/Bacon.R
 \name{pMC.age}
 \alias{pMC.age}
-\title{Calculate C14 ages from pmC values.}
+\title{Calculate C14 ages from pMC values.}
 \usage{
 pMC.age(mn, sdev, ratio = 100, decimals = 0)
 }
@@ -19,7 +19,7 @@ pMC.age(mn, sdev, ratio = 100, decimals = 0)
 Radiocarbon ages from pMC values. If pMC values are above 100\%, the resulting radiocarbon ages will be negative.
 }
 \description{
-Calculate C14 ages from pmC values of radiocarbon dates.
+Calculate C14 ages from pMC values of radiocarbon dates.
 }
 \details{
 Post-bomb dates are often reported as pMC or percent modern carbon. Since Bacon expects radiocarbon ages,

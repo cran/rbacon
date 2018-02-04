@@ -1,36 +1,21 @@
 #' rbacon
 #' 
 #' Bacon is an approach to age-depth modelling that uses Bayesian statistics to reconstruct Bayesian 
-#' accumulation histories for deposits, through combining radiocarbon and other dates with prior information Blaauw and Christen, 2011).
+#' accumulation histories for deposits, through combining radiocarbon and other dates with prior information (Blaauw and Christen, 2011).
 #' 
 #' @docType package
 #' @author Maarten Blaauw <maarten.blaauw@qub.ac.uk> J. Andres Christen <jac@cimat.mx>
 #' @importFrom grDevices dev.cur dev.off pdf dev.copy2pdf grey rgb
 #' @importFrom graphics abline box curve hist image layout legend lines par plot points polygon segments
-#' @importFrom stats approx dbeta density dgamma dnorm lm quantile rnorm weighted.mean
+#' @importFrom stats approx dbeta density dgamma dnorm dunif lm quantile rnorm weighted.mean
 #' @importFrom utils read.csv read.table write.table packageName
 #' @importFrom Rcpp evalCpp
 #' @importFrom coda gelman.diag mcmc.list as.mcmc 
 #' @useDynLib rbacon
 #' @name rbacon
-NULL  
+NULL
 
-# for future versions: slump, F14C, 0-yr hiatuses w certain hiatus parameter combinations, enhanced age calculations around hiatuses, if hiatus plot acc.posts of the individual sections?, allow for asymmetric cal BP errors (e.g. read from files), check if postbomb dates really taken into account (if MinYr=-1e3), check more consistent use of dark and darkest for all functions (incl. flux and accrate.age.ghost)
-
-# Done version 2.3.1.2: ensured more predictable behaviour if R is started in a non-writable directory (e.g. default R on Windows). Now uses tempfile() correctly in Bacon.hist. Added confidence ranges to accrate.age.ghost and flux.age.ghost. Calculates mean ages better (based on all its and not on hists, which are sensitive to choice of bins)
-
-# Done version 2.3.1.1: Official R package, new options: depths (in addition to depths.file), default core directory now called 'Bacon_runs' (if the Cores folder doesn't already exist within the directoy where R is working), added option to not plot x or y axis (xaxt, yaxt), added option to not plot the date distributions mirrored, renamed weighted means of age estimates to means (means of histograms), updated documentation, renamed function flux.age, plot.accrate.age and plot.accrate.depth to flux.age.ghost, accrate.age.ghost and accrate.depth.ghost, respectively. Bugs squashed: BCAD did not cause correct plots, many sundry bugs
-
-# Done version 2.2: changed .hpd to _ages.txt since many users get tricked by the extension, Bacon.hist gives 95\% ranges, mid and wmean, 
-# BCAD (sort of...), settings file, removed calc.every (gave problems with long cores), warn if any dateF errors 0 change to 1 optional depths.file for age calculations, language check cpp files, killed hist bug that assumed integers for res,
-# changed to .csv files as default with option to use .dat files, suggest to adapt prior for acc.mean if initial estimate
-# much different from default (20), allowing for different separator (e.g. French/Scandinavian use ';' not ',', 
-# also check use decimal points), renamed 'res' to hopefully more intuitive 'thick', d.R/d.STD 
-# for mixed dates where cc=0, enhanced flexibility MaxYr/MinYr (e.g. now depends on dates if cc=0), 
-# updated bacon's hist function (now bin/hist2), now reads depths from a file, added option to change axes 
-# order in age-depth graphs, added cleanup function to remove prior files etc., updated calibration curves to IntCal13, 
-# option in agedepth to only plot the age-model (so not the upper panels)
-
+# for future versions: slump, F14C, if hiatus or boundary plot acc.posts of the individual sections?, allow for asymmetric cal BP errors (e.g. read from files), make more consistent use of dark and darkest for all functions (incl. flux and accrate.age.ghost), introduce write.Bacon function to write files only once user agrees with the model
 
 #################### workhorse functions ####################
 
@@ -45,7 +30,7 @@ NULL
 #' the accumulation rate (in years/cm; so more correctly, sedimentation times) for each of these sections. 
 #' Combined with an estimated starting date for the first section, these accumulation rates then form the age-depth model. 
 #' The accumulation rates are constrained by prior information on the accumulation rate (\code{acc.mean, acc.shape)} and its 
-#' variability between neighbouring depths, or 'memory' (\code{mem.mean, mem.strength}). Hiatuses can be introduced as well, also constrained by prior information (\code{hiatus.mean, hiatus.strength}).
+#' variability between neighbouring depths, or 'memory' (\code{mem.mean, mem.strength}). Hiatuses can be introduced as well, also constrained by prior information (\code{hiatus.max}).
 #'
 #' Although Bacon works with any kind of absolute dates (e.g., OSL, tephra or other dates on a calendar scale), 
 #' it is often used to age-model 14C-dated sequences. Radiocarbon dates should be calibrated using either IntCal13 
@@ -62,7 +47,7 @@ NULL
 #' An alternative core provided with this package is RLGH3 (Jones et al., 1989).
 #' To run your own core, produce a .csv file with the dates as outlined in the manual, add a folder with the core's name to the default directory for cores (see \code{coredir}), and save the .csv file there. For example, the file's location and name could be \code{Bacon_runs/MyCore/MyCore.csv}. Then run Bacon as follows: \code{Bacon("MyCore")} 
 #' @param thick Bacon will divide the core into sections of equal thickness specified by thick (default \code{thick=5}). 
-#' @param coredir Subfolder where the core's files \code{core} are and will be located. This will be a folder with the core's name, within either the folder \code{coredir='Bacon_runs/'}, or the folder Cores/ if it already exists within R's working directory, or a custom-built folder. For example, use \code{coredir="."} to place the core's folder within the current working directory, or \code{coredir="F:"} if you want to put the core's folder and files on a USB drive loaded under F:.
+#' @param coredir Folder where the core's files \code{core} are and/or will be located. This will be a folder with the core's name, within either the folder \code{coredir='Bacon_runs/'}, or the folder Cores/ if it already exists within R's working directory, or a custom-built folder. For example, use \code{coredir="."} to place the core's folder within the current working directory, or \code{coredir="F:"} if you want to put the core's folder and files on a USB drive loaded under F:.
 #' Thinner (and thus more) sections will result in smoother age-models, but too many sections can cause 'run-away' models.
 #' @param prob Confidence interval to report. This should lie between 0 and 1, default 0.95 (95 \%).
 #' @param d.min Minimum depth of age-depth model (use this to extrapolate to depths higher than the top dated depth).
@@ -79,18 +64,17 @@ NULL
 #' Its shape is set by acc.shape (default \code{acc.shape=1.5}; higher values result in more peaked shapes).
 #' @param acc.mean The accumulation rate prior consists of a gamma distribution with two parameters. Its mean is set by acc.mean (default \code{acc.mean=20} yr/cm, 
 #' which can be changed to, e.g., 5, 10 or 50 for different kinds of deposits).
-#' @param mem.strength The prior for the memory is a beta distribution, which looks much like the gamma distribution
+#' @param mem.strength The prior for the memory (dependence of accumulation rate between neighbouring depths) is a beta distribution, which looks much like the gamma distribution.
 #'  but its values are always between 0 (no assumed memory) and 1 (100 \% memory). Its default settings of \code{mem.strength=4}
 #'  (higher values result in more peaked shapes) allow for a large range of posterior memory values.
 #' @param mem.mean The prior for the memory is a beta distribution, which looks much like the gamma distribution but 
 #' its values are always between 0 (no assumed memory) and 1 (100\% memory). Its default settings of \code{mem.mean=0.7}
 #' allow for a large range of posterior memory values. 
+#' @param boundary The assumed depths of any boundary, which divides sections of different accumulation rate regimes (e.g., as indicated by major change in the stratigraphy). No hiatus is assumed between these sections, and memory is reset crossing the boundary. Different accumulation priors can be set for the sections above and below the boundary, e.g., \code{acc.mean=c(5, 20)}. See also \code{hiatus.depths}, \code{mem.mean}, \code{acc.mean} and \code{acc.shape}.
 #' @param hiatus.depths The assumed depths for any hiatus should be provided as, e.g., 
 #' \code{hiatus.depths=20} for one at 20cm depth, and \code{hiatus.depths=c(20,40)} for two hiatuses at 20 and 40 cm depth.
-#' @param hiatus.shape The prior for the length of the hiatus, which is a gamma distribution with two parameters. 
-#' Its shape is set by hiatus.shape (default \code{acc.shape=1}).
-#' @param hiatus.mean The prior for the length of the hiatus, which is a gamma distribution with two parameters. 
-#' Its mean is set by hiatus.mean (default \code{acc.mean=1000}).
+#' @param hiatus.max The prior for the maximum length of the hiatus. Hiatus length is a uniform distribution, with equal probabilities between 0 and \code{hiatus.max} yr.
+#' @param add Add a value to the maximum hiatus length if a boundary is chosen. Defaults to \code{add=0}. Can be used if Bacon complains that the parameters are out of support. 
 #' @param after Sets a short section above and below hiatus.depths within which to calculate ages. For internal calculations - do not change.
 #' @param cc Calibration curve for C-14 dates: \code{cc=1} for IntCal13 (northern hemisphere terrestrial), \code{cc=2} for Marine13 (marine), 
 #' \code{cc=3} for SHCal13 (southern hemisphere terrestrial). For dates that are already on the cal BP scale use \code{cc=0}.
@@ -101,8 +85,8 @@ NULL
 #' @param ccdir Directory where the calibration curves for C14 dates \code{cc} are located. By default \code{ccdir=""} since they are loaded into R's memory. 
 #' Use \code{ccdir="."} to choose current working directory. Use \code{ccdir="Curves/"} to choose sub-folder \code{Curves/}.
 #' @param postbomb Use a postbomb curve for negative (i.e. postbomb) 14C ages. \code{0 = none, 1 = NH1, 2 = NH2, 3 = NH3, 4 = SH1-2, 5 = SH3}
-#' @param deltaR Mean of core-wide age offsets (e.g., regional marine offsets).
-#' @param deltaSTD Error of core-wide age offsets (e.g., regional marine offsets). 
+#' @param delta.R Mean of core-wide age offsets (e.g., regional marine offsets).
+#' @param delta.STD Error of core-wide age offsets (e.g., regional marine offsets). 
 #' @param t.a The dates are treated using the student's t distribution by default (\code{normal=FALSE}). 
 #' The student's t-distribution has two parameters, t.a and t.b, set at 3 and 4 by default (see Christen and Perez, 2010). 
 #' If you want to assign narrower error distributions (more closely resembling the normal distribution), set t.a and t.b at for example 33 and 34 respectively (e.g., for specific dates in your .csv file). 
@@ -133,7 +117,6 @@ NULL
 #' @param burnin Amount of initial, likely sub-optimal MCMC iterations that will be removed.
 #' @param MinYr Minimum age limit for Bacon runs, default at -1000 cal BP. To set plot limits, use \code{yr.min} instead.
 #' @param MaxYr Maximum age limit for Bacon runs, default at 1,000,000 cal BP. To set plot limits, use \code{yr.max} instead.
-#' @param find.round Temporary internal measure to deal with rounding problems at hiatuses; default 4. 
 #' @param cutoff Avoid plotting very low probabilities of date distributions (default \code{cutoff=0.001}). 
 #' @param plot.pdf Produce a pdf file of the age-depth plot. Defaults to \code{plot.pdf=TRUE} after a Bacon run. 
 #' @param dark Darkness of the greyscale age-depth model. The darkest grey value is \code{dark=1} by default.
@@ -145,10 +128,11 @@ NULL
 #' @return An age-depth model graph, its age estimates, and a summary.
 #' @examples 
 #' \dontshow{
-#'   Bacon(run=FALSE, coredir=tempfile())
+#'   Bacon(run=FALSE, coredir=tempfile()) 
+#' }
 #' \donttest{
 #'   Bacon(ask=FALSE, coredir=tempfile())
-#'   Bacon(cc=2, deltaR=80, deltaSTD=40, coredir=tempfile())
+#'   Bacon(cc=2, delta.R=80, delta.STD=40, coredir=tempfile())
 #' }
 #' @seealso \url{http://www.chrono.qub.ac.uk/blaauw/manualBacon_2.3.pdf}
 #' @references
@@ -175,29 +159,10 @@ NULL
 #' Journal of Ecology 77: 1-23.
 #'
 #' @export
-Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=NA, d.by=1, depths.file=FALSE, depths=c(), unit="cm", acc.shape=1.5, acc.mean=20, mem.strength=4, mem.mean=0.7, hiatus.depths=NA, hiatus.shape=1, hiatus.mean=1000, after=.0001, cc=1, cc1="IntCal13", cc2="Marine13", cc3="SHCal13", cc4="ConstCal", ccdir="", postbomb=0, deltaR=0, deltaSTD=0, t.a=3, t.b=4, normal=FALSE, suggest=TRUE, reswarn=c(10,200), remember=TRUE, ask=TRUE, run=TRUE, defaults="default_settings.txt", sep=",", dec=".", runname="", slump=NA, BCAD=FALSE, ssize=2000, th0=c(), burnin=min(200, ssize), MinYr=c(), MaxYr=c(), find.round=4, cutoff=.001, plot.pdf=TRUE, dark=1, date.res=100, yr.res=200, ...) {
-  # If coredir is left empty, check for a folder named Cores in the current working directory, and if this doesn't exist, for a folder called Bacon_runs (make this folder if it doesn't exist yet).
-  # Check if we have write access. If not, tell the user to provide a different, writeable location for coredir. 
-  if(coredir == "") {
-    if(dir.exists("Cores")) 
-      coredir <- "Cores" else
-        if(dir.exists("Bacon_runs"))
-	      coredir <- "Bacon_runs" else {
-			coredir <- "Bacon_runs"			  
-            wdir <- dir.create(coredir, FALSE)
-			if(!wdir)
-			  stop("Cannot write into the current directory.\nPlease set coredir to somewhere where you have writing access, e.g. Desktop or ~.")
-	      }    
-    } else {
-	    if(!dir.exists(coredir))
-          wdir <- dir.create(coredir, FALSE)
-        if(!dir.exists(coredir)) # if it still doesn't exist, we probably don't have enough permissions
-          stop("Cannot write into the current directory.\nPlease set coredir to somewhere where you have writing access, e.g. Desktop or ~.")
-	}
-  coredir <- .validateDirectoryName(coredir)
-  cat("The run's files will be put in this folder: ", coredir, core, "\n", sep="")
-	  
-  # Copy example file in core directory
+Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=NA, d.by=1, depths.file=FALSE, depths=c(), unit="cm", acc.shape=1.5, acc.mean=20, mem.strength=4, mem.mean=0.7, boundary=NA, hiatus.depths=NA, hiatus.max=10000, add=0, after=.0001, cc=1, cc1="IntCal13", cc2="Marine13", cc3="SHCal13", cc4="ConstCal", ccdir="", postbomb=0, delta.R=0, delta.STD=0, t.a=3, t.b=4, normal=FALSE, suggest=TRUE, reswarn=c(10,200), remember=TRUE, ask=TRUE, run=TRUE, defaults="default_settings.txt", sep=",", dec=".", runname="", slump=NA, BCAD=FALSE, ssize=2000, th0=c(), burnin=min(200, ssize), MinYr=c(), MaxYr=c(), cutoff=.001, plot.pdf=TRUE, dark=1, date.res=100, yr.res=200, ...) {
+  
+  # Check coredir and if required, copy example file in core directory
+  coredir <- assign_coredir(coredir, core, ask)	  
   if(core == "MSB2K" || core == "RLGH3") {
     dir.create(paste(coredir, core, "/", sep=""), showWarnings = FALSE, recursive = TRUE)
     fileCopy <- system.file(paste("extdata/Cores/", core, sep=""), package="rbacon")
@@ -225,14 +190,13 @@ Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=
             cat(" Using several C-14 calibration curves\n")
     }
 
-    if(suggest) {
-      # adapt prior for mean accumulation rate?
+    if(suggest) { # adapt prior for mean accumulation rate?
       sugg <- sapply(c(1,2,5), function(x) x*10^(-1:2)) # some suggested 'round' values
       ballpacc <- lm(dets[,2]*1.1 ~ dets[,4])$coefficients[2] # very rough acc.rate estimates, uncalibrated dates
       ballpacc <- abs(sugg - ballpacc) # get absolute differences between given acc.mean and suggested ones
-      ballpacc <- ballpacc[ballpacc > 0] # don't suggest 0; tmp MB
+      ballpacc <- ballpacc[ballpacc > 0] # don't suggest 0
       sugg <- sugg[order(ballpacc)[1]] # suggest rounded acc.rate with lowest absolute difference
-      if(sugg != acc.mean) {
+      if(!sugg %in% acc.mean) {
         ans <- readline(cat(" Ballpark estimates suggest changing the prior for acc.mean to ", sugg, " yr/", unit, ". OK? (y/n)  ", sep=""))
         if(tolower(substr(ans,1,1)) == "y")
           acc.mean <- sugg else
@@ -240,19 +204,19 @@ Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=
       }
     }
 
-  info <- .Bacon.settings(core=core, coredir=coredir, dets=dets, thick=thick, remember=remember, d.min=d.min, d.max=d.max, d.by=d.by, depths.file=depths.file, slump=slump, acc.mean=acc.mean, acc.shape=acc.shape, mem.mean=mem.mean, mem.strength=mem.strength, hiatus.depths=hiatus.depths, hiatus.mean=hiatus.mean, hiatus.shape=hiatus.shape, BCAD=BCAD, cc=cc, postbomb=postbomb, cc1=cc1, cc2=cc2, cc3=cc3, cc4=cc4, unit=unit, normal=normal, t.a=t.a, t.b=t.b, deltaR=deltaR, deltaSTD=deltaSTD, prob=prob, defaults=defaults, runname=runname, ssize=ssize, dark=dark, MinYr=MinYr, MaxYr=MaxYr, cutoff=cutoff, yr.res=yr.res, after=after, find.round=find.round)
+  info <- .Bacon.settings(core=core, coredir=coredir, dets=dets, thick=thick, remember=remember, d.min=d.min, d.max=d.max, d.by=d.by, depths.file=depths.file, slump=slump, acc.mean=acc.mean, acc.shape=acc.shape, mem.mean=mem.mean, mem.strength=mem.strength, boundary=boundary, hiatus.depths=hiatus.depths, hiatus.max=hiatus.max, BCAD=BCAD, cc=cc, postbomb=postbomb, cc1=cc1, cc2=cc2, cc3=cc3, cc4=cc4, unit=unit, normal=normal, t.a=t.a, t.b=t.b, delta.R=delta.R, delta.STD=delta.STD, prob=prob, defaults=defaults, runname=runname, ssize=ssize, dark=dark, MinYr=MinYr, MaxYr=MaxYr, cutoff=cutoff, yr.res=yr.res, after=after)
   .assign_to_global("info", info)
   info$coredir <- coredir
  
   ### check for initial mistakes
   if(any(info$acc.shape == info$acc.mean))
-    stop("\n Warning! acc.shape cannot be equal to acc.mean", call.=FALSE)
+    stop("\n Warning! acc.shape cannot be equal to acc.mean", call.=FALSE)  
   if(info$t.b - info$t.a != 1)
     stop("\n Warning! t.b - t.a should always be 1, check the manual")
 
   ### calibrate dates
   if(info$cc > 0) # confirm we're using radiocarbon dates
-    if(info$postbomb == 0 && ((ncol(info$dets)==4 && min(info$dets[,2]) < 0) ||
+    if(info$postbomb == 0 && ((ncol(info$dets) == 4 && min(info$dets[,2]) < 0) ||
       ncol(info$dets)>4 && max(info$dets[,5]) > 0 && min(info$dets[info$dets[,5] > 0,2]) < 0))
         stop("\nWarning, you have negative C14 ages so should select a postbomb curve")
   info$calib <- .bacon.calib(dets, info, date.res, ccdir=ccdir)
@@ -272,7 +236,7 @@ Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=
   info$K <- length(info$d)
   ans <- "n"
   if(suggest)
-    if(length(reswarn)==2)
+    if(length(reswarn) == 2)
       if(info$K < min(reswarn)) {
         sugg <- min(pretty(thick*(info$K/min(reswarn))))
         ans <- readline(cat(" Warning, the current value for thick, ", thick, ", will result in very few age-model sections (", info$K, ", not very flexible). Suggested maximum value for thick: ", sugg, " OK? (y/n) ", sep=""))
@@ -291,24 +255,34 @@ Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=
   ### produce files
   info$prefix <- paste(coredir, core, "/", core, runname, "_", info$K, sep="")
   info$coredir <- coredir
-  
   info$bacon.file <- paste(info$prefix, ".bacon", sep="")
   if(!file.exists(outfile <- paste(info$prefix, ".out", sep="")))
     file.create(outfile)
 
   ### store values (again) for future manipulations
-  .assign_to_global("info", info)
+  if(BCAD)
+    info$BCAD <- TRUE  
+  if(!is.na(boundary)[1]) {
+    info$boundary <- boundary  
+    info$hiatus.depths <- boundary
+    info$hiatus.max <- add+info$acc.mean
+  }
+  .assign_to_global("info", info)  
 
   prepare <- function() {
     ### plot initial data and priors
-    layout(matrix(if(is.na(info$hiatus.depths)[1]) c(1,2,3,3) else c(1,2,3,4,4,4),
-      nrow=2, byrow=TRUE), heights=c(.3,.7))
-    par(mar=c(3,3,1,1), mgp=c(1.5,.7,.0))
+    pn <- c(1,2,3,3)
+    if(!is.na(info$hiatus.depths)[1])
+      if(is.na(info$boundary)[1])
+        pn <- c(1,2,3,4,4,4)
+    layout(matrix(pn, nrow=2, byrow=TRUE), heights=c(.3,.7))
+    par(mar=c(3,3,1,1), mgp=c(1.5,.7,.0), bty="l")
     .PlotAccPrior(info$acc.shape, info$acc.mean)
     .PlotMemPrior(info$mem.strength, info$mem.mean, thick)
     if(!is.na(info$hiatus.depths)[1])
-      .PlotHiatusPrior(info$hiatus.shape, info$hiatus.mean, info$hiatus.depths)
-    calib.plot(info, ...)
+      if(is.na(info$boundary)[1])
+        .PlotHiatusPrior(info$hiatus.max, info$hiatus.depths)
+    calib.plot(info, BCAD=BCAD)
     legend("topleft", core, bty="n", cex=1.5)
   }
    
@@ -316,7 +290,7 @@ Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=
     txt <- paste(info$prefix, ".bacon", sep="")
     bacon(txt, outfile, ssize, ccdir)
     scissors(burnin, info)
-    agedepth(info, BCAD=BCAD, depths.file=depths.file, depths=depths, ...)
+    agedepth(info, BCAD=BCAD, depths.file=depths.file, depths=depths, talk=TRUE, ...)
     if(plot.pdf) {
       pdf(file=paste(info$prefix, ".pdf", sep=""))
       agedepth(info, BCAD=BCAD, depths.file=depths.file, depths=depths, talk=FALSE, ...)
@@ -389,8 +363,7 @@ Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=
 #' @param cal.border The colour of the border of non-14C dates in the age-depth plot: default semi-transparent dark blue-green: \code{cal.border=rgb(0,.5,.5,.5)}.
 #' @param hiatus.col The colour of the depths of any hiatuses. Default \code{hiatus.col=grey(0.5)}.
 #' @param hiatus.lty The line type of the depths of any hiatuses. Default \code{hiatus.lty=12}.
-#' @param greyscale The function to produce a grey-scale representation of all age-models. Default \code{greyscale=function(x) grey(1-x)}. 
-#' @param bins The amount of bins in histograms. Calculated automatically by default: \code{bins=c()}. See also \code{yr.res}.
+#' @param greyscale The function to produce a coloured representation of all age-models. Defaults to grey-scales: \code{greyscale=function(x) grey(1-x)}. 
 #' @param normalise.dists By default, the distributions of more precise dates will cover less time and will thus peak higher than less precise dates. This can be avoided by specifying \code{normalise.dists=FALSE}.
 #' @param cc Calibration curve for 14C dates: \code{cc=1} for IntCal13 (northern hemisphere terrestrial), \code{cc=2} for Marine13 (marine), \code{cc=3} for SHCal13 (southern hemisphere terrestrial). For dates that are already on the cal BP scale use \code{cc=0}.
 #' @param title The title of the age-depth model is plotted on the main panel. By default this is the core's name. To leave empty: \code{title=""}. 
@@ -406,8 +379,7 @@ Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=
 #' @param plot.pdf Produce a pdf file of the age-depth plot.
 #' @param model.only By default, panels showing the MCMC iterations and the priors and posteriors for accumulation rate and memory are plotted above the main age-depth model panel. This can be avoided by supplying \code{model.only=TRUE}. Note however that this removes relevant information to evaluate the age-depth model, so we do recommend to present age-models together with these upper panels.
 #' @param dates.only By default, the age-depth model is plotted on top of the dates. This can be avoided by supplying \code{dates.only=TRUE}.
-#' @param cleanup Temporary files used to produce the plot are removed automatically after the plot has been made by default; \code{cleanup=TRUE}. 
-#' @param talk Provide a summary of the age ranges after producing the age-depth model graph; default \code{talk=TRUE}.
+#' @param talk Provide a summary of the age ranges after producing the age-depth model graph; default \code{talk=FALSE}.
 #' @author Maarten Blaauw, J. Andres Christen
 #' @return A plot of the age-depth model, and estimated ages incl. confidence ranges for each depth.
 #' @examples 
@@ -424,135 +396,144 @@ Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=
 #' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474. 
 #' \url{https://projecteuclid.org/download/pdf_1/euclid.ba/1339616472}
 #' @export
-agedepth <- function(set=get('info'), BCAD=FALSE, unit="cm", d.lab=c(), yr.lab=c(), d.min=set$d.min, d.max=set$d.max, d.by=set$d.by, depths=c(), depths.file=FALSE, yr.min=c(), yr.max=c(), bins=c(), dark=set$dark, prob=set$prob, rounded=0, d.res=200, yr.res=200, date.res=100, grey.res=100, rotate.axes=FALSE, rev.yr=FALSE, rev.d=FALSE, maxcalc=500, height=15, mirror=TRUE, up=TRUE, cutoff=.001, plot.range=TRUE, panels=layout(1), range.col=grey(0.5), range.lty="12", mn.col="red", mn.lty="12", med.col=NA, med.lty="12", C14.col=rgb(0,0,1,.35), C14.border=rgb(0,0,1,.5), cal.col=rgb(0,.5,.5,.35), cal.border=rgb(0,.5,.5,.5), hiatus.col=grey(0.5), hiatus.lty="12", greyscale=function(x) grey(1-x), normalise.dists=TRUE, cc=set$cc, title=set$core, title.location="topleft", after=set$after, bty="l", mar=c(3,3,1,1), mgp=c(1.5,.7,.0), xaxs="r", yaxs="r", xaxt="s", yaxt="s", plot.pdf=FALSE, dates.only=FALSE, model.only=FALSE, cleanup=TRUE, talk=TRUE) {
-    # Load the output, if it exists
-    outp <- paste(set$prefix, ".out", sep="")
-    if(file.exists(outp))
-      lngth <- length(readLines(outp))
-    set <- .Bacon.AnaOut(paste(set$prefix, ".out", sep=""), set)
+agedepth <- function(set=get('info'), BCAD=set$BCAD, unit="cm", d.lab=c(), yr.lab=c(), d.min=set$d.min, d.max=set$d.max, d.by=set$d.by, depths=c(), depths.file=FALSE, yr.min=c(), yr.max=c(), dark=set$dark, prob=set$prob, rounded=0, d.res=400, yr.res=400, date.res=100, grey.res=100, rotate.axes=FALSE, rev.yr=FALSE, rev.d=FALSE, maxcalc=500, height=15, mirror=TRUE, up=TRUE, cutoff=.001, plot.range=TRUE, panels=layout(1), range.col=grey(.5), range.lty="12", mn.col="red", mn.lty="12", med.col=NA, med.lty="12", C14.col=rgb(0,0,1,.35), C14.border=rgb(0,0,1,.5), cal.col=rgb(0,.5,.5,.35), cal.border=rgb(0,.5,.5,.5), hiatus.col=grey(0.5), hiatus.lty="12", greyscale=grey(seq(1, 0, length=grey.res)), normalise.dists=TRUE, cc=set$cc, title=set$core, title.location="topleft", after=set$after, bty="l", mar=c(3,3,1,1), mgp=c(1.5,.7,.0), xaxs="r", yaxs="r", xaxt="s", yaxt="s", plot.pdf=FALSE, dates.only=FALSE, model.only=FALSE, talk=FALSE) {
+  # Load the output, if it exists
+  outp <- paste(set$prefix, ".out", sep="")
+  if(file.exists(outp))
+    lngth <- length(readLines(outp))
+  set <- .Bacon.AnaOut(paste(set$prefix, ".out", sep=""), set)
 
-    par(bty=bty, mar=mar, mgp=mgp, yaxs="i")
-    if(model.only) 
-      panels else { # layout(1) can mess things up if plotting within an existing panel...
-        layout(matrix(if(is.na(set$hiatus.depths)[1]) c(1:3, rep(4,3)) else c(1:4, rep(5,4)), nrow=2, byrow=TRUE), heights=c(.3,.7)) 
-        .PlotLogPost(set, 0, set$Tr) # convergence information
-        .PlotAccPost(set)
-        .PlotMemPost(set, set$core, set$K, "", set$mem.strength, set$mem.mean, ds=1, thick=set$thick)
-        if(!is.na(set$hiatus.depths[1]))
-          .PlotHiatusPost(set, set$hiatus.shape, set$hiatus.mean)
-    } 
+  par(bty=bty, mar=mar, mgp=mgp, yaxs="i")
+  if(model.only) 
+    panels else { # layout(1) can mess things up if plotting within an existing panel...
+      pn <- c(1:3, rep(4,3))
+      if(!is.na(set$hiatus.depths)[1])
+        if(is.na(set$boundary)[1])
+          pn <- c(1:4, rep(5,4))  
+      layout(matrix(pn, nrow=2, byrow=TRUE), heights=c(.3,.7)) 
+      .PlotLogPost(set, 0, set$Tr) # convergence information
+      .PlotAccPost(set)
+      .PlotMemPost(set, set$core, set$K, "", set$mem.strength, set$mem.mean, ds=1, thick=set$thick)
+      if(!is.na(set$hiatus.depths[1]))
+        if(is.na(set$boundary)[1])
+          .PlotHiatusPost(set, set$hiatus.max)
+  } 
 
-    # calculate calendar axis limits
-    if(length(BCAD) > 0)
-      if(BCAD != set$BCAD) 
-        set$BCAD <- BCAD
-    modelranges <- c()
-    modelranges <- Bacon.hist(range(set$d), set, bins=bins, Plot=FALSE, prob=prob, yr.res=yr.res)
-    dates <- set$calib$probs
-    dateranges <- c()
-    for(i in 1:length(dates))
-      dateranges <- range(dateranges, dates[[i]][,1])
-    if(set$BCAD)
-      dateranges <- 1950 - dateranges	 
-    
-    if(length(yr.min) == 0) 
-      yr.min <- min(modelranges, dateranges)
-    if(length(yr.max) == 0)
-      yr.max <- max(modelranges, dateranges)
-    yr.lim <- c(yr.min, yr.max)
-    if(set$BCAD) yr.lim <- rev(yr.lim)
-    if(rev.yr) yr.lim <- rev(yr.lim)
-    d.lim=c(d.max, d.min)
-    if(rev.d)
-      dlim <- dlim[2:1]
-    
-    if(length(d.lab) == 0)
-      d.lab <- paste("Depth (", unit, ")", sep="")
-        if(length(yr.lab) == 0)
-      yr.lab <- ifelse(set$BCAD, "BC/AD", "cal yr BP")
-
-    par(xaxs=xaxs, yaxs=yaxs, bty="n")
-    if(rotate.axes)
-      plot(0, type="n", ylim=d.lim, xlim=yr.lim, ylab=d.lab, xlab=yr.lab, bty="n", xaxt=xaxt, yaxt=yaxt) else
-        plot(0, type="n", xlim=d.lim[2:1], ylim=yr.lim, xlab=d.lab, ylab=yr.lab, bty="n", xaxt=xaxt, yaxt=yaxt)
-
-    if(!dates.only)
-      .depth.ghost(set, rotate.axes=rotate.axes, d.res=d.res, yr.res=yr.res, grey.res=grey.res, dark=dark, greyscale=greyscale, d.min=d.min, d.max=d.max, cleanup=cleanup)
-
-    calib.plot(set, rotate.axes=rotate.axes, height=height, mirror=mirror, up=up, date.res=date.res, cutoff=cutoff, C14.col=C14.col, C14.border=C14.border, cal.col=cal.col, cal.border=cal.border, new.plot=FALSE, normalise.dists=normalise.dists)
-    legend(title.location, title, bty="n", cex=1.5)
-    box(bty=bty)
-
-    # now calculate and plot the ranges and 'best' estimates for each required depth
-    if(depths.file) {
-      dfile <- paste(set$coredir, set$core, "/", set$core, "_depths.txt", sep="")
-      if(!file.exists(dfile))
-        stop(" Warning! I cannot find the file ", paste(set$coredir, set$core, "/", set$core, "_depths.txt", sep=""), "\n")
-      d <- read.table(dfile, header=FALSE)[,1]
-      if(!is.numeric(d[1]))
-        stop(" Warning! File should contain numbers only, no headers\n")
-      d <- sort(as.numeric(d))
-    } else
-      if(length(depths) > 0)
-        d <- sort(depths) else
-          d <- seq(d.min, d.max, by=d.by) 
+  # calculate and plot the ranges and 'best' estimates for each required depth
+  if(depths.file) {
+    dfile <- paste(set$coredir, set$core, "/", set$core, "_depths.txt", sep="")
+    if(!file.exists(dfile))
+      stop(" Warning! I cannot find the file ", paste(set$coredir, set$core, "/", set$core, "_depths.txt", sep=""), "\n")
+    d <- read.table(dfile, header=FALSE)[,1]
+    if(!is.numeric(d[1]))
+      stop(" Warning! File should contain numbers only, no headers\n")
+    d <- sort(as.numeric(d))
+  } else
+    if(length(depths) > 0)
+      d <- sort(depths) else
+        d <- seq(d.min, d.max, by=d.by) 
       
-    if(length(d) > maxcalc)
-      cat(" Warning, this will take quite some time to calculate. I suggest increasing d.by to, e.g.", 10*set$d.by, "\n")
+  if(length(d) > maxcalc)
+    cat(" Warning, this will take quite some time to calculate. I suggest increasing d.by to, e.g.", 10*set$d.by, "\n")
 
-    for(i in set$hiatus.depths)
-      if(i %in% d) d <- sort(c(i-after, d)) else 
-        d <- sort(c(i-after, i, d)) ### tmp
+  for(i in set$hiatus.depths) # to avoid very steep plotted curves of mean and ranges across a hiatus
+    if(i %in% d) d <- sort(c(i-after, d)) else 
+      d <- sort(c(i-after, i, d))
 
-    abline(v=set$hiatus.depths, col=hiatus.col, lty=hiatus.lty)
+  if(talk)
+    cat("Calculating age ranges...")    
+  ranges <- Bacon.hist(d, set, prob=prob, BCAD=BCAD) # age ranges for each depth have to calculated separately from .agedepth.ghost, which will call Bacon.hist again
+  
+  # calculate calendar axis limits
+  modelranges <- range(ranges)
+  dates <- set$calib$probs
+  dateranges <- c()
+  for(i in 1:length(dates))
+    if(BCAD) 
+      dateranges <- range(dateranges, 1950-dates[[i]][,1]) else
+        dateranges <- range(dateranges, dates[[i]][,1])
+  if(length(yr.min) == 0) 
+    yr.min <- min(modelranges, dateranges)
+  if(length(yr.max) == 0)
+    yr.max <- max(modelranges, dateranges)
+  yr.lim <- c(yr.min, yr.max)
+  if(BCAD)
+    yr.lim <- rev(yr.lim)
+  if(rev.yr)
+    yr.lim <- rev(yr.lim)
+  d.lim <- c(d.max, d.min)
+  if(rev.d)
+    d.lim <- d.lim[2:1]
+    
+  if(length(d.lab) == 0)
+    d.lab <- paste("Depth (", unit, ")", sep="")
+  if(length(yr.lab) == 0)
+    yr.lab <- ifelse(BCAD, "BC/AD", "cal yr BP")
 
-    ranges <- Bacon.hist(d, set, prob=prob, yr.res=yr.res, cleanup=cleanup)
+  par(xaxs=xaxs, yaxs=yaxs, bty="n")
+  if(rotate.axes)
+    plot(0, type="n", ylim=d.lim, xlim=yr.lim, ylab=d.lab, xlab=yr.lab, bty="n", xaxt=xaxt, yaxt=yaxt) else
+      plot(0, type="n", xlim=d.lim[2:1], ylim=yr.lim, xlab=d.lab, ylab=yr.lab, bty="n", xaxt=xaxt, yaxt=yaxt)
 
-    th <- rbind(1, nrow(ranges))
-    if(!is.na(set$hiatus.depths[1])) {
-      hi.d <- c()
+  if(talk)
+    cat(" preparing ghost graph...\n ")    
+  if(!dates.only)
+    .agedepth.ghost(, set, rotate.axes=rotate.axes, BCAD=BCAD, d.res=d.res, yr.res=yr.res, grey.res=grey.res, dark=dark, colours=greyscale, d.min=d.min, d.max=d.max, yr.lim=yr.lim)
+
+  calib.plot(set, BCAD=BCAD, rotate.axes=rotate.axes, height=height, mirror=mirror, up=up, date.res=date.res, cutoff=cutoff, C14.col=C14.col, C14.border=C14.border, cal.col=cal.col, cal.border=cal.border, new.plot=FALSE, normalise.dists=normalise.dists)
+  legend(title.location, title, bty="n", cex=1.5)
+  box(bty=bty)
+
+  if(rotate.axes)
+    abline(h=set$hiatus.depths, col=hiatus.col, lty=hiatus.lty) else
+      abline(v=set$hiatus.depths, col=hiatus.col, lty=hiatus.lty)
+
+  th <- rbind(1, nrow(ranges))
+  if(!is.na(set$hiatus.depths[1])) {
+    hi.d <- c()
     for(i in set$hiatus.depths)
       hi.d <- c(hi.d, max(which(d<=i)))
     th <- array(sort(c(1, nrow(ranges), hi.d-1, hi.d)), dim=c(2,length(hi.d)+1))
+  }
+
+  if(!dates.only)
+    for(i in 1:ncol(th)) {
+      h <- th[1,i] : th[2,i]
+      if(rotate.axes) {
+        lines(ranges[h,1], d[h], col=range.col, lty=range.lty)
+        lines(ranges[h,2], d[h], col=range.col, lty=range.lty)
+        lines(ranges[h,3], d[h], col=med.col, lty=med.lty) # median
+        lines(ranges[h,4], d[h], col=mn.col, lty=mn.lty) # mean
+      } else {
+          lines(d[h], ranges[h,1], col=range.col, lty=range.lty)
+          lines(d[h], ranges[h,2], col=range.col, lty=range.lty)
+          lines(d[h], ranges[h,3], col=med.col, lty=med.lty) # median
+          lines(d[h], ranges[h,4], col=mn.col, lty=mn.lty) # mean
+        }
     }
-
-    if(!dates.only)
-      for(i in 1:ncol(th)) {
-        h <- th[1,i] : th[2,i]
-        if(rotate.axes) {
-          lines(ranges[h,1], d[h], col=range.col, lty=range.lty)
-          lines(ranges[h,2], d[h], col=range.col, lty=range.lty)
-          lines(ranges[h,3], d[h], col=med.col, lty=med.lty) # median
-          lines(ranges[h,4], d[h], col=mn.col, lty=mn.lty) # mean
-        } else {
-            lines(d[h], ranges[h,1], col=range.col, lty=range.lty)
-            lines(d[h], ranges[h,2], col=range.col, lty=range.lty)
-            lines(d[h], ranges[h,3], col=med.col, lty=med.lty) # median
-            lines(d[h], ranges[h,4], col=mn.col, lty=mn.lty) # mean
-          }
-      }
  
-    set$ranges <- cbind(d, round(ranges, rounded))
-    colnames(set$ranges) <- c("depth", "min", "max", "median", "wmean")
-    
-    .assign_to_global("info", set)
+  set$ranges <- cbind(d, round(ranges, rounded))
+  colnames(set$ranges) <- c("depth", "min", "max", "median", "mean")
+  .assign_to_global("info", set)
 
-    if(plot.pdf)
-      if(names(dev.cur()) != "null device")
-        dev.copy2pdf(file=paste(set$prefix, ".pdf", sep=""))
+  if(plot.pdf)
+    if(names(dev.cur()) != "null device")
+      dev.copy2pdf(file=paste(set$prefix, ".pdf", sep=""))
 
-    write.table(set$ranges, paste(set$prefix, "_ages.txt", sep=""), quote=FALSE, row.names=FALSE, sep="\t")
-    rng <- abs(round(set$ranges[,3]-set$ranges[,2], rounded))
-    min.rng <- d[which(rng==min(rng))]
-    max.rng <- d[which(rng==max(rng))]
-    if(length(min.rng)==1) min.rng <- paste(" yr at", min.rng, noquote(set$unit)) else
+  write.table(set$ranges, paste(set$prefix, "_ages.txt", sep=""), quote=FALSE, row.names=FALSE, sep="\t")
+  rng <- abs(round(set$ranges[,3]-set$ranges[,2], rounded))
+  min.rng <- d[which(rng==min(rng))]
+  max.rng <- d[which(rng==max(rng))]
+  if(length(min.rng)==1)
+    min.rng <- paste(" yr at", min.rng, noquote(set$unit)) else
       min.rng <- paste(" yr between", min(min.rng), "and", max(min.rng), noquote(set$unit))
-    if(length(max.rng)==1) max.rng <- paste(" yr at", max.rng, set$unit) else
+  if(length(max.rng)==1)
+    max.rng <- paste(" yr at", max.rng, set$unit) else
       max.rng <- paste(" yr between", min(max.rng), "and", max(max.rng), noquote(set$unit))
-    if(talk)
-  	  if(!dates.only)
-        cat("Mean ", 100*prob, "% confidence ranges ", round(mean(rng), rounded), " yr, min. ",
-          min(rng), min.rng, ", max. ", max(rng), max.rng, "\n\n", sep="")
+  if(talk)
+    if(!dates.only)
+      cat("Mean ", 100*prob, "% confidence ranges ", round(mean(rng), rounded), " yr, min. ",
+        min(rng), min.rng, ", max. ", max(rng), max.rng, "\n", sep="")
 }
 
 
@@ -563,13 +544,14 @@ agedepth <- function(set=get('info'), BCAD=FALSE, unit="cm", d.lab=c(), yr.lab=c
 #' @details The directory is either "Bacon_runs", "Cores" or a custom-named one. 
 #' @author Maarten Blaauw, J. Andres Christen
 #' @return A list of folders
+#' @param coredir The directory where the Bacon runs reside. Defaults to \code{coredir="Bacon_runs"}.
 #' @examples
 #'   Bacon(run=FALSE, coredir=tempfile())
 #'   Bacon_runs()
 #' @seealso \url{http://www.chrono.qub.ac.uk/blaauw/manualBacon_2.3.pdf}
 #' @export
-Bacon_runs <- function()
-  list.files(get('info')$coredir)
+Bacon_runs <- function(coredir=get('info')$coredir)
+  list.files(coredir)
 
 
 
@@ -776,11 +758,10 @@ Baconvergence <- function(core="MSB2K", set=get('info'), runs=5, ...) {
 #' @export
 Bacon.Age.d <- function(d, set=get('info'), its=set$output, BCAD=set$BCAD) {
   if(length(d) > 1)
-	stop("Bacon.Age.d can handle one depth at a time only.\n")
-  if(length(its) == 0) {
-	#stop("Please run agedepth() first to re-load an existing Bacon run")
+    stop("Bacon.Age.d can handle one depth at a time only.\n")
+  if(length(its) == 0) 
     its <- read.table(paste(set$prefix, ".out", sep="") )
-  }	
+  
   elbows <- cbind(its[,1])
   accs <- its[,2:(ncol(its)-1)]
   for(i in 2:ncol(accs))
@@ -791,22 +772,24 @@ Bacon.Age.d <- function(d, set=get('info'), its=set$output, BCAD=set$BCAD) {
       maxd <- max(which(set$d < d))
       ages <- elbows[,maxd] + ((d-set$d[maxd]) * accs[,maxd])
     }
-   if(!is.na(set$hiatus.depths)[1])
-     for(hi in set$hiatus.depths) {
-       below <- min(which(set$d > hi), set$K-1)+1
-       above <- max(which(set$d < hi))
-       if(d > set$d[above] && d < set$d[below]) {
-         start.hiatus <- elbows[,below] - (its[,1+below] * (set$d[below] - hi))
-         end.hiatus <- elbows[,above] + (its[,above] * (hi - set$d[above]))
-         ok <- which(end.hiatus < start.hiatus)
-         if(d < hi)
-         ages[ok] <- elbows[ok,above] + (its[ok,above] * (d - set$d[above])) else
-           ages[ok] <- elbows[ok,below] - (its[ok,1+below] * (set$d[below] - d))
-       }
-     }
+
+  if(!is.na(set$hiatus.depths)[1])
+    if(is.na(set$boundary)[1]) # if boundary, set hiatus for that depth to be very short...
+      for(hi in set$hiatus.depths) {
+        below <- min(which(set$d > hi), set$K-1)+1
+        above <- max(which(set$d < hi))
+        if(d > set$d[above] && d < set$d[below]) {
+          start.hiatus <- elbows[,below] - (its[,1+below] * (set$d[below] - hi))
+          end.hiatus <- elbows[,above] + (its[,above] * (hi - set$d[above]))
+          ok <- which(end.hiatus < start.hiatus)
+          if(d < hi)
+            ages[ok] <- elbows[ok,above] + (its[ok,above] * (d - set$d[above])) else
+              ages[ok] <- elbows[ok,below] - (its[ok,1+below] * (set$d[below] - d))
+        }
+      }
   if(BCAD)
     ages <- 1950 - ages
-  ages
+  return(ages)
 }
 
 
@@ -819,21 +802,19 @@ Bacon.Age.d <- function(d, set=get('info'), its=set$output, BCAD=set$BCAD) {
 #' @details Age estimates of specific depths can also be plotted.
 #' @param d The depth or depths for which a histogram and age ranges should be provided. If multiple depths are given, then just the age ranges, median and means (no graphs) are provided for each depth.
 #' @param set Detailed information of the current run, stored within this session's memory as variable info.
-#' @param bins Bacon will try to automatically estimate reasonable bin sizes. Changing the histograms bin size could alter the shape of the histogram considerably. Values below c. 50 are generally not recommended.
+#' @param BCAD The calendar scale of graphs and age output-files is in \code{cal BP} by default, but can be changed to BC/AD using \code{BCAD=TRUE}. 
 #' @param yr.lab The labels for the calendar axis (default \code{yr.lab="cal BP"} or \code{"BC/AD"} if \code{BCAD=TRUE}).
 #' @param yr.lim Minimum and maximum calendar age ranges, calculated automatically by default (\code{yr.lim=c()}).
 #' @param hist.lab The y-axis is labelled \code{ylab="Frequency"} by default.
 #' @param hist.lim Limits of the y-axis.
-#' @param Plot Make a plot or not. Defaults to \code{Plot=TRUE}, however no plots are made if more than one depth \code{d} is provided.
-#'  If \code{Plot=FALSE}, then the age ranges, median and mean are given for each depth (as four columns).
-#' @param yr.res Bacon will try to automatically estimate reasonable bin sizes. Changing the histograms bin size could alter the shape of the histogram considerably. Values below c. 50 are generally not recommended. See also \code{bins}.
+#' @param draw Draw a plot or not. Defaults to \code{draw=TRUE}, however no plots are made if more than one depth \code{d} is provided.
+#'  If \code{draw=FALSE}, then the age ranges, median and mean are given for each depth (as four columns).
 #' @param prob Age ranges are given as quantiles, e.g., 2.5\% and 97.5\% for the default of 95\% confidence limits (\code{prob=0.95})). 
 #' @param hist.col Colour of the histogram. Default grey, \code{hist.col=grey(0.5)}.
 #' @param hist.border Colour of the histogram's outline. Default dark grey, \code{hist.border=grey(0.2)}.
 #' @param range.col Colour of confidence ranges. Defaults to \code{range.col="blue"}.
 #' @param med.col Colour of the median. Defaults to \code{med.col="green"}.
 #' @param mean.col Colour of the mean. Defaults to \code{mn.col="red"}.
-#' @param cleanup The drawing of the plot uses temporary files, which are removed afterward by default (\code{cleanup=TRUE}). 
 #' @author Maarten Blaauw, J. Andres Christen
 #' @return A plot with the histogram and the age ranges, median and mean, or just the age ranges, medians and means if more than one depth \code{d} is given.
 #' @examples
@@ -847,88 +828,61 @@ Bacon.Age.d <- function(d, set=get('info'), its=set$output, BCAD=set$BCAD) {
 #' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474. 
 #' \url{https://projecteuclid.org/download/pdf_1/euclid.ba/1339616472}
 #' @export
-Bacon.hist <- function(d, set=get('info'), bins=c(), yr.lab=c(), yr.lim=c(), hist.lab="Frequency", hist.lim=c(), Plot=TRUE, yr.res=200, prob=set$prob, hist.col=grey(0.5), hist.border=grey(.2), range.col="blue", med.col="green", mean.col="red", cleanup=TRUE) {
-  tmpfile <- tempfile()
-  depthfile <- tempfile()    
-  write(d, depthfile, 1)
+Bacon.hist <- function(d, set=get('info'), BCAD=set$BCAD, yr.lab=c(), yr.lim=c(), hist.lab="Frequency", hist.lim=c(), draw=TRUE, prob=set$prob, hist.col=grey(0.5), hist.border=grey(.2), range.col="blue", med.col="green", mean.col="red") {
   outfile <- paste(set$prefix, ".out", sep="")
-  if(!exists("set$output") || !exists("set$Tr")) {
-    set <- .Bacon.AnaOut(outfile, set)		
+  if(length(set$output) == 0 || length(set$Tr) == 0) {
+    set <- .Bacon.AnaOut(outfile, set)
     .assign_to_global("set", set)
   }
     
-  if(length(bins) == 0)
-    bins <- max(50,if(exists("set$output"))2*ceiling(sqrt(nrow(set$output))))
-
-  hist2(outfile, set$Tr, set$d.min, set$thick, set$K, bins, tmpfile, length(d), depthfile)
-  source(tmpfile)
-  if(cleanup) 
-    file.remove(tmpfile, depthfile)
-
-  # here check for hiatuses and re-calculate any affected depths d. 
-  if(!is.na(set$hiatus.depths)[1]) {
-    d.hists <- c()
-    for(j in 1:length(hists))
-      d.hists[j] <- hists[[j]]$d
-    for(hi in set$hiatus.depths)
-      for(i in d) {
-        below <- min(which(set$d > hi), set$K-1)+1
-        above <- max(which(set$d < hi))
-        if(i < set$d[below] && i > set$d[above]) {
-          this <- c()
-          if(any( round(d.hists, set$find.round) == round(i,set$find.round)) )
-            this <- max(which(round(d.hists,set$find.round) == round(i,set$find.round)))[1] # ugly
-          if(length(this) > 0) {
-            newdist <- hist(Bacon.Age.d(i, set), bins, plot=FALSE)
-            hists[[this]]$th0 <- round(min(newdist$mids))  # th0
-            hists[[this]]$th1 <- round(max(newdist$mids))  # th1
-            hists[[this]]$n <- length(newdist$mids)        # n
-            hists[[this]]$counts <- round(newdist$counts)
-            .assign_to_global("hists", hists)
-          } 
-        }
-      }
+  hist3 <- function(d, prob, BCAD) {
+    hsts <- c(); maxhist <- 0
+    for(i in 1:length(d)) {
+      ages <- Bacon.Age.d(d[i], set, BCAD=BCAD)
+      mn <- mean(ages)
+      qu <- quantile(ages, c(((1-prob)/2), 1-((1-prob)/2), .5))
+      wmn <- qu[3]
+      hst <- density(ages)
+    
+      th0 <- min(hst$x)
+      th1 <- max(hst$x)
+      maxhist <- max(maxhist, hst$y)
+      n <- length(hst$x)
+      counts <- hst$y
+      ds <- d[i]
+      hsts <- append(hsts, pairlist(list(d=ds, th0=th0, th1=th1, n=n, counts=counts, mean=mn, wmean=wmn, rng=qu[1:2], max=maxhist)))
+    }  
+    return(hsts)
   }
 
-  ranges.hst <- function(hst, d) {
-	mn <- weighted.mean(hst[,1], hst[,2]) # this needs to be a real mean, based on Bacon.Age.d or so
-    hst <- cbind(hst[,1], cumsum(hst[,2])/sum(hst[,2]))
-    qu <- approx(hst[,2], hst[,1], c((1-prob)/2, 1-((1-prob)/2), .5), rule=2)
-    c(qu$y, mn)
-  }
+  hists <- hist3(d, prob, BCAD)
+  .assign_to_global("hists", hists)
 
   rng <- array(NA, dim=c(length(d), 4))
-  for(i in 1:length(d)) {
-    yrs <- seq(hists[[i]]$th0, hists[[i]]$th1, length=hists[[i]]$n)
-    if(set$BCAD) yrs <- 1950 - yrs
-    hst <- approx(yrs, hists[[i]]$counts, seq(min(yrs), max(yrs), length=yr.res))
-    if(length(hst$y[hst$y>0]) < 2)
-    hst <- approx(yrs, hists[[i]]$counts, seq(min(yrs), max(yrs), length=50)) # for very narrow ranges
-    rng[i,] <- ranges.hst(cbind(hst$x, hst$y), d[i])
-    if(exists("set$Tr"))
-      if(exists("set$output")) # then get a better estimate of the mean (not disturbed by bin sizes)
-  	    rng[i,4] <- mean(Bacon.Age.d(d[i]))
-  }
+  for(i in 1:length(d)) 
+    rng[i,] <- c(hists[[i]]$rng, hists[[i]]$wmean, hists[[i]]$mean)  
 
-  rm(tmpfile, depthfile)
-  if(length(d)==1 && Plot==TRUE) {
+  if(length(d)==1 && draw==TRUE) {
+    hst <- hists[[1]]
     if(length(yr.lab) == 0)
-      yr.lab <- ifelse(set$BCAD, "BC/AD", "cal yr BP")
+      yr.lab <- ifelse(BCAD, "BC/AD", "cal yr BP")
     if(length(yr.lim) == 0)
-      yr.lim <- range(hst$x)
+      yr.lim <- c(hst$th0, hst$th1)
+    if(BCAD)
+      yr.lim <- rev(yr.lim)
     if(length(hist.lim) == 0)
-      hist.lim <- c(0, max(hst$y))
-	# mn <- mean(Bacon.Age.d(d))
-    pol <- cbind(c(min(hst$x), hst$x, max(hst$x)), c(0, hst$y, 0))
+      hist.lim <- c(0, 1.1*hst$max)
+
+    pol <- cbind(c(hst$th0, seq(hst$th0, hst$th1, length=hst$n), hst$th1), c(0, hst$counts, 0))
     plot(0, type="n", xlim=yr.lim, ylim=hist.lim, xlab=yr.lab, ylab=hist.lab, yaxs="i")
     polygon(pol, col=hist.col, border=hist.border)
-    segments(rng[1], 0, rng[2], 0, col=range.col, lwd=3)
-	points(rng[3], 0, col=med.col, pch=20)
-    points(rng[4], 0, col=mean.col, pch=20)
+    segments(rng[,1], 0, rng[,2], 0, col=range.col, lwd=3)
+    points(rng[,3], 0, col=med.col, pch=20)
+    points(rng[,4], 0, col=mean.col, pch=20)
 
     cat("  mean (", mean.col, "): ", round(rng[4],1), " ", yr.lab,
       ", median (", med.col, "): ",  round(rng[3],1), " ", yr.lab, "\n", sep="")
-    cat(100*prob, "% range (", range.col, "): ", round(rng[1],1), " to ", round(rng[2],1), yr.lab, "\n", sep="")
+    cat(100*prob, "% range (", range.col, "): ", round(rng[1],1), " to ", round(rng[2],1), " ", yr.lab, "\n", sep="")
   } else
   return(rng)
 }
@@ -944,9 +898,8 @@ Bacon.hist <- function(d, set=get('info'), bins=c(), yr.lab=c(), yr.lim=c(), his
 #' @param proxy.lab Label of the proxy axis. Default names are taken from the csv file.
 #' @param proxy.res Greyscale pixels are calculated for \code{proxy.res=200} proxy values by default. 
 #' @param yr.res Resolution or amount of greyscale pixels to cover the age scale of the age-model plot. Default \code{yr.res=200}.
-#' @param grey.res Grey-scale resolution of the proxy graph. Default \code{grey.res=100}. See also \code{bins}.
+#' @param grey.res Grey-scale resolution of the proxy graph. Default \code{grey.res=100}. 
 #' @param set Detailed information of the current run, stored within this session's memory as variable info.
-#' @param bins Bin sizes to calculate the grey-scales are calculated automatically. See also \code{grey.res}. 
 #' @param dark By default, the darkest grey value is assigned to the most likely value within the entire core (normalised to 1; \code{dark=1}). By setting dark to, e.g., \code{dark=.8}, all values of and above 0.8 will be darkest (and values below that threshold will be lighter grey the lower their probabilities).
 #' @param darkest Darkness of the most likely value. Is black by default (\code{darkest=1}); lower values will result in lighter grey.  
 #' @param rotate.axes The default is to plot the calendar horizontally, however the plot can be rotated (\code{rotate.axes=TRUE}). 
@@ -964,7 +917,6 @@ Bacon.hist <- function(d, set=get('info'), bins=c(), yr.lab=c(), yr.lim=c(), his
 #' @param bty Type of box to be drawn around the plot (\code{"n"} for none, and \code{"l"} (default), \code{"7"}, \code{"c"}, \code{"u"}, or \code{"o"} for correspondingly shaped boxes).
 #' @param BCAD The calendar scale of graphs and age output-files is in \code{cal BP} by default, but can be changed to BC/AD using \code{BCAD=TRUE}. 
 #' @param yr.lab The labels for the calendar axis (default \code{yr.lab="cal BP"} or \code{"BC/AD"} if \code{BCAD=TRUE}).
-#' @param cleanup Temporary files to produce the greyscales are removed automatically after the plot has been produced (\code{cleanup=TRUE}). 
 #' @author Maarten Blaauw, J. Andres Christen
 #' @return A grey-scale graph of the proxy against calendar age. 
 #' @examples
@@ -979,7 +931,7 @@ Bacon.hist <- function(d, set=get('info'), bins=c(), yr.lab=c(), yr.lim=c(), his
 #' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474. 
 #' \url{https://projecteuclid.org/download/pdf_1/euclid.ba/1339616472}
 #' @export
-proxy.ghost <- function(proxy=1, proxy.lab=c(), proxy.res=200, yr.res=200, grey.res=100, set=get('info'), bins=c(), dark=1, darkest=1, rotate.axes=FALSE, proxy.rev=FALSE, yr.rev=FALSE, plot.mean=FALSE, mean.col="red", yr.lim=c(), proxy.lim=c(), sep=",", xaxs="i", yaxs="i", xaxt="s", yaxt="s", bty="l", BCAD=set$BCAD, yr.lab=ifelse(BCAD, "BC/AD", "cal yr BP"), cleanup=TRUE) {
+proxy.ghost <- function(proxy=1, proxy.lab=c(), proxy.res=250, yr.res=250, grey.res=100, set=get('info'), dark=1, darkest=1, rotate.axes=FALSE, proxy.rev=FALSE, yr.rev=FALSE, plot.mean=FALSE, mean.col="red", yr.lim=c(), proxy.lim=c(), sep=",", xaxs="i", yaxs="i", xaxt="s", yaxt="s", bty="l", BCAD=set$BCAD, yr.lab=ifelse(BCAD, "BC/AD", "cal yr BP")) {
   if(length(set$Tr)==0)
     stop("\nPlease first run agedepth()\n\n")
   proxies <- read.csv(paste(set$coredir, set$core, "/", set$core, "_proxies.csv", sep=""), header=TRUE, sep=sep)
@@ -1008,12 +960,12 @@ proxy.ghost <- function(proxy=1, proxy.lab=c(), proxy.res=200, yr.res=200, grey.
   }
   cat("\nCalculating histograms... \n")
 
-  Bacon.hist(ds, set, bins, Plot=FALSE, cleanup=cleanup)
+  Bacon.hist(ds, set)
+  hists <- get('hists') 
+
   yr.min <- c()
   yr.max <- c()
-  min.rng <- c(); max.rng <- c()
-  hists <- get('hists') 
-    
+#  min.rng <- c(); max.rng <- c()    
   for(i in 1:length(hists)) {
     yr.min <- min(yr.min, hists[[i]]$th0)
     yr.max <- max(yr.max, hists[[i]]$th1)
@@ -1092,18 +1044,9 @@ proxy.ghost <- function(proxy=1, proxy.lab=c(), proxy.res=200, yr.res=200, grey.
 #' \url{https://projecteuclid.org/download/pdf_1/euclid.ba/1339616472}
 #' @export
 accrate.depth <- function(d, set=get('info'), cmyr=FALSE) {
-  if(is.na(set$hiatus.depths)) {
-    if(min(set$d) <= d && max(set$d) >= d)
-      accs <- set$output[,1+max(which(set$d <= d))] else accs <- NA
-  } else
-    for(hi in set$hiatus.depths) {
-      whichbelow <- min(which(set$d > d))
-      whichabove <- max(which(set$d < d))
-      if(set$d[whichbelow] > hi && set$d[whichabove] < hi)
-        if(d < hi)
-          accs <- set$output[,1+1+whichbelow] else
-            accs <- set$output[,0+whichabove]
-    }
+  if(min(set$d) <= d && max(set$d) >= d)
+    accs <- set$output[,1+max(which(set$d <= d))] else
+      accs <- NA 
   if(cmyr) 1/accs else accs
 }
 
@@ -1121,6 +1064,7 @@ accrate.depth <- function(d, set=get('info'), cmyr=FALSE) {
 #' @param age The age for which the accumulation rates need to be returned.
 #' @param set Detailed information of the current run, stored within this session's memory as variable \code{info}.
 #' @param cmyr Accumulation rates can be calculated in cm/year or year/cm. By default \code{cmyr=FALSE} and accumulation rates are calculated in year per cm. 
+#' @param BCAD The calendar scale of graphs and age output-files is in \code{cal BP} by default, but can be changed to BC/AD using \code{BCAD=TRUE}. 
 #' @author Maarten Blaauw, J. Andres Christen
 #' @return all MCMC estimates of accumulation rate of the chosen age.
 #' @examples
@@ -1135,10 +1079,12 @@ accrate.depth <- function(d, set=get('info'), cmyr=FALSE) {
 #' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474. 
 #'  \url{https://projecteuclid.org/download/pdf_1/euclid.ba/1339616472}
 #' @export
-accrate.age <- function(age, set=get('info'), cmyr=FALSE) {
+accrate.age <- function(age, set=get('info'), cmyr=FALSE, BCAD=set$BCAD) {
  ages <- cbind(set$output[,1])
  for(i in 1:set$K)
    ages <- cbind(ages, ages[,i] + (set$thick * (set$output[,i+1])))
+ if(BCAD)
+   ages <- 1950 - ages
 
  if(age < min(ages) || age > max(ages))
    cat(" Warning, age outside the core's age range!\n")
@@ -1169,7 +1115,7 @@ accrate.age <- function(age, set=get('info'), cmyr=FALSE) {
 #' @param cmyr Accumulation rates can be calculated in cm/year or year/cm. By default \code{cmyr=FALSE} and accumulation rates are calculated in year per cm. Axis limits are difficult to calculate when \code{cmyr=TRUE}, so a manual adaptation of \code{acc.lim} might be a good idea.
 #' @param acc.lab Axis label for the accumulation rate. 
 #' @param dark The darkest grey value is dark=1 by default; lower values will result in lighter grey but values >1 are not advised. 
-#' @param grey.res Grey-scale resolution. Default \code{grey.res=100}. See also \code{bins}.
+#' @param grey.res Grey-scale resolution. Default \code{grey.res=100}.
 #' @param prob Probability ranges. Defaults to \code{prob=0.95}.
 #' @param plot.range If \code{plot.range=TRUE}, the confidence ranges (two-tailed; half of the probability at each side) are plotted. 
 #' @param range.col Colour of the confidence ranges.
@@ -1203,10 +1149,10 @@ accrate.depth.ghost <- function(set=get('info'), d=set$d, d.lim=c(), acc.lim=c()
   for(i in 1:length(d)) {
     max.acc <- max(max.acc, acc[[i]]$x)
     max.dens <- max(max.dens, acc[[i]]$y)
-	quants <- quantile(accrate.depth(d[i], set, cmyr=cmyr), c((1-prob)/2, 1-((1-prob)/2)))
-	min.rng[i] <- quants[1]
-	max.rng[i] <- quants[2]
-	mn.rng[i] <- mean(accrate.depth(d[i], set, cmyr=cmyr))
+    quants <- quantile(accrate.depth(d[i], set, cmyr=cmyr), c((1-prob)/2, 1-((1-prob)/2)))
+    min.rng[i] <- quants[1]
+    max.rng[i] <- quants[2]
+    mn.rng[i] <- mean(accrate.depth(d[i], set, cmyr=cmyr))
    }
     
   for(i in 1:length(d)) {
@@ -1215,7 +1161,7 @@ accrate.depth.ghost <- function(set=get('info'), d=set$d, d.lim=c(), acc.lim=c()
   }
 
   if(length(d.lim) == 0)
-    d.lim <- range(set$d)  
+    d.lim <- range(d)  
   if(length(d.lab) == 0)
     d.lab <- paste("depth (", set$unit, ")", sep="")
   if(length(acc.lab) == 0)
@@ -1235,21 +1181,21 @@ accrate.depth.ghost <- function(set=get('info'), d=set$d, d.lim=c(), acc.lim=c()
     for(i in 2:length(d))
       image(acc[[i]]$x, d[c(i-1, i)], t(1-t(acc[[i]]$y)), add=TRUE, col=grey(seq(1-max(acc[[i]]$y), 1, length=grey.res)))
     if(plot.range) {
-      lines(min.rng, d-(set$thick/2), col=range.col, lty=range.lty)  	
+      lines(min.rng, d-(set$thick/2), col=range.col, lty=range.lty)
       lines(max.rng, d-(set$thick/2), col=range.col, lty=range.lty)
     }
-	if(plot.mean)    	
-      lines(mn.rng, d-(set$thick/2), col=mean.col, lty=mean.lty)  		 
+    if(plot.mean)
+      lines(mn.rng, d-(set$thick/2), col=mean.col, lty=mean.lty) 
   } else {
       plot(0, type="n", xlab=d.lab, ylab=acc.lab, xlim=d.lim, ylim=acc.lim)
       for(i in 2:length(d))
         image(d[c(i-1, i)], acc[[i]]$x, 1-t(acc[[i]]$y), add=TRUE, col=grey(seq(1-max(acc[[i]]$y), 1, length=grey.res)))
       if(plot.range) {
-        lines(d-(set$thick/2), min.rng, col=range.col, lty=range.lty)  		 
+        lines(d-(set$thick/2), min.rng, col=range.col, lty=range.lty) 
         lines(d-(set$thick/2), max.rng, col=range.col, lty=range.lty)
         }
     if(plot.mean)
-      lines(d-(set$thick/2), mn.rng, col=mean.col, lty=mean.lty)  		 
+      lines(d-(set$thick/2), mn.rng, col=mean.col, lty=mean.lty) 
     }
 }
 
@@ -1320,18 +1266,18 @@ accrate.age.ghost <- function(set=get('info'), yr.lim=c(), yr.lab=c(), yr.res=20
       cat(".")
       acc <- accrate.age(yr.seq[i], set, cmyr=cmyr)
     if(cmyr) acc <- rev(acc)
-	accs <- acc	
+      accs <- acc
     if(length(acc) > 2)
     if(length(acc.lim) == 0)
       acc <- density(acc, from=0) else
         acc <- density(acc, from=0, to=max(acc.lim))
-	hist.list$yr[[i]] <- yr.seq[i]		
+    hist.list$yr[[i]] <- yr.seq[i]
     hist.list$x[[i]] <- acc$x
     hist.list$y[[i]] <- acc$y/sum(acc$y)
     rng <- quantile(accs, c((1-prob)/2, 1-((1-prob)/2)))
-	hist.list$mn.rng[[i]] <- mean(accs)	
-	hist.list$min.rng[[i]] <- rng[1]
-	hist.list$max.rng[[i]] <- rng[2]	
+    hist.list$mn.rng[[i]] <- mean(accs)	
+    hist.list$min.rng[[i]] <- rng[1]
+    hist.list$max.rng[[i]] <- rng[2]	
     max.y <- max(max.y, hist.list$y[[i]])
     all.x <- c(all.x, acc$x)
   }
@@ -1343,44 +1289,54 @@ accrate.age.ghost <- function(set=get('info'), yr.lim=c(), yr.lab=c(), yr.res=20
     yr.lim <- range(yr.seq)
   if(length(acc.lim) == 0)
     acc.lim <- c(0, 1.1*quantile(all.x, upper))
+  if(BCAD)
+    yr.lim <- rev(yr.lim)
   if(rev.yr)
     yr.lim <- rev(yr.lim)
   if(rev.acc)
     acc.lim <- rev(acc.lim)
   if(length(yr.lab) == 0)
-	  if(BCAD)
-        yr.lab <- "BC/AD" else
-          yr.lab <- "cal BP"    
+    if(BCAD)
+      yr.lab <- "BC/AD" else
+        yr.lab <- "cal BP"    
   if(length(acc.lab) == 0)
     if(cmyr)
       acc.lab <- paste("accumulation rate (", set$unit, "/yr)", sep="") else
         acc.lab <- paste("accumulation rate (yr/", set$unit, ")", sep="") 
   if(rotate.axes) {
     plot(0, type="n", xlim=acc.lim, xlab=acc.lab, ylim=yr.lim, ylab=yr.lab, xaxs=xaxs, yaxs=yaxs)
-    for(i in 2:length(yr.seq))
-      image(sort(hist.list$x[[i]]), hist.list$yr[c(i-1,i)], t(t(matrix(hist.list$y[[i]]))),
-        col=grey(seq(1, 1-min(1,max(hist.list$y[[i]])*dark/max.y), length=grey.res)), add=TRUE)
-    } else {
-      plot(0, type="n", xlim=yr.lim, xlab=yr.lab, ylim=acc.lim, ylab=acc.lab, xaxs=xaxs, yaxs=yaxs)
-      for(i in 2:length(yr.seq))
-        image(sort(hist.list$yr[c(i-1,i)]), hist.list$x[[i]], t(matrix(hist.list$y[[i]])),
-          col=grey(seq(1, 1-min(1,max(hist.list$y[[i]])*dark/max.y), length=grey.res)), add=TRUE)
+    for(i in 2:length(yr.seq)) {
+      if(BCAD) 
+        image(sort(hist.list$x[[i]]), 1950-hist.list$yr[c(i,i-1)], t(t(matrix(hist.list$y[[i]]))),
+          col=grey(seq(1, 1-min(1,max(hist.list$y[[i]])*dark/max.y), length=grey.res)), add=TRUE) else
+          image(sort(hist.list$x[[i]]), hist.list$yr[c(i-1,i)], t(t(matrix(hist.list$y[[i]]))),
+            col=grey(seq(1, 1-min(1,max(hist.list$y[[i]])*dark/max.y), length=grey.res)), add=TRUE)
+    }
+  } else {
+        plot(0, type="n", xlim=yr.lim, xlab=yr.lab, ylim=acc.lim, ylab=acc.lab, xaxs=xaxs, yaxs=yaxs)
+        for(i in 2:length(yr.seq)) {
+          if(BCAD)
+            image(sort(1950-hist.list$yr[c(i,i-1)]), hist.list$x[[i]], t(matrix(hist.list$y[[i]])),
+              col=grey(seq(1, 1-min(1,max(hist.list$y[[i]])*dark/max.y), length=grey.res)), add=TRUE) else
+              image(sort(hist.list$yr[c(i-1,i)]), hist.list$x[[i]], t(matrix(hist.list$y[[i]])),
+                col=grey(seq(1, 1-min(1,max(hist.list$y[[i]])*dark/max.y), length=grey.res)), add=TRUE)
+        }
       }
    if(plot.range)
-	 if(rotate.axes) {
+     if(rotate.axes) {
        lines(hist.list$min.rng, yr.seq, pch=".", col=range.col, lty=range.lty)
        lines(hist.list$max.rng, yr.seq, pch=".", col=range.col, lty=range.lty)
-	 } else {
-		 lines(yr.seq, hist.list$min.rng, pch=".", col=range.col, lty=range.lty)
-		 lines(yr.seq, hist.list$max.rng, pch=".", col=range.col, lty=range.lty)
-	   } 	  
-	 if(plot.mean)
+     } else {
+       lines(yr.seq, hist.list$min.rng, pch=".", col=range.col, lty=range.lty)
+       lines(yr.seq, hist.list$max.rng, pch=".", col=range.col, lty=range.lty)
+       }
+     if(plot.mean)
        if(rotate.axes)
          lines(hist.list$mn.rng, yr.seq, pch=".", col=mean.col, lty=mean.lty) else
            lines(yr.seq, hist.list$mn.rng, pch=".", col=mean.col, lty=mean.lty)
       
   if(length(bty) > 0)
-	box(bty=bty)  	  
+    box(bty=bty)
 }
 
 
@@ -1475,13 +1431,13 @@ flux.age.ghost <- function(proxy=1, yr.lim=c(), yr.res=200, set=get('info'), flu
   if(rotate.axes)
     plot(0, type="n", ylim=yr.lim, ylab=yr.lab, xlim=flux.lim, xlab=flux.lab) else
       plot(0, type="n", xlim=yr.lim, xlab=yr.lab, ylim=flux.lim, ylab=flux.lab)
-  min.rng <- c(); max.rng <- c(); mn.rng <- c() 	  	  
+  min.rng <- c(); max.rng <- c(); mn.rng <- c()
   for(i in 2:length(age.seq)) {
     tmp <- fluxes[!is.na(fluxes[,i]),i] # all fluxes that fall at the required age.seq age
-	rng <- quantile(tmp, c((1-prob)/2, 1-((1-prob)/2)))
-	min.rng[i] <- rng[1]
-	max.rng[i] <- rng[2]
-	mn.rng[i] <- mean(tmp)
+    rng <- quantile(tmp, c((1-prob)/2, 1-((1-prob)/2)))
+    min.rng[i] <- rng[1]
+    max.rng[i] <- rng[2]
+    mn.rng[i] <- mean(tmp)
     if(length(tmp[tmp>=0]) > 2) {
       flux.hist <- density(tmp, from=0, to=max(flux.lim))
       flux.hist$y <- flux.hist$y - min(flux.hist$y) # no negative fluxes
@@ -1489,7 +1445,7 @@ flux.age.ghost <- function(proxy=1, yr.lim=c(), yr.res=200, set=get('info'), flu
         image(flux.hist$x, age.seq[c(i-1,i)], matrix(flux.hist$y/max.dens), add=TRUE,
           col=grey(seq(1, max(0, 1-dark*(max(flux.hist$y)/max.dens)), length=100))) else 
           image(age.seq[c(i-1,i)], flux.hist$x, t(matrix(flux.hist$y/max.dens)), add=TRUE,
-            col=grey(seq(1, max(0, 1-dark*(max(flux.hist$y)/max.dens)), length=100)))	
+            col=grey(seq(1, max(0, 1-dark*(max(flux.hist$y)/max.dens)), length=100)))
     }
   } 
  if(plot.range)
@@ -1498,11 +1454,11 @@ flux.age.ghost <- function(proxy=1, yr.lim=c(), yr.res=200, set=get('info'), flu
      lines(max.rng, age.seq, col=range.col, lty=range.lty)
  } else {
      lines(age.seq, min.rng, col=range.col, lty=range.lty)
-     lines(age.seq, max.rng, col=range.col, lty=range.lty)	
+     lines(age.seq, max.rng, col=range.col, lty=range.lty)
    }
   if(plot.mean)
     if(rotate.axes)
-   	 lines(mn.rng, age.seq, col=mean.col, lty=mean.lty) else
+      lines(mn.rng, age.seq, col=mean.col, lty=mean.lty) else
        lines(age.seq, mn.rng, col=mean.col, lty=mean.lty)  
 }
 
@@ -1618,40 +1574,28 @@ AgesOfEvents <- function(window, move, set=get('info'), plot.steps=FALSE, BCAD=s
 
 #################### user-invisible plot functions ####################
 
-# to plot greyscale/ghost graphs of age-depth model
-.depth.ghost <- function(set=get('info'), bins=c(), d.min=set$d.min, d.max=set$d.max, rotate.axes=FALSE, d.res=200, yr.res=200, grey.res=100, dark=set$dark, greyscale=function(x) grey(1-x), cleanup=TRUE, xaxt="s", yaxt="s") {
-  d <- seq(d.min, d.max, length=d.res) 
-  Bacon.hist(d, set, bins, yr.res=yr.res, cleanup=cleanup)
-  d.jumps <- diff(d)[1]
+# to plot greyscale/ghost graphs of the age-depth model
+.agedepth.ghost <- function(d=c(), set=get('info'), d.min=set$d.min, d.max=set$d.max, BCAD=set$BCAD, rotate.axes=FALSE, d.res=400, yr.res=400, grey.res=100, dark=set$dark, colours=grey(seq(1, 0, length=100)), xaxt="s", yaxt="s", yr.lim) {
+  if(length(d) == 0)
+    d <- seq(d.min, d.max, length=d.res)
+  Bacon.hist(d, set, BCAD=BCAD)
   hists <- get('hists') 
-    
-  peak <- 0
-  for(i in 1:(length(d))) {
-    yrs <- seq(hists[[i]]$th0, hists[[i]]$th1, length=hists[[i]]$n)
-    hst <- approx(yrs, hists[[i]]$counts, seq(min(yrs), max(yrs), length=yr.res))
-    if(length(hst$y>0) < 5) # for narrow distributions, go narrow
-      hst <- approx(yrs, hists[[i]]$counts, seq(min(yrs), max(yrs), length=20))
-    peak <- max(peak, max(hst$y))
-  }
-
+  
+  scales <- array(NA, dim=c(d.res, yr.res))
+  yrseq <- seq(min(yr.lim), max(yr.lim), length=yr.res)
+  dseq <- seq(d.min, d.max, length=d.res)
   for(i in 1:length(d)) {
     yrs <- seq(hists[[i]]$th0, hists[[i]]$th1, length=hists[[i]]$n)
-    hst <- approx(yrs, hists[[i]]$counts, seq(min(yrs), max(yrs), length=yr.res))
-    if(length(hst$y>0) < 5) # for narrow distributions, go narrow
-      hst <- approx(yrs, hists[[i]]$counts, seq(min(yrs), max(yrs), length=20))
-    if(set$BCAD) {
-      hst$x <- rev(1950-hst$x)
-      hst$y <- rev(hst$y)
-    }
-    hst$y <- hst$y/peak
-    hst$y[hst$y>dark] <- max(hst$y)
-    if(dark>1) stop(" Warning, the dark value should be <1")
-    gr <- seq(0, dark, length=grey.res)
-    if(rotate.axes)
-      image(hst$x, c(d[i]-(d.jumps/2), d[i]+(d.jumps/2)), t(t(hst$y)), add=TRUE, col=greyscale(gr)) else
-        image(c(d[i]-(d.jumps/2), d[i]+(d.jumps/2)), hst$x, t(hst$y), add=TRUE, col=greyscale(gr))
+    scales[i,] <- approx(yrs, hists[[i]]$counts, yrseq)$y
   }
+  scales <- scales/hists[[length(hists)]]$max # normalise to the height of most precise age estimate
+  scales[scales > dark] <- dark 
+  
+  if(rotate.axes)
+	image(yrseq, dseq, t(scales), add=TRUE, col=colours) else
+      image(dseq, yrseq, scales, add=TRUE, col=colours)
 }
+
 
 
 # Time series of the log of the posterior
@@ -1662,7 +1606,7 @@ AgesOfEvents <- function(window, move, set=get('info'), plot.steps=FALSE, BCAD=s
 
 
 # calibrate C14 dates and calculate distributions for any calendar dates
-.bacon.calib <- function(dat, set=get('info'), date.res=100, normal=set$normal, t.a=set$t.a, t.b=set$t.b, deltaR=set$deltaR, deltaSTD=set$deltaSTD, ccdir="") {
+.bacon.calib <- function(dat, set=get('info'), date.res=100, normal=set$normal, t.a=set$t.a, t.b=set$t.b, delta.R=set$delta.R, delta.STD=set$delta.STD, ccdir="") {
   # read in the curves
   if(set$cc1=="IntCal13" || set$cc1=="\"IntCal13\"")
     cc1 <- read.table(paste(ccdir, "3Col_intcal13.14C",sep="")) else
@@ -1712,7 +1656,7 @@ AgesOfEvents <- function(window, move, set=get('info'), plot.steps=FALSE, BCAD=s
   calib <- list(d=dat[,4])
   if(ncol(dat)==4) { # only one type of dates (e.g., calBP, or all IntCal13 C14 dates)
     if(set$cc==0) {
-      deltaR <- 0; deltaSTD <- 0 # only C14 dates should need correcting for age offsets
+      delta.R <- 0; delta.STD <- 0 # only C14 dates should need correcting for age offsets
       x <- seq(min(dat[,2])-max(100,4*max(dat[,3])), max(dat[,2])+max(100,4*max(dat[,3])), length=date.res)
       ccurve <- cbind(x, x, rep(0,length(x))) # dummy 1:1 curve
     } else
@@ -1721,7 +1665,7 @@ AgesOfEvents <- function(window, move, set=get('info'), plot.steps=FALSE, BCAD=s
             if(set$cc==3) ccurve <- cc3 else
               ccurve <- cc4
     for(i in 1:nrow(dat))
-      calib$probs[[i]] <- d.cal(ccurve, dat[i,2]-deltaR, dat[i,3]^2+deltaSTD^2, set$t.a, set$t.b)
+      calib$probs[[i]] <- d.cal(ccurve, dat[i,2]-delta.R, dat[i,3]^2+delta.STD^2, set$t.a, set$t.b)
   } else
       for(i in 1:nrow(dat)) {
         det <- as.numeric(dat[i,])
@@ -1732,10 +1676,10 @@ AgesOfEvents <- function(window, move, set=get('info'), plot.steps=FALSE, BCAD=s
             if(det[5]==1) ccurve <- cc1 else if(det[5]==2) ccurve <- cc2 else
               if(det[5]==3) ccurve <- cc3 else ccurve <- cc4
 
-        deltaR <- set$deltaR; deltaSTD <- set$deltaSTD; t.a <- set$t.a; t.b <- set$t.b
+        delta.R <- set$delta.R; delta.STD <- set$delta.STD; t.a <- set$t.a; t.b <- set$t.b
         if(length(det) >= 7 && det[5] > 0) { # the user provided age offsets; only for C14 dates
-          deltaR <- det[6]
-          deltaSTD <- det[7]
+          delta.R <- det[6]
+          delta.STD <- det[7]
         }
 
         if(length(det) >= 9) { # the user provided t.a and t.b values for each date
@@ -1744,7 +1688,7 @@ AgesOfEvents <- function(window, move, set=get('info'), plot.steps=FALSE, BCAD=s
           if(round(t.b-t.a) !=1) 
             stop("\n Warning! t.b - t.a should always be 1, check the manual")
         }
-        calib$probs[[i]] <- d.cal(ccurve, det[2]-deltaR, det[3]^2+deltaSTD^2, t.a, t.b)
+        calib$probs[[i]] <- d.cal(ccurve, det[2]-delta.R, det[3]^2+delta.STD^2, t.a, t.b)
       }
   calib
 }
@@ -1792,25 +1736,19 @@ AgesOfEvents <- function(window, move, set=get('info'), plot.steps=FALSE, BCAD=s
   for(i in s)
     for(j in mn)
       if(i*(1-j) <= 1) warn <- 1
-  if(warn) cat("\nWarning! Chosen memory prior might cause problems.\nmem.strength * (1 - mem.mean) should be smaller than 1\n ")
+  if(warn)
+    cat("\nWarning! Chosen memory prior might cause problems.\nmem.strength * (1 - mem.mean) should be smaller than 1\n ")
 }
 
 
 
 # plot the prior for the hiatus length
-.PlotHiatusPrior <- function(s=set$hiatus.shape, mn=set$hiatus.mean, hiatus=set$hiatus.depths, set=get('info'), xlab="Hiatus size (yr)", ylab="Density", main="", xlim=c(0, 3*max(mn)), add=FALSE, legend=TRUE) {
-  o <- order(s, decreasing=TRUE)
-  priors <- unique(cbind(s[o],mn[o])[,1:2])
-  x <- 0
-
-  if(length(priors) == 2) {
-    curve(dgamma(x, priors[1], priors[1]/priors[2]), col=3, lwd=2, xlim=xlim, xlab=xlab, ylab=ylab, add=add)
-    txt <- paste("h.shape: ", toString(priors[1]), "\nh.mean: ", toString(priors[2]), "\nd: ", toString(hiatus))
-  } else
-    for(i in 2:nrow(priors)) {
-      curve(dgamma(x, priors[i,1], priors[i,1]/priors[i,2]), col=3, lwd=2, xlim=xlim, xlab=xlab, ylab=ylab, add=if(i==1) add else TRUE)
-      txt <- paste("h.shape: ", toString(priors[,1]), "\nh.mean: ", toString(priors[,2]), "\nd: ", toString(hiatus))
-    }
+.PlotHiatusPrior <- function(mx=set$hiatus.max, hiatus=set$hiatus.depths, set=get('info'), xlab="Hiatus size (yr)", ylab="Density", main="", xlim=c(0, 1.1*max(mx)), add=FALSE, legend=TRUE) {
+  if(add)
+    lines(c(0, 0, mx, mx), c(0, 1/mx, 1/mx, 0), col=3, lwd=2) else
+      plot(c(0, 0, mx, mx), c(0, 1/mx, 1/mx, 0), xlab=xlab, ylab=ylab, xlim=xlim, type="l", col=3, lwd=2)
+      
+  txt <- paste("hiatus.max: ", toString(mx))
   if(legend)
     legend("topright", txt, bty="n", cex=.7, text.col=2, adj=c(0,0))
 }
@@ -1854,7 +1792,7 @@ AgesOfEvents <- function(window, move, set=get('info'), plot.steps=FALSE, BCAD=s
 
 
 # plot the posterior (and prior) of the hiatus
-.PlotHiatusPost <- function(set=get('info'), shape=set$hiatus.shape, mn=set$hiatus.mean, main="", xlim=c(0, 3*max(set$acc.mean)), xlab=paste("Hiatus size (yr)", sep=""), ylab="Frequency", minbreaks=10, after=set$after) {
+.PlotHiatusPost <- function(set=get('info'), mx=set$hiatus.max, main="", xlim=c(), xlab=paste("Hiatus size (yr)", sep=""), ylab="Frequency", minbreaks=10, after=set$after) {
   gaps <- c()
   for(i in set$hiatus.depths) {
     below <- Bacon.Age.d(i+after, set)
@@ -1862,15 +1800,13 @@ AgesOfEvents <- function(window, move, set=get('info'), plot.steps=FALSE, BCAD=s
     gaps <- c(gaps, below - above)
   }
   gaps <- density(gaps, from=0)
-  max.x <- max(gaps$x, xlim)
-  max.prior <- dgamma((shape-1)/(shape/mn), shape, shape/mn)
-  if(is.infinite(max(max.prior)))
-    max.y <- max(gaps$y) else
-      max.y <- max(max.prior, gaps$y)
-  plot(0, type="n", main="", xlab=xlab, xlim=c(0, max.x), ylab=ylab, ylim=c(0, 1.1*max.y))
+  max.y <- 1.1*max(1/mx, gaps$y)
+  if(length(xlim) == 0)
+    xlim <- c(0, 1.1*mx)
+  plot(0, type="n", main="", xlab=xlab, xlim=xlim, ylab=ylab, ylim=c(0, max.y))
   polygon(cbind(c(min(gaps$x), gaps$x, max(gaps$x)), c(0,gaps$y,0)),
     col=grey(.8), border=grey(.4))
-  .PlotHiatusPrior(add=TRUE, xlim=c(0, max.x), xlab="", ylab=ylab, main=main)
+  .PlotHiatusPrior(add=TRUE, xlab="", ylab=ylab, main=main)
 }
 
 
@@ -1884,20 +1820,26 @@ AgesOfEvents <- function(window, move, set=get('info'), plot.steps=FALSE, BCAD=s
 #' @return The calibration curve (invisible).
 #' @param cc Calibration curve for 14C dates: \code{cc=1} for IntCal13 (northern hemisphere terrestrial), \code{cc=2} for Marine13 (marine), 
 #' \code{cc=3} for SHCal13 (southern hemisphere terrestrial). 
+#' @param postbomb Use \code{postbomb=TRUE} to get a postbomb calibration curve (default \code{postbbomb=FALSE}).
 #' @author Maarten Blaauw, J. Andres Christen
 #' @examples 
 #' intcal13 <- copyCalibrationCurve(1)
 #' @seealso \url{http://www.chrono.qub.ac.uk/blaauw/manualBacon_2.3.pdf}
 #' @export
-copyCalibrationCurve <- function(cc=1) {
-  nameFile="3Col_intcal13.14C" 
-  if(cc>=1 && cc <=3) {
-    if(cc==1) nameFile="3Col_intcal13.14C" else
-      if(cc==2) nameFile="3Col_marine13.14C" else
-        if(cc==3) nameFile="3Col_shcal13.14C"
+copyCalibrationCurve <- function(cc=1, postbomb=FALSE) {
+  if(postbomb) {
+    if(cc==1) fl <- "postbomb_NH1.14C" else
+      if(cc==2) fl <- "postbomb_NH2.14C" else
+        if(cc==3) fl <- "postbomb_NH3.14C" else
+          if(cc==4) fl <- "postbomb_SH1-2.14C" else 
+            if(cc==5) fl <- "postbomb_SH3.14C" else  
+              stop("Calibration curve doesn't exist\n")		       
   } else
-      stop("Calibration curve doesn't exist\n") 		 
-  cc <- system.file("extdata", paste("Curves/", nameFile, sep=""), package='rbacon')
+  if(cc==1) fl <- "3Col_intcal13.14C" else
+    if(cc==2) fl <- "3Col_marine13.14C" else
+      if(cc==3) fl <- "3Col_shcal13.14C" else
+        stop("Calibration curve doesn't exist\n")  
+  cc <- system.file("extdata/Curves", fl, package='rbacon')
   cc <- read.table(cc)
   invisible(cc)
 }
@@ -1937,14 +1879,14 @@ mix.curves <- function(proportion=.5, cc1="3Col_intcal13.14C", cc2="3Col_marine1
   cc2.error <- sqrt(cc2.error^2 + offset[2]^2)
   mu <- proportion * cc1[,2] + (1-proportion) * cc2.mu
   error <- proportion * cc1[,3] + (1-proportion) * cc2.error
-  write.table(cbind(cc1[,1], mu, error), paste(dirname, name,  sep="") , row.names=FALSE, col.names=FALSE, sep="\t")
+  write.table(cbind(cc1[,1], mu, error), paste(dirname, name,  sep=""), row.names=FALSE, col.names=FALSE, sep="\t")
 }
 
 
 
 #' @name pMC.age
-#' @title Calculate C14 ages from pmC values.
-#' @description Calculate C14 ages from pmC values of radiocarbon dates.
+#' @title Calculate C14 ages from pMC values.
+#' @description Calculate C14 ages from pMC values of radiocarbon dates.
 #' @details Post-bomb dates are often reported as pMC or percent modern carbon. Since Bacon expects radiocarbon ages,
 #'  this function can be used to calculate radiocarbon ages from pMC values. The reverse function is \link{age.pMC}.
 #' @param mn Reported mean of the pMC.
@@ -1999,7 +1941,7 @@ age.pMC <- function(mn, sdev, ratio=100, decimals=3) {
 
 
 
-#' @name add.date
+#' @name add.dates
 #' @title Add dates to age-depth plots
 #' @description Add dated depths to plots, e.g. to show dates that weren't used in the age-depth model
 #' @details Sometimes it is useful to add additional dating information to age-depth plots, e.g., to show outliers or how dates calibrate with different estimated offsets. 
@@ -2008,7 +1950,7 @@ age.pMC <- function(mn, sdev, ratio=100, decimals=3) {
 #' @param depth Depth of the date. 
 #' @param cc The calibration curve to use: \code{cc=1} for IntCal13 (northern hemisphere terrestrial), \code{cc=2} for Marine13 (marine), \code{cc=0} for none (dates that are already on the cal BP scale).
 #' @param above Treshold for plotting of probability values. Defaults to \code{above=1e-3}.
-#' @param exx Exxagaration of probability distribution plots. Defaults to \code{exx=50}.
+#' @param ex Exaggeration of probability distribution plots. Defaults to \code{ex=50}.
 #' @param normal By default, Bacon uses the student's t-distribution to treat the dates. Use \code{normal=TRUE} to use the normal/Gaussian distribution. This will generally give higher weight to the dates.
 #' @param normalise By default, the date is normalised to an area of 1 (\code{normalise=TRUE}). 
 #' @param t.a The dates are treated using the student's t distribution by default (\code{normal=FALSE}). 
@@ -2033,49 +1975,49 @@ age.pMC <- function(mn, sdev, ratio=100, decimals=3) {
 #' @examples
 #'   Bacon(run=FALSE, coredir=tempfile())
 #'   agedepth()
-#'   add.date(5000, 100, 60)
+#'   add.dates(5000, 100, 60)
 #' @seealso \url{http://www.chrono.qub.ac.uk/blaauw/manualBacon_2.3.pdf}
 #' @references
 #' Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive 
 #' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474. 
 #' \url{https://projecteuclid.org/download/pdf_1/euclid.ba/1339616472}
 #' @export
-add.date <- function(mn, sdev, depth, cc=1, above=1e-3, exx=50, normal=TRUE, normalise=TRUE, t.a=3, t.b=4, age.res=100, times=20, col=rgb(1,0,0,.5), border=rgb(1,0,0,.5), rotate.axes=FALSE, mirror=TRUE, up=TRUE, BCAD=FALSE, pch=4) {
+add.dates <- function(mn, sdev, depth, cc=1, above=1e-3, ex=10, normal=TRUE, normalise=TRUE, t.a=3, t.b=4, age.res=100, times=20, col=rgb(1,0,0,.5), border=rgb(1,0,0,.5), rotate.axes=FALSE, mirror=TRUE, up=TRUE, BCAD=FALSE, pch=4) {
   if(cc > 0)
-    cc = copyCalibrationCurve(cc)
+    cc <- copyCalibrationCurve(cc)
   
   for(i in 1:length(mn)) {
-	yrs <- seq(mn[i]-times*sdev[i], mn[i]+times*sdev[i], length=age.res)
-	if(length(cc) < 2)
-	  cc <- cbind(yrs, yrs, rep(0, length(yrs)))	
-	ages <- approx(cc[,1], cc[,2], yrs)$y
-	errors <- approx(cc[,1], cc[,3], yrs)$y
-	
-	if(normal)
-	  probs <- dnorm(ages, mn[i], sqrt(sdev[i] + errors)^2) else
-	    probs <- (t.b + (mn[i]-ages)^2  / (2*(sdev[i]^2 + errors^2))) ^ (-1*(t.a+0.5))
-	if(normalise)
-	  probs <- probs / sum(probs)	
-	these <- which(probs >= above)
-	if(length(these) > 0) {
-	  yrs <- yrs[these]
-	  probs <- probs[these]	
-	}
-	  	
-	if(!up)
-	  up <- -1  
-	if(BCAD)
-      yrs <- 1950 - yrs
-	if(mirror)
-  	  pol <- cbind(depth[i] + exx*c(probs, -rev(probs)), c(yrs, rev(yrs))) else
-        pol <- cbind(depth[i] - up*exx*c(0, probs,  0), c(min(yrs), yrs, max(yrs)))
-	if(rotate.axes)
-	  pol <- pol[,2:1]		
-	polygon(pol, col=col, border=border)
-	if(length(pch) > 0)
-	  if(rotate.axes)
-        points(mean(yrs), depth[i], col=border, pch=pch) else
-	      points(depth[i], mean(yrs), col=border, pch=pch)	
+    yrs <- seq(mn[i]-times*sdev[i], mn[i]+times*sdev[i], length=age.res)
+    if(length(cc) < 2)
+      cc <- cbind(yrs, yrs, rep(0, length(yrs)))
+    ages <- approx(cc[,1], cc[,2], yrs)$y
+    errors <- approx(cc[,1], cc[,3], yrs)$y
+
+  if(normal)
+    probs <- dnorm(ages, mn[i], sqrt(sdev[i] + errors)^2) else
+      probs <- (t.b + (mn[i]-ages)^2  / (2*(sdev[i]^2 + errors^2))) ^ (-1*(t.a+0.5))
+  if(normalise)
+    probs <- probs / sum(probs)
+  these <- which(probs >= above)
+  if(length(these) > 0) {
+    yrs <- yrs[these]
+    probs <- probs[these]
+  }
+
+  if(!up)
+    up <- -1  
+  if(BCAD)
+    yrs <- 1950 - yrs
+  if(mirror)
+    pol <- cbind(depth[i] + ex*c(probs, -rev(probs)), c(yrs, rev(yrs))) else
+      pol <- cbind(depth[i] - up*ex*c(0, probs,  0), c(min(yrs), yrs, max(yrs)))
+  if(rotate.axes)
+    pol <- pol[,2:1]
+  polygon(pol, col=col, border=border)
+  if(length(pch) > 0)
+    if(rotate.axes)
+      points(mean(yrs), depth[i], col=border, pch=pch) else
+        points(depth[i], mean(yrs), col=border, pch=pch)
   }
 }
 
@@ -2087,6 +2029,7 @@ add.date <- function(mn, sdev, depth, cc=1, above=1e-3, exx=50, normal=TRUE, nor
 #' @details This function is generally called internally to produce the age-depth graph. 
 #' It can be used to produce custom-built graphs. 
 #' @param set Detailed information of the current run, stored within this session's memory as variable \code{info}.
+#' @param BCAD The calendar scale of graphs is in \code{cal BP} by default, but can be changed to BC/AD using \code{BCAD=TRUE}. 
 #' @param rotate.axes The default of plotting age on the horizontal axis and event probability on the vertical one can be changed with \code{rotate.axes=TRUE}.
 #' @param rev.d The direction of the depth axis can be reversed from the default (\code{rev.d=TRUE}). 
 #' @param rev.yr The direction of the calendar age axis can be reversed from the default (\code{rev.yr=TRUE}) 
@@ -2118,7 +2061,7 @@ add.date <- function(mn, sdev, depth, cc=1, above=1e-3, exx=50, normal=TRUE, nor
 #' \url{https://projecteuclid.org/download/pdf_1/euclid.ba/1339616472}
 #' @export
 ### produce plots of the calibrated distributions
-calib.plot <- function(set=get('info'), rotate.axes=FALSE, rev.d=FALSE, rev.yr=FALSE, yr.lim=c(), date.res=100, d.lab=c(), yr.lab=c(), height=15, mirror=TRUE, up=TRUE, cutoff=.001, C14.col=rgb(0,0,1,.5), C14.border=rgb(0,0,1,.75), cal.col=rgb(0,.5,.5,.5), cal.border=rgb(0,.5,.5,.75), new.plot=TRUE, plot.dists=TRUE, normalise.dists=TRUE) {
+calib.plot <- function(set=get('info'), BCAD=set$BCAD, rotate.axes=FALSE, rev.d=FALSE, rev.yr=FALSE, yr.lim=c(), date.res=100, d.lab=c(), yr.lab=c(), height=15, mirror=TRUE, up=TRUE, cutoff=.001, C14.col=rgb(0,0,1,.5), C14.border=rgb(0,0,1,.75), cal.col=rgb(0,.5,.5,.5), cal.border=rgb(0,.5,.5,.75), new.plot=TRUE, plot.dists=TRUE, normalise.dists=TRUE) {
   height <- length(set$d.min:set$d.max) * height/50
   if(length(yr.lim) == 0)
     lims <- c()  
@@ -2126,7 +2069,7 @@ calib.plot <- function(set=get('info'), rotate.axes=FALSE, rev.d=FALSE, rev.yr=F
     lims <- c(lims, set$calib$probs[[i]][,1])
   yr.min <- min(lims)
   yr.max <- max(lims)
-  if(set$BCAD) {
+  if(BCAD) {
     yr.min <- 1950 - yr.min
     yr.max <- 1950 - yr.max
     } 
@@ -2149,7 +2092,7 @@ calib.plot <- function(set=get('info'), rotate.axes=FALSE, rev.d=FALSE, rev.yr=F
     for(i in 1:length(set$calib$probs)) {
       cal <- set$calib$probs[[i]]
         d <- set$calib$d[[i]]
-      if(set$BCAD)
+      if(BCAD)
         cal[,1] <- 1950-cal[,1]
       o <- order(cal[,1])
       if(normalise.dists)
@@ -2178,6 +2121,34 @@ calib.plot <- function(set=get('info'), rotate.axes=FALSE, rev.d=FALSE, rev.yr=F
 
 
 #################### internal, user-invisible functions ####################
+
+# If coredir is left empty, check for a folder named Cores in the current working directory, and if this doesn't exist, for a folder called Bacon_runs (make this folder if it doesn't exist yet and if the user agrees).
+# Check if we have write access. If not, tell the user to provide a different, writeable location for coredir. 
+assign_coredir <- function(coredir, core, ask=TRUE) {
+  if(coredir == "") {
+    if(dir.exists("Cores")) 
+      coredir <- "Cores" else
+        if(dir.exists("Bacon_runs"))
+          coredir <- "Bacon_runs" else {
+            coredir <- "Bacon_runs"
+            ans <- readline(paste0("I will create a folder called ", coredir, ", is that OK? (y/n)  "))
+            if(ask)
+              if(tolower(substr(ans,1,1)) == "y")
+                wdir <- dir.create(coredir, FALSE) else
+                  stop("No problem. Please provide an alternative folder location using coredir\n")
+            if(!wdir)
+              stop("Cannot write into the current directory.\nPlease set coredir to somewhere where you have writing access, e.g. Desktop or ~.")
+        }    
+  } else {
+    if(!dir.exists(coredir))
+        wdir <- dir.create(coredir, FALSE)
+      if(!dir.exists(coredir)) # if it still doesn't exist, we probably don't have enough permissions
+        stop("Cannot write into the current directory.\nPlease set coredir to somewhere where you have writing access, e.g. Desktop or ~.")
+  }
+  coredir <- .validateDirectoryName(coredir)
+  cat("The run's files will be put in this folder: ", coredir, core, "\n", sep="")
+  return(coredir)
+}
 
 .validateDirectoryName <- function(dir) {
   if(!dir.exists(dir))
@@ -2307,10 +2278,10 @@ calib.plot <- function(set=get('info'), rotate.axes=FALSE, rev.d=FALSE, rev.yr=F
 
 
 # read in default values, values from previous run, any specified values, and report the desired one. Internal function. 
-.Bacon.settings <- function(core, coredir, dets, thick, remember=TRUE, d.min, d.max, d.by, depths.file, slump, acc.mean, acc.shape, mem.mean, mem.strength, hiatus.depths, hiatus.mean, hiatus.shape, BCAD, cc, postbomb, cc1, cc2, cc3, cc4, unit, normal, t.a, t.b, deltaR, deltaSTD, prob, defaults, runname, ssize, dark, MinYr, MaxYr, cutoff, yr.res, after, find.round) {
+.Bacon.settings <- function(core, coredir, dets, thick, remember=TRUE, d.min, d.max, d.by, depths.file, slump, acc.mean, acc.shape, mem.mean, mem.strength, boundary, hiatus.depths, hiatus.max, hiatus.shape, BCAD, cc, postbomb, cc1, cc2, cc3, cc4, unit, normal, t.a, t.b, delta.R, delta.STD, prob, defaults, runname, ssize, dark, MinYr, MaxYr, cutoff, yr.res, after) {
   
-  vals <- list(d.min, d.max, d.by, depths.file, slump, acc.mean, acc.shape, mem.mean, mem.strength, hiatus.depths, hiatus.mean, hiatus.shape, BCAD, cc, postbomb, cc1, cc2, cc3, cc4, unit, normal, t.a, t.b, deltaR, deltaSTD, prob)
-  valnames <- c("d.min", "d.max", "d.by", "depths.file", "slump", "acc.mean", "acc.shape", "mem.mean", "mem.strength", "hiatus.depths", "hiatus.mean", "hiatus.shape", "BCAD", "cc", "postbomb", "cc1", "cc2", "cc3", "cc4", "unit", "normal", "t.a", "t.b", "deltaR", "deltaSTD", "prob")
+  vals <- list(d.min, d.max, d.by, depths.file, slump, acc.mean, acc.shape, mem.mean, mem.strength, boundary, hiatus.depths, hiatus.max, BCAD, cc, postbomb, cc1, cc2, cc3, cc4, unit, normal, t.a, t.b, delta.R, delta.STD, prob)
+  valnames <- c("d.min", "d.max", "d.by", "depths.file", "slump", "acc.mean", "acc.shape", "mem.mean", "mem.strength", "boundary", "hiatus.depths", "hiatus.max", "BCAD", "cc", "postbomb", "cc1", "cc2", "cc3", "cc4", "unit", "normal", "t.a", "t.b", "delta.R", "delta.STD", "prob")
 
   extr <- function(i, def=deffile, pre=prevfile, exists.pre=prevf, rem=remember, sep=" ", isnum=TRUE) {
     if(any(is.na(vals[[i]]))) {
@@ -2353,12 +2324,13 @@ calib.plot <- function(set=get('info'), rotate.axes=FALSE, rev.d=FALSE, rev.yr=F
     acc.shape <- extr(7)
   mem.mean <- extr(8)
   mem.strength <- extr(9)
-  hiatus.depths <- if(is.na(hiatus.depths)[1]) NA else extr(10)
-  hiatus.mean <- extr(11); hiatus.shape <- extr(12)
+  boundary <- if(is.na(boundary)[1]) NA else extr(10)
+  hiatus.depths <- if(is.na(hiatus.depths)[1]) NA else extr(11)
+  hiatus.max <- extr(12)
   BCAD <- extr(13); cc <- extr(14); postbomb <- extr(15); cc1 <- extr(16, isnum=FALSE)
   cc2 <- extr(17, isnum=FALSE); cc3 <- extr(18, isnum=FALSE); cc4 <- extr(19, isnum=FALSE)
   unit <- extr(20, isnum=FALSE); normal <- extr(21); t.a <- extr(22); t.b <- extr(23)
-  deltaR <- extr(24); deltaSTD <- extr(25); prob <- extr(26)
+  delta.R <- extr(24); delta.STD <- extr(25); prob <- extr(26)
 
   if(is.na(d.min) || d.min=="NA")
     d.min <- min(dets[,4])
@@ -2382,13 +2354,14 @@ calib.plot <- function(set=get('info'), rotate.axes=FALSE, rev.d=FALSE, rev.yr=F
   for(i in acc.shape) scat(i, " "); scat("#acc.shape\n", "")
   for(i in mem.mean) scat(i, " "); scat("#mem.mean\n", "")
   for(i in mem.strength) scat(i, " "); scat("#mem.strength\n", "")
+  for(i in boundary) scat(i, " "); scat("#boundary\n", "")	  
   for(i in hiatus.depths) scat(i, " "); scat("#hiatus.depths\n", "")
-  for(i in hiatus.mean) scat(i, " "); scat("#hiatus.mean\n", "")
-  for(i in hiatus.shape) scat(i, " "); scat("#hiatus.shape\n", "")
+  for(i in hiatus.max) scat(i, " "); scat("#hiatus.max\n", "")
+  for(i in hiatus.max) scat(i, " "); scat("#hiatus.max\n", "") # redundant
   cat(BCAD, " #BCAD\n", cc, " #cc\n", postbomb, " #postbomb\n",
     cc1, " #cc1\n", cc2, " #cc2\n", cc3, " #cc3\n", cc4, " #cc4\n",
     unit, " #unit\n", normal, " #normal\n", t.a, " #t.a\n", t.b, " #t.b\n",
-    deltaR, " #deltaR\n", deltaSTD, " #d.STD\n", prob, " #prob\n", sep="", file=prevfile)
+    delta.R, " #delta.R\n", delta.STD, " #d.STD\n", prob, " #prob\n", sep="", file=prevfile)
   close(prevfile)
 
   if(length(MinYr) == 0)
@@ -2399,12 +2372,13 @@ calib.plot <- function(set=get('info'), rotate.axes=FALSE, rev.d=FALSE, rev.yr=F
   list(core=core, thick=thick, dets=dets, d.min=d.min, d.max=d.max,
     d.by=d.by, depths.file=depths.file, slump=slump,
     acc.mean=acc.mean, acc.shape=acc.shape, mem.mean=mem.mean,
-    mem.strength=mem.strength, hiatus.depths=hiatus.depths, hiatus.mean=hiatus.mean,
-    hiatus.shape=hiatus.shape, BCAD=BCAD, cc=cc, postbomb=postbomb,
+    mem.strength=mem.strength, boundary=boundary,
+    hiatus.depths=hiatus.depths, hiatus.max=hiatus.max,
+    BCAD=BCAD, cc=cc, postbomb=postbomb,
     cc1=cc1, cc2=cc2, cc3=cc3, cc4=cc4, unit=noquote(unit), normal=normal,
-    t.a=t.a, t.b=t.b, deltaR=deltaR, deltaSTD=deltaSTD, prob=prob, date=date(),
+    t.a=t.a, t.b=t.b, delta.R=delta.R, delta.STD=delta.STD, prob=prob, date=date(),
     runname=runname, ssize=ssize, dark=dark, MinYr=MinYr, MaxYr=MaxYr, 
-    cutoff=cutoff, yr.res=yr.res, after=after, find.round=find.round)
+    cutoff=cutoff, yr.res=yr.res, after=after)
 }
 
 
@@ -2429,14 +2403,12 @@ calib.plot <- function(set=get('info'), rotate.axes=FALSE, rev.d=FALSE, rev.yr=F
   ";\nCal 3 : ",
   if(set$cc3=="SHCal13" || set$cc3=="\"SHCal13\"") "SHCal13" else noquote(set$cc3), ", ", set$postbomb, ";",
   if(set$cc4=="ConstCal" || set$cc4=="\"ConstCal\"") set$cc4 <- c() else
-  # if(.Platform$OS == "windows")
-  #  paste("\nCal 4 : GenericCal, Curves\\", set$cc4, ";", sep="") else
   paste("\nCal 4 : GenericCal, ", set$cc4, ";", sep=""), sep="", file=fl)
-  cat("\n\n##   id.   yr    std   depth  deltaR  deltaSTD     t.a   t.b   cc", file=fl)
+  cat("\n\n##   id.   yr    std   depth  delta.R  delta.STD     t.a   t.b   cc", file=fl)
 
   if(ncol(set$dets) == 4) { # then we need to provide some constants once only
     cat("\nDet 0 : ", as.character(set$dets[1,1]), " ,  ", set$dets[1,2], ",  ",
-      set$dets[1,3], ",  ", set$dets[1,4], ",  ", set$deltaR, ",  ", set$deltaSTD,
+      set$dets[1,3], ",  ", set$dets[1,4], ",  ", set$delta.R, ",  ", set$delta.STD,
       ",  ", set$t.a, ",  ", set$t.b, ",  ", set$cc, ";", sep="", file=fl)
       if(nrow(set$dets)>1)
         for(i in 2:nrow(set$dets))
@@ -2445,16 +2417,16 @@ calib.plot <- function(set=get('info'), rotate.axes=FALSE, rev.d=FALSE, rev.yr=F
           ";", sep="", file=fl)
   } else { # use additional columns provided within the .dat file
       cc <- set$dets[,5]
-      deltaR <- rep(set$deltaR, nrow(set$dets))
-      deltaR[cc==0] <- 0 # only apply dR to C14 dates
-      deltaSTD <- rep(set$deltaSTD, nrow(set$dets))
-      deltaSTD[cc==0] <- 0 # only apply dR to C14 dates
+      delta.R <- rep(set$delta.R, nrow(set$dets))
+      delta.R[cc==0] <- 0 # only apply dR to C14 dates
+      delta.STD <- rep(set$delta.STD, nrow(set$dets))
+      delta.STD[cc==0] <- 0 # only apply dR to C14 dates
       t.a <- rep(set$t.a, nrow(set$dets))
       t.b <- rep(set$t.b, nrow(set$dets))
 
       if(ncol(set$dets) >= 7) {
-        deltaR <- set$dets[,6]
-        deltaSTD <- set$dets[,7]
+        delta.R <- set$dets[,6]
+        delta.STD <- set$dets[,7]
       }
       if(ncol(set$dets) >= 9) {
         t.a <- set$dets[,8]
@@ -2464,27 +2436,29 @@ calib.plot <- function(set=get('info'), rotate.axes=FALSE, rev.d=FALSE, rev.yr=F
       for(i in 1:nrow(set$dets))
         cat("\nDet ", i-1, " : ",  as.character(set$dets[i,1]), " , ",
           set$dets[i,2], ", ", set$dets[i,3], ", ", set$dets[i,4],  ",  ",
-          deltaR[i], ",  ", deltaSTD[i], ",  ", t.a[i], ",  ", t.b[i], ",  ",
+          delta.R[i], ",  ", delta.STD[i], ",  ", t.a[i], ",  ", t.b[i], ",  ",
           cc[i], ";", sep="", file=fl)
     }
 
-  if(!is.na(set$hiatus.depths)[1]) { ### hiatus(es) inferred. Prior values should be provided starting from top section
-    cat("\n  Hiatus set at depth(s)", set$hiatus.depths, "\n")
-      if(length(set$acc.shape)==1)
-        set$acc.shape <- rep(set$acc.shape, length(set$hiatus.depths)+1)
-      if(length(set$acc.mean)==1)
-        set$acc.mean <- rep(set$acc.mean, length(set$hiatus.depths)+1)
-      if(length(set$hiatus.mean)==1)
-        set$hiatus.mean <- rep(set$hiatus.mean, length(set$hiatus.depths))
-      if(length(set$hiatus.shape)==1)
-        set$hiatus.shape <- rep(set$hiatus.shape, length(set$hiatus.depths))
-      .assign_to_global ("info", set)
-      cat("\n\n### Depths and priors for fixed hiatuses, in descending order",
-        "\n##### cm  alpha beta      ha     hb", file=fl)
-      for(i in length(set$hiatus.depths):1)
-        cat("\nHiatus ", i-1, ":  ", set$hiatus.depth[i], ",  ", set$acc.shape[i+1],
-          ",  ", set$acc.shape[i+1]/set$acc.mean[i+1], ",  ", set$hiatus.shape[i],
-          ",  ", set$hiatus.shape[i]/set$hiatus.mean[i], ";", sep="", file=fl)
+  if(!is.na(set$hiatus.depths)[1]) { 
+    if(is.na(set$boundary)[1])
+      cat("\n  Hiatus set at depth(s)", set$hiatus.depths, "\n") else
+        cat("\n  Boundary set at depth(s)", set$boundary, "\n")
+    if(length(set$acc.shape)==1)
+      set$acc.shape <- rep(set$acc.shape, length(set$hiatus.depths)+1)
+    if(length(set$acc.mean)==1)
+      set$acc.mean <- rep(set$acc.mean, length(set$hiatus.depths)+1)
+    if(length(set$hiatus.max)==1)
+      set$hiatus.max <- rep(set$hiatus.max, length(set$hiatus.depths))
+#      if(length(set$hiatus.shape)==1)
+#        set$hiatus.shape <- rep(set$hiatus.shape, length(set$hiatus.depths))
+    .assign_to_global ("info", set)
+    cat("\n\n### Depths and priors for fixed hiatuses, in descending order",
+      "\n##### cm  alpha beta      ha     hb", file=fl)
+    for(i in length(set$hiatus.depths):1)
+      cat("\nHiatus ", i-1, ":  ", set$hiatus.depth[i], ",  ", set$acc.shape[i+1],
+        ",  ", set$acc.shape[i+1]/set$acc.mean[i+1], ",  ", NA,
+        ",  ", set$hiatus.max[i], ";", sep="", file=fl)
   }
 
   ### final parameters
