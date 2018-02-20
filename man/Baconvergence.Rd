@@ -4,14 +4,14 @@
 \alias{Baconvergence}
 \title{Test to identify poorly mixed MCMC runs.}
 \usage{
-Baconvergence(core = "MSB2K", set = get("info"), runs = 5, ...)
+Baconvergence(core = "MSB2K", runs = 5, suggest = FALSE, ...)
 }
 \arguments{
 \item{core}{Name of the core, given using quotes. Defaults to one of the cores provided with rbacon, \code{core="MSB2K"}.}
 
-\item{set}{Detailed information of the current run, stored within this session's memory as variable \code{info}.}
-
 \item{runs}{Amount of runs to test for mixing. Default \code{runs=5}.}
+
+\item{suggest}{If initial analysis of the data indicates abnormally slow or fast accumulation rates, Bacon will suggest to change the prior.}
 
 \item{...}{additional options that can be given to the Bacon function.}
 }

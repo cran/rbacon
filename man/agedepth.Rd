@@ -6,17 +6,17 @@
 \usage{
 agedepth(set = get("info"), BCAD = set$BCAD, unit = "cm", d.lab = c(),
   yr.lab = c(), d.min = set$d.min, d.max = set$d.max, d.by = set$d.by,
-  depths = c(), depths.file = FALSE, yr.min = c(), yr.max = c(),
-  dark = set$dark, prob = set$prob, rounded = 0, d.res = 400,
-  yr.res = 400, date.res = 100, grey.res = 100, rotate.axes = FALSE,
-  rev.yr = FALSE, rev.d = FALSE, maxcalc = 500, height = 15,
-  mirror = TRUE, up = TRUE, cutoff = 0.001, plot.range = TRUE,
-  panels = layout(1), range.col = grey(0.5), range.lty = "12",
-  mn.col = "red", mn.lty = "12", med.col = NA, med.lty = "12",
-  C14.col = rgb(0, 0, 1, 0.35), C14.border = rgb(0, 0, 1, 0.5),
-  cal.col = rgb(0, 0.5, 0.5, 0.35), cal.border = rgb(0, 0.5, 0.5, 0.5),
-  hiatus.col = grey(0.5), hiatus.lty = "12", greyscale = grey(seq(1, 0,
-  length = grey.res)), normalise.dists = TRUE, cc = set$cc,
+  depths = set$depths, depths.file = FALSE, yr.min = c(), yr.max = c(),
+  dark = c(), prob = set$prob, rounded = 0, d.res = 400, yr.res = 400,
+  date.res = 100, grey.res = 100, rotate.axes = FALSE, rev.yr = FALSE,
+  rev.d = FALSE, maxcalc = 500, height = 15, mirror = TRUE, up = TRUE,
+  cutoff = 0.001, plot.range = TRUE, panels = layout(1),
+  range.col = grey(0.5), range.lty = "12", mn.col = "red",
+  mn.lty = "12", med.col = NA, med.lty = "12", C14.col = rgb(0, 0, 1,
+  0.35), C14.border = rgb(0, 0, 1, 0.5), cal.col = rgb(0, 0.5, 0.5, 0.35),
+  cal.border = rgb(0, 0.5, 0.5, 0.5), hiatus.col = grey(0.5),
+  hiatus.lty = "12", greyscale = grey(seq(1, 0, length = grey.res)),
+  slump.col = grey(0.8), normalise.dists = TRUE, cc = set$cc,
   title = set$core, title.location = "topleft", after = set$after,
   bty = "l", mar = c(3, 3, 1, 1), mgp = c(1.5, 0.7, 0), xaxs = "r",
   yaxs = "r", xaxt = "s", yaxt = "s", plot.pdf = FALSE,
@@ -50,7 +50,7 @@ and its name should start with the core's name and end with '_depths.txt'. Then 
 
 \item{yr.max}{Maximum calendar age of the age-depth plot.}
 
-\item{dark}{Darkness of the greyscale age-depth model. The darkest grey value is \code{dark=1} by default; lower values will result in lighter grey but values >1 are not allowed.}
+\item{dark}{Darkness of the greyscale age-depth model. By default, the darkest grey value is calculated as 10 times the height of the lowest-precision age estimate \code{dark=c()}. Lower values will result in lighter grey but values >1 are not allowed.}
 
 \item{prob}{Confidence interval to report (between 0 and 1, default 0.95 or 95\%).}
 
@@ -109,6 +109,8 @@ and its name should start with the core's name and end with '_depths.txt'. Then 
 \item{hiatus.lty}{The line type of the depths of any hiatuses. Default \code{hiatus.lty=12}.}
 
 \item{greyscale}{The function to produce a coloured representation of all age-models. Defaults to grey-scales: \code{greyscale=function(x) grey(1-x)}.}
+
+\item{slump.col}{Colour of slumps. Defaults to \code{slump.col=grey(0.8)}.}
 
 \item{normalise.dists}{By default, the distributions of more precise dates will cover less time and will thus peak higher than less precise dates. This can be avoided by specifying \code{normalise.dists=FALSE}.}
 

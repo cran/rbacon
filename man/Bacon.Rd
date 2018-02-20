@@ -13,7 +13,7 @@ Bacon(core = "MSB2K", thick = 5, coredir = "", prob = 0.95,
   delta.R = 0, delta.STD = 0, t.a = 3, t.b = 4, normal = FALSE,
   suggest = TRUE, reswarn = c(10, 200), remember = TRUE, ask = TRUE,
   run = TRUE, defaults = "default_settings.txt", sep = ",", dec = ".",
-  runname = "", slump = NA, BCAD = FALSE, ssize = 2000, th0 = c(),
+  runname = "", slump = c(), BCAD = FALSE, ssize = 2000, th0 = c(),
   burnin = min(200, ssize), MinYr = c(), MaxYr = c(), cutoff = 0.001,
   plot.pdf = TRUE, dark = 1, date.res = 100, yr.res = 200, ...)
 }
@@ -125,7 +125,7 @@ try running your core again with \code{remember=FALSE}, or, start cleanly by typ
 
 \item{runname}{Text to add to the corename for specific runs, e.g., \code{runname="MyCore_Test1"}.}
 
-\item{slump}{(Not implemented yet).}
+\item{slump}{(not implemented yet).}
 
 \item{BCAD}{The calendar scale of graphs and age output-files is in cal BP (calendar or calibrated years before the present, where the present is AD 1950) by default, but can be changed to BC/AD using \code{BCAD=TRUE}.}
 

@@ -6,8 +6,8 @@
 \alias{rbacon-package}
 \title{rbacon}
 \description{
-Bacon is an approach to age-depth modelling that uses Bayesian statistics to reconstruct Bayesian 
-accumulation histories for deposits, through combining radiocarbon and other dates with prior information (Blaauw and Christen, 2011).
+Bacon produces Bayesian age-depth models from dated deposits, reconstructing Bayesian 
+accumulation histories through combining radiocarbon and other dates with prior information (Blaauw and Christen, 2011).
 }
 \author{
 Maarten Blaauw <maarten.blaauw@qub.ac.uk> J. Andres Christen <jac@cimat.mx>

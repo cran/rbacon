@@ -4,7 +4,8 @@
 \alias{Bacon.Age.d}
 \title{Output all ages for a single depth.}
 \usage{
-Bacon.Age.d(d, set = get("info"), its = set$output, BCAD = set$BCAD)
+Bacon.Age.d(d, set = get("info"), its = set$output, BCAD = set$BCAD,
+  slumpdepths = c())
 }
 \arguments{
 \item{d}{The depth of which Bacon age estimates are to be returned. Has to be a single depth.}
@@ -14,6 +15,8 @@ Bacon.Age.d(d, set = get("info"), its = set$output, BCAD = set$BCAD)
 \item{its}{The set of MCMC iterations to be used. Defaults to the entire MCMC output, \code{its=set$output}.}
 
 \item{BCAD}{The calendar scale of graphs and age output-files is in \code{cal BP} by default, but can be changed to BC/AD using \code{BCAD=TRUE}.}
+
+\item{slumpdepths}{An internal variable to deal with cores with slumps}
 }
 \value{
 Outputs all MCMC-derived ages for a given depth.

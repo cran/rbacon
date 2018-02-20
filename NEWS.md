@@ -1,3 +1,13 @@
+# rbacon 2.3.3
+
+* added an option to include slumps (sort of - more testing still welcome). Example: Bacon(slump=c(50, 52, 60, 70)) for two slumps between 50-52 and 60-70 cm depth
+* date-files with .csv.txt extensions are now renamed to .csv (and informing us that it did so)
+* default darkness of age-depth greyscale now adapts to a ratio between most and least precise sections (so that very imprecise sections still show some grey)
+* repaired option depths (e.g., Bacon(depths=0:100))
+* repaired height of prior distribution axes
+* repaired Baconvergence()
+* added a comentary after each run mentioning the proportion of dates that lie within the age-depth model's range (some sort of 'agreement')
+
 # rbacon 2.3.2
 
 * Added option boundary, which sets hiatus length to (close to) 0. This leaves the hiatus functionality more or less unchanged, and should cause less confusion with setting hiatus.depths even if no hiatus is desired.

@@ -9,7 +9,8 @@ calib.plot(set = get("info"), BCAD = set$BCAD, rotate.axes = FALSE,
   d.lab = c(), yr.lab = c(), height = 15, mirror = TRUE, up = TRUE,
   cutoff = 0.001, C14.col = rgb(0, 0, 1, 0.5), C14.border = rgb(0, 0, 1,
   0.75), cal.col = rgb(0, 0.5, 0.5, 0.5), cal.border = rgb(0, 0.5, 0.5,
-  0.75), new.plot = TRUE, plot.dists = TRUE, normalise.dists = TRUE)
+  0.75), slump.col = grey(0.8), new.plot = TRUE, plot.dists = TRUE,
+  normalise.dists = TRUE)
 }
 \arguments{
 \item{set}{Detailed information of the current run, stored within this session's memory as variable \code{info}.}
@@ -45,6 +46,8 @@ calib.plot(set = get("info"), BCAD = set$BCAD, rotate.axes = FALSE,
 \item{cal.col}{Colour of the non-14C dates in the age-depth plot: default semi-transparent blue-green: \code{rgb(0,.5,.5,.35)}.}
 
 \item{cal.border}{Colour of the of the border of non-14C dates in the age-depth plot: default semi-transparent dark blue-green: \code{rgb(0,.5,.5,.5)}.}
+
+\item{slump.col}{Colour of slumps. Defaults to \code{slump.col=grey(0.8)}.}
 
 \item{new.plot}{Start a new plot (\code{new.plot=TRUE}) or plot over an existing plot (\code{new.plot=FALSE}).}
 
