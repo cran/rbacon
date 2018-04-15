@@ -157,7 +157,7 @@ again using the command \code{agedepth()}.
 \examples{
 \dontshow{
   Bacon(run=FALSE, coredir=tempfile())}
-  agedepth(yr.res=50)
+  agedepth(yr.res=50, d.res=50, d.by=10)
 \donttest{
   Bacon(ask=FALSE, coredir=tempfile())
   agedepth()

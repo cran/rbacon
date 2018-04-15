@@ -62,7 +62,7 @@ if calculated in cm/yr; therefore you might want to manually adapt the axis limi
 }
 \examples{
   Bacon(run=FALSE, coredir=tempfile())
-  agedepth(yr.res=50)
+  agedepth(yr.res=50, d.res=50, d.by=10)
   layout(1)
   accrate.depth.ghost()
 }

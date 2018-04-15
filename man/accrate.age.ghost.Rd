@@ -79,7 +79,7 @@ Currently does not deal well with hiatuses, so do not interpret accumulation rat
 }
 \examples{
   Bacon(run=FALSE, coredir=tempfile())
-  agedepth(yr.res=50)
+  agedepth(yr.res=50, d.res=50, d.by=10)
   layout(1)
   accrate.age.ghost()
 }

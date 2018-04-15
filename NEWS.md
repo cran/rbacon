@@ -1,3 +1,10 @@
+# rbacon 2.3.4
+
+* faster drawing of greyscale plots (though still slower yet better than in version 2.3.1.1 and before)
+* added progress bar to functions that can take much time to finish
+* repaired a bug in calculating how many dates fall within the model range
+* delta.R is now accepted as a header for the dates file
+
 # rbacon 2.3.3
 
 * added an option to include slumps (sort of - more testing still welcome). Example: Bacon(slump=c(50, 52, 60, 70)) for two slumps between 50-52 and 60-70 cm depth
@@ -6,7 +13,7 @@
 * repaired option depths (e.g., Bacon(depths=0:100))
 * repaired height of prior distribution axes
 * repaired Baconvergence()
-* added a comentary after each run mentioning the proportion of dates that lie within the age-depth model's range (some sort of 'agreement')
+* added a commentary after each run, mentioning the proportion of dates that lie within the age-depth model's range (some sort of 'agreement')
 
 # rbacon 2.3.2
 

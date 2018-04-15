@@ -30,7 +30,7 @@ This will remove these iterations in the run's output file.
 \dontshow{
   Bacon(run=FALSE, coredir=tempfile())
   scissors(100)
-  agedepth(d.res=50)
+  agedepth(d.res=50, yr.res=50, d.by=10)
 }
 \donttest{
   Bacon(ask=FALSE, coredir=tempfile())

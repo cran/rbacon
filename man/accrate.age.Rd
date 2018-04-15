@@ -30,7 +30,7 @@ by the MCMC iterations for any age of a core. Deals with only 1 age at a time. S
 }
 \examples{
   Bacon(run=FALSE, coredir=tempfile())
-  agedepth(yr.res=50)
+  agedepth(yr.res=50, d.res=50, d.by=10)
   accrate.a5000 = accrate.age(5000)
   plot(accrate.a5000, pch='.')   
   hist(accrate.a5000)

@@ -5,9 +5,10 @@
 \title{Calculate age distributions of depths.}
 \usage{
 Bacon.hist(d, set = get("info"), BCAD = set$BCAD, yr.lab = c(),
-  yr.lim = c(), hist.lab = "Frequency", hist.lim = c(), draw = TRUE,
-  prob = set$prob, hist.col = grey(0.5), hist.border = grey(0.2),
-  range.col = "blue", med.col = "green", mean.col = "red")
+  yr.lim = c(), hist.lab = "Frequency", calc.range = TRUE,
+  hist.lim = c(), draw = TRUE, prob = set$prob, hist.col = grey(0.5),
+  hist.border = grey(0.2), range.col = "blue", med.col = "green",
+  mean.col = "red")
 }
 \arguments{
 \item{d}{The depth or depths for which a histogram and age ranges should be provided. If multiple depths are given, then just the age ranges, median and means (no graphs) are provided for each depth.}
@@ -21,6 +22,8 @@ Bacon.hist(d, set = get("info"), BCAD = set$BCAD, yr.lab = c(),
 \item{yr.lim}{Minimum and maximum calendar age ranges, calculated automatically by default (\code{yr.lim=c()}).}
 
 \item{hist.lab}{The y-axis is labelled \code{ylab="Frequency"} by default.}
+
+\item{calc.range}{Calculate ranges? Takes time so can be left out}
 
 \item{hist.lim}{Limits of the y-axis.}
 
@@ -50,7 +53,7 @@ Age estimates of specific depths can also be plotted.
 }
 \examples{
   Bacon(run=FALSE, coredir=tempfile())
-  agedepth(yr.res=50)
+  agedepth(yr.res=50, d.res=50, d.by=10)
   Bacon.hist(20) 
   Bacon.hist(20:30) 
 }

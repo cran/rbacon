@@ -24,7 +24,7 @@ From all iterations, a proportion is removed with to-be-removed iterations sampl
 \dontshow{
   Bacon(run=FALSE, coredir=tempfile())
   thinner(.1)
-  agedepth(d.res=50)
+  agedepth(d.res=50, yr.res=50, d.by=10)
 }
 \donttest{
   Bacon(ask=FALSE, coredir=tempfile())
