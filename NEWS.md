@@ -1,7 +1,22 @@
+# rbacon 2.3.5
+
+* added function agemodel.it to extract single iterations of a Bacon age-depth model
+* added functions clam2bacon and bacon2clam to translate Bacon dates files into clam files et vice versa (inspired by a suggestion from Dewey Dunnington)
+* corrected behaviour of boundary and hiatus (especially if together with slumps)
+* iterations with age reversals across a hiatus are now removed
+* removed closeAllConnections (as suggested by Dewey Dunnington)
+* Added option to change the field separator to mix.curves (thanks to Thomas Dye for the suggestion)
+* MinYr now defaults to the current year (1950 - as.integer(format(Sys.time(), "\%Y")))
+* added option in the scissors function to remove a specific range of iterations (e.g., iterations 400 to 800, or the first/last 300)
+* produced separate R files for groups of functions
+* Bacon now stops if it finds 6 columns with unexpected names in the .csv file. If provided with a delta.R column, Bacon expects a delta.STD column as well. 
+* Added an option dates.col to colour sets of dates (suggestion by Greg Cooper)
+* enhancements in bacon.h of MCMC calculations
+
 # rbacon 2.3.4
 
 * faster drawing of greyscale plots (though still slower yet better than in version 2.3.1.1 and before)
-* added progress bar to functions that can take much time to finish
+* added progress bar to functions that can be slow
 * repaired a bug in calculating how many dates fall within the model range
 * delta.R is now accepted as a header for the dates file
 

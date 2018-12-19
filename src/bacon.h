@@ -83,11 +83,16 @@ class BaconFix: public Bacon {
 			double prioracU(int i, const double al) { return (1.0-alpha[i])*log(al) + beta[i]*al; }
 
 			double a, b; //a priori pars for the w beta prior
+			double ds;
+			double rsc, logrsc, logw;
+			// ds=1.0, rsc=ds/Dc and logrsc=log(ds/Dc) set in the creator, lines 177 and 178 after reading Dc
 			double priorwU(const double w) {
-			    double ds=1.0, logw=log(w);
-			    return (ds/Dc)*(1.0-a)*logw + (1.0-b)*log(1.0-exp((ds/Dc)*logw));
+				logw=log(w);
+			    return rsc*(1.0-a)*logw + (1.0-b)*log(1.0-exp(rsc*logw)) + (1.0-rsc)*logw - logrsc;
+				//the last term (1.0-rsc)*logw - logrsc was missing,
+				//see f(w), p.461, of the paper, jac: changed 22OCT2018
 			}
-			//here ds = 1.0 (cm), it could be changed to a parameter
+			//here ds = 1.0 (in your depth units), it could be changed to a parameter
 
 
 			double *ha, *hb; //a priori pars for the gamma prior on hiatus jumps in each inter hiatus
@@ -169,7 +174,9 @@ class BaconFix: public Bacon {
 				//Set the sections, locations for the c's
 				c0 = cc0;
 				Dc = (cm-c0)/(double) K;
-				
+				ds=1.0;
+				rsc=ds/Dc;
+				logrsc=log(ds/Dc);
 				
 
 				//Verify the ordering in the h's
@@ -228,6 +235,7 @@ class BaconFix: public Bacon {
 					for (int k=K-1; k>0; k--) { 
 						if ((fcmp( c(k-1), h[l]) == -1) && (fcmp( h[l], c(k)) != 1)) { //forgets
 							x0[k]  = GammaSim( ha[l], 1.0/(hb[l]*Dc) );
+                            //x0[k]  = GammaSim( 1.0, 1.0/(hb[l]*Dc) ); // MB Dec 2018
 							//printf("Hiatus %d: %f %f %f\n", l, ha[l], hb[l], x0[k]);
 							l++; //jump to next hiatus, but max one hiatus in each section.
 						}
@@ -239,6 +247,7 @@ class BaconFix: public Bacon {
 					for (int k=K-1; k>0; k--) { 
 						if ((fcmp( c(k-1), h[l]) == -1) && (fcmp( h[l], c(k)) != 1)) { //forgets
 							xp0[k]  = GammaSim( ha[l], 1.0/(hb[l]*Dc) );
+                            //xp0[k]  = GammaSim( 1.0, 1.0/(hb[l]*Dc) ); // MB Dec 2018
 							//printf("Hiatus %d: %f %f %f\n", l, ha[l], hb[l], xp0[k]);
 							l++; //jump to next hiatus, but max one hiatus in each section.
 						}
@@ -392,7 +401,6 @@ class BaconFix: public Bacon {
 				//printf(" Uli=%f", Uli);
 		
 				Uprior += priorwU(w); //prior for w
-		
 				//printf(" priorw=%f", Uprior);
 
 

@@ -13,12 +13,6 @@
  ********************************************************************************************/
 
 
-
-
-
-
-
-
 //#include <iostream>
 
 //#include <stdlib.h>
@@ -26,11 +20,9 @@
 #include <string>
 #include <time.h>
 
-
-
 #include "ranfun.h"
 #include <Rcpp.h>
-
+#include <sys/stat.h>
 
 #ifndef TWALK_H
 #define TWALK_H
@@ -49,9 +41,6 @@
 /*Define SAVEACCONLY to save only accepted iterations, when the chain moves.
 This is normally done at compile time and not here, see the makefile
 #define SAVEACCONLY*/
-
-
-
 
 
 /********* This part used to be vector.h ************************/
@@ -85,10 +74,6 @@ void indice_max_vector(double *v, int n, int &indice, int *phi);
 int sum(int *v, int n);
 
 
-
-
-
-
 /*********** This part used to be obj_fcn.h **********************/
 
 /*Objective function abstract class*/
@@ -107,8 +92,6 @@ class obj_fcn {
 		virtual int insupport(double *x)  = 0;
 		virtual double eval(double *x, int prime)  = 0;
 };
-
-
 
 
 
@@ -608,6 +591,33 @@ int simulation(int Tr1, char *filename, const char *op="wt", int save_every1=1, 
 
     // ----- --- -------------- --- -----
     if ((fptr = (fopen(filename, op)))) { 
+		
+
+		//Simple function to calculate and set optimal buffer size for files ***
+		// *** see https://en.cppreference.com/w/c/io/setvbuf **
+		//jac, maarten: Changed 22OCT2018 
+		/* // tmp removal lines 599-620 by Maarten on 19 Dec 2018, to enable compilation on Win systems
+		size_t st_blksize;
+	    struct stat stats;
+
+	    if(fstat(fileno(fptr), &stats) == -1) { // POSIX only
+	        //return BUFSIZ; //cannot calculate optimal buffer size, not changed
+			st_blksize=BUFSIZ;
+	    }
+		else
+	 		//_IOBF full buffering:
+	    	if(setvbuf(fptr, NULL, _IOFBF, stats.st_blksize) != 0) {
+	       		//perror("setvbuf failed"); // POSIX version sets errno
+	       		//return BUFSIZ;
+				st_blksize=BUFSIZ;
+	    	}
+			else {
+				st_blksize=stats.st_blksize;
+			}
+		
+		Rprintf("BUFSIZ is %d, optimal block size changed to %ld\n", BUFSIZ, st_blksize);
+
+		*/
 
 		fver_vector(fptr, x, n);
         fprintf(fptr, "\t %f", U); // was %lf MB
@@ -643,7 +653,7 @@ int simulation(int Tr1, char *filename, const char *op="wt", int save_every1=1, 
 						if (debugg)			
 							fprintf( recacc, "%d %f\n", val, nphi/(double) n);
 				}
-				else //Propolsal not accepted
+				else //Proposal not accepted
 					if (debugg)
 						fprintf( recacc, "%d %f\n", val, 0.0);
 					
@@ -652,7 +662,7 @@ int simulation(int Tr1, char *filename, const char *op="wt", int save_every1=1, 
 				fflush(fptr);
 #endif
 
-				if (save_every > 0) //accepetd or not acc. iterations are saved
+				if (save_every > 0) //accepted or not acc. iterations are saved
 					if ((it % save_every) == 0) {
 						fver_vector(fptr, x, n);
 						fprintf(fptr, "\t %13.6g", U);
@@ -716,7 +726,7 @@ int simulation(int Tr1, char *filename, const char *op="wt", int save_every1=1, 
 		sec = time(NULL);
         temp = sec;
 		if (silent == 0)
-            Rprintf("twalk: Finished, %4.1f%% of moved pars per iteration, ratio (%f/%d). Output in file %s,\n      %s\n",
+            Rprintf("twalk: Finished, %4.1f%% of moved pars per iteration (ratio %f/%d). Output in file %s,\n      %s\n",
                  100.0*(acc/(double) Tr1), acc, Tr1, filename, ctime(&temp));
 			
         return (int) rint(acc);

@@ -8,14 +8,15 @@ Bacon(core = "MSB2K", thick = 5, coredir = "", prob = 0.95,
   d.min = NA, d.max = NA, d.by = 1, depths.file = FALSE, depths = c(),
   unit = "cm", acc.shape = 1.5, acc.mean = 20, mem.strength = 4,
   mem.mean = 0.7, boundary = NA, hiatus.depths = NA, hiatus.max = 10000,
-  add = 0, after = 1e-06, cc = 1, cc1 = "IntCal13", cc2 = "Marine13",
-  cc3 = "SHCal13", cc4 = "ConstCal", ccdir = "", postbomb = 0,
-  delta.R = 0, delta.STD = 0, t.a = 3, t.b = 4, normal = FALSE,
-  suggest = TRUE, reswarn = c(10, 200), remember = TRUE, ask = TRUE,
-  run = TRUE, defaults = "default_settings.txt", sep = ",", dec = ".",
-  runname = "", slump = c(), BCAD = FALSE, ssize = 2000, th0 = c(),
-  burnin = min(200, ssize), MinYr = c(), MaxYr = c(), cutoff = 0.001,
-  plot.pdf = TRUE, dark = 1, date.res = 100, yr.res = 200, ...)
+  add = 100, after = 1e-06, cc = 1, cc1 = "IntCal13",
+  cc2 = "Marine13", cc3 = "SHCal13", cc4 = "ConstCal", ccdir = "",
+  postbomb = 0, delta.R = 0, delta.STD = 0, t.a = 3, t.b = 4,
+  normal = FALSE, suggest = TRUE, reswarn = c(10, 200), remember = TRUE,
+  ask = TRUE, run = TRUE, defaults = "default_settings.txt", sep = ",",
+  dec = ".", runname = "", slump = c(), BCAD = FALSE, ssize = 2000,
+  th0 = c(), burnin = min(500, ssize), MinYr = c(), MaxYr = c(),
+  cutoff = 0.001, plot.pdf = TRUE, dark = 1, date.res = 100,
+  yr.res = 200, ...)
 }
 \arguments{
 \item{core}{Name of the core, given using quotes. Defaults to one of the cores provided with rbacon, \code{core="MSB2K"}. 
@@ -25,7 +26,7 @@ To run your own core, produce a .csv file with the dates as outlined in the manu
 \item{thick}{Bacon will divide the core into sections of equal thickness specified by thick (default \code{thick=5}).}
 
 \item{coredir}{Folder where the core's files \code{core} are and/or will be located. This will be a folder with the core's name, within either the folder \code{coredir='Bacon_runs/'}, or the folder Cores/ if it already exists within R's working directory, or a custom-built folder. For example, use \code{coredir="."} to place the core's folder within the current working directory, or \code{coredir="F:"} if you want to put the core's folder and files on a USB drive loaded under F:.
-Thinner (and thus more) sections will result in smoother age-models, but too many sections can cause 'run-away' models.}
+Thinner (and thus more) sections will result in smoother age-models, but too many sections can cause `run-away' models.}
 
 \item{prob}{Confidence interval to report. This should lie between 0 and 1, default 0.95 (95 \%).}
 
@@ -38,7 +39,7 @@ Thinner (and thus more) sections will result in smoother age-models, but too man
 \item{depths.file}{By default, Bacon will calculate the ages for the depths \code{d.min} to \code{d.max} in steps of \code{d.by}.
 If \code{depths.file=TRUE}, Bacon will read a file containing the depths for which you require ages. 
 This file, containing the depths in a single column without a header, should be stored within \code{coredir}, 
-and its name should start with the core's name and end with '_depths.txt'. Then specify \code{depths.file=TRUE} (default \code{FALSE}). See also \code{depths}.}
+and its name should start with the core's name and end with `_depths.txt'. Then specify \code{depths.file=TRUE} (default \code{FALSE}). See also \code{depths}.}
 
 \item{depths}{By default, Bacon will calculate the ages for the depths \code{d.min} to \code{d.max} in steps of \code{d.by}.
 Alternative depths can be provided as, e.g., \code{depths=seq(0, 100, length=500)} or as a file, e.g., \code{depths=read.table("CoreDepths.txt"}. See also \code{depths.file}.}
@@ -52,7 +53,7 @@ Its shape is set by acc.shape (default \code{acc.shape=1.5}; higher values resul
 which can be changed to, e.g., 5, 10 or 50 for different kinds of deposits).}
 
 \item{mem.strength}{The prior for the memory (dependence of accumulation rate between neighbouring depths) is a beta distribution, which looks much like the gamma distribution.
-but its values are always between 0 (no assumed memory) and 1 (100 \% memory). Its default settings of \code{mem.strength=4}
+but its values are always between 0 (no assumed memory) and 1 (100\% memory). Its default settings of \code{mem.strength=4}
 (higher values result in more peaked shapes) allow for a large range of posterior memory values.}
 
 \item{mem.mean}{The prior for the memory is a beta distribution, which looks much like the gamma distribution but 
@@ -66,7 +67,7 @@ allow for a large range of posterior memory values.}
 
 \item{hiatus.max}{The prior for the maximum length of the hiatus. Hiatus length is a uniform distribution, with equal probabilities between 0 and \code{hiatus.max} yr.}
 
-\item{add}{Add a value to the maximum hiatus length if a boundary is chosen. Defaults to \code{add=0}. Can be used if Bacon complains that the parameters are out of support.}
+\item{add}{Add a value to the maximum hiatus length if a boundary is chosen. Defaults to 100 yr. Can be adapted if Bacon complains that the parameters are out of support.}
 
 \item{after}{Sets a short section above and below hiatus.depths within which to calculate ages. For internal calculations - do not change.}
 
@@ -79,10 +80,10 @@ allow for a large range of posterior memory values.}
 
 \item{cc3}{For southern hemisphere 14C dates (SHCal13).}
 
-\item{cc4}{Use an alternative curve (3 columns: cal BP, 14C age, error, separated by white spaces and saved as a plain-text file).}
+\item{cc4}{Use an alternative curve (3 columns: cal BP, 14C age, error, separated by white spaces and saved as a plain-text file). See \code{ccdir}.}
 
 \item{ccdir}{Directory where the calibration curves for C14 dates \code{cc} are located. By default \code{ccdir=""} since they are loaded into R's memory. 
-Use \code{ccdir="."} to choose current working directory. Use \code{ccdir="Curves/"} to choose sub-folder \code{Curves/}.}
+Use \code{ccdir="."} to choose current working directory. Use \code{ccdir="Curves/"} to choose sub-folder \code{Curves/}. Note that all calibration curves should reside in the same directory. If you want to add a custom-built curve, put it in the directory where the default calibration curves are, or alternatively produce a new folder, and add your curve as well as the default calibration curves there (e.g., \code{write.table(copyCalibrationCurve(1), "./3Col_intcal13.14C", sep="\t")}.)}
 
 \item{postbomb}{Use a postbomb curve for negative (i.e. postbomb) 14C ages. \code{0 = none, 1 = NH1, 2 = NH2, 3 = NH3, 4 = SH1-2, 5 = SH3}}
 
@@ -104,13 +105,13 @@ For symmetry reasons, t.a must always be equal to t.b-1.}
 
 \item{suggest}{If initial analysis of the data indicates abnormally slow or fast accumulation rates, Bacon will suggest to change the prior.
 Also, if the length of the core would cause too few or too many sections with the default settings, Bacon will suggest an alternative section thickness \code{thick}. 
-Accept these suggested alternative settings by typing 'y' (or 'yes please' if you prefer to be polite), or leave as is by typing 'n' (or anything else, really). To get rid of these suggestions, use \code{suggest=FALSE}.}
+Accept these suggested alternative settings by typing "y" (or "yes please" if you prefer to be polite), or leave as is by typing "n" (or anything else, really). To get rid of these suggestions, use \code{suggest=FALSE}.}
 
 \item{reswarn}{Bacon will warn you if the number of sections lies outside the safe range (default between 10 and 200 sections; 
-\code{reswarn=c(10,200)}). Too few sections could lead to an 'elbowy' model while with too many sections the modelling process can get lost,
+\code{reswarn=c(10,200)}). Too few sections could lead to an `elbowy' model while with too many sections the modelling process can get lost,
  resulting in age-models far away from the dated depths.}
 
-\item{remember}{Bacon will try to remember which settings you've applied to your cores (default \code{remember=TRUE}). If you run into inconsistencies or other problems, 
+\item{remember}{Bacon will try to remember which settings you have applied to your cores (default \code{remember=TRUE}). If you run into inconsistencies or other problems, 
 try running your core again with \code{remember=FALSE}, or, start cleanly by typing \code{Bacon.cleanup()}.}
 
 \item{ask}{By default Bacon will ask you to confirm that you want to run the core with the provided settings. Disable this using \code{ask=FALSE} (e.g., for batch runs).}
@@ -125,7 +126,7 @@ try running your core again with \code{remember=FALSE}, or, start cleanly by typ
 
 \item{runname}{Text to add to the corename for specific runs, e.g., \code{runname="MyCore_Test1"}.}
 
-\item{slump}{(not implemented yet).}
+\item{slump}{Upper and lower depths of any sections of assumed abrupt accumulation, that require excising before age-modelling (and adding after age-modelling). Requires pairs of depths, e.g., \code{slump=c(10,15,60,67)} for slumps at 67-60 and 15-10 cm core depth.}
 
 \item{BCAD}{The calendar scale of graphs and age output-files is in cal BP (calendar or calibrated years before the present, where the present is AD 1950) by default, but can be changed to BC/AD using \code{BCAD=TRUE}.}
 
@@ -135,7 +136,7 @@ try running your core again with \code{remember=FALSE}, or, start cleanly by typ
 
 \item{burnin}{Amount of initial, likely sub-optimal MCMC iterations that will be removed.}
 
-\item{MinYr}{Minimum age limit for Bacon runs, default at -1000 cal BP. To set plot limits, use \code{yr.min} instead.}
+\item{MinYr}{Minimum age limit for Bacon runs, default at current year in cal BP. To set plot limits, use \code{yr.min} instead.}
 
 \item{MaxYr}{Maximum age limit for Bacon runs, default at 1,000,000 cal BP. To set plot limits, use \code{yr.max} instead.}
 
@@ -167,7 +168,7 @@ and through millions of Markov Chain Monte Carlo (MCMC) iterations estimates
 the accumulation rate (in years/cm; so more correctly, sedimentation times) for each of these sections. 
 Combined with an estimated starting date for the first section, these accumulation rates then form the age-depth model. 
 The accumulation rates are constrained by prior information on the accumulation rate (\code{acc.mean, acc.shape)} and its 
-variability between neighbouring depths, or 'memory' (\code{mem.mean, mem.strength}). Hiatuses can be introduced as well, also constrained by prior information (\code{hiatus.max}).
+variability between neighbouring depths, or "memory" (\code{mem.mean, mem.strength}). Hiatuses can be introduced as well, also constrained by prior information (\code{hiatus.max}).
 
 Although Bacon works with any kind of absolute dates (e.g., OSL, tephra or other dates on a calendar scale), 
 it is often used to age-model 14C-dated sequences. Radiocarbon dates should be calibrated using either IntCal13 

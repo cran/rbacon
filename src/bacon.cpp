@@ -176,7 +176,7 @@ int bacon( std::string inputfile1, std::string outputfile1 , int ssize, std::str
   printf("Final sample size %d\n", ss);
   */
 
- Rprintf("bacon: suggested burn in= %d\n", All.Dim() * EVERY_MULT * BURN_IN_MULT);
+ Rprintf("bacon: burn in (initial iterations which will be removed): %d\n", All.Dim() * EVERY_MULT * BURN_IN_MULT);
  Rprintf(FAREWELL);
 
 //  printf("bacon: suggested burn in= %d\n", All.Dim() * EVERY_MULT * BURN_IN_MULT);

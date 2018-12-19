@@ -12,7 +12,7 @@
 
 //#define IntCal13FNAM "Curves/3Col_intcal13.14C"
 #define IntCal13FNAM "3Col_intcal13.14C"
-#define IntCal13ROWS 5142
+#define IntCal13ROWS 5141
 #define IntCal13COLS 3
 
 //#define Marine13FNAM "Curves/3Col_marine13.14C"
@@ -22,7 +22,7 @@
 
 //#define SHCal13FNAM "Curves/3Col_shcal13.14C"
 #define SHCal13FNAM "3Col_shcal13.14C"
-#define SHCal13ROWS 5142
+#define SHCal13ROWS 5141
 #define SHCal13COLS 3
 
 #define GENCCMAXLINLEN 255
@@ -35,16 +35,6 @@
                         "postbomb_NH3.14C", \
                         "postbomb_SH1-2.14C", \
                         "postbomb_SH3.14C"
-
- /* #define POSTBOMBFNAMS	"None", \
-                        "Curves/postbomb_NH1.14C", \
-                        "Curves/postbomb_NH2.14C", \
-                        "Curves/postbomb_NH3.14C", \
-                        "Curves/postbomb_SH1-2.14C", \
-                        "Curves/postbomb_SH3.14C"
-
-*/
-
 
 /**** Template class to hold a calibration curve and perform all necessary calibrations. ****/
 class Cal {
@@ -273,11 +263,11 @@ public:
 		/** Read bomb **/
 		Bomb = bomb;
 		if (Bomb == 0) {
-			mincal = -5.0; //no bomb
+			mincal = 0.0; // no bomb; 17 Dec 2018 changed -5.0 to 0.0
 			sprintf( name, "IntCal13");
 		}
 		else
-			if (Bomb < 5) {
+			if (Bomb < 5) { // curve number, not cal BP yr
 
             bombcc = new GenericCal(postbombfnam[Bomb], ccdir);
 			mincal = bombcc->MinCal();
@@ -310,7 +300,7 @@ public:
 //int fcmp (double x, double y, double epsilon = 0.00000000001);
 	double cal(double theta)
 	{
-        if (fcmp(theta, -5.0) == -1)
+        if (fcmp(theta, -0.0) == -1) // 17 Dec 2018 changed -5.0 to 0.0
         {
 			if (Bomb == 0) {
 				//fprintf( stderr, "WARNING: Calibration attempted beyond IntCal13 cal. curve limits, theta= %f\n",theta);
@@ -327,22 +317,22 @@ public:
         }
         else {
             if (fcmp(theta, 13900.0) != 1)
-                {	//************** NB: In the official IntCal13 year 0 is node 1 (node 0 is -5)
-                        k = 1 + (int) floor(theta/5.0);
+                {
+                        k = 0 + (int) floor(theta/5.0); // 0 was 1
                         mu = CC(k,1) + (theta-CC(k,0))*(CC(k+1,1)-CC(k,1))/5.0;
                         sig =CC(k,2) + (theta-CC(k,0))*(CC(k+1,2)-CC(k,2))/5.0;
                 }
                 else
                         if (fcmp(theta, 25000.0) != 1)
                         {
-                                k = 2781 + (int) floor((theta-13900.0)/10.0);
+                                k = 2780 + (int) floor((theta-13900.0)/10.0); // line 2781 (in c-speak 2780) is 13900 calBP - 10yr steps after this
                                 mu = CC(k,1) + (theta-CC(k,0))*(CC(k+1,1)-CC(k,1))/10.0;
                                 sig = CC(k,2) + (theta-CC(k,0))*(CC(k+1,2)-CC(k,2))/10.0;
                         }
                         else
-                                if (fcmp(theta, 50000.0) != 1)
+                                if (fcmp(theta, 50000.0) != 1) // line 3891 (3890 in c-speak) is 25000 cal BP - 20yr steps after this
                                 {
-                                        k = 3891 + (int) floor((theta-25000.0)/20.0);
+                                        k = 3890 + (int) floor((theta-25000.0)/20.0);
                                         mu = CC(k,1) + (theta-CC(k,0))*(CC(k+1,1)-CC(k,1))/20.0;
                                         sig = CC(k,2) + (theta-CC(k,0))*(CC(k+1,2)-CC(k,2))/20.0;
                                 }
@@ -436,7 +426,7 @@ public:
 	{
         if (fcmp(theta, 0.0) == -1)
         {
-                //fprintf( stderr, "WARNING: Calibration attempted beyond marine09 cal. curve limits, theta= %f\n",theta);
+                //fprintf( stderr, "WARNING: Calibration attempted beyond marine13 cal. curve limits, theta= %f\n",theta);
                 k = 0;
                 mu = CC(k,1) + (theta-CC(k,0))*(CC(k+1,1)-CC(k,1))/5;
                 //sig <- CC(k,2); before JUDY
@@ -452,38 +442,24 @@ public:
                 else
                         if (fcmp(theta, 25000.0) != 1)
                         {
-                                k = 2100 + (int) floor((theta-10500.0)/10.0);
+                                k = 2100 + (int) floor((theta-10500.0)/10.0); // steps of 10yr after 10500 (line 2100)
                                 mu = CC(k,1) + (theta-CC(k,0))*(CC(k+1,1)-CC(k,1))/10.0;
                                 sig =CC(k,2) + (theta-CC(k,0))*(CC(k+1,2)-CC(k,2))/10.0;
                         }
                         else
                                 if (fcmp(theta, 50000.0) != 1)
                                 {
-                                        k = 3550 + (int) floor((theta-25000.0)/20.0);
+                                        k = 3550 + (int) floor((theta-25000.0)/20.0); // steps of 20yr after 25000 (line 3550)
                                         mu = CC(k,1) + (theta-CC(k,0))*(CC(k+1,1)-CC(k,1))/20.0;
                                         sig =CC(k,2) + (theta-CC(k,0))*(CC(k+1,2)-CC(k,2))/20.0;
                                 }
                                 else
-/*									if (fcmp(theta, 40000.0) != 1)
-									{
-                                        k = 3250 + (int) floor((theta-25000.0)/50.0);
-                                        mu = CC(k,1) + (theta-CC(k,0))*(CC(k+1,1)-CC(k,1))/50.0;
-                                        sig =CC(k,2) + (theta-CC(k,0))*(CC(k+1,2)-CC(k,2))/50.0;
-									}
-									else
-										if (fcmp(theta, 50000.0) != 1)
-										{
-											k = 3550 + (int) floor((theta-40000.0)/100.0);
-											mu = CC(k,1) + (theta-CC(k,0))*(CC(k+1,1)-CC(k,1))/100.0;
-											sig =CC(k,2) + (theta-CC(k,0))*(CC(k+1,2)-CC(k,2))/100.0;
-										}
-										else */
-										{
-                        //fprintf( stderr, "WARNING: Calibration attempted beyond IntCal04 cal. curve limits, theta= %f\n",theta);
-											k = Marine13ROWS - 2;
-											mu = CC(k,1) + (theta-CC(k,0))*(CC(k+1,1)-CC(k,1))/100.0;
-											sig =CC(k,2);
-										}
+					{
+                        //fprintf( stderr, "WARNING: Calibration attempted beyond IntCal13 cal. curve limits, theta= %f\n",theta);
+						k = Marine13ROWS - 2;
+						mu = CC(k,1) + (theta-CC(k,0))*(CC(k+1,1)-CC(k,1))/100.0;
+						sig =CC(k,2);
+					}
 
 		return mu;
 	}
@@ -550,7 +526,7 @@ public:
 		/** Read bomb **/
 		Bomb = bomb;
 		if (Bomb == 0) {
-			mincal = -5.0; //no bomb
+			mincal = -0.0; // no bomb, was -5.0 changed 17 Dec 2018
 			sprintf( name, "SHCal13");
 		}
 		else
@@ -587,7 +563,7 @@ public:
 //int fcmp (double x, double y, double epsilon = 0.00000000001);
 	double cal(double theta)
 	{
-        if (fcmp(theta, -5.0) == -1)
+        if (fcmp(theta, 0.0) == -1)
         {
 			if (Bomb == 0) {
 				//fprintf( stderr, "WARNING: Calibration attempted beyond SHCal13 cal. curve limits, theta= %f\n",theta);
@@ -605,21 +581,21 @@ public:
         else {
                 if (fcmp(theta, 13900.0) != 1)
                 {				//************** NB: In the official SHCal13 year 0 is node 1 (node 0 is -5)
-                        k = 1 + (int) floor(theta/5.0);
+                        k = 0 + (int) floor(theta/5.0); // 0 was 1
                         mu = CC(k,1) + (theta-CC(k,0))*(CC(k+1,1)-CC(k,1))/5.0;
                         sig = CC(k,2) + (theta-CC(k,0))*(CC(k+1,2)-CC(k,2))/5.0;
                 }
                 else
-                        if (fcmp(theta, 25000.0) != 1)
+                        if (fcmp(theta, 25000.0) != 1) // 10yr steps from 13900 on - line 2781 (2780 in c speak)
                         {
-                                k = 2781 + (int) floor((theta-13900.0)/10.0);
+                                k = 2780 + (int) floor((theta-13900.0)/10.0);
                                 mu = CC(k,1) + (theta-CC(k,0))*(CC(k+1,1)-CC(k,1))/10.0;
                                 sig = CC(k,2) + (theta-CC(k,0))*(CC(k+1,2)-CC(k,2))/10.0;
                         }
                         else
-                                if (fcmp(theta, 50000.0) != 1)
+                                if (fcmp(theta, 50000.0) != 1) // 20yr steps from 25000 on - line 3891 (3890 in c speak)
                                 {
-                                        k = 3891 + (int) floor((theta-25000.0)/20.0);
+                                        k = 3890 + (int) floor((theta-25000.0)/20.0);
                                         mu = CC(k,1) + (theta-CC(k,0))*(CC(k+1,1)-CC(k,1))/20.0;
                                         sig = CC(k,2) + (theta-CC(k,0))*(CC(k+1,2)-CC(k,2))/20.0;
                                 }
