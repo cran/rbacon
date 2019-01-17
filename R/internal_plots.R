@@ -22,8 +22,8 @@
   scales[scales > dark] <- dark 
   
   if(rotate.axes)
-    image(yrseq, dseq, t(scales), add=TRUE, col=colours) else
-      image(dseq, yrseq, scales, add=TRUE, col=colours)
+    image(yrseq, dseq, t(scales), add=TRUE, col=colours, useRaster=FALSE) else
+      image(dseq, yrseq, scales, add=TRUE, col=colours, useRaster=FALSE)
 }
 
 

@@ -592,11 +592,11 @@ int simulation(int Tr1, char *filename, const char *op="wt", int save_every1=1, 
     // ----- --- -------------- --- -----
     if ((fptr = (fopen(filename, op)))) { 
 		
-
+#ifndef _WIN32 
+		// tmp removal lines 596-618 by Maarten and jac on 10 Jan 2019, to enable compilation on Win systems
 		//Simple function to calculate and set optimal buffer size for files ***
 		// *** see https://en.cppreference.com/w/c/io/setvbuf **
 		//jac, maarten: Changed 22OCT2018 
-		/* // tmp removal lines 599-620 by Maarten on 19 Dec 2018, to enable compilation on Win systems
 		size_t st_blksize;
 	    struct stat stats;
 
@@ -616,8 +616,8 @@ int simulation(int Tr1, char *filename, const char *op="wt", int save_every1=1, 
 			}
 		
 		Rprintf("BUFSIZ is %d, optimal block size changed to %ld\n", BUFSIZ, st_blksize);
-
-		*/
+#endif
+		
 
 		fver_vector(fptr, x, n);
         fprintf(fptr, "\t %f", U); // was %lf MB

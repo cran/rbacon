@@ -4,24 +4,25 @@
 \alias{agedepth}
 \title{Plot an age-depth model}
 \usage{
-agedepth(set = get("info"), BCAD = set$BCAD, unit = "cm", d.lab = c(),
-  yr.lab = c(), d.min = set$d.min, d.max = set$d.max, d.by = set$d.by,
-  depths = set$depths, depths.file = FALSE, yr.min = c(), yr.max = c(),
-  dark = c(), prob = set$prob, rounded = 0, d.res = 400, yr.res = 400,
-  date.res = 100, grey.res = 100, rotate.axes = FALSE, rev.yr = FALSE,
-  rev.d = FALSE, maxcalc = 500, height = 15, mirror = TRUE, up = TRUE,
-  cutoff = 0.001, plot.range = TRUE, panels = layout(1),
+agedepth(set = get("info"), BCAD = set$BCAD, unit = "cm",
+  d.lab = c(), yr.lab = c(), d.min = set$d.min, d.max = set$d.max,
+  d.by = set$d.by, depths = set$depths, depths.file = FALSE,
+  yr.min = c(), yr.max = c(), dark = c(), prob = set$prob,
+  rounded = 0, d.res = 400, yr.res = 400, date.res = 100,
+  grey.res = 100, rotate.axes = FALSE, rev.yr = FALSE,
+  rev.d = FALSE, maxcalc = 500, height = 15, mirror = TRUE,
+  up = TRUE, cutoff = 0.001, plot.range = TRUE, panels = layout(1),
   range.col = grey(0.5), range.lty = "12", mn.col = "red",
-  mn.lty = "12", med.col = NA, med.lty = "12", C14.col = rgb(0, 0, 1,
-  0.35), C14.border = rgb(0, 0, 1, 0.5), cal.col = rgb(0, 0.5, 0.5, 0.35),
-  cal.border = rgb(0, 0.5, 0.5, 0.5), dates.col = c(),
-  hiatus.col = grey(0.5), hiatus.lty = "12", greyscale = grey(seq(1, 0,
-  length = grey.res)), slump.col = grey(0.8), normalise.dists = TRUE,
-  cc = set$cc, title = set$core, title.location = "topleft",
-  after = set$after, bty = "l", mar = c(3, 3, 1, 1), mgp = c(1.5, 0.7,
-  0), xaxs = "r", yaxs = "r", xaxt = "s", yaxt = "s",
-  plot.pdf = FALSE, dates.only = FALSE, model.only = FALSE,
-  talk = FALSE)
+  mn.lty = "12", med.col = NA, med.lty = "12", C14.col = rgb(0, 0,
+  1, 0.35), C14.border = rgb(0, 0, 1, 0.5), cal.col = rgb(0, 0.5, 0.5,
+  0.35), cal.border = rgb(0, 0.5, 0.5, 0.5), dates.col = c(),
+  hiatus.col = grey(0.5), hiatus.lty = "12", greyscale = grey(seq(1,
+  0, length = grey.res)), slump.col = grey(0.8),
+  normalise.dists = TRUE, cc = set$cc, title = set$core,
+  title.location = "topleft", after = set$after, bty = "l",
+  mar = c(3, 3, 1, 1), mgp = c(1.5, 0.7, 0), xaxs = "r",
+  yaxs = "r", xaxt = "s", yaxt = "s", plot.pdf = FALSE,
+  dates.only = FALSE, model.only = FALSE, talk = FALSE)
 }
 \arguments{
 \item{set}{Detailed information of the current run, stored within this session's memory as variable \code{info}.}

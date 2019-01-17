@@ -5,18 +5,19 @@
 \title{Main age-depth modelling function}
 \usage{
 Bacon(core = "MSB2K", thick = 5, coredir = "", prob = 0.95,
-  d.min = NA, d.max = NA, d.by = 1, depths.file = FALSE, depths = c(),
-  unit = "cm", acc.shape = 1.5, acc.mean = 20, mem.strength = 4,
-  mem.mean = 0.7, boundary = NA, hiatus.depths = NA, hiatus.max = 10000,
-  add = 100, after = 1e-06, cc = 1, cc1 = "IntCal13",
-  cc2 = "Marine13", cc3 = "SHCal13", cc4 = "ConstCal", ccdir = "",
-  postbomb = 0, delta.R = 0, delta.STD = 0, t.a = 3, t.b = 4,
-  normal = FALSE, suggest = TRUE, reswarn = c(10, 200), remember = TRUE,
-  ask = TRUE, run = TRUE, defaults = "default_settings.txt", sep = ",",
-  dec = ".", runname = "", slump = c(), BCAD = FALSE, ssize = 2000,
-  th0 = c(), burnin = min(500, ssize), MinYr = c(), MaxYr = c(),
-  cutoff = 0.001, plot.pdf = TRUE, dark = 1, date.res = 100,
-  yr.res = 200, ...)
+  d.min = NA, d.max = NA, d.by = 1, depths.file = FALSE,
+  depths = c(), unit = "cm", acc.shape = 1.5, acc.mean = 20,
+  mem.strength = 4, mem.mean = 0.7, boundary = NA,
+  hiatus.depths = NA, hiatus.max = 10000, add = 100, after = 1e-06,
+  cc = 1, cc1 = "IntCal13", cc2 = "Marine13", cc3 = "SHCal13",
+  cc4 = "ConstCal", ccdir = "", postbomb = 0, delta.R = 0,
+  delta.STD = 0, t.a = 3, t.b = 4, normal = FALSE,
+  suggest = TRUE, reswarn = c(10, 200), remember = TRUE,
+  ask = TRUE, run = TRUE, defaults = "default_settings.txt",
+  sep = ",", dec = ".", runname = "", slump = c(), BCAD = FALSE,
+  ssize = 2000, th0 = c(), burnin = min(500, ssize), MinYr = c(),
+  MaxYr = c(), cutoff = 0.001, plot.pdf = TRUE, dark = 1,
+  date.res = 100, yr.res = 200, ...)
 }
 \arguments{
 \item{core}{Name of the core, given using quotes. Defaults to one of the cores provided with rbacon, \code{core="MSB2K"}. 

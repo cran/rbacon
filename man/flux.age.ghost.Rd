@@ -4,12 +4,13 @@
 \alias{flux.age.ghost}
 \title{Plot flux rates for proxies.}
 \usage{
-flux.age.ghost(proxy = 1, yr.lim = c(), yr.res = 200, set = get("info"),
-  flux = c(), plot.range = TRUE, prob = 0.8, range.col = grey(0.5),
-  range.lty = 2, plot.mean = TRUE, mean.col = "red", mean.lty = 2,
-  flux.lim = c(), flux.lab = "flux", upper = 0.95, dark = set$dark,
-  BCAD = set$BCAD, yr.lab = c(), rotate.axes = FALSE, rev.flux = FALSE,
-  rev.yr = FALSE)
+flux.age.ghost(proxy = 1, yr.lim = c(), yr.res = 200,
+  set = get("info"), flux = c(), plot.range = TRUE, prob = 0.8,
+  range.col = grey(0.5), range.lty = 2, plot.mean = TRUE,
+  mean.col = "red", mean.lty = 2, flux.lim = c(),
+  flux.lab = "flux", upper = 0.95, dark = set$dark,
+  BCAD = set$BCAD, yr.lab = c(), rotate.axes = FALSE,
+  rev.flux = FALSE, rev.yr = FALSE)
 }
 \arguments{
 \item{proxy}{Which proxy to use (counting from the column number in the .csv file after the depths column).}

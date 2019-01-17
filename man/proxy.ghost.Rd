@@ -4,12 +4,13 @@
 \alias{proxy.ghost}
 \title{Proxies analysed along the depths of a core can be plotted as 'proxy-ghost' graphs against calendar time while taking into account chronological uncertainties. Here darker grey indicates more likely calendar ages for specific proxy values.}
 \usage{
-proxy.ghost(proxy = 1, proxy.lab = c(), proxy.res = 250, yr.res = 250,
-  grey.res = 100, set = get("info"), dark = 1, darkest = 1,
-  rotate.axes = FALSE, proxy.rev = FALSE, yr.rev = FALSE,
-  plot.mean = FALSE, mean.col = "red", yr.lim = c(), proxy.lim = c(),
-  sep = ",", xaxs = "i", yaxs = "i", xaxt = "s", yaxt = "s",
-  bty = "l", BCAD = set$BCAD, yr.lab = ifelse(BCAD, "BC/AD", "cal yr BP"))
+proxy.ghost(proxy = 1, proxy.lab = c(), proxy.res = 250,
+  yr.res = 250, grey.res = 100, set = get("info"), dark = 1,
+  darkest = 1, rotate.axes = FALSE, proxy.rev = FALSE,
+  yr.rev = FALSE, plot.mean = FALSE, mean.col = "red",
+  yr.lim = c(), proxy.lim = c(), sep = ",", xaxs = "i",
+  yaxs = "i", xaxt = "s", yaxt = "s", bty = "l", BCAD = set$BCAD,
+  yr.lab = ifelse(BCAD, "BC/AD", "cal yr BP"))
 }
 \arguments{
 \item{proxy}{Which proxy to use (counting from the column number in the .csv file after the depths column).}

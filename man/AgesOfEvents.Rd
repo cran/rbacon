@@ -5,9 +5,9 @@
 \title{Event probabilities against calendar age}
 \usage{
 AgesOfEvents(window, move, set = get("info"), plot.steps = FALSE,
-  BCAD = set$BCAD, yr.lab = c(), yr.lim = c(), prob.lab = "probability",
-  prob.lim = c(), rotate.axes = FALSE, rev.yr = TRUE, yaxs = "i",
-  bty = "l")
+  BCAD = set$BCAD, yr.lab = c(), yr.lim = c(),
+  prob.lab = "probability", prob.lim = c(), rotate.axes = FALSE,
+  rev.yr = TRUE, yaxs = "i", bty = "l")
 }
 \arguments{
 \item{window}{Width of the window.}

@@ -5,10 +5,11 @@
 \title{Plot modelled accumulation rates against the depths of a core.}
 \usage{
 accrate.depth.ghost(set = get("info"), d = set$d, d.lim = c(),
-  acc.lim = c(), d.lab = c(), cmyr = FALSE, acc.lab = c(), dark = 1,
-  grey.res = 100, prob = 0.95, plot.range = TRUE, range.col = grey(0.5),
-  range.lty = 2, plot.mean = TRUE, mean.col = "red", mean.lty = 2,
-  rotate.axes = FALSE, rev.d = FALSE, rev.acc = FALSE)
+  acc.lim = c(), d.lab = c(), cmyr = FALSE, acc.lab = c(),
+  dark = 1, grey.res = 100, prob = 0.95, plot.range = TRUE,
+  range.col = grey(0.5), range.lty = 2, plot.mean = TRUE,
+  mean.col = "red", mean.lty = 2, rotate.axes = FALSE,
+  rev.d = FALSE, rev.acc = FALSE)
 }
 \arguments{
 \item{set}{Detailed information of the current run, stored within this session's memory as variable info.}

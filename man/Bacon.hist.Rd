@@ -6,9 +6,9 @@
 \usage{
 Bacon.hist(d, set = get("info"), BCAD = set$BCAD, yr.lab = c(),
   yr.lim = c(), hist.lab = "Frequency", calc.range = TRUE,
-  hist.lim = c(), draw = TRUE, prob = set$prob, hist.col = grey(0.5),
-  hist.border = grey(0.2), range.col = "blue", med.col = "green",
-  mean.col = "red")
+  hist.lim = c(), draw = TRUE, prob = set$prob,
+  hist.col = grey(0.5), hist.border = grey(0.2), range.col = "blue",
+  med.col = "green", mean.col = "red")
 }
 \arguments{
 \item{d}{The depth or depths for which a histogram and age ranges should be provided. If multiple depths are given, then just the age ranges, median and means (no graphs) are provided for each depth.}

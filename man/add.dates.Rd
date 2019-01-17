@@ -5,10 +5,10 @@
 \title{Add dates to age-depth plots}
 \usage{
 add.dates(mn, sdev, depth, cc = 1, above = 0.001, ex = 10,
-  normal = TRUE, normalise = TRUE, t.a = 3, t.b = 4, age.res = 100,
-  times = 20, col = rgb(1, 0, 0, 0.5), border = rgb(1, 0, 0, 0.5),
-  rotate.axes = FALSE, mirror = TRUE, up = TRUE, BCAD = FALSE,
-  pch = 4)
+  normal = TRUE, normalise = TRUE, t.a = 3, t.b = 4,
+  age.res = 100, times = 20, col = rgb(1, 0, 0, 0.5),
+  border = rgb(1, 0, 0, 0.5), rotate.axes = FALSE, mirror = TRUE,
+  up = TRUE, BCAD = FALSE, pch = 4)
 }
 \arguments{
 \item{mn}{Reported mean of the date. Can be multiple dates.}

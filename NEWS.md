@@ -1,3 +1,7 @@
+# rbacon 2.3.6
+
+* further enhancements of memory usage in MCMC calculations (bacon.h)
+
 # rbacon 2.3.5
 
 * added function agemodel.it to extract single iterations of a Bacon age-depth model
@@ -11,7 +15,7 @@
 * produced separate R files for groups of functions
 * Bacon now stops if it finds 6 columns with unexpected names in the .csv file. If provided with a delta.R column, Bacon expects a delta.STD column as well. 
 * Added an option dates.col to colour sets of dates (suggestion by Greg Cooper)
-* enhancements in bacon.h of MCMC calculations
+* enhancements in bacon.h of MCMC calculations and memory usage 
 
 # rbacon 2.3.4
 

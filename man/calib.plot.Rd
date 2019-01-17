@@ -6,11 +6,12 @@
 \usage{
 calib.plot(set = get("info"), BCAD = set$BCAD, rotate.axes = FALSE,
   rev.d = FALSE, rev.yr = FALSE, yr.lim = c(), date.res = 100,
-  d.lab = c(), yr.lab = c(), height = 15, mirror = TRUE, up = TRUE,
-  cutoff = 0.001, C14.col = rgb(0, 0, 1, 0.5), C14.border = rgb(0, 0, 1,
-  0.75), cal.col = rgb(0, 0.5, 0.5, 0.5), cal.border = rgb(0, 0.5, 0.5,
-  0.75), dates.col = c(), slump.col = grey(0.8), new.plot = TRUE,
-  plot.dists = TRUE, normalise.dists = TRUE)
+  d.lab = c(), yr.lab = c(), height = 15, mirror = TRUE,
+  up = TRUE, cutoff = 0.001, C14.col = rgb(0, 0, 1, 0.5),
+  C14.border = rgb(0, 0, 1, 0.75), cal.col = rgb(0, 0.5, 0.5, 0.5),
+  cal.border = rgb(0, 0.5, 0.5, 0.75), dates.col = c(),
+  slump.col = grey(0.8), new.plot = TRUE, plot.dists = TRUE,
+  normalise.dists = TRUE)
 }
 \arguments{
 \item{set}{Detailed information of the current run, stored within this session's memory as variable \code{info}.}

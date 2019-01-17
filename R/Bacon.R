@@ -17,7 +17,7 @@ NULL
 
 # done: 
 
-# do: check how to compile on Win-systems the updated twalk.h with the enhanced buffer size (decides when to keep MCMC calculations in memory and when to write them to a .out file) 
+# do: 
 
 
 # for future versions: check behaviour of AgesOfEvents around hiatuses, add function to estimate best thickness (once published), check w Andres if correction to remove -5.0 cal BP in IntCal13 and SHCal13 curves was done correctly, F14C, if hiatus or boundary plot acc.posts of the individual sections?, allow for asymmetric cal BP errors (e.g. read from files), make more consistent use of dark for all functions (incl. flux and accrate.age.ghost), remove darkest?, introduce write.Bacon function to write files only once user agrees with the model, proxy.ghost very slow with long/detailed cores - optimization possible?, check again if/how Bacon gets confused by Windows usernames with non-ascii characters (works fine on Mac)
