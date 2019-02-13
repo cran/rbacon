@@ -22,7 +22,7 @@
    if ((objects) == NULL)                                                   \
    {                                                                        \
      /*fprintf(stderr, "New(): Out of Heap Memory (%d)\n", have); JEV WARNING CHECK   */          \
-      Rcpp::stop("abort, exit");                                                             \
+      Rcpp::stop("memory problem, stopping");                                                             \
    }
 
 /*

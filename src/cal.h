@@ -433,8 +433,9 @@ public:
                  sig = CC(k,2);
         }
         else
+        {       // MB added '{' on 30 Jan 2019 to avoid indentation warning while compiling on Fedora. This '{' was placed correctly for IntCal13 (line 318)    
                 if (fcmp(theta, 10500.0) != 1)
-                {				//************** NB: 0 is the number of rows before cal year 0
+                {       //************** NB: 0 is the number of rows before cal year 0
                         k = 0 + (int) floor(theta/5.0);
                         mu = CC(k,1) + (theta-CC(k,0))*(CC(k+1,1)-CC(k,1))/5.0;
                         sig =CC(k,2) + (theta-CC(k,0))*(CC(k+1,2)-CC(k,2))/5.0;
@@ -454,15 +455,15 @@ public:
                                         sig =CC(k,2) + (theta-CC(k,0))*(CC(k+1,2)-CC(k,2))/20.0;
                                 }
                                 else
-					{
+                                {
                         //fprintf( stderr, "WARNING: Calibration attempted beyond IntCal13 cal. curve limits, theta= %f\n",theta);
-						k = Marine13ROWS - 2;
-						mu = CC(k,1) + (theta-CC(k,0))*(CC(k+1,1)-CC(k,1))/100.0;
-						sig =CC(k,2);
-					}
-
-		return mu;
-	}
+                                        k = Marine13ROWS - 2;
+                                        mu = CC(k,1) + (theta-CC(k,0))*(CC(k+1,1)-CC(k,1))/100.0;
+                                        sig =CC(k,2);
+                                }
+        }       // MB added '}' on 30 Jan 2019 to avoid indentation warning while compiling on Fedora                   
+                return mu;
+        }
 
 
 

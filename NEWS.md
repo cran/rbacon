@@ -1,3 +1,9 @@
+# rbacon 2.3.7
+
+* adapted source code to allow for more than 10 hiatuses/boundaries (now limited to 50)
+* corrected bug causing a warning when a hiatus was set with multiple acc.mean priors provided.
+* now ensures that hiatus or boundary depths are in the correct order (ascending in depth)
+
 # rbacon 2.3.6
 
 * further enhancements of memory usage in MCMC calculations (bacon.h)
@@ -8,8 +14,8 @@
 * added functions clam2bacon and bacon2clam to translate Bacon dates files into clam files et vice versa (inspired by a suggestion from Dewey Dunnington)
 * corrected behaviour of boundary and hiatus (especially if together with slumps)
 * iterations with age reversals across a hiatus are now removed
-* removed closeAllConnections (as suggested by Dewey Dunnington)
-* Added option to change the field separator to mix.curves (thanks to Thomas Dye for the suggestion)
+* removed closeAllConnections (suggested by Dewey Dunnington)
+* Added option to change the field separator to mix.curves (suggested by Thomas Dye)
 * MinYr now defaults to the current year (1950 - as.integer(format(Sys.time(), "\%Y")))
 * added option in the scissors function to remove a specific range of iterations (e.g., iterations 400 to 800, or the first/last 300)
 * produced separate R files for groups of functions

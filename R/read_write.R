@@ -157,15 +157,15 @@ assign_coredir <- function(coredir, core, ask=TRUE) {
             if(ask)
               if(tolower(substr(ans,1,1)) == "y")
                 wdir <- dir.create(coredir, FALSE) else
-                  stop("No problem. Please provide an alternative folder location using coredir\n")
+                  stop("No problem. Please provide an alternative folder location using coredir\n", call.=FALSE)
             if(!wdir)
-              stop("Cannot write into the current directory.\nPlease set coredir to somewhere where you have writing access, e.g. Desktop or ~.")
+              stop("Cannot write into the current directory.\nPlease set coredir to somewhere where you have writing access, e.g. Desktop or ~.", call.=FALSE)
         }    
   } else {
     if(!dir.exists(coredir))
         wdir <- dir.create(coredir, FALSE)
       if(!dir.exists(coredir)) # if it still doesn't exist, we probably don't have enough permissions
-        stop("Cannot write into the current directory.\nPlease set coredir to somewhere where you have writing access, e.g. Desktop or ~.")
+        stop("Cannot write into the current directory.\nPlease set coredir to somewhere where you have writing access, e.g. Desktop or ~.", call.=FALSE)
   }
   coredir <- .validateDirectoryName(coredir)
   cat("The run's files will be put in this folder: ", coredir, core, "\n", sep="")
@@ -327,8 +327,8 @@ assign_coredir <- function(coredir, core, ask=TRUE) {
     acc.shape <- extr(7)
   mem.mean <- extr(8)
   mem.strength <- extr(9)
-  boundary <- if(is.na(boundary)[1]) NA else extr(10)
-  hiatus.depths <- if(is.na(hiatus.depths)[1]) NA else extr(11)
+  boundary <- if(is.na(boundary)[1]) NA else sort(extr(10))
+  hiatus.depths <- if(is.na(hiatus.depths)[1]) NA else sort(extr(11))
   hiatus.max <- extr(12)
   BCAD <- extr(13); cc <- extr(14); postbomb <- extr(15); cc1 <- extr(16, isnum=FALSE)
   cc2 <- extr(17, isnum=FALSE); cc3 <- extr(18, isnum=FALSE); cc4 <- extr(19, isnum=FALSE)
@@ -410,13 +410,15 @@ assign_coredir <- function(coredir, core, ask=TRUE) {
   fl <- file(set$bacon.file, "w")
   cat("## Ran on", set$date, "\n\n", file=fl)
   cat("Cal 0 : ConstCal;\nCal 1 : ",
-  if(set$cc1=="IntCal13" || set$cc1=="\"IntCal13\"") "IntCal13" else noquote(set$cc1),
-  ", ", set$postbomb, ";\nCal 2 : ",
-  if(set$cc2=="Marine13" || set$cc2=="\"Marine13\"") "Marine13" else noquote(set$cc2),
-  ";\nCal 3 : ",
-  if(set$cc3=="SHCal13" || set$cc3=="\"SHCal13\"") "SHCal13" else noquote(set$cc3), ", ", set$postbomb, ";",
-  if(set$cc4=="ConstCal" || set$cc4=="\"ConstCal\"") set$cc4 <- c() else
-  paste("\nCal 4 : GenericCal, ", set$cc4, ";", sep=""), sep="", file=fl)
+  if(set$cc1=="IntCal13" || set$cc1=="\"IntCal13\"") "IntCal13"
+    else noquote(set$cc1), ", ", set$postbomb, ";\nCal 2 : ",
+  if(set$cc2=="Marine13" || set$cc2=="\"Marine13\"") "Marine13" 
+    else noquote(set$cc2), ";\nCal 3 : ",
+  if(set$cc3=="SHCal13" || set$cc3=="\"SHCal13\"") "SHCal13" 
+    else noquote(set$cc3), ", ", set$postbomb, ";",
+  if(set$cc4=="ConstCal" || set$cc4=="\"ConstCal\"") set$cc4 <- c() 
+    else
+      paste("\nCal 4 : GenericCal, ", set$cc4, ";", sep=""), sep="", file=fl)
   cat("\n\n##   id.   yr    std   depth  delta.R  delta.STD     t.a   t.b   cc", file=fl)
 
   if(ncol(dets) == 4) { # then we need to provide some constants once only

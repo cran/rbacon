@@ -48,22 +48,22 @@ Bacon.Age.d <- function(d, set=get('info'), its=set$output, BCAD=set$BCAD) {
         below <- min(which(set$d > hiatus.depths[i]), set$K-1)
         above <- max(which(set$d < hiatus.depths[i]), 1)
         if(d > set$d[above] && d < set$d[below]) { # then adapt ages
-			 
+ 
           # ages above the hiatus - no memory between hiatus and next section 
           if(above == 1)
             elbow.above <- elbows else
-    		  if(above == 2)
-      	        elbow.above <- elbows + set$thick * its[,2] else
-    		      elbow.above <- elbows + set$thick * c(apply(its[,(2:above)], 1, sum))
+              if(above == 2)
+                elbow.above <- elbows + set$thick * its[,2] else
+                  elbow.above <- elbows + set$thick * c(apply(its[,(2:above)], 1, sum))
           ages.above <- elbow.above + set$acc.mean[i] * (d-set$d[above]) # prior only
 
           # ages below the hiatus
           if(below == 2)
             elbow.below <- elbows + set$thick * its[,2] else
               elbow.below <- elbows + set$thick * c(apply(its[,(2:below)], 1, sum))
-          if(is.na(set$boundary)[1]) {	
-  	        w <- set$output[,ncol(set$output)]^(1/set$thick) # memory
-            acc <- ((1-w)*set$acc.mean) + (w*its[,below+1]) # mix weigthed by w
+          if(is.na(set$boundary)[1]) {
+            w <- set$output[,ncol(set$output)]^(1/set$thick) # memory
+            acc <- ((1-w)*rep(set$acc.mean[i+1],length(w))) + (w*its[,below+1]) # mix weighted by w
             ages.below <- elbow.below - acc * (set$d[below] - d)
           } else {
               slope <- (elbow.below - ages.above) / (set$d[below] - set$d[above])

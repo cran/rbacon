@@ -35,21 +35,19 @@
 
 
 
-
-
 # plot the prior for the accumulation rate
 .PlotAccPrior <- function(s, mn, set=get('info'), main="", xlim=c(0, 3*max(mn)), xlab=paste("Acc. rate (yr/", noquote(set$unit), ")", sep=""), ylab="Density", add=FALSE, legend=TRUE, cex=.9) {
   o <- order(s, decreasing=TRUE)
   priors <- unique(cbind(s[o],mn[o])[,1:2])
   x <- 0
   if(length(priors) == 2) {
-    curve(dgamma(x, s, s/mn), col=3, lwd=2, xlim=xlim, xlab=xlab, ylab=ylab, add=add)
+    curve(dgamma(x, s, s/mn), col=3, lwd=2, from=0, xlim=xlim, xlab=xlab, ylab=ylab, add=add)
     txt <- paste("acc.shape: ", priors[1], "\nacc.mean: ", priors[2])
   } else {
 	  priors <- priors[order(priors[,1]*priors[,2]),]
-      curve(dgamma(x, priors[1,1], priors[1,1]/priors[1,2]), col=3, lwd=2, xlim=xlim, xlab=xlab, ylab=ylab, add=add)
+      curve(dgamma(x, priors[1,1], priors[1,1]/priors[1,2]), col=3, lwd=2, from=0, xlim=xlim, xlab=xlab, ylab=ylab, add=add)
       for(i in 2:nrow(priors))
-        curve(dgamma(x, priors[i,1], priors[i,1]/priors[i,2]), col=3, lwd=2, xlim=xlim, xlab=xlab, ylab=ylab, add=if(i==1) add else TRUE)
+        curve(dgamma(x, priors[i,1], priors[i,1]/priors[i,2]), col=3, lwd=2, from=0, xlim=xlim, xlab=xlab, ylab=ylab, add=if(i==1) add else TRUE)
       txt <- paste("acc.shape: ", toString(priors[,1]), "\nacc.mean: ", toString(priors[,2]))
     }
   if(legend)
@@ -65,13 +63,13 @@
   x <- 0
 
   if(length(priors)==2) {
-    curve(dbeta(x, s*mn, s*(1-mn)), 0, 1, col=3, lwd=2, xlab=xlab, ylab=ylab, add=add)
+    curve(dbeta(x, s*mn, s*(1-mn)), from=0, to=1, col=3, lwd=2, xlab=xlab, ylab=ylab, add=add)
     txt <- paste("mem.strength: ", s, "\nmem.mean: ", mn, "\n", set$K, " ", round(thick,3), noquote(set$unit), " sections", sep="")
   } else {
 	  priors <- priors[order(priors[,1]*priors[,2]),]
-      curve(dbeta(x, priors[1,1]*priors[1,2], priors[1,1]*(1-priors[1,2])), 0, 1, col=3, lwd=2, xlab=xlab, ylab=ylab, add=add)
+      curve(dbeta(x, priors[1,1]*priors[1,2], priors[1,1]*(1-priors[1,2])), from=0, to=1, col=3, lwd=2, xlab=xlab, ylab=ylab, add=add)
       for(i in 2:nrow(priors))
-        curve(dbeta(x, priors[i,1]*priors[i,2], priors[i,1]*(1-priors[i,2])), 0, 1, col=3, lwd=2, xlab="", ylab="", add=TRUE)
+        curve(dbeta(x, priors[i,1]*priors[i,2], priors[i,1]*(1-priors[i,2])), from=0, to=1, col=3, lwd=2, xlab="", ylab="", add=TRUE)
       txt <- paste("acc.shape: ", toString(priors[,1]), "\nacc.mean: ", toString(priors[,2]))
     }
   if(legend)
@@ -108,15 +106,17 @@
   post <- c()
   for(i in hi) 
     post <- c(post, set$output[[i]])
-  post <- density(post)
+  post <- density(post, from=0)
+  post <- cbind(c(0, post$x, max(post$x)), c(0, post$y, 0))
+  post <<- post
   maxprior <- dgamma((s-1)/(s/mn), s, s/mn)
   if(is.infinite(max(maxprior))) 
-    max.y <- max(post$y) else
-      max.y <- max(maxprior, post$y)
-  lim.x <- range(0, post$x, 2*mn)
+    max.y <- max(post[,2]) else
+      max.y <- max(maxprior, post[,2])
+  lim.x <- range(0, post[,1], 2*mn)
   plot(0, type="n", xlim=lim.x, xlab=xlab, ylim=c(0, 1.05*max.y), ylab="")
   polygon(post, col=grey(.8), border=grey(.4))
-  .PlotAccPrior(s, mn, add=TRUE, xlim=range(post$x), xlab="", ylab=ylab, main=main)
+  .PlotAccPrior(s, mn, add=TRUE, xlim=range(post[,1]), xlab="", ylab=ylab, main=main)
 }
 
 

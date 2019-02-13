@@ -84,7 +84,8 @@ allow for a large range of posterior memory values.}
 \item{cc4}{Use an alternative curve (3 columns: cal BP, 14C age, error, separated by white spaces and saved as a plain-text file). See \code{ccdir}.}
 
 \item{ccdir}{Directory where the calibration curves for C14 dates \code{cc} are located. By default \code{ccdir=""} since they are loaded into R's memory. 
-Use \code{ccdir="."} to choose current working directory. Use \code{ccdir="Curves/"} to choose sub-folder \code{Curves/}. Note that all calibration curves should reside in the same directory. If you want to add a custom-built curve, put it in the directory where the default calibration curves are, or alternatively produce a new folder, and add your curve as well as the default calibration curves there (e.g., \code{write.table(copyCalibrationCurve(1), "./3Col_intcal13.14C", sep="\t")}.)}
+For example, use \code{ccdir="."} to choose current working directory, or \code{ccdir="Curves/"} to choose sub-folder \code{Curves/}. Note that all calibration curves should reside in the same directory. If you want to add a custom-built curve, put it in the directory where the default calibration curves are (probably \code{list.files(paste0(.libPaths(), "/rbacon/extdata/Curves/"))}).
+Alternatively produce a new folder, and add your curve as well as the default calibration curves there (cc1, cc2 and cc3; e.g., \code{write.table(copyCalibrationCurve(1), "./3Col_intcal13.14C", sep="\t")}.)}
 
 \item{postbomb}{Use a postbomb curve for negative (i.e. postbomb) 14C ages. \code{0 = none, 1 = NH1, 2 = NH2, 3 = NH3, 4 = SH1-2, 5 = SH3}}
 
@@ -162,7 +163,7 @@ This is the main age-depth modelling function of the rbacon package.
 }
 \details{
 Bacon is an approach to age-depth modelling that uses Bayesian statistics in order to reconstruct Bayesian 
-accumulation histories for deposits, through combining radiocarbon and other dates with prior information (Blaauw and Christen, 2011).
+accumulation histories for deposits, through combining radiocarbon and other dates with prior information ('Blaauw' and 'Christen', 2011).
 
 Bacon divides a core into many thin vertical sections (by default of \code{thick=5} cm thickness), 
 and through millions of Markov Chain Monte Carlo (MCMC) iterations estimates 
@@ -205,10 +206,10 @@ Marine13 radiocarbon age calibration curves 0-50,000 yr cal BP. Radiocarbon 55(4
 
 Hogg, A.G., Hua, Q., Blackwell, P.G., Buck, C.E., Guilderson, T.P., Heaton, T.J., Niu, M., Palmer, J.,
 Reimer, P.J., Reimer, R., Turney, C.S.M., Zimmerman, S.R.H., 2013. ShCal13 Southern Hemisphere
-calibration, 0-50,000 cal yr BP. Radiocarbon 55(4), doi:10.2458/azu_js_rc.55.16783.
+calibration, 0-50,000 cal yr BP. Radiocarbon 55(4), <doi:10.2458/azu_js_rc.55.16783>.
 
 Hua, Q., Barbetti, M., Rakowski, A.Z., 2013. Atmospheric radiocarbon for the period 1950-2010. 
-Radiocarbon 55(4), doi:10.2458/azu_js_rc.v55i2.16177.
+Radiocarbon 55(4), <doi:10.2458/azu_js_rc.v55i2.16177>.
 
 Jones, V.J., Stevenson, A.C., Battarbee, R.W., 1989. Acidification of lakes in Galloway, south west Scotland
 - a diatom and pollen study of the post-glacial history of the Round Loch of Glenhead. 

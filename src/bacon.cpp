@@ -133,12 +133,12 @@ int bacon( std::string inputfile1, std::string outputfile1 , int ssize, std::str
   if ((F = fopen( ax, "r")) == NULL) {
   printf("Could not open %s for reading.\n", ax);
 
-  exit(0);
+  //exit(0);
   }
   if ((G = fopen( ax2, "w+")) == NULL) {
   printf("Could not open %s for writing.\n", ax2);
 
-  exit(0);
+  //exit(0);
   }
 
 

@@ -1,17 +1,11 @@
 
-
-
-
-
 //This class implements the input system for all parameters
-//It reads the configuration file and hold all input needed for 
-//the Bacon clasess.
+//It reads the configuration file and holds all input needed for 
+//the Bacon classes.
 
 
 #ifndef INPUT_H
 #define INPUT_H
-
-
 
 //#include <stdio.h>
 //#include <stdlib.h>
@@ -23,11 +17,11 @@
 #include "ranfun.h"
 //#include "iostream"
 
-//Maximum number of parameters in a lines in the input program
+//Maximum number of parameters per line in the input program
 #define MAXNUMOFPARS 20
 
 //Maximum number of hiatuses
-#define MAXNUMOFHIATUS 10
+#define MAXNUMOFHIATUS 50 // was 10, changed 30 Jan 2019 MB
 
 class Input {
 

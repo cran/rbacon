@@ -19,14 +19,13 @@ NULL
 
 # do: 
 
-
-# for future versions: check behaviour of AgesOfEvents around hiatuses, add function to estimate best thickness (once published), check w Andres if correction to remove -5.0 cal BP in IntCal13 and SHCal13 curves was done correctly, F14C, if hiatus or boundary plot acc.posts of the individual sections?, allow for asymmetric cal BP errors (e.g. read from files), make more consistent use of dark for all functions (incl. flux and accrate.age.ghost), remove darkest?, introduce write.Bacon function to write files only once user agrees with the model, proxy.ghost very slow with long/detailed cores - optimization possible?, check again if/how Bacon gets confused by Windows usernames with non-ascii characters (works fine on Mac)
+# for future versions: produce greyscale proxy graph with proxy uncertainties?, smooth bacon, check behaviour of AgesOfEvents around hiatuses, add function to estimate best thickness (once published), check w Andres if correction to remove -5.0 cal BP in IntCal13 and SHCal13 curves was done correctly, F14C, if hiatus or boundary plot acc.posts of the individual sections?, allow for asymmetric cal BP errors (e.g. read from files), make more consistent use of dark for all functions (incl. flux and accrate.age.ghost), remove darkest?, introduce write.Bacon function to write files only once user agrees with the model, proxy.ghost very slow with long/detailed cores - optimization possible?, check again if/how Bacon gets confused by Windows usernames with non-ascii characters (works fine on Mac)
 
 #' @name Bacon 
 #' @title Main age-depth modelling function
 #' @description This is the main age-depth modelling function of the rbacon package.
 #' @details Bacon is an approach to age-depth modelling that uses Bayesian statistics in order to reconstruct Bayesian 
-#' accumulation histories for deposits, through combining radiocarbon and other dates with prior information (Blaauw and Christen, 2011).
+#' accumulation histories for deposits, through combining radiocarbon and other dates with prior information ('Blaauw' and 'Christen', 2011).
 #'
 #' Bacon divides a core into many thin vertical sections (by default of \code{thick=5} cm thickness), 
 #' and through millions of Markov Chain Monte Carlo (MCMC) iterations estimates 
@@ -86,7 +85,8 @@ NULL
 #' @param cc3 For southern hemisphere 14C dates (SHCal13).
 #' @param cc4 Use an alternative curve (3 columns: cal BP, 14C age, error, separated by white spaces and saved as a plain-text file). See \code{ccdir}.
 #' @param ccdir Directory where the calibration curves for C14 dates \code{cc} are located. By default \code{ccdir=""} since they are loaded into R's memory. 
-#' Use \code{ccdir="."} to choose current working directory. Use \code{ccdir="Curves/"} to choose sub-folder \code{Curves/}. Note that all calibration curves should reside in the same directory. If you want to add a custom-built curve, put it in the directory where the default calibration curves are, or alternatively produce a new folder, and add your curve as well as the default calibration curves there (e.g., \code{write.table(copyCalibrationCurve(1), "./3Col_intcal13.14C", sep="\t")}.)
+#' For example, use \code{ccdir="."} to choose current working directory, or \code{ccdir="Curves/"} to choose sub-folder \code{Curves/}. Note that all calibration curves should reside in the same directory. If you want to add a custom-built curve, put it in the directory where the default calibration curves are (probably \code{list.files(paste0(.libPaths(), "/rbacon/extdata/Curves/"))}).
+#' Alternatively produce a new folder, and add your curve as well as the default calibration curves there (cc1, cc2 and cc3; e.g., \code{write.table(copyCalibrationCurve(1), "./3Col_intcal13.14C", sep="\t")}.)
 #' @param postbomb Use a postbomb curve for negative (i.e. postbomb) 14C ages. \code{0 = none, 1 = NH1, 2 = NH2, 3 = NH3, 4 = SH1-2, 5 = SH3}
 #' @param delta.R Mean of core-wide age offsets (e.g., regional marine offsets).
 #' @param delta.STD Error of core-wide age offsets (e.g., regional marine offsets). 
@@ -152,10 +152,10 @@ NULL
 #'
 #' Hogg, A.G., Hua, Q., Blackwell, P.G., Buck, C.E., Guilderson, T.P., Heaton, T.J., Niu, M., Palmer, J.,
 #' Reimer, P.J., Reimer, R., Turney, C.S.M., Zimmerman, S.R.H., 2013. ShCal13 Southern Hemisphere
-#' calibration, 0-50,000 cal yr BP. Radiocarbon 55(4), doi:10.2458/azu_js_rc.55.16783.
+#' calibration, 0-50,000 cal yr BP. Radiocarbon 55(4), <doi:10.2458/azu_js_rc.55.16783>.
 #'
 #' Hua, Q., Barbetti, M., Rakowski, A.Z., 2013. Atmospheric radiocarbon for the period 1950-2010. 
-#' Radiocarbon 55(4), doi:10.2458/azu_js_rc.v55i2.16177.
+#' Radiocarbon 55(4), <doi:10.2458/azu_js_rc.v55i2.16177>.
 #'
 #' Jones, V.J., Stevenson, A.C., Battarbee, R.W., 1989. Acidification of lakes in Galloway, south west Scotland
 #' - a diatom and pollen study of the post-glacial history of the Round Loch of Glenhead. 
@@ -206,6 +206,10 @@ Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=
       }
     }
 
+  if(!is.na(boundary[1]))
+    boundary <- sort(unique(boundary))
+  if(!is.na(hiatus.depths[1]))
+    hiatus.depths <- sort(unique(hiatus.depths))
   info <- .Bacon.settings(core=core, coredir=coredir, dets=dets, thick=thick, remember=remember, d.min=d.min, d.max=d.max, d.by=d.by, depths.file=depths.file, slump=slump, acc.mean=acc.mean, acc.shape=acc.shape, mem.mean=mem.mean, mem.strength=mem.strength, boundary=boundary, hiatus.depths=hiatus.depths, hiatus.max=hiatus.max, BCAD=BCAD, cc=cc, postbomb=postbomb, cc1=cc1, cc2=cc2, cc3=cc3, cc4=cc4, unit=unit, normal=normal, t.a=t.a, t.b=t.b, delta.R=delta.R, delta.STD=delta.STD, prob=prob, defaults=defaults, runname=runname, ssize=ssize, dark=dark, MinYr=MinYr, MaxYr=MaxYr, cutoff=cutoff, yr.res=yr.res, after=after)
   .assign_to_global("info", info)
   info$coredir <- coredir
@@ -278,8 +282,8 @@ Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=
     slump <- matrix(sort(slump), ncol=2, byrow=TRUE)
       info$slump <- slump
     info$slumpfree <- excise(depths, slump, info$d.by)
-    info$slumpboundary <- excise(info$boundary, slump, info$d.by) # check
-    info$slumphiatus <- excise(info$hiatus.depths, slump, info$d.by) # check
+    info$slumpboundary <- excise(sort(info$boundary), slump, info$d.by) # check
+    info$slumphiatus <- excise(sort(info$hiatus.depths), slump, info$d.by) # check
     if(!is.na(info$slumpboundary[1]))
       info$slumphiatus <- info$slumpboundary
     slumpdets <- info$dets
