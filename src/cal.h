@@ -267,7 +267,7 @@ public:
 			sprintf( name, "IntCal13");
 		}
 		else
-			if (Bomb < 5) { // curve number, not cal BP yr
+			if (Bomb < 6) { // curve number, not cal BP yr. 26 March 2019: Was Bomb < 5 but now there are 5 postbomb curves
 
             bombcc = new GenericCal(postbombfnam[Bomb], ccdir);
 			mincal = bombcc->MinCal();
@@ -531,7 +531,7 @@ public:
 			sprintf( name, "SHCal13");
 		}
 		else
-			if (Bomb < 5) {
+			if (Bomb < 6) { /// was Bomb < 5 but now there are 5 postbomb curves (March 2019)
 
             bombcc = new GenericCal(postbombfnam[Bomb],(char*)ccdir.c_str());
 			mincal = bombcc->MinCal();

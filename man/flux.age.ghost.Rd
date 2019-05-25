@@ -4,20 +4,25 @@
 \alias{flux.age.ghost}
 \title{Plot flux rates for proxies.}
 \usage{
-flux.age.ghost(proxy = 1, yr.lim = c(), yr.res = 200,
-  set = get("info"), flux = c(), plot.range = TRUE, prob = 0.8,
-  range.col = grey(0.5), range.lty = 2, plot.mean = TRUE,
-  mean.col = "red", mean.lty = 2, flux.lim = c(),
-  flux.lab = "flux", upper = 0.95, dark = set$dark,
-  BCAD = set$BCAD, yr.lab = c(), rotate.axes = FALSE,
-  rev.flux = FALSE, rev.yr = FALSE)
+flux.age.ghost(proxy = 1, age.lim = c(), yr.lim = age.lim,
+  age.res = 200, yr.res = age.res, set = get("info"), flux = c(),
+  plot.range = TRUE, prob = 0.8, range.col = grey(0.5),
+  range.lty = 2, plot.mean = TRUE, mean.col = "red", mean.lty = 2,
+  flux.lim = c(), flux.lab = "flux", upper = 0.95, dark = set$dark,
+  BCAD = set$BCAD, age.lab = c(), yr.lab = age.lab,
+  rotate.axes = FALSE, rev.flux = FALSE, rev.age = FALSE,
+  rev.yr = rev.age)
 }
 \arguments{
 \item{proxy}{Which proxy to use (counting from the column number in the .csv file after the depths column).}
 
-\item{yr.lim}{Minimum and maximum calendar age ranges, calculated automatically by default (\code{yr.lim=c()}).}
+\item{age.lim}{Minimum and maximum calendar age ranges, calculated automatically by default (\code{age.lim=c()}).}
 
-\item{yr.res}{Resolution or amount of greyscale pixels to cover the age scale of the plot. Default \code{yr.res=200}.}
+\item{yr.lim}{Deprecated - use age.lim instead}
+
+\item{age.res}{Resolution or amount of greyscale pixels to cover the age scale of the plot. Default \code{age.res=200}.}
+
+\item{yr.res}{Deprecated - use age.res instead}
 
 \item{set}{Detailed information of the current run, stored within this session's memory as variable info.}
 
@@ -48,13 +53,17 @@ flux.age.ghost(proxy = 1, yr.lim = c(), yr.res = 200,
 
 \item{BCAD}{The calendar scale of graphs and age output-files is in \code{cal BP} by default, but can be changed to BC/AD using \code{BCAD=TRUE}.}
 
-\item{yr.lab}{The labels for the calendar axis (default \code{yr.lab="cal BP"} or \code{"BC/AD"} if \code{BCAD=TRUE}).}
+\item{age.lab}{The labels for the calendar axis (default \code{age.lab="cal BP"} or \code{"BC/AD"} if \code{BCAD=TRUE}).}
+
+\item{yr.lab}{Deprecated - use age.lab instead}
 
 \item{rotate.axes}{The default of plotting calendar year on the horizontal axis and fluxes on the vertical one can be changed with \code{rotate.axes=TRUE}.}
 
 \item{rev.flux}{The flux axis can be reversed with \code{rev.flux=TRUE}.}
 
-\item{rev.yr}{The direction of the age axis can be reversed using \code{rev.yr=TRUE}.}
+\item{rev.age}{The direction of the age axis can be reversed using \code{rev.age=TRUE}.}
+
+\item{rev.yr}{Deprecated - use rev.age instead}
 }
 \value{
 A plot of flux rates.

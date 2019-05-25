@@ -4,22 +4,29 @@
 \alias{accrate.age.ghost}
 \title{Plot a core's accumulation rates against calendar time.}
 \usage{
-accrate.age.ghost(set = get("info"), yr.lim = c(), yr.lab = c(),
-  yr.res = 200, grey.res = 50, prob = 0.95, plot.range = TRUE,
+accrate.age.ghost(set = get("info"), age.lim = c(), yr.lim = age.lim,
+  age.lab = c(), yr.lab = age.lab, age.res = 200, yr.res = age.res,
+  grey.res = 50, prob = 0.95, plot.range = TRUE,
   range.col = grey(0.5), range.lty = 2, plot.mean = TRUE,
   mean.col = "red", mean.lty = 2, acc.lim = c(), acc.lab = c(),
   upper = 0.99, dark = 50, BCAD = set$BCAD, cmyr = FALSE,
-  rotate.axes = FALSE, rev.yr = FALSE, rev.acc = FALSE, xaxs = "i",
-  yaxs = "i", bty = "o")
+  rotate.axes = FALSE, rev.age = FALSE, rev.yr = rev.age,
+  rev.acc = FALSE, xaxs = "i", yaxs = "i", bty = "o")
 }
 \arguments{
 \item{set}{Detailed information of the current run, stored within this session's memory as variable info.}
 
-\item{yr.lim}{Minimum and maximum calendar age ranges, calculated automatically by default (\code{yr.lim=c()}).}
+\item{age.lim}{Minimum and maximum calendar age ranges, calculated automatically by default (\code{age.lim=c()}).}
 
-\item{yr.lab}{The labels for the calendar axis (default \code{yr.lab="cal BP"} or \code{"BC/AD"} if \code{BCAD=TRUE}).}
+\item{yr.lim}{Deprecated - use age.lim instead}
 
-\item{yr.res}{Resolution or amount of greyscale pixels to cover the age scale of the age-model plot. Default \code{yr.res=200}.}
+\item{age.lab}{The labels for the calendar axis (default \code{age.lab="cal BP"} or \code{"BC/AD"} if \code{BCAD=TRUE}).}
+
+\item{yr.lab}{Deprecated - use age.lab instead}
+
+\item{age.res}{Resolution or amount of greyscale pixels to cover the age scale of the age-model plot. Default \code{age.res=200}.}
+
+\item{yr.res}{Deprecated - use age.res instead}
 
 \item{grey.res}{Resolution of greyscales. Default \code{grey.res=50}, which does not aim to poke fun at a famous novel.}
 
@@ -51,7 +58,9 @@ accrate.age.ghost(set = get("info"), yr.lim = c(), yr.lab = c(),
 
 \item{rotate.axes}{The default is to plot the calendar age horizontally and accumulation rates vertically. Change to \code{rotate.axes=TRUE} value to rotate axes.}
 
-\item{rev.yr}{The direction of the age axis, which can be reversed using \code{rev.yr=TRUE}.}
+\item{rev.age}{The direction of the age axis, which can be reversed using \code{rev.age=TRUE}.}
+
+\item{rev.yr}{Deprecated - use rev.age instead}
 
 \item{rev.acc}{The direction of the accumulation rate axis, which can be reversed (\code{rev.acc=TRUE}.}
 

@@ -4,23 +4,25 @@
 \alias{agedepth}
 \title{Plot an age-depth model}
 \usage{
-agedepth(set = get("info"), BCAD = set$BCAD, unit = "cm",
-  d.lab = c(), yr.lab = c(), d.min = set$d.min, d.max = set$d.max,
-  d.by = set$d.by, depths = set$depths, depths.file = FALSE,
-  yr.min = c(), yr.max = c(), dark = c(), prob = set$prob,
-  rounded = 0, d.res = 400, yr.res = 400, date.res = 100,
-  grey.res = 100, rotate.axes = FALSE, rev.yr = FALSE,
-  rev.d = FALSE, maxcalc = 500, height = 15, mirror = TRUE,
-  up = TRUE, cutoff = 0.001, plot.range = TRUE, panels = layout(1),
-  range.col = grey(0.5), range.lty = "12", mn.col = "red",
-  mn.lty = "12", med.col = NA, med.lty = "12", C14.col = rgb(0, 0,
-  1, 0.35), C14.border = rgb(0, 0, 1, 0.5), cal.col = rgb(0, 0.5, 0.5,
-  0.35), cal.border = rgb(0, 0.5, 0.5, 0.5), dates.col = c(),
-  hiatus.col = grey(0.5), hiatus.lty = "12", greyscale = grey(seq(1,
-  0, length = grey.res)), slump.col = grey(0.8),
-  normalise.dists = TRUE, cc = set$cc, title = set$core,
-  title.location = "topleft", after = set$after, bty = "l",
-  mar = c(3, 3, 1, 1), mgp = c(1.5, 0.7, 0), xaxs = "r",
+agedepth(set = get("info"), BCAD = set$BCAD, depth.unit = "cm",
+  age.unit = "yr", unit = depth.unit, d.lab = c(), age.lab = c(),
+  yr.lab = age.lab, acc.lab = c(), d.min = set$d.min,
+  d.max = set$d.max, d.by = set$d.by, depths = set$depths,
+  depths.file = FALSE, age.min = c(), yr.min = age.min,
+  age.max = c(), yr.max = age.max, dark = c(), prob = set$prob,
+  rounded = 0, d.res = 400, age.res = 400, yr.res = age.res,
+  date.res = 100, grey.res = 100, rotate.axes = FALSE,
+  rev.age = FALSE, rev.yr = rev.age, rev.d = FALSE, maxcalc = 500,
+  height = 15, mirror = TRUE, up = TRUE, cutoff = 0.001,
+  plot.range = TRUE, panels = layout(1), range.col = grey(0.5),
+  range.lty = "12", mn.col = "red", mn.lty = "12", med.col = NA,
+  med.lty = "12", C14.col = rgb(0, 0, 1, 0.35), C14.border = rgb(0,
+  0, 1, 0.5), cal.col = rgb(0, 0.5, 0.5, 0.35), cal.border = rgb(0,
+  0.5, 0.5, 0.5), dates.col = c(), hiatus.col = grey(0.5),
+  hiatus.lty = "12", greyscale = grey(seq(1, 0, length = grey.res)),
+  slump.col = grey(0.8), normalise.dists = TRUE, cc = set$cc,
+  title = set$core, title.location = "topleft", after = set$after,
+  bty = "l", mar = c(3, 3, 1, 1), mgp = c(1.5, 0.7, 0), xaxs = "r",
   yaxs = "r", xaxt = "s", yaxt = "s", plot.pdf = FALSE,
   dates.only = FALSE, model.only = FALSE, talk = FALSE)
 }
@@ -29,11 +31,19 @@ agedepth(set = get("info"), BCAD = set$BCAD, unit = "cm",
 
 \item{BCAD}{The calendar scale of graphs and age output-files is in \code{cal BP} by default, but can be changed to BC/AD using \code{BCAD=TRUE}.}
 
-\item{unit}{Depth units, default \code{unit="cm"}.}
+\item{depth.unit}{Units of the depths. Defaults to \code{depth.unit="cm"}.}
 
-\item{d.lab}{The labels for the depth axis. Default \code{d.lab="Depth (cm)"}. See also \code{unit}.}
+\item{age.unit}{Units of the ages. Defaults to \code{age.unit="yr"}.}
 
-\item{yr.lab}{The labels for the calendar axis (default \code{yr.lab="cal BP"} or \code{"BC/AD"} if \code{BCAD=TRUE}).}
+\item{unit}{Deprecated and replaced by \code{depth.unit}.}
+
+\item{d.lab}{The labels for the depth axis. Default \code{d.lab="Depth (cm)"}. See also \code{depth.unit}.}
+
+\item{age.lab}{The labels for the calendar axis (default \code{age.lab="cal BP"} or \code{"BC/AD"} if \code{BCAD=TRUE}).}
+
+\item{yr.lab}{Deprecated - use age.lab instead}
+
+\item{acc.lab}{The labels for the accumulation rate plot (top middle). Default \code{d.lab="Acc. rate (yr/cm)"} (or whatever units you're using).}
 
 \item{d.min}{Minimum depth of age-depth model (use this to extrapolate to depths higher than the top dated depth).}
 
@@ -48,9 +58,13 @@ If \code{depths.file=TRUE}, Bacon will read a file containing the depths for whi
 This file, containing the depths in a single column without a header, should be stored within \code{coredir}, 
 and its name should start with the core's name and end with '_depths.txt'. Then specify \code{depths.file=TRUE} (default \code{FALSE}). See also \code{depths}.}
 
-\item{yr.min}{Minimum calendar age of the age-depth plot.}
+\item{age.min}{Minimum age of the age-depth plot.}
 
-\item{yr.max}{Maximum calendar age of the age-depth plot.}
+\item{yr.min}{Deprecated - use age.min instead}
+
+\item{age.max}{Maximum age of the age-depth plot.}
+
+\item{yr.max}{Deprecated - use age.min instead}
 
 \item{dark}{Darkness of the greyscale age-depth model. By default, the darkest grey value is calculated as 10 times the height of the lowest-precision age estimate \code{dark=c()}. Lower values will result in lighter grey but values >1 are not allowed.}
 
@@ -60,7 +74,9 @@ and its name should start with the core's name and end with '_depths.txt'. Then 
 
 \item{d.res}{Resolution or amount of greyscale pixels to cover the depth scale of the age-model plot. Default \code{d.res=200}.}
 
-\item{yr.res}{Resolution or amount of greyscale pixels to cover the age scale of the age-model plot. Default \code{yr.res=200}.}
+\item{age.res}{Resolution or amount of greyscale pixels to cover the age scale of the age-model plot. Default \code{yr.res=200}.}
+
+\item{yr.res}{Deprecated - use age.res instead}
 
 \item{date.res}{Date distributions are plotted using \code{date.res=100} points by default.}
 
@@ -68,7 +84,9 @@ and its name should start with the core's name and end with '_depths.txt'. Then 
 
 \item{rotate.axes}{By default, the age-depth model is plotted with the depths on the horizontal axis and ages on the vertical axis. This can be changed with \code{rotate.axes=TRUE}.}
 
-\item{rev.yr}{The direction of the age axis, which can be reversed using \code{rev.yr=TRUE}.}
+\item{rev.age}{The direction of the age axis, which can be reversed using \code{rev.age=TRUE}.}
+
+\item{rev.yr}{Deprecated - use rev.age instead}
 
 \item{rev.d}{The direction of the depth axis, which can be reversed using \code{rev.d=TRUE}.}
 

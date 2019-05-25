@@ -19,12 +19,12 @@ copyCalibrationCurve <- function(cc=1, postbomb=FALSE) {
         if(cc==3) fl <- "postbomb_NH3.14C" else
           if(cc==4) fl <- "postbomb_SH1-2.14C" else 
             if(cc==5) fl <- "postbomb_SH3.14C" else  
-              stop("Calibration curve doesn't exist\n")		       
+              stop("calibration curve doesn't exist\n", call.=FALSE)		       
   } else
   if(cc==1) fl <- "3Col_intcal13.14C" else
     if(cc==2) fl <- "3Col_marine13.14C" else
       if(cc==3) fl <- "3Col_shcal13.14C" else
-        stop("Calibration curve doesn't exist\n")  
+        stop("calibration curve doesn't exist\n", call.=FALSE)  
   cc <- system.file("extdata/Curves", fl, package='rbacon')
   cc <- read.table(cc)
   invisible(cc)
@@ -169,7 +169,7 @@ age.pMC <- function(mn, sdev, ratio=100, decimals=3) {
 #' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474. 
 #' \url{https://projecteuclid.org/download/pdf_1/euclid.ba/1339616472}
 #' @export
-add.dates <- function(mn, sdev, depth, cc=1, above=1e-3, ex=10, normal=TRUE, normalise=TRUE, t.a=3, t.b=4, age.res=100, times=20, col=rgb(1,0,0,.5), border=rgb(1,0,0,.5), rotate.axes=FALSE, mirror=TRUE, up=TRUE, BCAD=FALSE, pch=4) {
+add.dates <- function(mn, sdev, depth, cc=1, above=1e-6, ex=10, normal=TRUE, normalise=TRUE, t.a=3, t.b=4, age.res=100, times=20, col=rgb(1,0,0,.5), border=rgb(1,0,0,.5), rotate.axes=FALSE, mirror=TRUE, up=TRUE, BCAD=FALSE, pch=4) {
   if(cc > 0)
     cc <- copyCalibrationCurve(cc)
   
@@ -217,12 +217,16 @@ add.dates <- function(mn, sdev, depth, cc=1, above=1e-3, ex=10, normal=TRUE, nor
 #' It can be used to produce custom-built graphs. 
 #' @param set Detailed information of the current run, stored within this session's memory as variable \code{info}.
 #' @param BCAD The calendar scale of graphs is in \code{cal BP} by default, but can be changed to BC/AD using \code{BCAD=TRUE}. 
+#' @param cc Calibration curve to be used (defaults to info$cc)
 #' @param rotate.axes The default of plotting age on the horizontal axis and event probability on the vertical one can be changed with \code{rotate.axes=TRUE}.
 #' @param rev.d The direction of the depth axis can be reversed from the default (\code{rev.d=TRUE}). 
-#' @param rev.yr The direction of the calendar age axis can be reversed from the default (\code{rev.yr=TRUE}) 
-#' @param yr.lim Minimum and maximum calendar age ranges, calculated automatically by default (\code{yr.lim=c()}).
+#' @param rev.age The direction of the calendar age axis can be reversed from the default (\code{rev.age=TRUE}) 
+#' @param rev.yr Deprecated - use rev.age instead
+#' @param age.lim Minimum and maximum calendar age ranges, calculated automatically by default (\code{age.lim=c()}).
+#' @param yr.lim Deprecated - use age.lim instead
 #' @param d.lab The labels for the depth axis. Default \code{d.lab="Depth (cm)"}.
-#' @param yr.lab The labels for the calendar axis (default \code{yr.lab="cal BP"} or \code{"BC/AD"} if \code{BCAD=TRUE}).
+#' @param age.lab The labels for the calendar axis (default \code{yr.lab="cal BP"} or \code{"BC/AD"} if \code{BCAD=TRUE}).
+#' @param yr.lab Deprecated - use age.lab instead
 #' @param height The heights of the distributions of the dates. See also \code{normalise.dists}.
 #' @param mirror Plot the dates as 'blobs'. Set to \code{mirror=FALSE} to plot simple distributions.
 #' @param up Directions of distributions if they are plotted non-mirrored. Default \code{up=TRUE}.
@@ -250,32 +254,32 @@ add.dates <- function(mn, sdev, depth, cc=1, above=1e-3, ex=10, normal=TRUE, nor
 #' \url{https://projecteuclid.org/download/pdf_1/euclid.ba/1339616472}
 #' @export
 ### produce plots of the calibrated distributions
-calib.plot <- function(set=get('info'), BCAD=set$BCAD, rotate.axes=FALSE, rev.d=FALSE, rev.yr=FALSE, yr.lim=c(), date.res=100, d.lab=c(), yr.lab=c(), height=15, mirror=TRUE, up=TRUE, cutoff=.001, C14.col=rgb(0,0,1,.5), C14.border=rgb(0,0,1,.75), cal.col=rgb(0,.5,.5,.5), cal.border=rgb(0,.5,.5,.75), dates.col=c(), slump.col=grey(0.8), new.plot=TRUE, plot.dists=TRUE, normalise.dists=TRUE) {
+calib.plot <- function(set=get('info'), BCAD=set$BCAD, cc=set$cc, rotate.axes=FALSE, rev.d=FALSE, rev.age=FALSE, rev.yr=rev.age, age.lim=c(), yr.lim=age.lim, date.res=100, d.lab=c(), age.lab=c(), yr.lab=age.lab, height=15, mirror=TRUE, up=TRUE, cutoff=.001, C14.col=rgb(0,0,1,.5), C14.border=rgb(0,0,1,.75), cal.col=rgb(0,.5,.5,.5), cal.border=rgb(0,.5,.5,.75), dates.col=c(), slump.col=grey(0.8), new.plot=TRUE, plot.dists=TRUE, normalise.dists=TRUE) {
   height <- length(set$d.min:set$d.max) * height/50
-  if(length(yr.lim) == 0)
+  if(length(age.lim) == 0)
     lims <- c()  
   for(i in 1:length(set$calib$probs))
     lims <- c(lims, set$calib$probs[[i]][,1])
-  yr.min <- min(lims)
-  yr.max <- max(lims)
+  age.min <- min(lims)
+  age.max <- max(lims)
   if(BCAD) {
-    yr.min <- 1950 - yr.min
-    yr.max <- 1950 - yr.max
+    age.min <- 1950 - age.min
+    age.max <- 1950 - age.max
     } 
-  if(length(yr.lab) == 0)
-    yr.lab <- ifelse(set$BCAD, "BC/AD", "cal yr BP")
-  yr.lim <- c(yr.min, yr.max)  
-  if(rev.yr)
-    yr.lim <- yr.lim[2:1]
+  if(length(age.lab) == 0)
+    age.lab <- ifelse(set$BCAD, "BC/AD", paste("cal", set$age.unit, " BP"))
+  age.lim <- c(age.min, age.max)  
+  if(rev.age)
+    age.lim <- age.lim[2:1]
   dlim <- range(set$d)
   if(rev.d)
     dlim <- dlim[2:1]
   if(length(d.lab) == 0)
-    d.lab <- paste("depth (", set$unit, ")", sep="")  
+    d.lab <- paste("depth (", set$depth.unit, ")", sep="")  
   if(new.plot)
     if(rotate.axes)
-      plot(0, type="n", xlim=yr.lim, ylim=dlim[2:1], xlab=yr.lab, ylab=d.lab, main="") else
-        plot(0, type="n", xlim=dlim, ylim=yr.lim, xlab=d.lab, ylab=yr.lab, main="")
+      plot(0, type="n", xlim=age.lim, ylim=dlim[2:1], xlab=age.lab, ylab=d.lab, main="") else
+        plot(0, type="n", xlim=dlim, ylim=age.lim, xlab=d.lab, ylab=age.lab, main="")
 
   if(length(set$slump) > 0)
     if(rotate.axes)
@@ -284,16 +288,18 @@ calib.plot <- function(set=get('info'), BCAD=set$BCAD, rotate.axes=FALSE, rev.d=
 
   if(plot.dists)
     for(i in 1:length(set$calib$probs)) {
-      cal <- set$calib$probs[[i]]
+      cal <- cbind(set$calib$probs[[i]])
         d <- set$calib$d[[i]]
       if(BCAD)
         cal[,1] <- 1950-cal[,1]
       o <- order(cal[,1])
-      if(normalise.dists)
-        cal <- cbind(cal[o,1], height*cal[o,2]/sum(cal[,2])) else
-          cal <- cbind(cal[o,1], height*cal[o,2]/max(cal[,2]))
+#      if(normalise.dists)
+#        cal <- cbind(cal[o,1], height*cal[o,2]/sum(cal[,2])) else
+#          cal <- cbind(cal[o,1], height*cal[o,2]/max(cal[,2]))
       cal <- cal[cal[,2] >= cutoff,]  
-      cal <- approx(cal[,1], cal[,2], seq(min(cal[,1]), max(cal[,1]), length=200)) # tmp
+	  cal[,2] <- height*cal[,2]
+      cal <- approx(cal[,1], cal[,2], seq(min(cal[,1]), max(cal[,1]), length=100)) # tmp
+	  
       if(mirror)
         pol <- cbind(c(d-cal$y, d+rev(cal$y)), c(cal$x, rev(cal$x))) else
          if(up)
@@ -301,7 +307,7 @@ calib.plot <- function(set=get('info'), BCAD=set$BCAD, rotate.axes=FALSE, rev.d=
              pol <- cbind(d+c(0, cal$y, 0), c(min(cal$x), cal$x, max(cal$x)))
       if(rotate.axes)
         pol <- cbind(pol[,2], pol[,1])
-      if(ncol(set$dets)==4 || (ncol(set$dets) > 4 && set$dets[i,5] > 0)) {
+      if(ncol(set$dets)==4 && cc > 0 || (ncol(set$dets) > 4 && set$dets[i,5] > 0)) {
         col <- C14.col
         border <- C14.border
       } else {
@@ -309,9 +315,9 @@ calib.plot <- function(set=get('info'), BCAD=set$BCAD, rotate.axes=FALSE, rev.d=
           border <- cal.border
         }
       if(length(dates.col) > 0) {
-		col <- dates.col[i]
+	    col <- dates.col[i]
         border <- dates.col[i]
-	  }
+      }
       polygon(pol, col=col, border=border)
     }
 }
@@ -338,7 +344,7 @@ calib.plot <- function(set=get('info'), BCAD=set$BCAD, rotate.axes=FALSE, rev.d=
         if(set$postbomb==3) bomb <- read.table(paste(ccdir,"postbomb_NH3.14C", sep=""))[,1:3] else
           if(set$postbomb==4) bomb <- read.table(paste(ccdir,"postbomb_SH1-2.14C", sep=""))[,1:3] else
             if(set$postbomb==5) bomb <- read.table(paste(ccdir,"postbomb_SH3.14C", sep=""))[,1:3] else
-              stop("Warning, cannot find postbomb curve #", set$postbomb, " (use values of 1 to 5 only)")
+              stop("cannot find postbomb curve #", set$postbomb, " (use values of 1 to 5 only)", call.=FALSE)
       bomb.x <- seq(max(bomb[,1]), min(bomb[,1]), by=-.1) # interpolate
       bomb.y <- approx(bomb[,1], bomb[,2], bomb.x)$y
       bomb.z <- approx(bomb[,1], bomb[,3], bomb.x)$y
@@ -350,15 +356,15 @@ calib.plot <- function(set=get('info'), BCAD=set$BCAD, rotate.axes=FALSE, rev.d=
 
   ## use Gaussian or t (Christen and Perez Radiocarbon 2009) calibration
   if(round(set$t.b-set$t.a) !=1)
-    stop("\n Warning! t.b - t.a should always be 1, check the manual")
+    stop("t.b - t.a should always be 1, check the manual", call.=FALSE)
   d.cal <- function(cc, rcmean, w2, t.a, t.b) {
     if(set$normal)
       cal <- cbind(cc[,1], dnorm(cc[,2], rcmean, sqrt(cc[,3]^2+w2))) else
-        cal <- cbind(cc[,1], (t.b+ ((rcmean-cc[,2])^2) / (2*(cc[,3]^2 + w2))) ^ (-1*(t.a+0.5)))
+        cal <- cbind(cc[,1], (t.b+ ((rcmean-cc[,2])^2) / (2*(cc[,3]^2 + w2))) ^ (-1*(t.a+0.5))) # student-t
     cal[,2] <- cal[,2]/sum(cal[,2])
     if(length(which(cal[,2]>set$cutoff)) > 5) # ensure that also very precise dates get a range of probabilities
       cal[which(cal[,2]>set$cutoff),] else {
-        calx <- seq(min(cal[,1]), max(cal[,1]), length=50)
+        calx <- seq(min(cal[,1]), max(cal[,1]), length=20)
         caly <- approx(cal[,1], cal[,2], calx)$y
         cbind(calx, caly/sum(caly))
       }
@@ -368,8 +374,10 @@ calib.plot <- function(set=get('info'), BCAD=set$BCAD, rotate.axes=FALSE, rev.d=
   calib <- list(d=dat[,4])
   if(ncol(dat)==4) { # only one type of dates (e.g., calBP, or all IntCal13 C14 dates)
     if(set$cc==0) {
-      delta.R <- 0; delta.STD <- 0 # only C14 dates should need correcting for age offsets
-      x <- seq(min(dat[,2])-max(100,4*max(dat[,3])), max(dat[,2])+max(100,4*max(dat[,3])), length=date.res)
+      #x <- seq(min(dat[,2])-max(100,10*max(dat[,3])), max(dat[,2])+max(100,10*max(dat[,3])), length=max(1e3, 100*date.res)) 
+	  x <- seq(min(dat[,2])-(5*max(dat[,3])), max(dat[,2])+(5*max(dat[,3])), by=5) # simplify, May 2019
+	  if(length(x) < 5 || length(x) > 200) # if too few/many resulting years, make 20 vals
+	    x <- seq(min(dat[,2])-(5*max(dat[,3])), max(dat[,2])+(5*max(dat[,3])), length=20)
       ccurve <- cbind(x, x, rep(0,length(x))) # dummy 1:1 curve
     } else
         if(set$cc==1) ccurve <- cc1 else
@@ -380,28 +388,29 @@ calib.plot <- function(set=get('info'), BCAD=set$BCAD, rotate.axes=FALSE, rev.d=
       calib$probs[[i]] <- d.cal(ccurve, dat[i,2]-delta.R, dat[i,3]^2+delta.STD^2, set$t.a, set$t.b)
   } else
       for(i in 1:nrow(dat)) {
-        det <- as.numeric(dat[i,])
-        if(det[5]==0) {
-          x <- seq(det[2]-max(100,4*det[3]), det[2]+max(100,4*det[3]), length=date.res)
+        dets <- as.numeric(dat[i,])
+        if(dets[5]==0) {
+		  x <- seq(dets[2]-(5*dets[3]), dets[2]+(5*dets[3]), by=5) # simplify, May 2019
+		  if(length(x) < 5 || length(x) > 200) # if too few/many resulting years, make 20 vals
+            x <- seq(dets[2]-(5*dets[3]), dets[2]+(5*dets[3]), length=20)  
           ccurve <- cbind(x, x, rep(0,length(x))) # dummy 1:1 curve
         } else
-            if(det[5]==1) ccurve <- cc1 else if(det[5]==2) ccurve <- cc2 else
-              if(det[5]==3) ccurve <- cc3 else ccurve <- cc4
+            if(dets[5]==1) ccurve <- cc1 else if(dets[5]==2) ccurve <- cc2 else
+              if(dets[5]==3) ccurve <- cc3 else ccurve <- cc4
 
         delta.R <- set$delta.R; delta.STD <- set$delta.STD; t.a <- set$t.a; t.b <- set$t.b
-        if(length(det) >= 7 && det[5] > 0) { # the user provided age offsets; only for C14 dates
-          delta.R <- det[6]
-          delta.STD <- det[7]
+        if(length(dets) >= 7 && dets[5] > 0) { # the user provided age offsets; only for C14 dates
+          delta.R <- dets[6]
+          delta.STD <- dets[7]
         }
 
-        if(length(det) >= 9) { # the user provided t.a and t.b values for each date
-          t.a <- det[8]
-          t.b <- det[9]
-          if(round(t.b-t.a) !=1) 
-            stop("\n Warning! t.b - t.a should always be 1, check the manual")
+        if(length(dets) >= 9) { # the user provided t.a and t.b values for each date
+          t.a <- dets[8]
+          t.b <- dets[9]
+          if(round(t.b-t.a) != 1) 
+            stop("t.b - t.a should always be 1, check the manual", call.=FALSE)
         }
-        calib$probs[[i]] <- d.cal(ccurve, det[2]-delta.R, det[3]^2+delta.STD^2, t.a, t.b)
+        calib$probs[[i]] <- d.cal(ccurve, dets[2]-delta.R, dets[3]^2+delta.STD^2, t.a, t.b)
       }
   calib
 }
-

@@ -4,8 +4,8 @@
 \alias{Bacon.hist}
 \title{Calculate age distributions of depths.}
 \usage{
-Bacon.hist(d, set = get("info"), BCAD = set$BCAD, yr.lab = c(),
-  yr.lim = c(), hist.lab = "Frequency", calc.range = TRUE,
+Bacon.hist(d, set = get("info"), BCAD = set$BCAD, age.lab = c(),
+  age.lim = c(), hist.lab = "Frequency", calc.range = TRUE,
   hist.lim = c(), draw = TRUE, prob = set$prob,
   hist.col = grey(0.5), hist.border = grey(0.2), range.col = "blue",
   med.col = "green", mean.col = "red")
@@ -17,9 +17,9 @@ Bacon.hist(d, set = get("info"), BCAD = set$BCAD, yr.lab = c(),
 
 \item{BCAD}{The calendar scale of graphs and age output-files is in \code{cal BP} by default, but can be changed to BC/AD using \code{BCAD=TRUE}.}
 
-\item{yr.lab}{The labels for the calendar axis (default \code{yr.lab="cal BP"} or \code{"BC/AD"} if \code{BCAD=TRUE}).}
+\item{age.lab}{The labels for the calendar axis (default \code{age.lab="cal BP"} or \code{"BC/AD"} if \code{BCAD=TRUE}).}
 
-\item{yr.lim}{Minimum and maximum calendar age ranges, calculated automatically by default (\code{yr.lim=c()}).}
+\item{age.lim}{Minimum and maximum calendar age ranges, calculated automatically by default (\code{age.lim=c()}).}
 
 \item{hist.lab}{The y-axis is labelled \code{ylab="Frequency"} by default.}
 
@@ -53,7 +53,7 @@ Age estimates of specific depths can also be plotted.
 }
 \examples{
   Bacon(run=FALSE, coredir=tempfile())
-  agedepth(yr.res=50, d.res=50, d.by=10)
+  agedepth(age.res=50, d.res=50, d.by=10)
   Bacon.hist(20) 
   Bacon.hist(20:30) 
 }

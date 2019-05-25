@@ -6,18 +6,21 @@
 #' The file name should start with the core's name and end with "_proxies.csv". For an example see \code{"Bacon_coredir/MSB2K/MSB2K_proxies.csv"} or \code{"Cores/MSB2K/MSB2K_proxies.csv"}.
 #' @param proxy Which proxy to use (counting from the column number in the .csv file after the depths column). 
 #' @param proxy.lab Label of the proxy axis. Default names are taken from the csv file.
-#' @param proxy.res Greyscale pixels are calculated for \code{proxy.res=200} proxy values by default. 
-#' @param yr.res Resolution or amount of greyscale pixels to cover the age scale of the age-model plot. Default \code{yr.res=200}.
+#' @param proxy.res Greyscale pixels are calculated for \code{proxy.res=250} proxy values by default, as a compromise between image quality and calculation speed. If the output looks very pixel-like (e.g., when choosing to plot only part of the record using proxy.lim), set this option to higher values.
+#' @param age.res Resolution or amount of greyscale pixels to cover the age scale of the age-model plot. Default \code{age.res=250} as a compromise between image quality and calculation speed. If the output looks very pixel-like (e.g., when choosing to plot only part of the record using age.lim), set this option to higher values.
+#' @param yr.res Deprecated - use age.res instead
 #' @param grey.res Grey-scale resolution of the proxy graph. Default \code{grey.res=100}. 
 #' @param set Detailed information of the current run, stored within this session's memory as variable info.
 #' @param dark By default, the darkest grey value is assigned to the most likely value within the entire core (normalised to 1; \code{dark=1}). By setting dark to, e.g., \code{dark=.8}, all values of and above 0.8 will be darkest (and values below that threshold will be lighter grey the lower their probabilities).
 #' @param darkest Darkness of the most likely value. Is black by default (\code{darkest=1}); lower values will result in lighter grey.  
 #' @param rotate.axes The default is to plot the calendar horizontally, however the plot can be rotated (\code{rotate.axes=TRUE}). 
 #' @param proxy.rev The proxy axis can be reversed if \code{proxy.rev=TRUE}.
-#' @param yr.rev The calendar axis can be reversed using \code{yr.rev=TRUE}.
+#' @param age.rev The calendar axis can be reversed using \code{yr.rev=TRUE}.
+#' @param yr.rev Deprecated - use age.rev instead
 #' @param plot.mean The mean ages of the proxy values can be added using \code{plot.mean=TRUE}.
 #' @param mean.col Colour of the weighted mean ages of the proxy values.
-#' @param yr.lim Minimum and maximum calendar age ranges, calculated automatically by default (\code{yr.lim=c()}).
+#' @param age.lim Minimum and maximum calendar age ranges, calculated automatically by default (\code{yr.lim=c()}).
+#' @param yr.lim Deprecated - use age.lim instead
 #' @param proxy.lim Ranges of the proxy axis, calculated automatically by default (\code{proxy.lim=c()}).
 #' @param sep Separator between the fields of the plain text file containing the depth and proxy data.
 #' @param xaxs Extension of x-axis. By default, no white-space will be added at the axis extremes (\code{xaxs="i"}). See ?par for other options. 
@@ -26,7 +29,8 @@
 #' @param yaxt The y-axis is plotted by default, but this can be switched off using \code{yaxt="n"}.
 #' @param bty Type of box to be drawn around the plot (\code{"n"} for none, and \code{"l"} (default), \code{"7"}, \code{"c"}, \code{"u"}, or \code{"o"} for correspondingly shaped boxes).
 #' @param BCAD The calendar scale of graphs and age output-files is in \code{cal BP} by default, but can be changed to BC/AD using \code{BCAD=TRUE}. 
-#' @param yr.lab The labels for the calendar axis (default \code{yr.lab="cal BP"} or \code{"BC/AD"} if \code{BCAD=TRUE}).
+#' @param age.lab The labels for the calendar axis (default \code{age.lab="cal BP"} or \code{"BC/AD"} if \code{BCAD=TRUE}).
+#' @param yr.lab Deprecated - use age.lab instead
 #' @author Maarten Blaauw, J. Andres Christen
 #' @return A grey-scale graph of the proxy against calendar age. 
 #' @examples
@@ -41,19 +45,19 @@
 #' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474. 
 #' \url{https://projecteuclid.org/download/pdf_1/euclid.ba/1339616472}
 #' @export
-proxy.ghost <- function(proxy=1, proxy.lab=c(), proxy.res=250, yr.res=250, grey.res=100, set=get('info'), dark=1, darkest=1, rotate.axes=FALSE, proxy.rev=FALSE, yr.rev=FALSE, plot.mean=FALSE, mean.col="red", yr.lim=c(), proxy.lim=c(), sep=",", xaxs="i", yaxs="i", xaxt="s", yaxt="s", bty="l", BCAD=set$BCAD, yr.lab=ifelse(BCAD, "BC/AD", "cal yr BP")) {
+proxy.ghost <- function(proxy=1, proxy.lab=c(), proxy.res=250, age.res=200, yr.res=age.res, grey.res=100, set=get('info'), dark=1, darkest=1, rotate.axes=FALSE, proxy.rev=FALSE, age.rev=FALSE, yr.rev=age.rev, plot.mean=FALSE, mean.col="red", age.lim=c(), yr.lim=age.lim, proxy.lim=c(), sep=",", xaxs="i", yaxs="i", xaxt="s", yaxt="s", bty="l", BCAD=set$BCAD, age.lab=ifelse(BCAD, "BC/AD", "cal yr BP"), yr.lab=age.lab) {
   if(length(set$Tr)==0)
-    stop("\nPlease first run agedepth()\n\n")
+    stop("please first run agedepth()", call.=FALSE)
   proxies <- read.csv(paste(set$coredir, set$core, "/", set$core, "_proxies.csv", sep=""), header=TRUE, sep=sep)
   if(length(proxy.lab)==0)
     proxy.lab <- names(proxies)[proxy+1]
   proxy <- cbind(as.numeric(proxies[,1]), as.numeric(proxies[,proxy+1]))
   proxy <- proxy[!is.na(proxy[,2]),]
-  proxy <- proxy[which(proxy[,1] <= max(set$d)),]
-  proxy <- proxy[which(proxy[,1] >= min(set$d)),]
+  proxy <- proxy[which(proxy[,1] <= set$d.max),]
+  proxy <- proxy[which(proxy[,1] >= set$d.min),]  
   pr.mn.ages <- approx(set$ranges[,1], set$ranges[,5], proxy[,1], rule=1)$y
   if(length(unique(proxy[,2]))==1)
-    stop("\nThis proxy's values remain constant throughout the core, and cannot be proxy-ghosted!\n\n")
+    stop("this proxy's values remain constant throughout the core, and cannot be proxy-ghosted!", call.=FALSE)
   proxyseq <- seq(min(proxy[,2]), max(proxy[,2]), length=proxy.res)
   out <- list(yrseq=c(), binned=c(), maxs=c())
   ds <- c()
@@ -69,42 +73,41 @@ proxy.ghost <- function(proxy=1, proxy.lab=c(), proxy.res=250, yr.res=250, grey.
       d.length[i,] <- d.length[i-1,]
   }
   cat("Calculating histograms\n")
-
   Bacon.hist(ds, set, calc.range=FALSE)
   hists <- get('hists') 
   cat("\n")
 
-  yr.min <- c()
-  yr.max <- c()
+  age.min <- c()
+  age.max <- c()
   for(i in 1:length(hists)) {
-    yr.min <- min(yr.min, hists[[i]]$th0)
-    yr.max <- max(yr.max, hists[[i]]$th1)
+    age.min <- min(age.min, hists[[i]]$th0)
+    age.max <- max(age.max, hists[[i]]$th1)
   }
-  yr.seq <- seq(yr.min, yr.max, length=yr.res)
+  age.seq <- seq(age.min, age.max, length=age.res)
 
-  all.counts <- array(0, dim=c(length(hists), length(yr.seq)))
+  all.counts <- array(0, dim=c(length(hists), length(age.seq)))
   for(i in 1:length(hists))
-    all.counts[i,] <- approx(seq(hists[[i]]$th0, hists[[i]]$th1, length=hists[[i]]$n), hists[[i]]$counts, yr.seq)$y
+    all.counts[i,] <- approx(seq(hists[[i]]$th0, hists[[i]]$th1, length=hists[[i]]$n), hists[[i]]$counts, age.seq)$y
   all.counts[is.na(all.counts)] <- 0
   all.counts <- all.counts/max(all.counts)
   all.counts[all.counts > dark] <- dark
-  max.counts <- array(0, dim=c(proxy.res, length(yr.seq)))
+  max.counts <- array(0, dim=c(proxy.res, length(age.seq)))
   for(i in 1:proxy.res)
-    for(j in 1:length(yr.seq))
+    for(j in 1:length(age.seq))
       max.counts[i,j] <- max(all.counts[d.length[i,1]:d.length[i,2],j])
   if(dark>1)
-    stop("Warning, dark values larger than 1 are not allowed\n") else  
+    stop("dark values larger than 1 are not allowed\n", call.=FALSE) else  
       max.counts[max.counts > dark] <- dark
-  if(length(yr.lim)==0)
+  if(length(age.lim)==0)
     if(xaxs=="r")
-      yr.lim <- range(pretty(c(1.04*max(yr.seq), .96*min(yr.seq)))) else
-        yr.lim <- range(yr.seq)[2:1]
-  if(yr.rev)
-    yr.lim <- yr.lim[2:1]
+      age.lim <- range(pretty(c(1.04*max(age.seq), .96*min(age.seq)))) else
+        age.lim <- range(age.seq)[2:1]
+  if(age.rev)
+    age.lim <- age.lim[2:1]
   if(BCAD) {
-    yr.lim <- 1950-yr.lim
+    age.lim <- 1950-age.lim
     max.counts <- max.counts[,ncol(max.counts):1]
-    yr.seq <- 1950-rev(yr.seq)
+    age.seq <- 1950-rev(age.seq)
   }
 
   if(length(proxy.lim)==0)
@@ -112,17 +115,16 @@ proxy.ghost <- function(proxy=1, proxy.lab=c(), proxy.res=250, yr.res=250, grey.
   if(proxy.rev)
     proxy.lim <- proxy.lim[2:1]
   if(rotate.axes) {
-    image(proxyseq, yr.seq, max.counts, xlim=proxy.lim, ylim=yr.lim, col=grey(seq(1, 1-darkest, length=grey.res)), ylab=yr.lab, xlab=proxy.lab, xaxs=xaxs, yaxs=yaxs, xaxt=xaxt, yaxt=yaxt)
+    image(proxyseq, age.seq, max.counts, xlim=proxy.lim, ylim=age.lim, col=grey(seq(1, 1-darkest, length=grey.res)), ylab=age.lab, xlab=proxy.lab, xaxs=xaxs, yaxs=yaxs, xaxt=xaxt, yaxt=yaxt)
     if(plot.mean) 
       lines(proxy[,2], pr.mn.ages, col=mean.col)
   } else {
-    image(yr.seq, proxyseq, t(max.counts), xlim=yr.lim, ylim=proxy.lim, col=grey(seq(1, 1-darkest, length=grey.res)), xlab=yr.lab, ylab=proxy.lab, xaxs=xaxs, yaxs=yaxs, xaxt=xaxt, yaxt=yaxt)
+    image(age.seq, proxyseq, t(max.counts), xlim=age.lim, ylim=proxy.lim, col=grey(seq(1, 1-darkest, length=grey.res)), xlab=age.lab, ylab=proxy.lab, xaxs=xaxs, yaxs=yaxs, xaxt=xaxt, yaxt=yaxt)
     if(plot.mean)
       lines(pr.mn.ages, proxy[,2], col=mean.col)
-}
+  }
   box(bty=bty)
 }
-
 
 
 
@@ -141,7 +143,6 @@ proxy.ghost <- function(proxy=1, proxy.lab=c(), proxy.res=250, yr.res=250, grey.
   }
   unique(d)
 }
-
 
 
 
@@ -165,12 +166,15 @@ proxy.ghost <- function(proxy=1, proxy.lab=c(), proxy.res=250, yr.res=250, grey.
 #' @param set Detailed information of the current run, stored within this session's memory as variable \code{info}.
 #' @param plot.steps Plot probability values step-wise (defaults to \code{plot.steps=FALSE}, which plots smooth curves instead).
 #' @param BCAD The calendar scale of graphs and age output-files is in \code{cal BP} by default, but can be changed to BC/AD using \code{BCAD=TRUE}. 
-#' @param yr.lab The labels for the calendar axis (default \code{yr.lab="cal BP"} or \code{"BC/AD"} if \code{BCAD=TRUE}).
-#' @param yr.lim Minimum and maximum calendar age ranges, calculated automatically by default (\code{yr.lim=c()}).
+#' @param age.lab The labels for the calendar axis (default \code{age.lab="cal BP"} or \code{"BC/AD"} if \code{BCAD=TRUE}).
+#' @param yr.lab Deprecated - use age.lab instead
+#' @param age.lim Minimum and maximum calendar age ranges, calculated automatically by default (\code{age.lim=c()}).
+#' @param yr.lim Deprecated - use age.lim instead
 #' @param prob.lab Label of the probability axis (default \code{prob.lab="probability"}).
 #' @param prob.lim Limits of the probability axis (calculated automatically by default).
 #' @param rotate.axes The default of plotting age on the horizontal axis and event probability on the vertical one can be changed with \code{rotate.axes=TRUE}.
-#' @param rev.yr The direction of the age axis, which can be reversed using \code{rev.yr=TRUE}.
+#' @param rev.age The direction of the age axis, which can be reversed using \code{rev.age=TRUE}.
+#' @param rev.yr Deprecated - use rev.age instead
 #' @param yaxs Extension of the y-axis. Defaults to the exact ranges of the probability values. White space can be added to the vertical axis using \code{yaxs="r"}.
 #' @param bty Type of box to be drawn around plots. Draw a box around the graph (\code{"n"} for none, and \code{"l"}, \code{"7"},
 #'  \code{"c"}, \code{"u"}, "]" or \code{"o"} for correspondingly shaped boxes).
@@ -188,20 +192,20 @@ proxy.ghost <- function(proxy=1, proxy.lab=c(), proxy.res=250, yr.res=250, grey.
 #' Blaauw, M., Wohlfarth, B., Christen, J.A., Ampel, L., Veres, D., Hughen, K.A., Preusser, F., Svensson, A. (2010) Were last glacial climate events simultaneous between Greenland and France? A quantitative comparison using non-tuned chronologies. _Journal of Quaternary Science_ *25*, 387-394.
 #' \url{https://projecteuclid.org/download/pdf_1/euclid.ba/1339616472}
 #' @export
-AgesOfEvents <- function(window, move, set=get('info'), plot.steps=FALSE, BCAD=set$BCAD, yr.lab=c(), yr.lim=c(), prob.lab="probability", prob.lim=c(), rotate.axes=FALSE, rev.yr=TRUE, yaxs="i", bty="l") {
+AgesOfEvents <- function(window, move, set=get('info'), plot.steps=FALSE, BCAD=set$BCAD, age.lab=c(), yr.lab=age.lab, age.lim=c(), yr.lim=age.lim, prob.lab="probability", prob.lim=c(), rotate.axes=FALSE, rev.age=TRUE, rev.yr=rev.age, yaxs="i", bty="l") {
   if(move == 0)
-    stop("I cannot move anywhere if move = 0\n")
+    stop("I cannot move anywhere if move = 0", call.=FALSE)
   outfile <- paste(set$prefix, "_", window, "_probs.txt", sep="")
   file.create(outfile)
   MCMCname <- paste(set$prefix, ".out", sep="")
   probfile <- paste(set$coredir, set$core, "/", set$core, "_events.txt", sep="")
   if(!file.exists(probfile))
-    stop("\nFile with probabilities for events per depth not found! Check the manual\n\n")
+    stop("file with probabilities for events per depth not found! Check the manual", call.=FALSE)
   probs <- read.table(probfile)
   if(!is.numeric(probs[1,1]))
-    stop("\nFirst line of the _events.txt file should NOT contain titles; please remove them\n\n")
+    stop("first line of the _events.txt file should NOT contain titles; please remove them", call.=FALSE)
   if(min(probs[,1]) < min(set$d) || max(probs[,1]) > max(set$d)) {
-    cat("\nSome depths in the _events.txt file go beyond the age-model; I will remove them\n\n")
+    cat("some depths in the _events.txt file go beyond the age-model; I will remove them", call.=FALSE)
     file.rename(probfile, paste(probfile, "_backup", sep=""))
     probs <- probs[which(probs[,1] >= min(set$d)),]
     probs <- probs[which(probs[,1] <= max(set$d)),]

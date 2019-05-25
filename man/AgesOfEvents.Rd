@@ -5,9 +5,10 @@
 \title{Event probabilities against calendar age}
 \usage{
 AgesOfEvents(window, move, set = get("info"), plot.steps = FALSE,
-  BCAD = set$BCAD, yr.lab = c(), yr.lim = c(),
-  prob.lab = "probability", prob.lim = c(), rotate.axes = FALSE,
-  rev.yr = TRUE, yaxs = "i", bty = "l")
+  BCAD = set$BCAD, age.lab = c(), yr.lab = age.lab, age.lim = c(),
+  yr.lim = age.lim, prob.lab = "probability", prob.lim = c(),
+  rotate.axes = FALSE, rev.age = TRUE, rev.yr = rev.age,
+  yaxs = "i", bty = "l")
 }
 \arguments{
 \item{window}{Width of the window.}
@@ -20,9 +21,13 @@ AgesOfEvents(window, move, set = get("info"), plot.steps = FALSE,
 
 \item{BCAD}{The calendar scale of graphs and age output-files is in \code{cal BP} by default, but can be changed to BC/AD using \code{BCAD=TRUE}.}
 
-\item{yr.lab}{The labels for the calendar axis (default \code{yr.lab="cal BP"} or \code{"BC/AD"} if \code{BCAD=TRUE}).}
+\item{age.lab}{The labels for the calendar axis (default \code{age.lab="cal BP"} or \code{"BC/AD"} if \code{BCAD=TRUE}).}
 
-\item{yr.lim}{Minimum and maximum calendar age ranges, calculated automatically by default (\code{yr.lim=c()}).}
+\item{yr.lab}{Deprecated - use age.lab instead}
+
+\item{age.lim}{Minimum and maximum calendar age ranges, calculated automatically by default (\code{age.lim=c()}).}
+
+\item{yr.lim}{Deprecated - use age.lim instead}
 
 \item{prob.lab}{Label of the probability axis (default \code{prob.lab="probability"}).}
 
@@ -30,7 +35,9 @@ AgesOfEvents(window, move, set = get("info"), plot.steps = FALSE,
 
 \item{rotate.axes}{The default of plotting age on the horizontal axis and event probability on the vertical one can be changed with \code{rotate.axes=TRUE}.}
 
-\item{rev.yr}{The direction of the age axis, which can be reversed using \code{rev.yr=TRUE}.}
+\item{rev.age}{The direction of the age axis, which can be reversed using \code{rev.age=TRUE}.}
+
+\item{rev.yr}{Deprecated - use rev.age instead}
 
 \item{yaxs}{Extension of the y-axis. Defaults to the exact ranges of the probability values. White space can be added to the vertical axis using \code{yaxs="r"}.}
 

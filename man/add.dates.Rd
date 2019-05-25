@@ -4,7 +4,7 @@
 \alias{add.dates}
 \title{Add dates to age-depth plots}
 \usage{
-add.dates(mn, sdev, depth, cc = 1, above = 0.001, ex = 10,
+add.dates(mn, sdev, depth, cc = 1, above = 1e-06, ex = 10,
   normal = TRUE, normalise = TRUE, t.a = 3, t.b = 4,
   age.res = 100, times = 20, col = rgb(1, 0, 0, 0.5),
   border = rgb(1, 0, 0, 0.5), rotate.axes = FALSE, mirror = TRUE,

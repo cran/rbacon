@@ -4,33 +4,42 @@
 \alias{calib.plot}
 \title{Plot the dates}
 \usage{
-calib.plot(set = get("info"), BCAD = set$BCAD, rotate.axes = FALSE,
-  rev.d = FALSE, rev.yr = FALSE, yr.lim = c(), date.res = 100,
-  d.lab = c(), yr.lab = c(), height = 15, mirror = TRUE,
-  up = TRUE, cutoff = 0.001, C14.col = rgb(0, 0, 1, 0.5),
-  C14.border = rgb(0, 0, 1, 0.75), cal.col = rgb(0, 0.5, 0.5, 0.5),
-  cal.border = rgb(0, 0.5, 0.5, 0.75), dates.col = c(),
-  slump.col = grey(0.8), new.plot = TRUE, plot.dists = TRUE,
-  normalise.dists = TRUE)
+calib.plot(set = get("info"), BCAD = set$BCAD, cc = set$cc,
+  rotate.axes = FALSE, rev.d = FALSE, rev.age = FALSE,
+  rev.yr = rev.age, age.lim = c(), yr.lim = age.lim,
+  date.res = 100, d.lab = c(), age.lab = c(), yr.lab = age.lab,
+  height = 15, mirror = TRUE, up = TRUE, cutoff = 0.001,
+  C14.col = rgb(0, 0, 1, 0.5), C14.border = rgb(0, 0, 1, 0.75),
+  cal.col = rgb(0, 0.5, 0.5, 0.5), cal.border = rgb(0, 0.5, 0.5, 0.75),
+  dates.col = c(), slump.col = grey(0.8), new.plot = TRUE,
+  plot.dists = TRUE, normalise.dists = TRUE)
 }
 \arguments{
 \item{set}{Detailed information of the current run, stored within this session's memory as variable \code{info}.}
 
 \item{BCAD}{The calendar scale of graphs is in \code{cal BP} by default, but can be changed to BC/AD using \code{BCAD=TRUE}.}
 
+\item{cc}{Calibration curve to be used (defaults to info$cc)}
+
 \item{rotate.axes}{The default of plotting age on the horizontal axis and event probability on the vertical one can be changed with \code{rotate.axes=TRUE}.}
 
 \item{rev.d}{The direction of the depth axis can be reversed from the default (\code{rev.d=TRUE}).}
 
-\item{rev.yr}{The direction of the calendar age axis can be reversed from the default (\code{rev.yr=TRUE})}
+\item{rev.age}{The direction of the calendar age axis can be reversed from the default (\code{rev.age=TRUE})}
 
-\item{yr.lim}{Minimum and maximum calendar age ranges, calculated automatically by default (\code{yr.lim=c()}).}
+\item{rev.yr}{Deprecated - use rev.age instead}
+
+\item{age.lim}{Minimum and maximum calendar age ranges, calculated automatically by default (\code{age.lim=c()}).}
+
+\item{yr.lim}{Deprecated - use age.lim instead}
 
 \item{date.res}{Date distributions are plotted using \code{date.res=100} points by default.}
 
 \item{d.lab}{The labels for the depth axis. Default \code{d.lab="Depth (cm)"}.}
 
-\item{yr.lab}{The labels for the calendar axis (default \code{yr.lab="cal BP"} or \code{"BC/AD"} if \code{BCAD=TRUE}).}
+\item{age.lab}{The labels for the calendar axis (default \code{yr.lab="cal BP"} or \code{"BC/AD"} if \code{BCAD=TRUE}).}
+
+\item{yr.lab}{Deprecated - use age.lab instead}
 
 \item{height}{The heights of the distributions of the dates. See also \code{normalise.dists}.}
 

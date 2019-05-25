@@ -7,7 +7,7 @@ Bacon
  
  BaconFix to be used with large K, number of sections 
  
- BaconMov with moving borders, to be used with small K (<10)
+ BaconMov with moving borders, to be used with small K (<10). Not used any more (comment MB April 2019)
 *
  */
 
@@ -95,7 +95,7 @@ class BaconFix: public Bacon {
 			//here ds = 1.0 (in your depth units), it could be changed to a parameter
 
 
-			double *ha, *hb; //a priori pars for the gamma prior on hiatus jumps in each inter hiatus
+			double *ha, *hb; //a priori pars for the uniform prior on hiatus jumps in each inter hiatus.
 //H Change			double priorHU(int i, const double x) { return (1.0-ha[i])*log(x) + hb[i]*Dc*x; }
 			double priorHU(int i, const double x) { return 1.0; } //Uniform
 			
@@ -106,7 +106,7 @@ class BaconFix: public Bacon {
 				int rt = 1;
 
 				theta[0] = x[0];
-				if (fcmp( theta[0], MinYr) == -1) {// < MinYr
+				if (fcmp( theta[0], MinYr) == -1) { // < MinYr
 					WarnBeyondLimits++;
 					//beyond established limits
 					rt = 0;
@@ -153,13 +153,13 @@ class BaconFix: public Bacon {
 				
 				//hiatus_pars is a pointer to 5 arrays of doubles of size H+1
 				//containing:
-				h     = hiatus_pars[0];		
+				h     = hiatus_pars[0];		// hiatus depth(s)
 						
-				alpha = hiatus_pars[1];
-				beta  = hiatus_pars[2];
+				alpha = hiatus_pars[1];		// acc.shape
+				beta  = hiatus_pars[2];		// acc.shape/acc.mean
 				
-				ha    = hiatus_pars[3]; 
-				hb    = hiatus_pars[4]; 
+				ha    = hiatus_pars[3]; 	// WAS hiatus.shape, now a dummy
+				hb    = hiatus_pars[4]; 	// WAS hiatus.mean, now hiatus.max
 
 
 				//Open memory for the two points in the parameter space
@@ -179,22 +179,22 @@ class BaconFix: public Bacon {
 				logrsc=log(ds/Dc);
 				
 
-				//Verify the ordering in the h's
+				//Verify the ordering in the h's // disabled MB 13 May 2019 - JAC OK
 				//The h's must be an array of size H+1!!! although there are only H hiatuses
-				for (int k=0; k<H; k++) {
-					if (fcmp( h[k], ((k == 0) ? c(K) :  h[k-1]) - Dc) != -1) { //we need only one per section
-                        REprintf("Bacon: ERROR: The hiatuses are not in descending order and/or less than %f\n", c(K));
+				//		for (int k=0; k<H; k++) {
+				//			if (fcmp( h[k], ((k == 0) ? c(K) :  h[k-1]) - Dc) != -1) { //we need only one per section
+        		//                //REprintf("Bacon: ERROR: The hiatuses are not in descending order and/or less than %f\n", c(K)); 
 						
-                        //exit(0); //h[k] not in the correct order ... we need to have h[H-1] < ... < h[0] < c(K)
-                        Rcpp::stop("Bacon: ERROR: The hiatuses are not in descending order and/or less than %f\n", c(K));
-
-					}
-				}
+				//				exit(0); //h[k] not in the correct order ... we need to have h[H-1] < ... < h[0] < c(K)
+        		//				Rcpp::stop("Bacon: ERROR: The hiatuses are not in descending order and/or less than %f\n", //c(K)); // commented MB 11 May 2019
+				//			}
+				//		}
+				
 				if (H > 0)
 					if (fcmp( h[H-1], c0) == -1) {
                         REprintf("Bacon: ERROR: The last hiatus location is not greater than %f\n", c0);
 
-                    //	exit(0); //we need to have  c0 < h[H-1]
+                    //	exit(0); //we need to have c0 < h[H-1]
                         Rcpp::stop("Bacon: ERROR: The last hiatus location is not greater than %f\n", c0);
 
 					}
@@ -225,7 +225,6 @@ class BaconFix: public Bacon {
 					for (int k=K-1; k>0; k--) { 
 						x0[k]  = w0*x0[k+1] + (1.0-w0)*GammaSim( alpha[0], mult/beta[0]);		
 						xp0[k] = wp0*xp0[k+1] + (1.0-wp0)*GammaSim( alpha[0], mult/beta[0]);
-
 					}
 				}
 				else {//initial values for the acc. rates, with hiatus
@@ -233,13 +232,13 @@ class BaconFix: public Bacon {
 					//we go backwards until we find the hiatus
 					int l=0;	
 					for (int k=K-1; k>0; k--) { 
-						if ((fcmp( c(k-1), h[l]) == -1) && (fcmp( h[l], c(k)) != 1)) { //forgets
+						if ((fcmp( c(k-1), h[l]) == -1) && (fcmp( h[l], c(k)) != 1)) { //if c_{k-1} < h_l & h_l !> c_k, forgets
 							x0[k]  = GammaSim( ha[l], 1.0/(hb[l]*Dc) );
-                            //x0[k]  = GammaSim( 1.0, 1.0/(hb[l]*Dc) ); // MB Dec 2018
+							//x0[k]  = GammaSim( alpha[l], mult/(beta[l]) ); // MB May 2019
 							//printf("Hiatus %d: %f %f %f\n", l, ha[l], hb[l], x0[k]);
 							l++; //jump to next hiatus, but max one hiatus in each section.
 						}
-						else //continue with  memory
+						else //continue with the memory
 							x0[k]  = w0*x0[k+1] + (1.0-w0)*GammaSim( alpha[l], mult/beta[l]);
 					}
 					
@@ -247,7 +246,7 @@ class BaconFix: public Bacon {
 					for (int k=K-1; k>0; k--) { 
 						if ((fcmp( c(k-1), h[l]) == -1) && (fcmp( h[l], c(k)) != 1)) { //forgets
 							xp0[k]  = GammaSim( ha[l], 1.0/(hb[l]*Dc) );
-                            //xp0[k]  = GammaSim( 1.0, 1.0/(hb[l]*Dc) ); // MB Dec 2018
+							//xp0[k]  = GammaSim( alpha[l], mult/(beta[l]) ); // MB Apr 2019
 							//printf("Hiatus %d: %f %f %f\n", l, ha[l], hb[l], xp0[k]);
 							l++; //jump to next hiatus, but max one hiatus in each section.
 						}
@@ -268,9 +267,8 @@ class BaconFix: public Bacon {
 				//for (int i=0; i<get_dim(); i++) printf("x[%2d] = %f\n", i, x[i]);
 				
 				w = x[K+1];
-				if   ((fcmp( w, 0.0) != 1) || (fcmp( w, 1.0) != -1))  //w out of support
+				if   ((fcmp( w, 0.0) != 1) || (fcmp( w, 1.0) != -1))  //w out of support, should be <0, 1>
 					return 0;
-
 
 				if (fcmp( x[K], 0.0) != 1) //acc. rate alpha_{K} <= 0, out of support
 					return 0;
@@ -278,8 +276,7 @@ class BaconFix: public Bacon {
 				if (H == 0) {
 					//printf("A: %d  %f  %d\n", 0, x[0], K); 
 					for (int k=1; k<K; k++) {
-					
-				
+									
 						//printf("B: %d  %f  %f\n", k, x[k], (x[k]-w*x[k+1])/(1.0-w)); 
 						if (fcmp( (x[k]-w*x[k+1])/(1.0-w), 0.0) != 1) { //e_k <= 0
 							return 0;
@@ -297,12 +294,12 @@ class BaconFix: public Bacon {
 						//printf("B: %d  %f  %f\n", k, x[k], (x[k]-w*x[k+1])/(1.0-w)); 
 						if ((fcmp( c(k-1), h[l]) == -1) && (fcmp( h[l], c(k)) != 1)) { //forgets
 //H Change							if (fcmp( x[k], 0.0) != 1) //we only require x[k] greater than 0
-							if ((fcmp( x[k], 0.0) != 1) || (fcmp( hb[l], x[k]) != 1)) //we require 0.0 < x[k] < hb[l]
-								return 0;
+							if ((fcmp( x[k], 0.0) != 1) || (fcmp( hb[l], x[k]) != 1))  
+								return 0; // do not accept proposal where x[k] <= 0 or x[k] <= hb[l] ????
 							l++; //jump to next hiatus, but max one hiatus in each section.
 						}
 						else if (fcmp( (x[k]-w*x[k+1])/(1.0-w), 0.0) != 1) { //e_k <= 0
-								return 0;
+								return 0; // do not accept proposal where x <= 0 ???
 						}
 					}
 
@@ -369,7 +366,7 @@ class BaconFix: public Bacon {
 			 double *Getxp0() { return xp0; }
 			 
 			virtual double eval(double *x, int prime) {
-                 prime=0; //avoid waining JEV
+                 prime=0; //avoid warning JEV
 
 				Uprior = 0.0;
 				Uli = 0.0;
@@ -421,7 +418,7 @@ class BaconFix: public Bacon {
 					for (int k=K-1; k>0; k--) { 
 						if ((fcmp( c(k-1), h[l]) == -1) && (fcmp( h[l], c(k)) != 1)) { //forgets
 							Uprior += priorHU( l, x[k]); //prior for the hiatus jump in hiatus l
-							l++; //jump to next hiatus, but max one hiatuas in each section.
+							l++; //jump to next hiatus, but max one hiatus in each section.
 						}
 						else
 							Uprior += prioracU( l, (x[k]-w*x[k+1])/(1.0-w)); //prior for e_k in section l

@@ -19,7 +19,7 @@
 #' \dontshow{
 #'   Bacon(run=FALSE, coredir=tempfile())
 #'   scissors(100)
-#'   agedepth(d.res=50, yr.res=50, d.by=10)
+#'   agedepth(d.res=50, age.res=50, d.by=10)
 #' }
 #' \donttest{
 #'   Bacon(ask=FALSE, coredir=tempfile())
@@ -37,11 +37,11 @@ scissors <- function(burnin, set=get('info')) {
   output <- read.table(paste(set$prefix, ".out", sep=""))
   if(length(burnin) > 1) {
     if(length(burnin) >= nrow(output))
-      stop("\nCannot remove that many iterations, there would be none left!\n")
+      stop("cannot remove that many iterations, there would be none left!", call.=FALSE)
 	output <- output[-burnin,] 
   } else {
       if(abs(burnin) >= nrow(output))
-        stop("\nCannot remove that many iterations, there would be none left!\n")
+        stop("cannot remove that many iterations, there would be none left!", call.=FALSE)
 	  if(burnin > 0)
 	    output <- output[-(1:burnin),] else
           output <- output[-((nrow(output)-abs(burnin)):nrow(output)),]
@@ -68,7 +68,7 @@ scissors <- function(burnin, set=get('info')) {
 #' \dontshow{
 #'   Bacon(run=FALSE, coredir=tempfile())
 #'   thinner(.1)
-#'   agedepth(d.res=50, yr.res=50, d.by=10)
+#'   agedepth(d.res=50, age.res=50, d.by=10)
 #' }
 #' \donttest{
 #'   Bacon(ask=FALSE, coredir=tempfile())
@@ -85,7 +85,7 @@ scissors <- function(burnin, set=get('info')) {
 thinner <- function(proportion=0.1, set=get('info')) {
   output <- read.table(paste(set$prefix, ".out", sep=""))
   if(proportion >= 1)
-    stop("\nCannot remove that many iterations, there would be none left!\n\n", call.=FALSE)
+    stop("cannot remove that many iterations, there would be none left!", call.=FALSE)
   proportion <- sample(nrow(output), proportion*nrow(output))
   output <- output[-proportion,]
   write.table(output, paste(set$prefix, ".out", sep=""), col.names=FALSE, row.names=FALSE)
@@ -163,7 +163,6 @@ Baconvergence <- function(core="MSB2K", runs=5, suggest=FALSE, ...) {
 
 
 
-
 # calculate the proportion of dates that are within the age-depth model's confidence ranges
 overlap <- function(set=get('info'), digits=0) {
   d <- set$dets[,4]
@@ -172,7 +171,7 @@ overlap <- function(set=get('info'), digits=0) {
     daterng <- set$calib$probs[[i]]
     daterng <- cbind(cumsum(daterng[,2])/sum(daterng[,2]), daterng[,1])
     daterng <- approx(daterng[,1], daterng[,2], c((1-set$prob)/2, 1-(1-set$prob)/2))$y
-    age <- quantile(Bacon.Age.d(d[i]), c((1-set$prob)/2, 1-(1-set$prob)/2))
+    age <- quantile(Bacon.Age.d(d[i], BCAD=FALSE), c((1-set$prob)/2, 1-(1-set$prob)/2))
     daterng <- daterng[!is.na(daterng)]
     if(length(daterng) > 0)
       if(max(daterng) < min(age) || max(age) < min(daterng))
@@ -181,7 +180,7 @@ overlap <- function(set=get('info'), digits=0) {
   inside <- 100*sum(inside)/length(d)
   if(inside < 80)
     cat("Warning! Only ")
-  cat(round(inside, digits), "% of the dates lie within the age-depth model's ", 100*set$prob, "% range\n", sep="")
+  cat(round(inside, digits), "% of the dates overlap with the age-depth model (", 100*set$prob, "% ranges)\n", sep="")
 }
 
 

@@ -1,4 +1,4 @@
-
+	
 //This class implements the input system for all parameters
 //It reads the configuration file and holds all input needed for 
 //the Bacon classes.

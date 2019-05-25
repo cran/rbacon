@@ -187,7 +187,7 @@ Input::Input(char *datafile, int emaxnumofcurves, int maxm, std::string ccdir) {
 
 			H++;
 
-			//If H==0 then hiatus_pars willl be ignored in the constructors BaconFix and BaconMov
+			//If H==0 then hiatus_pars will be ignored in the constructors BaconFix and BaconMov
 			continue;
 		}
 

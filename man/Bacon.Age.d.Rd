@@ -27,7 +27,7 @@ fossil series ('proxies') against calendar time. Bacon.Age.d can be used to list
 }
 \examples{
   Bacon(run=FALSE, coredir=tempfile())
-  agedepth(yr.res=50, d.res=50, d.by=10)
+  agedepth(age.res=50, d.res=50, d.by=10)
   ages.d20 = Bacon.Age.d(20)
   mean(ages.d20)
 }

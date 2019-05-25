@@ -138,8 +138,9 @@ Bacon.cleanup <- function(set=get('info')) {
   for(i in files)
     if(file.exists(i))
       tmp <- file.remove(i)
-  if(exists("tmp")) rm(tmp)
-    cat("Previous Bacon runs of core", set$core, "with thick =", set$thick, "deleted. Now try running the core again\n")
+  if(exists("tmp"))
+    rm(tmp)
+  cat("Previous Bacon runs of core", set$core, "with thick =", set$thick, "deleted. Now try running the core again\n")
 }
 
 
@@ -159,13 +160,13 @@ assign_coredir <- function(coredir, core, ask=TRUE) {
                 wdir <- dir.create(coredir, FALSE) else
                   stop("No problem. Please provide an alternative folder location using coredir\n", call.=FALSE)
             if(!wdir)
-              stop("Cannot write into the current directory.\nPlease set coredir to somewhere where you have writing access, e.g. Desktop or ~.", call.=FALSE)
+              stop("cannot write into the current directory.\nPlease set coredir to somewhere where you have writing access, e.g. Desktop or ~.", call.=FALSE)
         }    
   } else {
     if(!dir.exists(coredir))
         wdir <- dir.create(coredir, FALSE)
       if(!dir.exists(coredir)) # if it still doesn't exist, we probably don't have enough permissions
-        stop("Cannot write into the current directory.\nPlease set coredir to somewhere where you have writing access, e.g. Desktop or ~.", call.=FALSE)
+        stop("cannot write into the current directory.\nPlease set coredir to somewhere where you have writing access, e.g. Desktop or ~.", call.=FALSE)
   }
   coredir <- .validateDirectoryName(coredir)
   cat("The run's files will be put in this folder: ", coredir, core, "\n", sep="")
@@ -205,12 +206,15 @@ assign_coredir <- function(coredir, core, ask=TRUE) {
         }
     }
   name <- tolower(names(dets))
+  commas <- grep(",,", readLines(csv.file)) # check if there are too many commas (e.g., lines with just commas)
+  if(length(!is.na(commas)) > 0) # often an artefact of spreadsheet programs
+    stop("check the .csv file in a plain-text editor for 'orphan' commas\n", call.=FALSE) 
 
   # check if 'classic' dets file, which has a different column order from the current default
   if(ncol(dets) > 4)
     if(ncol(dets) == 5) { # then probably a 'new' dets file
       if((name[5] %in% cc.names) && min(dets[,5]) >= 0 && max(dets[,5]) <= 4) {} else # extra check for correct values
-        stop("Error! Unexpected name or values in fifth column (cc, should be between 0 and 4). Please check the manual for guidelines in producing a correct .csv file.\n")
+        stop("unexpected name or values in fifth column (cc, should be between 0 and 4). Please check the manual for guidelines in producing a correct .csv file.\n", call.=FALSE)
     } else
       if(ncol(dets) == 6) { # probably an 'old' file: dR, dSTD, but could also be cc and delta.R (so no column for delta.STD)
         if(name[5] %in% dR.names && name[6] %in% dSTD.names) {
@@ -219,13 +223,13 @@ assign_coredir <- function(coredir, core, ask=TRUE) {
           cat(" Assumed order of columns in dets file: lab ID, Age, error, depth, dR, dSTD. \nAdding calibration curve column (fifth column, before dR and dSTD) and saving as", csv.file, "\n")
           changed <- 1
         } else 
-	      stop("Error! Unexpected names for columns 5/6. If you want to include delta.R, also add a column for delta.STD. Check the manual for guidelines to producing a correct .csv file.\n")
+	      stop("unexpected names for columns 5/6. If you want to include delta.R, also add a column for delta.STD. Check the manual for guidelines to producing a correct .csv file.\n", call.=FALSE)
       } else
         if(ncol(dets) == 7) { # probably a 'new' file: cc, dR, dSTD
           if(name[5] %in% cc.names && min(dets[,5]) >= 0 && max(dets[,5]) <= 4 &&
             name[6] %in% dR.names && name[7] %in% dSTD.names) 
               {} else
-                 stop("Error! Unexpected column names, order or values in dets file. \nPlease check the manual for correct dets file formats.\n")
+                 stop("unexpected column names, order or values in dets file. \nPlease check the manual for correct dets file formats.\n", call.=FALSE)
         } else
           if(ncol(dets) == 8) { # probably an 'old' file: dR, dSTD, ta, tb
             if(name[5] %in% dR.names && name[6] %in% dSTD.names)
@@ -235,7 +239,7 @@ assign_coredir <- function(coredir, core, ask=TRUE) {
               cat(" Assumed order of columns in dets file: lab ID, Age, error, depth, dR, dSTD. \nAdding calibration curve column (fifth column, before dR and dSTD) and saving as", csv.file, "\n")
               changed <- 1
             } else
-              stop("Error! Unexpected column names, order or values in dets file. \nPlease check the manual for how to produce a correct .csv file")
+              stop("unexpected column names, order or values in dets file. \nPlease check the manual for how to produce a correct .csv file", call.=FALSE)
           } else
             if(ncol(dets) == 9) { # most complex case, many checks needed
               if(name[9] %in% cc.names && # we're almost sure that this is a 'classic' dets file
@@ -253,15 +257,15 @@ assign_coredir <- function(coredir, core, ask=TRUE) {
                               name[8] %in% ta.names && name[9] %in% tb.names && # and are correctly named
                                 name[6] %in% dR.names && name[7] %in% dSTD.names) # all lights are green
                                   {} else
-                                     stop("Error! Unexpected column names, order or values in dets file. \nPlease check the manual for how to produce a correct .csv file")
+                                     stop("unexpected column names, order or values in dets file. \nPlease check the manual for how to produce a correct .csv file", call.=FALSE)
             } else
-              stop("Error! Unexpected column names, order or values in dets file. \nPlease check the manual for how to produce a correct dets file.\n")
+              stop("unexpected column names, order or values in dets file. \nPlease check the manual for how to produce a correct dets file.\n", call.=FALSE)
 
   # more sanity checks
   if(!is.numeric(dets[,2]) || !is.numeric(dets[,3]) || !is.numeric(dets[,4]))
-    stop("Error, unexpected values in dets file, I expected numbers. Check the manual.\n", call.=FALSE)
+    stop("unexpected values in dets file, I expected numbers. Check the manual.\n", call.=FALSE)
   if(min(dets[,3]) <= 0) {
-    cat("Warning, zero year errors don't exist in Bacon's world. I will increase them to 1 yr.\n")
+    cat("Warning, zero year errors don't exist in Bacon's world. I will increase them to 1 ", set$age.unit, " yr.\n")
     dets[dets[,3] <= 0,3] <- 1
     changed <- 1
   }
@@ -280,10 +284,10 @@ assign_coredir <- function(coredir, core, ask=TRUE) {
 
 
 # read in default values, values from previous run, any specified values, and report the desired one. Internal function. 
-.Bacon.settings <- function(core, coredir, dets, thick, remember=TRUE, d.min, d.max, d.by, depths.file, slump, acc.mean, acc.shape, mem.mean, mem.strength, boundary, hiatus.depths, hiatus.max, hiatus.shape, BCAD, cc, postbomb, cc1, cc2, cc3, cc4, unit, normal, t.a, t.b, delta.R, delta.STD, prob, defaults, runname, ssize, dark, MinYr, MaxYr, cutoff, yr.res, after) {
+.Bacon.settings <- function(core, coredir, dets, thick, remember=TRUE, d.min, d.max, d.by, depths.file, slump, acc.mean, acc.shape, mem.mean, mem.strength, boundary, hiatus.depths, hiatus.max, hiatus.shape, BCAD, cc, postbomb, cc1, cc2, cc3, cc4, depth.unit, normal, t.a, t.b, delta.R, delta.STD, prob, defaults, runname, ssize, dark, MinAge, MaxAge, cutoff, age.res, after, age.unit) {
   
-  vals <- list(d.min, d.max, d.by, depths.file, slump, acc.mean, acc.shape, mem.mean, mem.strength, boundary, hiatus.depths, hiatus.max, BCAD, cc, postbomb, cc1, cc2, cc3, cc4, unit, normal, t.a, t.b, delta.R, delta.STD, prob)
-  valnames <- c("d.min", "d.max", "d.by", "depths.file", "slump", "acc.mean", "acc.shape", "mem.mean", "mem.strength", "boundary", "hiatus.depths", "hiatus.max", "BCAD", "cc", "postbomb", "cc1", "cc2", "cc3", "cc4", "unit", "normal", "t.a", "t.b", "delta.R", "delta.STD", "prob")
+  vals <- list(d.min, d.max, d.by, depths.file, slump, acc.mean, acc.shape, mem.mean, mem.strength, boundary, hiatus.depths, hiatus.max, BCAD, cc, postbomb, cc1, cc2, cc3, cc4, depth.unit, normal, t.a, t.b, delta.R, delta.STD, prob, age.unit)
+  valnames <- c("d.min", "d.max", "d.by", "depths.file", "slump", "acc.mean", "acc.shape", "mem.mean", "mem.strength", "boundary", "hiatus.depths", "hiatus.max", "BCAD", "cc", "postbomb", "cc1", "cc2", "cc3", "cc4", "depth.unit", "normal", "t.a", "t.b", "delta.R", "delta.STD", "prob", "age.unit")
 
   extr <- function(i, def=deffile, pre=prevfile, exists.pre=prevf, rem=remember, sep=" ", isnum=TRUE) {
     if(length(vals[[i]]) > 0) # tmp
@@ -332,8 +336,8 @@ assign_coredir <- function(coredir, core, ask=TRUE) {
   hiatus.max <- extr(12)
   BCAD <- extr(13); cc <- extr(14); postbomb <- extr(15); cc1 <- extr(16, isnum=FALSE)
   cc2 <- extr(17, isnum=FALSE); cc3 <- extr(18, isnum=FALSE); cc4 <- extr(19, isnum=FALSE)
-  unit <- extr(20, isnum=FALSE); normal <- extr(21); t.a <- extr(22); t.b <- extr(23)
-  delta.R <- extr(24); delta.STD <- extr(25); prob <- extr(26)
+  depth.unit <- extr(20, isnum=FALSE); normal <- extr(21); t.a <- extr(22); t.b <- extr(23)
+  delta.R <- extr(24); delta.STD <- extr(25); prob <- extr(26); age.unit <- extr(27, isnum=FALSE)
 
   if(is.na(d.min) || d.min=="NA")
     d.min <- min(dets[,4])
@@ -363,15 +367,14 @@ assign_coredir <- function(coredir, core, ask=TRUE) {
   for(i in hiatus.max) scat(i, " "); scat("#hiatus.max\n", "") # redundant
   cat(BCAD, " #BCAD\n", cc, " #cc\n", postbomb, " #postbomb\n",
     cc1, " #cc1\n", cc2, " #cc2\n", cc3, " #cc3\n", cc4, " #cc4\n",
-    unit, " #unit\n", normal, " #normal\n", t.a, " #t.a\n", t.b, " #t.b\n",
-    delta.R, " #delta.R\n", delta.STD, " #d.STD\n", prob, " #prob\n", sep="", file=prevfile)
+    depth.unit, " #depth.unit\n", normal, " #normal\n", t.a, " #t.a\n", t.b, " #t.b\n",
+    delta.R, " #delta.R\n", delta.STD, " #d.STD\n", prob, " #prob\n", age.unit, "#age.unit\n", sep="", file=prevfile)
   close(prevfile)
 
-  if(length(MinYr) == 0)
-  #  MinYr <- min(-1e3, round(dets[,2] - (5*dets[,3])))
-    MinYr <- min(1950 - as.integer(format(Sys.time(), "%Y")), round(dets[,2] - (5*dets[,3])))
-  if(length(MaxYr) == 0)
-    MaxYr <- max(1e6, round(dets[,2] + (5*dets[,3])))
+  if(length(MinAge) == 0)
+    MinAge <- min(1950 - as.integer(format(Sys.time(), "%Y")), round(dets[,2] - (5*dets[,3])))
+  if(length(MaxAge) == 0)
+    MaxAge <- max(1e6, round(dets[,2] + (5*dets[,3])))
 
   list(core=core, thick=thick, dets=dets, d.min=d.min, d.max=d.max,
     d.by=d.by, depths.file=depths.file, slump=slump,
@@ -379,10 +382,10 @@ assign_coredir <- function(coredir, core, ask=TRUE) {
     mem.strength=mem.strength, boundary=boundary,
     hiatus.depths=hiatus.depths, hiatus.max=hiatus.max,
     BCAD=BCAD, cc=cc, postbomb=postbomb,
-    cc1=cc1, cc2=cc2, cc3=cc3, cc4=cc4, unit=noquote(unit), normal=normal,
+    cc1=cc1, cc2=cc2, cc3=cc3, cc4=cc4, depth.unit=noquote(depth.unit), unit=depth.unit, age.unit=noquote(age.unit), normal=normal,
     t.a=t.a, t.b=t.b, delta.R=delta.R, delta.STD=delta.STD, prob=prob, date=date(),
-    runname=runname, ssize=ssize, dark=dark, MinYr=MinYr, MaxYr=MaxYr, 
-    cutoff=cutoff, yr.res=yr.res, after=after)
+    runname=runname, ssize=ssize, dark=dark, MinAge=MinAge, MaxAge=MaxAge, 
+    cutoff=cutoff, age.res=age.res, after=after)
 }
 
 
@@ -398,13 +401,19 @@ assign_coredir <- function(coredir, core, ask=TRUE) {
       hiatus.depths <- set$hiatus.depths
       boundary <- set$boundary
     }
-  if(set$d.min < min(dets[,4])) {
-    extrap <- c(NA, min(dets[,2]), max(1e5, 1e3*dets[,2], 1e3*dets[,3]), set$d.min, 0)
-    dets <- rbind(extrap, dets, deparse.level=0)
+  if(set$d.min < min(dets[,4])) { # repeat relevant row, change error and depth
+    # extrap <- c(NA, min(dets[,2]), max(1e5, 1e3*dets[,2], 1e3*dets[,3]), set$d.min, 0)
+    dets <- rbind(dets[which(dets[,4] == min(dets[,4]))[1],], dets, make.row.names=FALSE)
+    dets[1,1] <- NA # calling this "d.min" causes issues
+    dets[1,3] <- max(1e5, 1e3*dets[,2], 1e3*dets[,3])
+    dets[1,4] <- set$d.min
   }
-  if(set$d.max > max(dets[,4])) {
-    extrap <- c(NA, max(dets[,2]), max(1e5, 1e3*dets[,2], 1e3*dets[,3]), set$d.max, 0)
-    dets <- rbind(dets, extrap, deparse.level=1)
+  if(set$d.max > max(dets[,4])) { # repeat relevant row, change error and depth
+    # extrap <- c(NA, max(dets[,2]), max(1e5, 1e3*dets[,2], 1e3*dets[,3]), set$d.max, 0)
+    dets <- rbind(dets, dets[which(dets[,4] == max(dets[,4]))[1],], make.row.names=FALSE)
+    dets[nrow(dets),1] <- NA # calling this "d.max" causes issues
+    dets[nrow(dets),3] <- max(1e5, 1e3*dets[,2], 1e3*dets[,3])
+    dets[nrow(dets),4] <- set$d.max
   }
 
   fl <- file(set$bacon.file, "w")
@@ -419,7 +428,7 @@ assign_coredir <- function(coredir, core, ask=TRUE) {
   if(set$cc4=="ConstCal" || set$cc4=="\"ConstCal\"") set$cc4 <- c() 
     else
       paste("\nCal 4 : GenericCal, ", set$cc4, ";", sep=""), sep="", file=fl)
-  cat("\n\n##   id.   yr    std   depth  delta.R  delta.STD     t.a   t.b   cc", file=fl)
+  cat("\n\n##   id.   age    std   depth  delta.R  delta.STD     t.a   t.b   cc", file=fl)
 
   if(ncol(dets) == 4) { # then we need to provide some constants once only
     cat("\nDet 0 : ", as.character(dets[1,1]), " ,  ", dets[1,2], ",  ",
@@ -455,8 +464,8 @@ assign_coredir <- function(coredir, core, ask=TRUE) {
           cc[i], ";", sep="", file=fl)
     }
 
-  if(!is.na(hiatus.depths)[1]) { 
-    if(is.na(boundary)[1])
+  if(!is.na(hiatus.depths[1])) { 
+    if(is.na(boundary[1]))
       cat("\n  Hiatus set at depth(s)", hiatus.depths, "\n") else
         cat("\n  Boundary set at depth(s)", boundary, "\n")
     if(length(set$acc.shape)==1)
@@ -472,14 +481,14 @@ assign_coredir <- function(coredir, core, ask=TRUE) {
       "\n##### cm  alpha beta      ha     hb", file=fl)
     for(i in length(hiatus.depths):1)
       cat("\nHiatus ", i-1, ":  ", hiatus.depths[i], ",  ", set$acc.shape[i+1],
-        ",  ", set$acc.shape[i+1]/set$acc.mean[i+1], ",  ", .1, # .1 was NA
+        ",  ", set$acc.shape[i+1]/set$acc.mean[i+1], ",  ", .1, # last value (h.a) was NA but this conflicts with setting initial values for hiatus length
         ",  ", set$hiatus.max[i], ";", sep="", file=fl)
   }
 
   ### final parameters
-  wrapup <- paste("\n\n##\t\t K   MinYr   MaxYr   th0   th0p   w.a   w.b   alpha  beta  dmin  dmax",
+  wrapup <- paste("\n\n##\t\t K   MinAge   MaxAge   th0   th0p   w.a   w.b   alpha  beta  dmin  dmax",
     "\nBacon 0: ", ifelse(set$normal, "FixNor", "FixT"), ", ", set$K,
-    ",  ", set$MinYr, ",  ", set$MaxYr, ",  ", set$th0[1], ",  ", set$th0[2],
+    ",  ", set$MinAge, ",  ", set$MaxAge, ",  ", set$th0[1], ",  ", set$th0[2],
     ",  ", set$mem.strength*set$mem.mean, ",  ", set$mem.strength*(1-set$mem.mean),
     ",  ", set$acc.shape[1], ",  ", set$acc.shape[1]/set$acc.mean[1], ", ", set$d.min,
     ", ", set$d.max, ";\n", sep="")

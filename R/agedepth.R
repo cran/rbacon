@@ -5,8 +5,10 @@
 #' again using the command \code{agedepth()}. 
 #' @param set Detailed information of the current run, stored within this session's memory as variable \code{info}.
 #' @param BCAD The calendar scale of graphs and age output-files is in \code{cal BP} by default, but can be changed to BC/AD using \code{BCAD=TRUE}. 
-#' @param d.lab The labels for the depth axis. Default \code{d.lab="Depth (cm)"}. See also \code{unit}.
-#' @param yr.lab The labels for the calendar axis (default \code{yr.lab="cal BP"} or \code{"BC/AD"} if \code{BCAD=TRUE}).
+#' @param d.lab The labels for the depth axis. Default \code{d.lab="Depth (cm)"}. See also \code{depth.unit}.
+#' @param age.lab The labels for the calendar axis (default \code{age.lab="cal BP"} or \code{"BC/AD"} if \code{BCAD=TRUE}).
+#' @param yr.lab Deprecated - use age.lab instead
+#' @param acc.lab The labels for the accumulation rate plot (top middle). Default \code{d.lab="Acc. rate (yr/cm)"} (or whatever units you're using). 
 #' @param d.min Minimum depth of age-depth model (use this to extrapolate to depths higher than the top dated depth).
 #' @param d.max Maximum depth of age-depth model (use this to extrapolate to depths below the bottom dated depth).
 #' @param d.by Depth intervals at which ages are calculated. Default 1. Alternative depth intervals can be provided using, e.g., d.\code{by=0.5}.
@@ -15,19 +17,25 @@
 #' If \code{depths.file=TRUE}, Bacon will read a file containing the depths for which you require ages. 
 #' This file, containing the depths in a single column without a header, should be stored within \code{coredir}, 
 #' and its name should start with the core's name and end with '_depths.txt'. Then specify \code{depths.file=TRUE} (default \code{FALSE}). See also \code{depths}.
-#' @param yr.min Minimum calendar age of the age-depth plot.
-#' @param yr.max Maximum calendar age of the age-depth plot.
+#' @param age.min Minimum age of the age-depth plot.
+#' @param yr.min Deprecated - use age.min instead
+#' @param age.max Maximum age of the age-depth plot.
+#' @param yr.max Deprecated - use age.min instead
 #' @param dark Darkness of the greyscale age-depth model. By default, the darkest grey value is calculated as 10 times the height of the lowest-precision age estimate \code{dark=c()}. Lower values will result in lighter grey but values >1 are not allowed.
 #' @param prob Confidence interval to report (between 0 and 1, default 0.95 or 95\%).
 #' @param rounded Rounding of years. Default is to round to single years.
 #' @param d.res Resolution or amount of greyscale pixels to cover the depth scale of the age-model plot. Default \code{d.res=200}.
-#' @param yr.res Resolution or amount of greyscale pixels to cover the age scale of the age-model plot. Default \code{yr.res=200}.
+#' @param age.res Resolution or amount of greyscale pixels to cover the age scale of the age-model plot. Default \code{yr.res=200}.
+#' @param yr.res Deprecated - use age.res instead
 #' @param date.res Date distributions are plotted using \code{date.res=100} points by default.
 #' @param grey.res Grey-scale resolution of the age-depth model. Default \code{grey.res=100}.
 #' @param rotate.axes By default, the age-depth model is plotted with the depths on the horizontal axis and ages on the vertical axis. This can be changed with \code{rotate.axes=TRUE}.
-#' @param rev.yr The direction of the age axis, which can be reversed using \code{rev.yr=TRUE}.
+#' @param rev.age The direction of the age axis, which can be reversed using \code{rev.age=TRUE}.
+#' @param rev.yr Deprecated - use rev.age instead
 #' @param rev.d The direction of the depth axis, which can be reversed using \code{rev.d=TRUE}.
-#' @param unit Depth units, default \code{unit="cm"}.
+#' @param depth.unit Units of the depths. Defaults to \code{depth.unit="cm"}.
+#' @param age.unit Units of the ages. Defaults to \code{age.unit="yr"}.
+#' @param unit Deprecated and replaced by \code{depth.unit}.
 #' @param maxcalc Number of depths to calculate ages for. If this is more than \code{maxcalc=500}, a warning will be shown that calculations will take time.
 #' @param height The maximum heights of the distributions of the dates on the plot. See also \code{normalise.dists}.
 #' @param mirror Plot the dates as 'blobs'. Set to \code{mirror=FALSE} to plot simple distributions.
@@ -82,7 +90,7 @@
 #' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474. 
 #' \url{https://projecteuclid.org/download/pdf_1/euclid.ba/1339616472}
 #' @export
-agedepth <- function(set=get('info'), BCAD=set$BCAD, unit="cm", d.lab=c(), yr.lab=c(), d.min=set$d.min, d.max=set$d.max, d.by=set$d.by, depths=set$depths, depths.file=FALSE, yr.min=c(), yr.max=c(), dark=c(), prob=set$prob, rounded=0, d.res=400, yr.res=400, date.res=100, grey.res=100, rotate.axes=FALSE, rev.yr=FALSE, rev.d=FALSE, maxcalc=500, height=15, mirror=TRUE, up=TRUE, cutoff=.001, plot.range=TRUE, panels=layout(1), range.col=grey(.5), range.lty="12", mn.col="red", mn.lty="12", med.col=NA, med.lty="12", C14.col=rgb(0,0,1,.35), C14.border=rgb(0,0,1,.5), cal.col=rgb(0,.5,.5,.35), cal.border=rgb(0,.5,.5,.5), dates.col=c(), hiatus.col=grey(0.5), hiatus.lty="12", greyscale=grey(seq(1, 0, length=grey.res)), slump.col=grey(0.8), normalise.dists=TRUE, cc=set$cc, title=set$core, title.location="topleft", after=set$after, bty="l", mar=c(3,3,1,1), mgp=c(1.5,.7,.0), xaxs="r", yaxs="r", xaxt="s", yaxt="s", plot.pdf=FALSE, dates.only=FALSE, model.only=FALSE, talk=FALSE) {
+agedepth <- function(set=get('info'), BCAD=set$BCAD, depth.unit="cm", age.unit="yr", unit=depth.unit, d.lab=c(), age.lab=c(), yr.lab=age.lab, acc.lab=c(), d.min=set$d.min, d.max=set$d.max, d.by=set$d.by, depths=set$depths, depths.file=FALSE, age.min=c(), yr.min=age.min, age.max=c(), yr.max=age.max, dark=c(), prob=set$prob, rounded=0, d.res=400, age.res=400, yr.res=age.res, date.res=100, grey.res=100, rotate.axes=FALSE, rev.age=FALSE, rev.yr=rev.age, rev.d=FALSE, maxcalc=500, height=15, mirror=TRUE, up=TRUE, cutoff=.001, plot.range=TRUE, panels=layout(1), range.col=grey(.5), range.lty="12", mn.col="red", mn.lty="12", med.col=NA, med.lty="12", C14.col=rgb(0,0,1,.35), C14.border=rgb(0,0,1,.5), cal.col=rgb(0,.5,.5,.35), cal.border=rgb(0,.5,.5,.5), dates.col=c(), hiatus.col=grey(0.5), hiatus.lty="12", greyscale=grey(seq(1, 0, length=grey.res)), slump.col=grey(0.8), normalise.dists=TRUE, cc=set$cc, title=set$core, title.location="topleft", after=set$after, bty="l", mar=c(3,3,1,1), mgp=c(1.5,.7,.0), xaxs="r", yaxs="r", xaxt="s", yaxt="s", plot.pdf=FALSE, dates.only=FALSE, model.only=FALSE, talk=FALSE) {
 # Load the output, if it exists
   outp <- paste0(set$prefix, ".out")
   if(file.exists(outp))
@@ -97,18 +105,17 @@ agedepth <- function(set=get('info'), BCAD=set$BCAD, unit="cm", d.lab=c(), yr.la
           pn <- c(1:4, rep(5,4))  
       layout(matrix(pn, nrow=2, byrow=TRUE), heights=c(.3,.7)) 
       .PlotLogPost(set, 0, set$Tr) # convergence information
-      .PlotAccPost(set)
+      .PlotAccPost(set, depth.unit=unit, age.unit=age.unit)
       .PlotMemPost(set, set$core, set$K, "", set$mem.strength, set$mem.mean, ds=1, thick=set$thick)
       if(!is.na(set$hiatus.depths[1]))
         if(is.na(set$boundary)[1])
           .PlotHiatusPost(set, set$hiatus.max)
   } 
 
-
   # calculate and plot the ranges and 'best' estimates for each required depth
   if(length(depths) > 0)
     d <- sort(depths) else
-      d <- seq(d.min, d.max, by=d.by) 
+      d <- seq(set$d.min, set$d.max, by=d.by) # not d.min itself as depths < set$d.min cannot be calculated. Same for d.max, best not extrapolate here
       
   if(length(d) > maxcalc)
     cat("Warning, this will take quite some time to calculate. I suggest increasing d.by to, e.g.", 10*d.by, "\n") # was set$d.by
@@ -121,7 +128,7 @@ agedepth <- function(set=get('info'), BCAD=set$BCAD, unit="cm", d.lab=c(), yr.la
 
   if(talk)
     cat("Calculating age ranges\n")  
-  ranges <- Bacon.rng(d, set, BCAD=BCAD, prob=prob) 
+  ranges <- Bacon.rng(d, set, BCAD=BCAD, prob=prob)   
 
   # calculate calendar axis limits
 
@@ -132,42 +139,42 @@ agedepth <- function(set=get('info'), BCAD=set$BCAD, unit="cm", d.lab=c(), yr.la
     if(BCAD) 
       dateranges <- range(dateranges, 1950-dates[[i]][,1]) else
         dateranges <- range(dateranges, dates[[i]][,1])
-  if(length(yr.min) == 0) 
-    yr.min <- min(modelranges, dateranges)
-  if(length(yr.max) == 0)
-    yr.max <- max(modelranges, dateranges)
-  yr.lim <- c(yr.min, yr.max)
+  if(length(age.min) == 0) 
+    age.min <- min(modelranges, dateranges)
+  if(length(age.max) == 0)
+    age.max <- max(modelranges, dateranges)
+  age.lim <- c(age.min, age.max)
   if(BCAD)
-    yr.lim <- rev(yr.lim)
-  if(rev.yr)
-    yr.lim <- rev(yr.lim)
+    age.lim <- rev(age.lim)
+  if(rev.age)
+    age.lim <- rev(age.lim)
   d.lim <- c(d.max, d.min)
   if(rev.d)
     d.lim <- d.lim[2:1]
     
   if(length(d.lab) == 0)
-    d.lab <- paste("Depth (", unit, ")", sep="")
-  if(length(yr.lab) == 0)
-    yr.lab <- ifelse(BCAD, "BC/AD", "cal yr BP")
+    d.lab <- paste("Depth (", depth.unit, ")", sep="")
+  if(length(age.lab) == 0)
+    age.lab <- ifelse(BCAD, "BC/AD", paste("cal", age.unit, "BP"))
 
   par(xaxs=xaxs, yaxs=yaxs, bty="n")
   if(rotate.axes)
-    plot(0, type="n", ylim=d.lim, xlim=yr.lim, ylab=d.lab, xlab=yr.lab, bty="n", xaxt=xaxt, yaxt=yaxt) else
-      plot(0, type="n", xlim=d.lim[2:1], ylim=yr.lim, xlab=d.lab, ylab=yr.lab, bty="n", xaxt=xaxt, yaxt=yaxt)
+    plot(0, type="n", ylim=d.lim, xlim=age.lim, ylab=d.lab, xlab=age.lab, bty="n", xaxt=xaxt, yaxt=yaxt) else
+      plot(0, type="n", xlim=d.lim[2:1], ylim=age.lim, xlab=d.lab, ylab=age.lab, bty="n", xaxt=xaxt, yaxt=yaxt)
 
   if(!dates.only) {
     if(talk)
       cat("\nPreparing ghost graph\n")    
-    .agedepth.ghost(set, rotate.axes=rotate.axes, BCAD=BCAD, d.res=d.res, yr.res=yr.res, grey.res=grey.res, dark=dark, colours=greyscale, d.min=d.min, d.max=d.max, yr.lim=yr.lim)
+    .agedepth.ghost(set, rotate.axes=rotate.axes, BCAD=BCAD, d.res=d.res, age.res=age.res, grey.res=grey.res, dark=dark, colours=greyscale, age.lim=age.lim)
   }
   
   if(length(set$slump) > 0 ) 
     for(i in 1:nrow(set$slump))
       if(rotate.axes)
-        rect(min(yr.lim)-1e3, set$slump[i,1], max(yr.lim)+1e3, set$slump[i,2], col=slump.col, border=slump.col) else
-          rect(set$slump[i,1], min(yr.lim)-1e3, set$slump[i,2], max(yr.lim)+1e3, col=slump.col, border=slump.col)      
+        rect(min(age.lim)-1e3, set$slump[i,1], max(age.lim)+1e3, set$slump[i,2], col=slump.col, border=slump.col) else
+          rect(set$slump[i,1], min(age.lim)-1e3, set$slump[i,2], max(age.lim)+1e3, col=slump.col, border=slump.col)      
 
-  calib.plot(set, BCAD=BCAD, rotate.axes=rotate.axes, height=height, mirror=mirror, up=up, date.res=date.res, cutoff=cutoff, C14.col=C14.col, C14.border=C14.border, cal.col=cal.col, cal.border=cal.border, dates.col=dates.col, new.plot=FALSE, normalise.dists=normalise.dists)
+  calib.plot(set, BCAD=BCAD, cc=cc, rotate.axes=rotate.axes, height=height, mirror=mirror, up=up, date.res=date.res, cutoff=cutoff, C14.col=C14.col, C14.border=C14.border, cal.col=cal.col, cal.border=cal.border, dates.col=dates.col, new.plot=FALSE, normalise.dists=normalise.dists)
   legend(title.location, title, bty="n", cex=1.5)
   box(bty=bty)
 
@@ -216,15 +223,15 @@ agedepth <- function(set=get('info'), BCAD=set$BCAD, unit="cm", d.lab=c(), yr.la
   min.rng <- d[which(rng==min(rng))]
   max.rng <- d[which(rng==max(rng))]
   if(length(min.rng)==1)
-    min.rng <- paste(" yr at", min.rng, noquote(set$unit)) else
-      min.rng <- paste(" yr between", min(min.rng), "and", max(min.rng), noquote(set$unit))
+    min.rng <- paste(age.unit, "at", min.rng, noquote(depth.unit)) else
+      min.rng <- paste(age.unit, "between", min(min.rng), "and", max(min.rng), noquote(depth.unit))
   if(length(max.rng)==1)
-    max.rng <- paste(" yr at", max.rng, set$unit) else
-      max.rng <- paste(" yr between", min(max.rng), "and", max(max.rng), noquote(set$unit))
+    max.rng <- paste(age.unit, "at", max.rng, noquote(depth.unit)) else
+      max.rng <- paste(age.unit, "between", min(max.rng), "and", max(max.rng), noquote(depth.unit))
   if(talk) {
     if(!dates.only)
-      cat("\nMean ", 100*prob, "% confidence ranges ", round(mean(rng), rounded), " yr, min. ",
-        min(rng), min.rng, ", max. ", max(rng), max.rng, "\n", sep="")
+      cat("\nMean ", 100*prob, "% confidence ranges ", round(mean(rng), rounded), " ", age.unit, ", min. ",
+        min(rng), " ", min.rng, ", max. ", max(rng), " ", max.rng, "\n", sep="")
     overlap()
   } else
       cat("\n")

@@ -21,7 +21,7 @@ For one MCMC iteration (it), extract the corresponding age-depth model.
 }
 \examples{
   Bacon(run=FALSE, coredir=tempfile())
-  agedepth(yr.res=50, d.res=50, d.by=10)
+  agedepth(age.res=50, d.res=50, d.by=10)
   lines(agemodel.it(5), col="red") 
 }
 \references{

@@ -223,7 +223,7 @@ class twalk {
 		/*Kernel probabilities, no longer used*/
                 //double *krl_probs;     
 				
-		/* Saving scheme, < 0 only accepeted it., otherwise only it %% abs(save_every) == 0 (1 = all iterations) */
+		/* Saving scheme, < 0 only accepted it., otherwise only it %% abs(save_every) == 0 (1 = all iterations) */
 		/* if 0, save all iterations and save the file recacc with kernel acceptance rates etc.  For debugging info*/
 		
 				 int save_every;
@@ -268,7 +268,7 @@ class twalk {
 	                                                  /**** not used, for backward compatibility but it doesn't work! ****/
 	twalk(obj_fcn &Obj1, double *x1, double *xp1, int n1, double *krl_probs1=NULL) {
 
-        krl_probs1=NULL; //avoid waining JEV
+        krl_probs1=NULL; //avoid warning JEV
         Obj = &Obj1;
         x = x1;
         xp = xp1;
@@ -342,9 +342,9 @@ int init(double *xx, double *xxp) {
 		cp_vector( xx, x, n);
 	}
 	
-	if (xxp != NULL)
+	if (xxp != NULL) {
 		cp_vector( xxp, xp, n);
-
+    }
 
 	 //initialization
 

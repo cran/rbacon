@@ -6,18 +6,20 @@
 \usage{
 Bacon(core = "MSB2K", thick = 5, coredir = "", prob = 0.95,
   d.min = NA, d.max = NA, d.by = 1, depths.file = FALSE,
-  depths = c(), unit = "cm", acc.shape = 1.5, acc.mean = 20,
+  depths = c(), depth.unit = "cm", age.unit = "yr",
+  unit = depth.unit, acc.shape = 1.5, acc.mean = 20,
   mem.strength = 4, mem.mean = 0.7, boundary = NA,
-  hiatus.depths = NA, hiatus.max = 10000, add = 100, after = 1e-06,
+  hiatus.depths = NA, hiatus.max = 10000, add = c(), after = 1e-06,
   cc = 1, cc1 = "IntCal13", cc2 = "Marine13", cc3 = "SHCal13",
   cc4 = "ConstCal", ccdir = "", postbomb = 0, delta.R = 0,
   delta.STD = 0, t.a = 3, t.b = 4, normal = FALSE,
   suggest = TRUE, reswarn = c(10, 200), remember = TRUE,
   ask = TRUE, run = TRUE, defaults = "default_settings.txt",
   sep = ",", dec = ".", runname = "", slump = c(), BCAD = FALSE,
-  ssize = 2000, th0 = c(), burnin = min(500, ssize), MinYr = c(),
-  MaxYr = c(), cutoff = 0.001, plot.pdf = TRUE, dark = 1,
-  date.res = 100, yr.res = 200, ...)
+  ssize = 2000, th0 = c(), burnin = min(500, ssize), MinAge = c(),
+  MaxAge = c(), MinYr = MinAge, MaxYr = MaxAge, cutoff = 0.001,
+  plot.pdf = TRUE, dark = 1, date.res = 100, age.res = 200,
+  yr.res = age.res, ...)
 }
 \arguments{
 \item{core}{Name of the core, given using quotes. Defaults to one of the cores provided with rbacon, \code{core="MSB2K"}. 
@@ -45,13 +47,17 @@ and its name should start with the core's name and end with `_depths.txt'. Then 
 \item{depths}{By default, Bacon will calculate the ages for the depths \code{d.min} to \code{d.max} in steps of \code{d.by}.
 Alternative depths can be provided as, e.g., \code{depths=seq(0, 100, length=500)} or as a file, e.g., \code{depths=read.table("CoreDepths.txt"}. See also \code{depths.file}.}
 
-\item{unit}{Units of the depths. Note that the default prior for accumulation rate assumes the default \code{unit="cm"}.}
+\item{depth.unit}{Units of the depths. Defaults to \code{depth.unit="cm"}.}
+
+\item{age.unit}{Units of the ages. Defaults to \code{age.unit="yr"}.}
+
+\item{unit}{Deprecated and replaced by \code{depth.unit}.}
 
 \item{acc.shape}{The prior for the accumulation rate consists of a gamma distribution with two parameters. 
 Its shape is set by acc.shape (default \code{acc.shape=1.5}; higher values result in more peaked shapes).}
 
-\item{acc.mean}{The accumulation rate prior consists of a gamma distribution with two parameters. Its mean is set by acc.mean (default \code{acc.mean=20} yr/cm, 
-which can be changed to, e.g., 5, 10 or 50 for different kinds of deposits).}
+\item{acc.mean}{The accumulation rate prior consists of a gamma distribution with two parameters. Its mean is set by acc.mean (default \code{acc.mean=20} yr/cm (or whatever age or depth units are chosen), 
+which can be changed to, e.g., 5, 10 or 50 for different kinds of deposits). Multiple values can be given in case of hiatuses or boundaries, e.g., Bacon(hiatus.depths=23, acc.mean=c(5,20))}
 
 \item{mem.strength}{The prior for the memory (dependence of accumulation rate between neighbouring depths) is a beta distribution, which looks much like the gamma distribution.
 but its values are always between 0 (no assumed memory) and 1 (100\% memory). Its default settings of \code{mem.strength=4}
@@ -61,14 +67,14 @@ but its values are always between 0 (no assumed memory) and 1 (100\% memory). It
 its values are always between 0 (no assumed memory) and 1 (100\% memory). Its default settings of \code{mem.mean=0.7}
 allow for a large range of posterior memory values.}
 
-\item{boundary}{The assumed depths of any boundary, which divides sections of different accumulation rate regimes (e.g., as indicated by major change in the stratigraphy). No hiatus is assumed between these sections, and memory is reset crossing the boundary. Different accumulation priors can be set for the sections above and below the boundary, e.g., \code{acc.mean=c(5, 20)}. See also \code{hiatus.depths}, \code{mem.mean}, \code{acc.mean} and \code{acc.shape}.}
+\item{boundary}{The assumed depths of any boundary, which divides sections of different accumulation rate regimes (e.g., as indicated by major change in the stratigraphy). No hiatus is assumed between these sections, and memory is reset crossing the boundary. Different accumulation priors can be set for the sections above and below the boundary, e.g., \code{acc.mean=c(5, 20)}. See also \code{hiatus.depths}, \code{mem.mean}, \code{acc.mean} and \code{acc.shape}. Setting many boundaries might not work, and having more than one boundary per model section (see \code{'thick'}) might not work either.}
 
 \item{hiatus.depths}{The assumed depths for any hiatus should be provided as, e.g., 
 \code{hiatus.depths=20} for one at 20cm depth, and \code{hiatus.depths=c(20,40)} for two hiatuses at 20 and 40 cm depth.}
 
-\item{hiatus.max}{The prior for the maximum length of the hiatus. Hiatus length is a uniform distribution, with equal probabilities between 0 and \code{hiatus.max} yr.}
+\item{hiatus.max}{The prior for the maximum length of the hiatus. Hiatus length is a uniform distribution, with equal probabilities between 0 and \code{hiatus.max} yr (or whatever other \code{age.unit} is chosen).}
 
-\item{add}{Add a value to the maximum hiatus length if a boundary is chosen. Defaults to 100 yr. Can be adapted if Bacon complains that the parameters are out of support.}
+\item{add}{Add a value to the maximum hiatus length if a boundary is chosen. Defaults to 100 yr (or whatever other age unit is chosen). Can be adapted if Bacon complains that the parameters are out of support.}
 
 \item{after}{Sets a short section above and below hiatus.depths within which to calculate ages. For internal calculations - do not change.}
 
@@ -138,9 +144,13 @@ try running your core again with \code{remember=FALSE}, or, start cleanly by typ
 
 \item{burnin}{Amount of initial, likely sub-optimal MCMC iterations that will be removed.}
 
-\item{MinYr}{Minimum age limit for Bacon runs, default at current year in cal BP. To set plot limits, use \code{yr.min} instead.}
+\item{MinAge}{Minimum age limit for Bacon runs, default at current year in cal BP. To set plot limits, use \code{yr.min} instead.}
 
-\item{MaxYr}{Maximum age limit for Bacon runs, default at 1,000,000 cal BP. To set plot limits, use \code{yr.max} instead.}
+\item{MaxAge}{Maximum age limit for Bacon runs, default at 1,000,000 cal BP. To set plot limits, use \code{yr.max} instead.}
+
+\item{MinYr}{Deprecated - use MinAge instead.}
+
+\item{MaxYr}{Deprecated - use MaxAge instead.}
 
 \item{cutoff}{Avoid plotting very low probabilities of date distributions (default \code{cutoff=0.001}).}
 
@@ -151,7 +161,9 @@ Lower values will result in lighter grey but values >1 are not allowed.}
 
 \item{date.res}{Date distributions are plotted using \code{date.res=100} segments by default.}
 
-\item{yr.res}{Resolution or amount of greyscale pixels to cover the age scale of the age-model plot. Default \code{yr.res=200}.}
+\item{age.res}{Resolution or amount of greyscale pixels to cover the age scale of the age-model plot. Default \code{yr.res=200}.}
+
+\item{yr.res}{Deprecated - use age.res instead}
 
 \item{...}{options for the age-depth graph. See \link{agedepth} and \link{calib.plot}}
 }

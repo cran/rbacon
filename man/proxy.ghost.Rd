@@ -5,21 +5,24 @@
 \title{Proxies analysed along the depths of a core can be plotted as 'proxy-ghost' graphs against calendar time while taking into account chronological uncertainties. Here darker grey indicates more likely calendar ages for specific proxy values.}
 \usage{
 proxy.ghost(proxy = 1, proxy.lab = c(), proxy.res = 250,
-  yr.res = 250, grey.res = 100, set = get("info"), dark = 1,
-  darkest = 1, rotate.axes = FALSE, proxy.rev = FALSE,
-  yr.rev = FALSE, plot.mean = FALSE, mean.col = "red",
-  yr.lim = c(), proxy.lim = c(), sep = ",", xaxs = "i",
+  age.res = 200, yr.res = age.res, grey.res = 100,
+  set = get("info"), dark = 1, darkest = 1, rotate.axes = FALSE,
+  proxy.rev = FALSE, age.rev = FALSE, yr.rev = age.rev,
+  plot.mean = FALSE, mean.col = "red", age.lim = c(),
+  yr.lim = age.lim, proxy.lim = c(), sep = ",", xaxs = "i",
   yaxs = "i", xaxt = "s", yaxt = "s", bty = "l", BCAD = set$BCAD,
-  yr.lab = ifelse(BCAD, "BC/AD", "cal yr BP"))
+  age.lab = ifelse(BCAD, "BC/AD", "cal yr BP"), yr.lab = age.lab)
 }
 \arguments{
 \item{proxy}{Which proxy to use (counting from the column number in the .csv file after the depths column).}
 
 \item{proxy.lab}{Label of the proxy axis. Default names are taken from the csv file.}
 
-\item{proxy.res}{Greyscale pixels are calculated for \code{proxy.res=200} proxy values by default.}
+\item{proxy.res}{Greyscale pixels are calculated for \code{proxy.res=250} proxy values by default, as a compromise between image quality and calculation speed. If the output looks very pixel-like (e.g., when choosing to plot only part of the record using proxy.lim), set this option to higher values.}
 
-\item{yr.res}{Resolution or amount of greyscale pixels to cover the age scale of the age-model plot. Default \code{yr.res=200}.}
+\item{age.res}{Resolution or amount of greyscale pixels to cover the age scale of the age-model plot. Default \code{age.res=250} as a compromise between image quality and calculation speed. If the output looks very pixel-like (e.g., when choosing to plot only part of the record using age.lim), set this option to higher values.}
+
+\item{yr.res}{Deprecated - use age.res instead}
 
 \item{grey.res}{Grey-scale resolution of the proxy graph. Default \code{grey.res=100}.}
 
@@ -33,13 +36,17 @@ proxy.ghost(proxy = 1, proxy.lab = c(), proxy.res = 250,
 
 \item{proxy.rev}{The proxy axis can be reversed if \code{proxy.rev=TRUE}.}
 
-\item{yr.rev}{The calendar axis can be reversed using \code{yr.rev=TRUE}.}
+\item{age.rev}{The calendar axis can be reversed using \code{yr.rev=TRUE}.}
+
+\item{yr.rev}{Deprecated - use age.rev instead}
 
 \item{plot.mean}{The mean ages of the proxy values can be added using \code{plot.mean=TRUE}.}
 
 \item{mean.col}{Colour of the weighted mean ages of the proxy values.}
 
-\item{yr.lim}{Minimum and maximum calendar age ranges, calculated automatically by default (\code{yr.lim=c()}).}
+\item{age.lim}{Minimum and maximum calendar age ranges, calculated automatically by default (\code{yr.lim=c()}).}
+
+\item{yr.lim}{Deprecated - use age.lim instead}
 
 \item{proxy.lim}{Ranges of the proxy axis, calculated automatically by default (\code{proxy.lim=c()}).}
 
@@ -57,7 +64,9 @@ proxy.ghost(proxy = 1, proxy.lab = c(), proxy.res = 250,
 
 \item{BCAD}{The calendar scale of graphs and age output-files is in \code{cal BP} by default, but can be changed to BC/AD using \code{BCAD=TRUE}.}
 
-\item{yr.lab}{The labels for the calendar axis (default \code{yr.lab="cal BP"} or \code{"BC/AD"} if \code{BCAD=TRUE}).}
+\item{age.lab}{The labels for the calendar axis (default \code{age.lab="cal BP"} or \code{"BC/AD"} if \code{BCAD=TRUE}).}
+
+\item{yr.lab}{Deprecated - use age.lab instead}
 }
 \value{
 A grey-scale graph of the proxy against calendar age.

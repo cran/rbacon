@@ -1,12 +1,33 @@
+# rbacon 2.3.8
+
+* repaired a bug in cal.h which prevented the postbomb curve postbomb_SH3 from being used
+* repaired bug where the prior for the accumulation rate would not always be drawn entirely
+* Bacon.hist now takes alternative values for prob into account (e.g., prob=.68)
+* The agedepth function now deals better with d.min and d.max values
+* Colours of cal BP dates now as expected when cc=0 is provided as Bacon option 
+* The fit of the dates to the age-model is now reported correctly also when BCAD=TRUE
+* Date distributions should now plot as expected over a wider range of values
+* New option acc.lab to provide alternative label for the accumulation rate axis (top-middle panel of the main agedepth graph)
+* When provided, d.max or d.min are now dealt with better if extra columns are provided for dR/dSTD and/or t.a/t.b in the core's .csv file
+* New options depth.unit (default 'cm') and age.unit (default 'yr'), deprecating the previous poorly named option 'unit' which defaulted to 'cm'. So can now also deal with, e.g., 'Ma' and 'km'
+* Replaced occurrences of yr with the more generic unit of age (deprecate yr.min, yr.max, MinYr, MaxYr)
+* When Bacon asks for confirmation to run a core (Y/n), the user can now simply press Enter instead of having to type y first. Similarly, by default suggestions to adapt the prior accumulation rate are not accepted (y/N)
+* Enhanced drawing of very precise ages (e.g., 1 yr)
+* Bacon now stops if there are less than 2 sections between neighbouring hiatuses
+* A warning is now given if acc.shape <1 (since this results in weirdly shaped gamma prior distributions)
+* An error is thrown when the core's .csv file has 'orphan' commas (can happen if the file was made in a spreadsheet program - check in a plain-text editor)
+* add.dates now plots better when mirror=FALSE
+* More consistent error messages
+
 # rbacon 2.3.7
 
-* adapted source code to allow for more than 10 hiatuses/boundaries (now limited to 50)
-* corrected bug causing a warning when a hiatus was set with multiple acc.mean priors provided.
+* adapted cpp code to allow for more than 10 hiatuses/boundaries (now limited to 50)
+* corrected bug causing a warning when a hiatus was set with multiple acc.mean priors provided
 * now ensures that hiatus or boundary depths are in the correct order (ascending in depth)
 
 # rbacon 2.3.6
 
-* further enhancements of memory usage in MCMC calculations (bacon.h)
+* further enhancements to memory usage in MCMC calculations (bacon.h)
 
 # rbacon 2.3.5
 
