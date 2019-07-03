@@ -6,24 +6,26 @@
 \usage{
 agedepth(set = get("info"), BCAD = set$BCAD, depth.unit = "cm",
   age.unit = "yr", unit = depth.unit, d.lab = c(), age.lab = c(),
-  yr.lab = age.lab, acc.lab = c(), d.min = set$d.min,
-  d.max = set$d.max, d.by = set$d.by, depths = set$depths,
+  yr.lab = age.lab, kcal = FALSE, acc.lab = c(), d.min = c(),
+  d.max = c(), d.by = c(), depths = set$depths,
   depths.file = FALSE, age.min = c(), yr.min = age.min,
-  age.max = c(), yr.max = age.max, dark = c(), prob = set$prob,
-  rounded = 0, d.res = 400, age.res = 400, yr.res = age.res,
-  date.res = 100, grey.res = 100, rotate.axes = FALSE,
-  rev.age = FALSE, rev.yr = rev.age, rev.d = FALSE, maxcalc = 500,
-  height = 15, mirror = TRUE, up = TRUE, cutoff = 0.001,
-  plot.range = TRUE, panels = layout(1), range.col = grey(0.5),
-  range.lty = "12", mn.col = "red", mn.lty = "12", med.col = NA,
-  med.lty = "12", C14.col = rgb(0, 0, 1, 0.35), C14.border = rgb(0,
-  0, 1, 0.5), cal.col = rgb(0, 0.5, 0.5, 0.35), cal.border = rgb(0,
-  0.5, 0.5, 0.5), dates.col = c(), hiatus.col = grey(0.5),
-  hiatus.lty = "12", greyscale = grey(seq(1, 0, length = grey.res)),
-  slump.col = grey(0.8), normalise.dists = TRUE, cc = set$cc,
-  title = set$core, title.location = "topleft", after = set$after,
-  bty = "l", mar = c(3, 3, 1, 1), mgp = c(1.5, 0.7, 0), xaxs = "r",
-  yaxs = "r", xaxt = "s", yaxt = "s", plot.pdf = FALSE,
+  age.max = c(), yr.max = age.max, hiatus.option = 1, dark = c(),
+  prob = set$prob, rounded = 0, d.res = 400, age.res = 400,
+  yr.res = age.res, date.res = 100, grey.res = 100,
+  rotate.axes = FALSE, rev.age = FALSE, rev.yr = rev.age,
+  rev.d = FALSE, maxcalc = 500, height = 15, calheight = 1,
+  mirror = TRUE, up = TRUE, cutoff = 0.001, plot.range = TRUE,
+  panels = layout(1), range.col = grey(0.5), range.lty = "12",
+  mn.col = "red", mn.lty = "12", med.col = NA, med.lty = "12",
+  C14.col = rgb(0, 0, 1, 0.35), C14.border = rgb(0, 0, 1, 0.5),
+  cal.col = rgb(0, 0.5, 0.5, 0.35), cal.border = rgb(0, 0.5, 0.5, 0.5),
+  dates.col = c(), hiatus.col = grey(0.5), hiatus.lty = "12",
+  greyscale = grey(seq(1, 0, length = grey.res)),
+  slump.col = grey(0.8), normalise.dists = TRUE,
+  same.heights = FALSE, cc = set$cc, title = set$core,
+  title.location = "topleft", after = set$after, bty = "l",
+  mar = c(3, 3, 1, 1), mgp = c(1.5, 0.7, 0), xaxs = "r",
+  yaxs = "i", xaxt = "s", yaxt = "s", plot.pdf = FALSE,
   dates.only = FALSE, model.only = FALSE, talk = FALSE)
 }
 \arguments{
@@ -42,6 +44,8 @@ agedepth(set = get("info"), BCAD = set$BCAD, depth.unit = "cm",
 \item{age.lab}{The labels for the calendar axis (default \code{age.lab="cal BP"} or \code{"BC/AD"} if \code{BCAD=TRUE}).}
 
 \item{yr.lab}{Deprecated - use age.lab instead}
+
+\item{kcal}{Use kcal BP. Default is \code{kcal=FALSE}.}
 
 \item{acc.lab}{The labels for the accumulation rate plot (top middle). Default \code{d.lab="Acc. rate (yr/cm)"} (or whatever units you're using).}
 
@@ -65,6 +69,8 @@ and its name should start with the core's name and end with '_depths.txt'. Then 
 \item{age.max}{Maximum age of the age-depth plot.}
 
 \item{yr.max}{Deprecated - use age.min instead}
+
+\item{hiatus.option}{How to calculate accumulation rates and ages for sections with hiatuses. Either extrapolate from surrounding sections (default, \code{hiatus.option=1}), use a w-weighted mix between the prior and posterior values for depths below the hiatus and prior information only for above the hiatus (\code{hiatus.option=2}), or use the originally calculated slopes (\code{hiatus.option=0}).}
 
 \item{dark}{Darkness of the greyscale age-depth model. By default, the darkest grey value is calculated as 10 times the height of the lowest-precision age estimate \code{dark=c()}. Lower values will result in lighter grey but values >1 are not allowed.}
 
@@ -93,6 +99,8 @@ and its name should start with the core's name and end with '_depths.txt'. Then 
 \item{maxcalc}{Number of depths to calculate ages for. If this is more than \code{maxcalc=500}, a warning will be shown that calculations will take time.}
 
 \item{height}{The maximum heights of the distributions of the dates on the plot. See also \code{normalise.dists}.}
+
+\item{calheight}{Multiplier for the heights of the distributions of dates on the calendar scale. Defaults to \code{calheight=1}.}
 
 \item{mirror}{Plot the dates as 'blobs'. Set to \code{mirror=FALSE} to plot simple distributions.}
 
@@ -136,6 +144,8 @@ and its name should start with the core's name and end with '_depths.txt'. Then 
 
 \item{normalise.dists}{By default, the distributions of more precise dates will cover less time and will thus peak higher than less precise dates. This can be avoided by specifying \code{normalise.dists=FALSE}.}
 
+\item{same.heights}{Plot the distributions of the dates all at the same maximum height (default \code{same.height=FALSE}).}
+
 \item{cc}{Calibration curve for 14C dates: \code{cc=1} for IntCal13 (northern hemisphere terrestrial), \code{cc=2} for Marine13 (marine), \code{cc=3} for SHCal13 (southern hemisphere terrestrial). For dates that are already on the cal BP scale use \code{cc=0}.}
 
 \item{title}{The title of the age-depth model is plotted on the main panel. By default this is the core's name. To leave empty: \code{title=""}.}
@@ -152,7 +162,7 @@ and its name should start with the core's name and end with '_depths.txt'. Then 
 
 \item{xaxs}{Extension of x-axis. By default, add some extra white-space at both extremes (\code{xaxs="r"}). See ?par for other options.}
 
-\item{yaxs}{Extension of y-axis. By default, add some extra white-space at both extremes (\code{yaxs="r"}). See ?par for other options.}
+\item{yaxs}{Extension of y-axis. By default, add no extra white-space at both extremes (\code{yaxs="i"}). See ?par for other options.}
 
 \item{xaxt}{Whether or not to plot the x-axis. Can be used to adapt axes after a plot. See ?par for other options.}
 
@@ -188,7 +198,7 @@ again using the command \code{agedepth()}.
 \references{
 Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive 
 gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474. 
-\url{https://projecteuclid.org/download/pdf_1/euclid.ba/1339616472}
+\url{https://projecteuclid.org/euclid.ba/1339616472}
 }
 \seealso{
 \url{http://www.chrono.qub.ac.uk/blaauw/manualBacon_2.3.pdf}

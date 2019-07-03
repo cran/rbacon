@@ -8,11 +8,12 @@ calib.plot(set = get("info"), BCAD = set$BCAD, cc = set$cc,
   rotate.axes = FALSE, rev.d = FALSE, rev.age = FALSE,
   rev.yr = rev.age, age.lim = c(), yr.lim = age.lim,
   date.res = 100, d.lab = c(), age.lab = c(), yr.lab = age.lab,
-  height = 15, mirror = TRUE, up = TRUE, cutoff = 0.001,
-  C14.col = rgb(0, 0, 1, 0.5), C14.border = rgb(0, 0, 1, 0.75),
-  cal.col = rgb(0, 0.5, 0.5, 0.5), cal.border = rgb(0, 0.5, 0.5, 0.75),
-  dates.col = c(), slump.col = grey(0.8), new.plot = TRUE,
-  plot.dists = TRUE, normalise.dists = TRUE)
+  height = 15, calheight = 1, mirror = TRUE, up = TRUE,
+  cutoff = 0.001, C14.col = rgb(0, 0, 1, 0.5), C14.border = rgb(0, 0,
+  1, 0.75), cal.col = rgb(0, 0.5, 0.5, 0.5), cal.border = rgb(0, 0.5,
+  0.5, 0.75), dates.col = c(), slump.col = grey(0.8),
+  new.plot = TRUE, plot.dists = TRUE, same.heights = FALSE,
+  normalise.dists = TRUE)
 }
 \arguments{
 \item{set}{Detailed information of the current run, stored within this session's memory as variable \code{info}.}
@@ -43,6 +44,8 @@ calib.plot(set = get("info"), BCAD = set$BCAD, cc = set$cc,
 
 \item{height}{The heights of the distributions of the dates. See also \code{normalise.dists}.}
 
+\item{calheight}{Multiplier for the heights of the distributions of dates on the calendar scale. Defaults to \code{calheight=1}.}
+
 \item{mirror}{Plot the dates as 'blobs'. Set to \code{mirror=FALSE} to plot simple distributions.}
 
 \item{up}{Directions of distributions if they are plotted non-mirrored. Default \code{up=TRUE}.}
@@ -65,6 +68,8 @@ calib.plot(set = get("info"), BCAD = set$BCAD, cc = set$cc,
 
 \item{plot.dists}{Plot the distributions of the dates (default \code{plot.dists=TRUE}).}
 
+\item{same.heights}{Plot the distributions of the dates all at the same maximum height (default \code{same.height=FALSE}).}
+
 \item{normalise.dists}{By default, the distributions of more precise dates will cover less time and will thus peak higher than less precise dates. This can be avoided by specifying \code{normalise.dists=FALSE}.}
 }
 \value{
@@ -85,7 +90,7 @@ It can be used to produce custom-built graphs.
 \references{
 Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive 
 gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474. 
-\url{https://projecteuclid.org/download/pdf_1/euclid.ba/1339616472}
+\url{https://projecteuclid.org/euclid.ba/1339616472}
 }
 \seealso{
 \url{http://www.chrono.qub.ac.uk/blaauw/manualBacon_2.3.pdf}

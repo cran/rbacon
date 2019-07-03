@@ -43,7 +43,7 @@
 #' @references
 #' Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive 
 #' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474. 
-#' \url{https://projecteuclid.org/download/pdf_1/euclid.ba/1339616472}
+#' \url{https://projecteuclid.org/euclid.ba/1339616472}
 #' @export
 proxy.ghost <- function(proxy=1, proxy.lab=c(), proxy.res=250, age.res=200, yr.res=age.res, grey.res=100, set=get('info'), dark=1, darkest=1, rotate.axes=FALSE, proxy.rev=FALSE, age.rev=FALSE, yr.rev=age.rev, plot.mean=FALSE, mean.col="red", age.lim=c(), yr.lim=age.lim, proxy.lim=c(), sep=",", xaxs="i", yaxs="i", xaxt="s", yaxt="s", bty="l", BCAD=set$BCAD, age.lab=ifelse(BCAD, "BC/AD", "cal yr BP"), yr.lab=age.lab) {
   if(length(set$Tr)==0)
@@ -190,7 +190,7 @@ proxy.ghost <- function(proxy=1, proxy.lab=c(), proxy.res=250, age.res=200, yr.r
 #' @references
 #' Blaauw, M., Christen, J.A., Mauquoy, D., van der Plicht, J., Bennett, K.D. (2007) Testing the timing of radiocarbon-dated events between proxy archives. _The Holocene_, *17*, 283-288.
 #' Blaauw, M., Wohlfarth, B., Christen, J.A., Ampel, L., Veres, D., Hughen, K.A., Preusser, F., Svensson, A. (2010) Were last glacial climate events simultaneous between Greenland and France? A quantitative comparison using non-tuned chronologies. _Journal of Quaternary Science_ *25*, 387-394.
-#' \url{https://projecteuclid.org/download/pdf_1/euclid.ba/1339616472}
+#' \url{https://projecteuclid.org/euclid.ba/1339616472}
 #' @export
 AgesOfEvents <- function(window, move, set=get('info'), plot.steps=FALSE, BCAD=set$BCAD, age.lab=c(), yr.lab=age.lab, age.lim=c(), yr.lim=age.lim, prob.lab="probability", prob.lim=c(), rotate.axes=FALSE, rev.age=TRUE, rev.yr=rev.age, yaxs="i", bty="l") {
   if(move == 0)
@@ -204,24 +204,24 @@ AgesOfEvents <- function(window, move, set=get('info'), plot.steps=FALSE, BCAD=s
   probs <- read.table(probfile)
   if(!is.numeric(probs[1,1]))
     stop("first line of the _events.txt file should NOT contain titles; please remove them", call.=FALSE)
-  if(min(probs[,1]) < min(set$d) || max(probs[,1]) > max(set$d)) {
+  if(min(probs[,1]) < min(set$elbows) || max(probs[,1]) > max(set$elbows)) {
     cat("some depths in the _events.txt file go beyond the age-model; I will remove them", call.=FALSE)
     file.rename(probfile, paste(probfile, "_backup", sep=""))
-    probs <- probs[which(probs[,1] >= min(set$d)),]
-    probs <- probs[which(probs[,1] <= max(set$d)),]
+    probs <- probs[which(probs[,1] >= min(set$elbows)),]
+    probs <- probs[which(probs[,1] <= max(set$elbows)),]
     write.table(probs, probfile, col.names=FALSE, row.names=FALSE, quote=FALSE)
   }
   
-  if(length(yr.lim) == 0) {
-    min.age=min(set$ranges[,2])
-    max.age=max(set$ranges[,3])
-    yr.lim=c(min.age, max.age)
+  if(length(age.lim) == 0) {
+    min.age <- min(set$ranges[,2])
+    max.age <- max(set$ranges[,3])
+    age.lim <- c(min.age, max.age)
   } else {
-      min.age <- min(yr.lim)
-      max.age <- max(yr.lim)
+      min.age <- min(age.lim)
+      max.age <- max(age.lim)
     }
   
-  events(min.age, max.age, move, window, outfile, MCMCname, nrow(set$output), set$K, set$d[1], set$thick, probfile, nrow(probs))
+  events(min.age, max.age, move, window, outfile, MCMCname, nrow(set$output), set$K, set$elbows[1], set$thick, probfile, nrow(probs))
   probs <- read.table(outfile)
   if(BCAD) {
     probs[,1] <- 1950 - probs[,1]
@@ -237,18 +237,18 @@ AgesOfEvents <- function(window, move, set=get('info'), plot.steps=FALSE, BCAD=s
       probs <- cbind(c(min(probs[,1]), probs[,1], max(probs[,1])), c(0,probs[,2],0))
   par(yaxs=yaxs, bty=bty)
 
-  if(rev.yr)
-    yr.lim <- rev(yr.lim)
-  if(length(yr.lab) == 0)
-    yr.lab <- ifelse(BCAD, "BC/AD", "cal BP")
+  if(rev.age)
+    age.lim <- rev(age.lim)
+  if(length(age.lab) == 0)
+    age.lab <- ifelse(BCAD, "BC/AD", "cal BP")
   if(length(prob.lim) == 0)
     prob.lim <- c(0, 1.1*max(probs[,2]))
 
   if(rotate.axes) {
-    plot(probs[,2], probs[,1], type="n", ylab=yr.lab, xlab=prob.lab, xlim=prob.lim, ylim=yr.lim)
+    plot(probs[,2], probs[,1], type="n", ylab=age.lab, xlab=prob.lab, xlim=prob.lim, ylim=age.lim)
     polygon(probs[,2:1], col="grey")
   } else {
-      plot(probs, type="n", xlab=yr.lab, ylab=prob.lab, ylim=prob.lim, xlim=yr.lim)
+      plot(probs, type="n", xlab=age.lab, ylab=prob.lab, ylim=prob.lim, xlim=age.lim)
       polygon(probs, col="grey")
     }
   if(move > window) cat("\nAre you sure you want the window widths to be smaller than the moves?\n")

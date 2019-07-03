@@ -74,7 +74,7 @@ does not yet deal correctly with hiatuses.
 \references{
 Blaauw, M., Christen, J.A., Mauquoy, D., van der Plicht, J., Bennett, K.D. (2007) Testing the timing of radiocarbon-dated events between proxy archives. _The Holocene_, *17*, 283-288.
 Blaauw, M., Wohlfarth, B., Christen, J.A., Ampel, L., Veres, D., Hughen, K.A., Preusser, F., Svensson, A. (2010) Were last glacial climate events simultaneous between Greenland and France? A quantitative comparison using non-tuned chronologies. _Journal of Quaternary Science_ *25*, 387-394.
-\url{https://projecteuclid.org/download/pdf_1/euclid.ba/1339616472}
+\url{https://projecteuclid.org/euclid.ba/1339616472}
 }
 \seealso{
 \url{http://www.chrono.qub.ac.uk/blaauw/manualBacon_2.3.pdf}

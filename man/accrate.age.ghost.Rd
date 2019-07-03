@@ -11,7 +11,7 @@ accrate.age.ghost(set = get("info"), age.lim = c(), yr.lim = age.lim,
   mean.col = "red", mean.lty = 2, acc.lim = c(), acc.lab = c(),
   upper = 0.99, dark = 50, BCAD = set$BCAD, cmyr = FALSE,
   rotate.axes = FALSE, rev.age = FALSE, rev.yr = rev.age,
-  rev.acc = FALSE, xaxs = "i", yaxs = "i", bty = "o")
+  rev.acc = FALSE, xaxs = "i", yaxs = "i", bty = "l")
 }
 \arguments{
 \item{set}{Detailed information of the current run, stored within this session's memory as variable info.}
@@ -95,7 +95,7 @@ Currently does not deal well with hiatuses, so do not interpret accumulation rat
 \references{
 Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive 
 gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474. 
-\url{https://projecteuclid.org/download/pdf_1/euclid.ba/1339616472}
+\url{https://projecteuclid.org/euclid.ba/1339616472}
 }
 \seealso{
 \url{http://www.chrono.qub.ac.uk/blaauw/manualBacon_2.3.pdf}

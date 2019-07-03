@@ -72,7 +72,7 @@ Sometimes it is useful to add additional dating information to age-depth plots, 
 \references{
 Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive 
 gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474. 
-\url{https://projecteuclid.org/download/pdf_1/euclid.ba/1339616472}
+\url{https://projecteuclid.org/euclid.ba/1339616472}
 }
 \seealso{
 \url{http://www.chrono.qub.ac.uk/blaauw/manualBacon_2.3.pdf}

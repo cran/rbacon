@@ -7,6 +7,7 @@
 #' @param BCAD The calendar scale of graphs and age output-files is in \code{cal BP} by default, but can be changed to BC/AD using \code{BCAD=TRUE}. 
 #' @param d.lab The labels for the depth axis. Default \code{d.lab="Depth (cm)"}. See also \code{depth.unit}.
 #' @param age.lab The labels for the calendar axis (default \code{age.lab="cal BP"} or \code{"BC/AD"} if \code{BCAD=TRUE}).
+#' @param kcal Use kcal BP. Default is \code{kcal=FALSE}.
 #' @param yr.lab Deprecated - use age.lab instead
 #' @param acc.lab The labels for the accumulation rate plot (top middle). Default \code{d.lab="Acc. rate (yr/cm)"} (or whatever units you're using). 
 #' @param d.min Minimum depth of age-depth model (use this to extrapolate to depths higher than the top dated depth).
@@ -21,6 +22,7 @@
 #' @param yr.min Deprecated - use age.min instead
 #' @param age.max Maximum age of the age-depth plot.
 #' @param yr.max Deprecated - use age.min instead
+#' @param hiatus.option How to calculate accumulation rates and ages for sections with hiatuses. Either extrapolate from surrounding sections (default, \code{hiatus.option=1}), use a w-weighted mix between the prior and posterior values for depths below the hiatus and prior information only for above the hiatus (\code{hiatus.option=2}), or use the originally calculated slopes (\code{hiatus.option=0}).
 #' @param dark Darkness of the greyscale age-depth model. By default, the darkest grey value is calculated as 10 times the height of the lowest-precision age estimate \code{dark=c()}. Lower values will result in lighter grey but values >1 are not allowed.
 #' @param prob Confidence interval to report (between 0 and 1, default 0.95 or 95\%).
 #' @param rounded Rounding of years. Default is to round to single years.
@@ -38,6 +40,7 @@
 #' @param unit Deprecated and replaced by \code{depth.unit}.
 #' @param maxcalc Number of depths to calculate ages for. If this is more than \code{maxcalc=500}, a warning will be shown that calculations will take time.
 #' @param height The maximum heights of the distributions of the dates on the plot. See also \code{normalise.dists}.
+#' @param calheight Multiplier for the heights of the distributions of dates on the calendar scale. Defaults to \code{calheight=1}.
 #' @param mirror Plot the dates as 'blobs'. Set to \code{mirror=FALSE} to plot simple distributions.
 #' @param up Directions of distributions if they are plotted non-mirrored. Default \code{up=TRUE}.
 #' @param cutoff Avoid plotting very low probabilities of date distributions (default \code{cutoff=0.001}).
@@ -59,6 +62,7 @@
 #' @param greyscale The function to produce a coloured representation of all age-models. Defaults to grey-scales: \code{greyscale=function(x) grey(1-x)}. 
 #' @param slump.col Colour of slumps. Defaults to \code{slump.col=grey(0.8)}.
 #' @param normalise.dists By default, the distributions of more precise dates will cover less time and will thus peak higher than less precise dates. This can be avoided by specifying \code{normalise.dists=FALSE}.
+#' @param same.heights Plot the distributions of the dates all at the same maximum height (default \code{same.height=FALSE}).
 #' @param cc Calibration curve for 14C dates: \code{cc=1} for IntCal13 (northern hemisphere terrestrial), \code{cc=2} for Marine13 (marine), \code{cc=3} for SHCal13 (southern hemisphere terrestrial). For dates that are already on the cal BP scale use \code{cc=0}.
 #' @param title The title of the age-depth model is plotted on the main panel. By default this is the core's name. To leave empty: \code{title=""}. 
 #' @param title.location Location of the title. Default \code{title.location='topleft'}.
@@ -67,7 +71,7 @@
 #' @param mar Plot margins (amount of white space along edges of axes 1-4). Default \code{mar=c(3,3,1,1)}.
 #' @param mgp Axis text margins (where should titles, labels and tick marks be plotted). Defaults to \code{mgp=c(1.5, .7, .0)}.
 #' @param xaxs Extension of x-axis. By default, add some extra white-space at both extremes (\code{xaxs="r"}). See ?par for other options. 
-#' @param yaxs Extension of y-axis. By default, add some extra white-space at both extremes (\code{yaxs="r"}). See ?par for other options. 
+#' @param yaxs Extension of y-axis. By default, add no extra white-space at both extremes (\code{yaxs="i"}). See ?par for other options. 
 #' @param xaxt Whether or not to plot the x-axis. Can be used to adapt axes after a plot. See ?par for other options. 
 #' @param yaxt Whether or not to plot the y-axis. Can be used to adapt axes after a plot. See ?par for other options. 
 #' @param plot.pdf Produce a pdf file of the age-depth plot.
@@ -88,35 +92,53 @@
 #' @references
 #' Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive 
 #' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474. 
-#' \url{https://projecteuclid.org/download/pdf_1/euclid.ba/1339616472}
+#' \url{https://projecteuclid.org/euclid.ba/1339616472}
 #' @export
-agedepth <- function(set=get('info'), BCAD=set$BCAD, depth.unit="cm", age.unit="yr", unit=depth.unit, d.lab=c(), age.lab=c(), yr.lab=age.lab, acc.lab=c(), d.min=set$d.min, d.max=set$d.max, d.by=set$d.by, depths=set$depths, depths.file=FALSE, age.min=c(), yr.min=age.min, age.max=c(), yr.max=age.max, dark=c(), prob=set$prob, rounded=0, d.res=400, age.res=400, yr.res=age.res, date.res=100, grey.res=100, rotate.axes=FALSE, rev.age=FALSE, rev.yr=rev.age, rev.d=FALSE, maxcalc=500, height=15, mirror=TRUE, up=TRUE, cutoff=.001, plot.range=TRUE, panels=layout(1), range.col=grey(.5), range.lty="12", mn.col="red", mn.lty="12", med.col=NA, med.lty="12", C14.col=rgb(0,0,1,.35), C14.border=rgb(0,0,1,.5), cal.col=rgb(0,.5,.5,.35), cal.border=rgb(0,.5,.5,.5), dates.col=c(), hiatus.col=grey(0.5), hiatus.lty="12", greyscale=grey(seq(1, 0, length=grey.res)), slump.col=grey(0.8), normalise.dists=TRUE, cc=set$cc, title=set$core, title.location="topleft", after=set$after, bty="l", mar=c(3,3,1,1), mgp=c(1.5,.7,.0), xaxs="r", yaxs="r", xaxt="s", yaxt="s", plot.pdf=FALSE, dates.only=FALSE, model.only=FALSE, talk=FALSE) {
+agedepth <- function(set=get('info'), BCAD=set$BCAD, depth.unit="cm", age.unit="yr", unit=depth.unit, d.lab=c(), age.lab=c(), yr.lab=age.lab, kcal=FALSE, acc.lab=c(), d.min=c(), d.max=c(), d.by=c(), depths=set$depths, depths.file=FALSE, age.min=c(), yr.min=age.min, age.max=c(), yr.max=age.max, hiatus.option=1, dark=c(), prob=set$prob, rounded=0, d.res=400, age.res=400, yr.res=age.res, date.res=100, grey.res=100, rotate.axes=FALSE, rev.age=FALSE, rev.yr=rev.age, rev.d=FALSE, maxcalc=500, height=15, calheight=1, mirror=TRUE, up=TRUE, cutoff=.001, plot.range=TRUE, panels=layout(1), range.col=grey(.5), range.lty="12", mn.col="red", mn.lty="12", med.col=NA, med.lty="12", C14.col=rgb(0,0,1,.35), C14.border=rgb(0,0,1,.5), cal.col=rgb(0,.5,.5,.35), cal.border=rgb(0,.5,.5,.5), dates.col=c(), hiatus.col=grey(0.5), hiatus.lty="12", greyscale=grey(seq(1, 0, length=grey.res)), slump.col=grey(0.8), normalise.dists=TRUE, same.heights=FALSE, cc=set$cc, title=set$core, title.location="topleft", after=set$after, bty="l", mar=c(3,3,1,1), mgp=c(1.5,.7,.0), xaxs="r", yaxs="i", xaxt="s", yaxt="s", plot.pdf=FALSE, dates.only=FALSE, model.only=FALSE, talk=FALSE) {
 # Load the output, if it exists
   outp <- paste0(set$prefix, ".out")
   if(file.exists(outp))
     set <- .Bacon.AnaOut(outp, set)
+    
+  # Adapt ages of sections which contain hiatuses
+  if(!is.na(set$hiatus.depths[1])) 
+	set <- hiatus.slopes(set, hiatus.option)
+  .assign_to_global("info", set)
 
-  par(bty=bty, mar=mar, mgp=mgp, yaxs="i")
+  par(bty=bty, mar=mar, mgp=mgp, xaxs=xaxs, yaxs=yaxs)
   if(model.only) 
-    panels else { # layout(1) can mess things up if plotting within an existing panel...
+    panels else { # layout(1) can mess things up if plotting within an existing panel
       pn <- c(1:3, rep(4,3))
-      if(!is.na(set$hiatus.depths)[1])
-        if(is.na(set$boundary)[1])
+      if(!is.na(set$hiatus.depths[1]))
+        if(is.na(set$boundary[1]))
           pn <- c(1:4, rep(5,4))  
       layout(matrix(pn, nrow=2, byrow=TRUE), heights=c(.3,.7)) 
-      .PlotLogPost(set, 0, set$Tr) # convergence information
-      .PlotAccPost(set, depth.unit=unit, age.unit=age.unit)
-      .PlotMemPost(set, set$core, set$K, "", set$mem.strength, set$mem.mean, ds=1, thick=set$thick)
+      .PlotLogPost(set, 0, set$Tr, xaxs=xaxs, yaxs=yaxs) # convergence information
+      .PlotAccPost(set, depth.unit=unit, age.unit=age.unit, xaxs=xaxs, yaxs=yaxs)
+      .PlotMemPost(set, set$core, set$K, "", set$mem.strength, set$mem.mean, ds=1, thick=set$thick, xaxs=xaxs, yaxs=yaxs)
       if(!is.na(set$hiatus.depths[1]))
-        if(is.na(set$boundary)[1])
-          .PlotHiatusPost(set, set$hiatus.max)
-  } 
+        if(is.na(set$boundary[1]))
+          .PlotHiatusPost(set, set$hiatus.max, xaxs=xaxs, yaxs=yaxs)
+      } 
 
   # calculate and plot the ranges and 'best' estimates for each required depth
+  if(length(d.min) == 0)
+	d.min <- set$d.min
+  if(length(d.max) == 0)
+	d.max <- set$d.max
+  if(length(d.by) == 0)
+	d.by <- set$d.by  
+  if(depths.file) { 
+    dfile <- paste0(set$coredir, set$core, "/", set$core, "_depths.txt")
+    if(!file.exists(dfile))
+      stop("I cannot find the file ", paste0(set$coredir, set$core, "/", set$core, "_depths.txt"), call.=FALSE)
+    depths <- read.table(dfile, header=FALSE)[,1]
+    if(!is.numeric(depths[1]))
+      stop("File should contain numbers only, no headers", call.=FALSE)
+  }
   if(length(depths) > 0)
     d <- sort(depths) else
       d <- seq(set$d.min, set$d.max, by=d.by) # not d.min itself as depths < set$d.min cannot be calculated. Same for d.max, best not extrapolate here
-      
   if(length(d) > maxcalc)
     cat("Warning, this will take quite some time to calculate. I suggest increasing d.by to, e.g.", 10*d.by, "\n") # was set$d.by
 
@@ -127,12 +149,11 @@ agedepth <- function(set=get('info'), BCAD=set$BCAD, depth.unit="cm", age.unit="
     d <- sort(unique(c(i+after, i, d)))
 
   if(talk)
-    cat("Calculating age ranges\n")  
-  ranges <- Bacon.rng(d, set, BCAD=BCAD, prob=prob)   
-
+    cat("Calculating age ranges...\n")  
+  modelranges <- c()
+  ranges <- Bacon.rng(d, set, BCAD=BCAD, prob=prob)
   # calculate calendar axis limits
-
-  modelranges <- range(ranges)
+  modelranges <- range(ranges[!is.na(ranges)])
   dates <- set$calib$probs
   dateranges <- c()
   for(i in 1:length(dates))
@@ -143,28 +164,33 @@ agedepth <- function(set=get('info'), BCAD=set$BCAD, depth.unit="cm", age.unit="
     age.min <- min(modelranges, dateranges)
   if(length(age.max) == 0)
     age.max <- max(modelranges, dateranges)
-  age.lim <- c(age.min, age.max)
+  age.lim <- extendrange(c(age.min, age.max), f=0.01)
+  
   if(BCAD)
     age.lim <- rev(age.lim)
   if(rev.age)
     age.lim <- rev(age.lim)
-  d.lim <- c(d.max, d.min)
+  d.lim <- rev(extendrange(c(d.max, d.min), f=0.01))
   if(rev.d)
     d.lim <- d.lim[2:1]
     
   if(length(d.lab) == 0)
     d.lab <- paste("Depth (", depth.unit, ")", sep="")
   if(length(age.lab) == 0)
-    age.lab <- ifelse(BCAD, "BC/AD", paste("cal", age.unit, "BP"))
+    age.lab <- ifelse(BCAD, "BC/AD", ifelse(kcal, "kcal BP", paste("cal", age.unit, "BP")))
 
   par(xaxs=xaxs, yaxs=yaxs, bty="n")
+  if(kcal)
+	ifelse(rotate.axes, xaxt <- "n", yaxt <- "n")
   if(rotate.axes)
     plot(0, type="n", ylim=d.lim, xlim=age.lim, ylab=d.lab, xlab=age.lab, bty="n", xaxt=xaxt, yaxt=yaxt) else
       plot(0, type="n", xlim=d.lim[2:1], ylim=age.lim, xlab=d.lab, ylab=age.lab, bty="n", xaxt=xaxt, yaxt=yaxt)
-
+  if(kcal)
+    axis(ifelse(rotate.axes, 1, 2), pretty(age.lim), pretty(age.lim/1e3))
+	  
   if(!dates.only) {
     if(talk)
-      cat("\nPreparing ghost graph\n")    
+      cat("Preparing ghost graph... ")
     .agedepth.ghost(set, rotate.axes=rotate.axes, BCAD=BCAD, d.res=d.res, age.res=age.res, grey.res=grey.res, dark=dark, colours=greyscale, age.lim=age.lim)
   }
   
@@ -174,7 +200,7 @@ agedepth <- function(set=get('info'), BCAD=set$BCAD, depth.unit="cm", age.unit="
         rect(min(age.lim)-1e3, set$slump[i,1], max(age.lim)+1e3, set$slump[i,2], col=slump.col, border=slump.col) else
           rect(set$slump[i,1], min(age.lim)-1e3, set$slump[i,2], max(age.lim)+1e3, col=slump.col, border=slump.col)      
 
-  calib.plot(set, BCAD=BCAD, cc=cc, rotate.axes=rotate.axes, height=height, mirror=mirror, up=up, date.res=date.res, cutoff=cutoff, C14.col=C14.col, C14.border=C14.border, cal.col=cal.col, cal.border=cal.border, dates.col=dates.col, new.plot=FALSE, normalise.dists=normalise.dists)
+  calib.plot(set, BCAD=BCAD, cc=cc, rotate.axes=rotate.axes, height=height, calheight=calheight, mirror=mirror, up=up, date.res=date.res, cutoff=cutoff, C14.col=C14.col, C14.border=C14.border, cal.col=cal.col, cal.border=cal.border, dates.col=dates.col, new.plot=FALSE, normalise.dists=normalise.dists, same.heights=same.heights)
   legend(title.location, title, bty="n", cex=1.5)
   box(bty=bty)
 
@@ -233,6 +259,5 @@ agedepth <- function(set=get('info'), BCAD=set$BCAD, depth.unit="cm", age.unit="
       cat("\nMean ", 100*prob, "% confidence ranges ", round(mean(rng), rounded), " ", age.unit, ", min. ",
         min(rng), " ", min.rng, ", max. ", max(rng), " ", max.rng, "\n", sep="")
     overlap()
-  } else
-      cat("\n")
+  } else cat("\n")
 }

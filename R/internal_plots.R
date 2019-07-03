@@ -5,14 +5,24 @@
 # to plot greyscale/ghost graphs of the age-depth model
 .agedepth.ghost <- function(set=get('info'), d.min=set$d.min, d.max=set$d.max, BCAD=set$BCAD, rotate.axes=FALSE, d.res=400, age.res=400, grey.res=100, dark=c(), colours=grey(seq(1, 0, length=100)), xaxt="s", yaxt="s", age.lim) {
   dseq <- seq(d.min, d.max, length=d.res)
+  if(length(set$slump) > 0) {
+	d.inside <- c()
+    for(i in 1:nrow(set$slump)) {
+      inside <- which(dseq < max(set$slump[i,]))
+	  inside <- which(dseq[inside] > min(set$slump[i,]))
+	  d.inside <- c(d.inside, inside)	
+    }
+	dseq <- dseq[-d.inside]
+  }
+    
   Bacon.hist(dseq, set, BCAD=BCAD, calc.range=FALSE)
   hists <- get('hists') 
-  
-  scales <- array(NA, dim=c(d.res, age.res))
+  scales <- array(0, dim=c(length(dseq), age.res))
   ageseq <- seq(min(age.lim), max(age.lim), length=age.res)
   for(i in 1:length(dseq)) {
     ages <- seq(hists[[i]]$th0, hists[[i]]$th1, length=hists[[i]]$n)
-    scales[i,] <- approx(ages, hists[[i]]$counts, ageseq)$y
+	if(length(!is.na(ages)) > 0)
+      scales[i,] <- approx(ages, hists[[i]]$counts, ageseq, rule=2)$y
   }
   minmax <- hists[[length(hists)]]$min
   maxmax <- hists[[length(hists)]]$max
@@ -20,7 +30,6 @@
   if(length(dark) == 0)
     dark <- 10 * minmax/maxmax
   scales[scales > dark] <- dark 
-  
   if(rotate.axes)
     image(ageseq, dseq, t(scales), add=TRUE, col=colours, useRaster=FALSE) else
       image(dseq, ageseq, scales, add=TRUE, col=colours, useRaster=FALSE)
@@ -29,9 +38,9 @@
 
 
 # Time series of the log of the posterior
-.PlotLogPost <- function(set, from=0, to=set$Tr)
+.PlotLogPost <- function(set, from=0, to=set$Tr, xaxs="i", yaxs="i")
   plot(from:(to-1), -set$Us[(from+1):to], type="l",
-    ylab="Log of Objective", xlab="Iteration", main="")
+    ylab="Log of Objective", xlab="Iteration", main="", xaxs=xaxs, yaxs=yaxs)
 
 
 
@@ -100,11 +109,11 @@
 
 
 # plot the posterior (and prior) of the accumulation rate
-.PlotAccPost <- function(set=get('info'), s=set$acc.shape, mn=set$acc.mean, main="", depth.unit=set$depth.unit, age.unit=set$age.unit, ylab="Frequency") {
+.PlotAccPost <- function(set=get('info'), s=set$acc.shape, mn=set$acc.mean, main="", depth.unit=set$depth.unit, age.unit=set$age.unit, ylab="Frequency", xaxs="i", yaxs="i") {
   hi <- 2:(set$K-1)
   if(!is.na(set$hiatus.depths)[1])
     for(i in set$hiatus.depths) 
-      hi <- hi[-max(which(set$d < i))]
+      hi <- hi[-max(which(set$elbows < i))]
   post <- c()
   for(i in hi) 
     post <- c(post, set$output[[i]])
@@ -117,7 +126,7 @@
       max.y <- max(maxprior, post[,2])
   lim.x <- range(0, post[,1], 2*mn)
   acc.lab <- paste0("Acc. rate (", age.unit, "/", depth.unit, ")")
-  plot(0, type="n", xlim=lim.x, xlab=acc.lab, ylim=c(0, 1.05*max.y), ylab="")
+  plot(0, type="n", xlim=lim.x, xlab=acc.lab, ylim=c(0, 1.05*max.y), ylab="", xaxs=xaxs, yaxs=yaxs)
   polygon(post, col=grey(.8), border=grey(.4))
   .PlotAccPrior(s, mn, add=TRUE, xlim=lim.x, xlab="", ylab=ylab, main=main)
 }
@@ -125,13 +134,13 @@
 
 
 # plot the posterior (and prior) of the memory
-.PlotMemPost <- function(set=get('info'), corenam, K, main="", s=set$mem.strength, mn=set$mem.mean, xlab=paste("Memory"), ylab="Density", ds=1, thick) {
+.PlotMemPost <- function(set=get('info'), corenam, K, main="", s=set$mem.strength, mn=set$mem.mean, xlab=paste("Memory"), ylab="Density", ds=1, thick, xaxs="i", yaxs="i") {
   post <- density(set$output[,set$n]^(1/set$thick), from=0, to=1)
   post <- cbind(c(min(post$x), post$x, max(post$x)), c(0, post$y, 0))
   maxprior <- max(dbeta((0:100)/100, s*mn, s*(1-mn)))
   if(is.infinite(max(maxprior))) max.y <- max(post[,2]) else
     max.y <- max(maxprior, max(post[,2]))
-  plot(0, type="n", xlab=xlab, xlim=range(post[,1]), ylim=c(0, 1.05*max.y), ylab="", main="")
+  plot(0, type="n", xlab=xlab, xlim=range(post[,1]), ylim=c(0, 1.05*max.y), ylab="", main="", xaxs=xaxs, yaxs=yaxs)
   polygon(post, col=grey(.8), border=grey(.4))
   .PlotMemPrior(s, mn, thick, add=TRUE, xlab="", ylab=ylab, main=main)
 }
@@ -139,19 +148,23 @@
 
 
 # plot the posterior (and prior) of the hiatus
-.PlotHiatusPost <- function(set=get('info'), mx=set$hiatus.max, main="", xlim=c(), xlab=paste0("Hiatus size (", set$age.unit, ")"), ylab="Frequency", after=set$after) {
+.PlotHiatusPost <- function(set=get('info'), mx=set$hiatus.max, main="", xlim=c(), xlab=paste0("Hiatus size (", set$age.unit, ")"), ylab="Frequency", after=set$after, xaxs="i", yaxs="i") {
   gaps <- c()
   for(i in set$hiatus.depths) {
     below <- Bacon.Age.d(i+after, set)
     above <- Bacon.Age.d(i-after, set)
-    gaps <- below - above 
+	gaps <- c(gaps, below - above)
   }
   if(length(xlim) == 0)
     xlim <- c(0, 1.1*(max(mx, gaps)))
-  gaps <- density(gaps, from=0)
-  max.y <- 1.1*max(1/mx, gaps$y)
-  plot(0, type="n", main="", xlab=xlab, xlim=xlim, ylab=ylab, ylim=c(0, max.y))
-  polygon(cbind(c(min(gaps$x), gaps$x, max(gaps$x)), c(0,gaps$y,0)),
+  max.y <- 1.1/mx
+  if(length(gaps) > 1) {
+    gaps <- density(gaps, from=0)
+    max.y <- max(max.y, gaps$y)
+  }
+  plot(0, type="n", main="", xlab=xlab, xlim=xlim, ylab=ylab, ylim=c(0, max.y), xaxs=xaxs, yaxs=yaxs)
+  if(length(gaps) > 1) 
+    polygon(cbind(c(min(gaps$x), gaps$x, max(gaps$x)), c(0,gaps$y,0)),
     col=grey(.8), border=grey(.4))
   .PlotHiatusPrior(add=TRUE, xlab="", ylab=ylab, main=main)
 }

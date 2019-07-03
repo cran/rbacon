@@ -1,3 +1,16 @@
+# rbacon 2.3.9.1
+
+* Added a new option calheight, which acts as a multiplier for the relative height of non-14C dates
+* Set default for y-axis to have no space added after the extreme values (yaxs="i"); x-axis has some space added by default (xaxs="r")
+* Added a bit of space to d.max and d.min in the main age-depth graph, to accommodate age blobs
+* New option kcal, which gives tick marks every 1,000 cal years (default kcal=FALSE)
+* Corrected an error when running a core with 4 columns in the .csv file and cc=0
+* depth.unit and age.unit now work correctly when provided as options in Bacon or agedepth
+* Corrected a bug where thickness (dC) was sometimes internally set to wrong values
+* Redid hiatuses: If a core has one or more hiatuses, then variables slopes.above and slopes.below are made for each hiatus, and used internally to adapt ages and accumulation rates for each depth below and above a hiatus within a section containing a hiatus. 
+* Slumps, hiatuses and boundaries have gone through a thorough check and should now work better than they did before. Reports of weird things welcome!
+* Renamed info$d to info$elbows (internal; for better consistency with the naming of parameters within the Bacon paper)
+
 # rbacon 2.3.8
 
 * repaired a bug in cal.h which prevented the postbomb curve postbomb_SH3 from being used

@@ -7,6 +7,7 @@
 #' @param set Detailed information of the current run, stored within this session's memory as variable info.
 #' @param its The set of MCMC iterations to be used. Defaults to the entire MCMC output, \code{its=set$output}.
 #' @param BCAD The calendar scale of graphs and age output-files is in \code{cal BP} by default, but can be changed to BC/AD using \code{BCAD=TRUE}. 
+#' @param remove Whether or not to remove NA values (ages within slumps)
 #' @author Maarten Blaauw, J. Andres Christen
 #' @return Outputs all MCMC-derived ages for a given depth. 
 #' @examples 
@@ -18,9 +19,9 @@
 #' @references
 #' Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive 
 #' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474. 
-#'  \url{https://projecteuclid.org/download/pdf_1/euclid.ba/1339616472}
+#'  \url{https://projecteuclid.org/euclid.ba/1339616472}
 #' @export
-Bacon.Age.d <- function(d, set=get('info'), its=set$output, BCAD=set$BCAD) {
+Bacon.Age.d <- function(d, set=get('info'), its=set$output, BCAD=set$BCAD, remove=FALSE) {
   if(length(d) > 1)
     stop("Bacon.Age.d can handle one depth at a time only", call.=FALSE)
   if(length(its) == 0) 
@@ -28,59 +29,109 @@ Bacon.Age.d <- function(d, set=get('info'), its=set$output, BCAD=set$BCAD) {
   
   hiatus.depths <- set$hiatus.depths
   if(length(set$slump) > 0) {
-    d <- approx(set$depths, set$slumpfree, d, rule=2)$y
-   if(length(set$hiatus.depths) > 0)
+   d <- toslump(d, set$slump, remove=remove)
+   if(!is.na(hiatus.depths[1]))
      hiatus.depths <- set$slumphiatus
   }   
 
-  ages <- NA
+  ages <- c()
   if(!is.na(d)) 
     if(d >= set$d.min) { # we cannot calculate ages of depths above the top depth
-      topages <- cbind(its[,1]) # ages for the core top
-      maxd <- max(which(set$d <= d)) # find the relevant sections
+      topages <- as.vector(its[,1]) # ages for the core top
+      maxd <- max(which(set$elbows <= d)) # find the relevant sections
       accs <- as.matrix(its[,1+(1:maxd)]) # the accumulation rates xi for each relevant section
       cumaccs <- cbind(0, t(apply(accs, 1, cumsum))) # cumulative accumulation
       ages <- topages + (set$thick * cumaccs[,maxd]) + # topages + xi * dC + ...
-	   ((d-set$d[maxd]) * accs[,maxd]) # ... remaining bit of lowest section
+	   ((d-set$elbows[maxd]) * accs[,maxd]) # ... remaining bit of lowest section
 
-      # following Blaauw and Christen 2011, but now using a uniform jump, not gamma.
-	  # Also, here we do attempt to model ages for depths in sections with hiatuses, but results might be unexpected.
-      # ages BELOW the hiatus use a w of x_k+1 (i.e. the xi of the section below the one containing the hiatus) and the prior, while those above use prior of accrate only (memory lost)
-	  # discussion 21 May 2019: Should really plot age-models of sections until the one above the hiatus, then the age-model from the elbow below the hiatus, without drawing the connecting lines between c_k-1 and C_k of a hiatus. The code puts the hiatus at the bottom of each section. Use more&smaller sections. Sections with hiatus are slopes x
-      if(!is.na(hiatus.depths[1])) { # adapt ages of sections around hiatuses or boundaries
+      # now using a uniform jump, not gamma.
+      if(!is.na(hiatus.depths[1])) 
         for(i in 1:length(hiatus.depths)) {
-          above <- max(which(set$d <= hiatus.depths[i]), 1) 
+          above <- max(which(set$elbows < hiatus.depths[i]), 1)[1]
           below <- above + 1
-          if(d > set$d[above] && d < set$d[below]) { # then adapt ages
-
-            # ages for the section just below the hiatus, w-weighted mix of xi and prior
-            if(below == 2)
-              elbow.below <- topages + (set$thick * its[,2]) else
-                elbow.below <- topages + (set$thick * apply(its[,2:below], 1, sum))
-            w <- set$output[,ncol(set$output)-1]^(1/set$thick) # memory, penultimate column of .out
-            acc <- w*its[,below+1] + (1-w)*set$acc.mean[i+1] # weighted mix of xi+1 and prior 
-            ages.below <- elbow.below - (acc * (set$d[below] - d))
-
-            # ages above the hiatus - based on accrate prior only since memory is lost
-            if(above == 1)
-              elbow.above <- topages else
-                if(above == 2)
-                  elbow.above <- topages + (set$thick * its[,2]) else
-                    elbow.above <- topages + (set$thick * apply(its[,2:above], 1, sum))
-            ages.above <- elbow.above + (set$acc.mean[i] * (d-set$d[above]) )
-              
-            # ensure no reversals among the adapted ages 
-            ok <- which(ages.below >= ages.above)
-            if(d <= hiatus.depths[i]) 
-              ages[ok] <- ages.above[ok] else
-                ages[ok] <- ages.below[ok]
-          }
+          if(d > set$elbows[above] && d <= set$elbows[below]) { # adapt ages for sections with hiatus
+            if(d > hiatus.depths[i])
+  	          ages <- set$elbow.below[[i]] - (set$slope.below[[i]] * (set$elbows[below] - d)) else
+	            ages <- set$elbow.above[[i]] + (set$slope.above[[i]] * (d - set$elbows[above]))
+	      }	
         }
-      }
-      if(BCAD)
-        ages <- 1950 - ages
-      return(c(ages))
     }
+  if(BCAD)
+    ages <- 1950 - ages
+  return(c(ages))
+}
+
+
+# First get ages and slopes of c's just above and below hiatus. 
+# then calculate slope.below and slope.above as extrapolations from the sections below resp. above (option 1, default), no adapting of slopes (option 0), 
+# or as w-weighted mix of prior and accrates, resp. prior only (option 2).
+# then check if these slopes work (no reversals). Those with reversals revert to the original slopes.
+# check approach for boundaries. check that elbows in correct order, then set slopes to either ages.below or ages.above??? 
+hiatus.slopes <- function(set=get('info'), hiatus.option=1) {
+  elbows <- set$elbows
+  hiatus.depths <- set$hiatus.depths
+  if(length(set$slump) > 0) 
+    hiatus.depths <- set$slumphiatus
+  
+  its <- cbind(set$output)
+  w <- its[,ncol(its)]^(1/set$thick)
+  set$slope.below <- list(); set$slope.above <- list()
+  set$elbow.below <- list(); set$elbow.above <- list(); set$above <- c()
+  topages <- as.vector(its[,1]) # ages for the core top
+  accs <- as.matrix(its[,1+(1:set$K)]) # the accumulation rates xi for each section
+  cumaccs <- set$thick * cbind(0, t(apply(accs, 1, cumsum))) # cumulative accumulation
+  elbow.ages <- topages + cumaccs
+
+  for(i in 1:length(hiatus.depths)) {
+    above <- max(which(elbows < hiatus.depths[i]), 1) ### is this the correct one?
+	elbow.below <- elbow.ages[,above+1]
+	elbow.above <- elbow.ages[,above]	
+	orig.slope <- accs[,above] 
+	
+    if(hiatus.option == 0) { # then do nothing
+      slope.below <- orig.slope
+	  slope.above <- orig.slope  
+    }
+	if(hiatus.option == 1) { # then extrapolate slopes above/below section w hiatus
+	  slope.below <- its[,above+2]
+	  slope.above <- its[,above]
+	} 
+	if(hiatus.option == 2) { # then w-weighted for below, and prior-only for above
+      slope.below <- w*set$output[,above+2] + (1-w)*set$acc.mean[i+1]
+  	  slope.above <- rep(set$acc.mean[i], nrow(its))  
+    }
+
+	# now calculate the ages at the hiatus/boundary, coming from below and from above  
+  	ages.above <- elbow.above + (slope.above * (hiatus.depths[i] - elbows[above])) 
+    ages.below <- elbow.below - (slope.below * (elbows[above+1] - hiatus.depths[i]))
+
+    if(!is.na(set$boundary[1])) { # then set the boundary's elbow at ages.below for both sections
+	  if(length(set$slumpboundary) > 0)
+		boundary <- set$slumpboundary else
+	      boundary <- set$boundary
+	  ages.boundary <- elbow.below - (slope.below * (elbows[above+1] - set$boundary[i]))	
+	  slope.above <- (ages.boundary - elbow.above) / (set$boundary[i] - elbows[above])
+	  slope.below <- (ages.below - ages.boundary) / (elbows[above+1] - set$boundary[i])
+    }
+
+	# for sections with reversals, use the original slopes
+  	reversed <- c(which(elbow.above > ages.above), 
+	  which(ages.above > ages.below), 
+	    which(ages.below > elbow.below), 
+		which(slope.below < 0), which(slope.above < 0))
+	if(length(reversed) > 0) {	
+  	  slope.above[reversed] <- orig.slope[reversed] 
+  	  slope.below[reversed] <- orig.slope[reversed]
+    }
+
+    # store the updated information
+    set$elbow.below[[i]] <- elbow.below
+    set$elbow.above[[i]] <- elbow.above
+    set$slope.below[[i]] <- slope.below
+    set$slope.above[[i]] <- slope.above
+    set$above <- above
+  }
+  return(set)
 }
 
 
@@ -116,7 +167,7 @@ Bacon.Age.d <- function(d, set=get('info'), its=set$output, BCAD=set$BCAD) {
 #' @references
 #' Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive 
 #' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474. 
-#' \url{https://projecteuclid.org/download/pdf_1/euclid.ba/1339616472}
+#' \url{https://projecteuclid.org/euclid.ba/1339616472}
 #' @export
 Bacon.hist <- function(d, set=get('info'), BCAD=set$BCAD, age.lab=c(), age.lim=c(), hist.lab="Frequency", calc.range=TRUE, hist.lim=c(), draw=TRUE, prob=set$prob, hist.col=grey(0.5), hist.border=grey(.2), range.col="blue", med.col="green", mean.col="red") {
   outfile <- paste(set$prefix, ".out", sep="")
@@ -124,7 +175,6 @@ Bacon.hist <- function(d, set=get('info'), BCAD=set$BCAD, age.lab=c(), age.lim=c
     set <- .Bacon.AnaOut(outfile, set)
     .assign_to_global("set", set)
   }
-    
   hist3 <- function(d, BCAD) {
     hsts <- c(); maxhist <- 0; minhist <- 1
     pb <- txtProgressBar(min=0, max=max(1,length(d)-1), style = 3)
@@ -132,16 +182,18 @@ Bacon.hist <- function(d, set=get('info'), BCAD=set$BCAD, age.lab=c(), age.lim=c
       if(length(d) > 1)
         setTxtProgressBar(pb, i)
       ages <- Bacon.Age.d(d[i], set, BCAD=BCAD)
-      hst <- density(ages)
-      th0 <- min(hst$x)
-      th1 <- max(hst$x)
-      maxhist <- max(maxhist, hst$y)
-      minhist <- min(minhist, max(hst$y))
-      n <- length(hst$x)
-      counts <- hst$y
-      ds <- d[i]
-      hsts <- append(hsts, pairlist(list(d=ds, th0=th0, th1=th1, n=n, counts=counts, max=maxhist, min=minhist)))
-    }  
+	  if(length(ages) > 0) {
+        hst <- density(ages)
+        th0 <- min(hst$x)
+        th1 <- max(hst$x)
+        maxhist <- max(maxhist, hst$y)
+        minhist <- min(minhist, max(hst$y))
+        n <- length(hst$x)
+        counts <- hst$y
+        ds <- d[i]
+        hsts <- append(hsts, pairlist(list(d=ds, th0=th0, th1=th1, n=n, counts=counts, max=maxhist, min=minhist)))
+      } else hsts$d[[i]] <- d[i]
+	} 
     return(hsts)
   }
   hists <- hist3(d, BCAD)
@@ -169,7 +221,7 @@ Bacon.hist <- function(d, set=get('info'), BCAD=set$BCAD, age.lab=c(), age.lim=c
     points(rng[,3], 0, col=med.col, pch=20)
     points(rng[,4], 0, col=mean.col, pch=20)
 
-    cat("\nmean (", mean.col, "): ", round(rng[4],1), " ", age.lab,
+    cat("mean (", mean.col, "): ", round(rng[4],1), " ", age.lab,
       ", median (", med.col, "): ",  round(rng[3],1), " ", age.lab, "\n", sep="")
     cat(100*prob, "% range (", range.col, "): ", round(rng[1],1), " to ", round(rng[2],1), " ", age.lab, "\n", sep="")
   } 
@@ -185,14 +237,20 @@ Bacon.rng <- function(d, set=get('info'), BCAD=set$BCAD, prob=set$prob) {
     .assign_to_global("set", set)
   }
     
-  pb <- txtProgressBar(min=0, max=max(1, length(d)-1), style=3)
+  if(length(d) > 1)
+    pb <- txtProgressBar(min=0, max=max(1, length(d)-1), style=3)
   rng <- array(NA, dim=c(length(d), 4)) 
   for(i in 1:length(d)) {
     ages <- Bacon.Age.d(d[i], set, BCAD=BCAD)
-    rng[i,1:3] <- quantile(ages, c(((1-prob)/2), 1-((1-prob)/2), .5))
-    rng[i,4] <- mean(ages)
-    setTxtProgressBar(pb, i)
-  }  
+	if(length(!is.na(ages)) > 0) {
+      rng[i,1:3] <- quantile(ages[!is.na(ages)], c(((1-prob)/2), 1-((1-prob)/2), .5))
+      rng[i,4] <- mean(ages[!is.na(ages)])
+    }
+    if(length(d) > 1)
+      setTxtProgressBar(pb, i)
+  }
+  if(length(d) > 1)
+    close(pb)
   return(rng)
 }
 
@@ -212,7 +270,7 @@ Bacon.rng <- function(d, set=get('info'), BCAD=set$BCAD, prob=set$prob) {
 #' @references
 #' Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive 
 #' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474. 
-#' \url{https://projecteuclid.org/download/pdf_1/euclid.ba/1339616472}
+#' \url{https://projecteuclid.org/euclid.ba/1339616472}
 #' @export
 agemodel.it <- function(it, set=get('info'), BCAD=set$BCAD) {
   outfile <- paste(set$prefix, ".out", sep="")
@@ -220,26 +278,51 @@ agemodel.it <- function(it, set=get('info'), BCAD=set$BCAD) {
     set <- .Bacon.AnaOut(outfile, set)
     .assign_to_global("set", set)
   }
-  d <- set$d
+  # does this function work in cores with slumps?
   if(length(set$hiatus.depths) > 0)
-    age <- sort(c(d, set$hiatus.depths+.001, set$hiatus.depths))
+    age <- sort(c(set$d, set$hiatus.depths+.001, set$hiatus.depths))
   age <- c()
-  for(i in 1:length(d))
-    age[i] <- Bacon.Age.d(d[i], set, BCAD=BCAD)[it]
-  cbind(d,age)
+  for(i in 1:length(set$elbows))
+    age[i] <- Bacon.Age.d(set$elbows[i], set, BCAD=BCAD)[it]
+  cbind(set$elbows, age)
 }
 
 
-excise <- function(d, slump, d.by) {
+# calculate slumpfree depths
+toslump <- function(d, slump, remove=FALSE) {
+  d <- sort(d)
+  slump <- matrix(sort(slump), ncol=2, byrow=TRUE)
+  slices <- c(0, slump[,2] - slump[,1])
   dfree <- d
   for(i in 1:nrow(slump)) {
-    dup <- which(d <= slump[i,2]) # find depths within slump, part 1
-    dup <- which(d[dup] >= slump[i,1]) # part 2
-    dfree[dup] <- NA # and set them to NA
-    below <- which(d > slump[i,1]) # adapt depths below slumps
-    dfree[below] <- dfree[below] - (slump[i,2] - slump[i,1])-d.by
+
+    inside <- which(d <= slump[i,2]) # find depths within slump, step 1
+    inside <- which(d[inside] >= slump[i,1]) # step 2
+    below <- which(d >= slump[i,2]) # adapt depths below slumps
+
+	if(length(below) > 0) # depths below slump
+      dfree[below] <- dfree[below] - slices[i+1]
+
+    if(length(inside) > 0) # depths within slump
+      if(min(d) < max(slump[i,])) 
+	    if(remove)
+          dfree[inside] <- NA else
+            dfree[inside] <- slump[i,1] - sum(slices[1:i])
   }
   return(dfree) 
 }
 
 
+
+# calculate original depths. Needed?
+fromslump <- function(d, slump) {
+  slump <- matrix(sort(slump), ncol=2, byrow=TRUE)
+  slices <- slump[,2] - slump[,1]
+  dorig <- d # original depths
+  for(i in 1:nrow(slump)) {
+	below <- which(d > min(slump[i,]))
+	if(length(below) > 0)
+      dorig[below] <- dorig[below] - slices[i]
+  }
+  return(dorig)
+}

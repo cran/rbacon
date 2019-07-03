@@ -9,17 +9,17 @@ Bacon(core = "MSB2K", thick = 5, coredir = "", prob = 0.95,
   depths = c(), depth.unit = "cm", age.unit = "yr",
   unit = depth.unit, acc.shape = 1.5, acc.mean = 20,
   mem.strength = 4, mem.mean = 0.7, boundary = NA,
-  hiatus.depths = NA, hiatus.max = 10000, add = c(), after = 1e-06,
-  cc = 1, cc1 = "IntCal13", cc2 = "Marine13", cc3 = "SHCal13",
-  cc4 = "ConstCal", ccdir = "", postbomb = 0, delta.R = 0,
-  delta.STD = 0, t.a = 3, t.b = 4, normal = FALSE,
+  hiatus.depths = NA, hiatus.max = 10000, add = c(),
+  after = 1e-04/thick, cc = 1, cc1 = "IntCal13", cc2 = "Marine13",
+  cc3 = "SHCal13", cc4 = "ConstCal", ccdir = "", postbomb = 0,
+  delta.R = 0, delta.STD = 0, t.a = 3, t.b = 4, normal = FALSE,
   suggest = TRUE, reswarn = c(10, 200), remember = TRUE,
   ask = TRUE, run = TRUE, defaults = "default_settings.txt",
   sep = ",", dec = ".", runname = "", slump = c(), BCAD = FALSE,
   ssize = 2000, th0 = c(), burnin = min(500, ssize), MinAge = c(),
   MaxAge = c(), MinYr = MinAge, MaxYr = MaxAge, cutoff = 0.001,
   plot.pdf = TRUE, dark = 1, date.res = 100, age.res = 200,
-  yr.res = age.res, ...)
+  yr.res = age.res, close.connections = TRUE, ...)
 }
 \arguments{
 \item{core}{Name of the core, given using quotes. Defaults to one of the cores provided with rbacon, \code{core="MSB2K"}. 
@@ -165,6 +165,8 @@ Lower values will result in lighter grey but values >1 are not allowed.}
 
 \item{yr.res}{Deprecated - use age.res instead}
 
+\item{close.connections}{Internal option to close connections after a run. Default \code{close.connections=TRUE}.}
+
 \item{...}{options for the age-depth graph. See \link{agedepth} and \link{calib.plot}}
 }
 \value{
@@ -206,7 +208,7 @@ For calendar dates, i.e. dates that are already on the calendar scale and thus s
 }
 \references{
 Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474. 
-\url{https://projecteuclid.org/download/pdf_1/euclid.ba/1339616472}
+\url{https://projecteuclid.org/euclid.ba/1339616472}
 
 Christen, J.A., Perez E., S., 2010. A new robust statistical model for radiocarbon data. Radiocarbon 51, 1047-1059.
 

@@ -48,15 +48,15 @@ copyCalibrationCurve <- function(cc=1, postbomb=FALSE) {
 #' @author Maarten Blaauw, J. Andres Christen
 #' @return A file containing the custom-made calibration curve, based on calibration curves \code{cc1} and \code{cc2}.
 #' @examples
-#' mix.curves()
+#' mix.curves(, dirname=tempdir())
 #' @seealso \url{http://www.chrono.qub.ac.uk/blaauw/manualBacon_2.3.pdf}
 #' @references
 #' Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive 
 #' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474. 
-#' \url{https://projecteuclid.org/download/pdf_1/euclid.ba/1339616472}
+#' \url{https://projecteuclid.org/euclid.ba/1339616472}
 #' @export
 mix.curves <- function(proportion=.5, cc1="3Col_intcal13.14C", cc2="3Col_marine13.14C", name="mixed.14C", dirname=".", offset=c(0,0), sep="\t") {
-  ccloc <- paste(system.file("extdata", package='rbacon'), "/Curves/", sep="") 
+  ccloc <- paste0(system.file("extdata", package='rbacon'), "/Curves/") 
   dirname <- .validateDirectoryName(dirname)
   
   cc1 <- read.table(paste(ccloc, cc1,  sep=""))
@@ -66,7 +66,7 @@ mix.curves <- function(proportion=.5, cc1="3Col_intcal13.14C", cc2="3Col_marine1
   cc2.error <- sqrt(cc2.error^2 + offset[2]^2)
   mu <- proportion * cc1[,2] + (1-proportion) * cc2.mu
   error <- proportion * cc1[,3] + (1-proportion) * cc2.error
-  write.table(cbind(cc1[,1], mu, error), paste(dirname, name,  sep=""), row.names=FALSE, col.names=FALSE, sep=sep)
+  write.table(cbind(cc1[,1], mu, error), paste0(dirname, name), row.names=FALSE, col.names=FALSE, sep=sep)
 }
 
 
@@ -90,7 +90,7 @@ mix.curves <- function(proportion=.5, cc1="3Col_intcal13.14C", cc2="3Col_marine1
 #' @references
 #' Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive 
 #' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474. 
-#'  \url{https://projecteuclid.org/download/pdf_1/euclid.ba/1339616472}
+#'  \url{https://projecteuclid.org/euclid.ba/1339616472}
 #' @export
 pMC.age <- function(mn, sdev, ratio=100, decimals=0) {
   y <- -8033 * log(mn/ratio)
@@ -118,7 +118,7 @@ pMC.age <- function(mn, sdev, ratio=100, decimals=0) {
 #' @references
 #' Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive 
 #' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474. 
-#' \url{https://projecteuclid.org/download/pdf_1/euclid.ba/1339616472}
+#' \url{https://projecteuclid.org/euclid.ba/1339616472}
 #' @export
 age.pMC <- function(mn, sdev, ratio=100, decimals=3) {
   y <- exp(-mn / 8033)
@@ -159,15 +159,16 @@ age.pMC <- function(mn, sdev, ratio=100, decimals=3) {
 #' @param pch The shape of any marker to be added to the date. Defaults to a cross, \code{pch=4}. To leave empty, use \code{pch=NA}.  
 #' @author Maarten Blaauw, J. Andres Christen
 #' @return A date's distribution, added to an age-depth plot.
-#' @examples
+#' \donttest{
 #'   Bacon(run=FALSE, coredir=tempfile())
 #'   agedepth()
 #'   add.dates(5000, 100, 60)
+#' }
 #' @seealso \url{http://www.chrono.qub.ac.uk/blaauw/manualBacon_2.3.pdf}
 #' @references
 #' Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive 
 #' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474. 
-#' \url{https://projecteuclid.org/download/pdf_1/euclid.ba/1339616472}
+#' \url{https://projecteuclid.org/euclid.ba/1339616472}
 #' @export
 add.dates <- function(mn, sdev, depth, cc=1, above=1e-6, ex=10, normal=TRUE, normalise=TRUE, t.a=3, t.b=4, age.res=100, times=20, col=rgb(1,0,0,.5), border=rgb(1,0,0,.5), rotate.axes=FALSE, mirror=TRUE, up=TRUE, BCAD=FALSE, pch=4) {
   if(cc > 0)
@@ -228,6 +229,7 @@ add.dates <- function(mn, sdev, depth, cc=1, above=1e-6, ex=10, normal=TRUE, nor
 #' @param age.lab The labels for the calendar axis (default \code{yr.lab="cal BP"} or \code{"BC/AD"} if \code{BCAD=TRUE}).
 #' @param yr.lab Deprecated - use age.lab instead
 #' @param height The heights of the distributions of the dates. See also \code{normalise.dists}.
+#' @param calheight Multiplier for the heights of the distributions of dates on the calendar scale. Defaults to \code{calheight=1}.
 #' @param mirror Plot the dates as 'blobs'. Set to \code{mirror=FALSE} to plot simple distributions.
 #' @param up Directions of distributions if they are plotted non-mirrored. Default \code{up=TRUE}.
 #' @param cutoff Avoid plotting very low probabilities of date distributions (default \code{cutoff=0.001}).
@@ -240,6 +242,7 @@ add.dates <- function(mn, sdev, depth, cc=1, above=1e-6, ex=10, normal=TRUE, nor
 #' @param slump.col Colour of slumps. Defaults to \code{slump.col=grey(0.8)}.
 #' @param new.plot Start a new plot (\code{new.plot=TRUE}) or plot over an existing plot (\code{new.plot=FALSE}).
 #' @param plot.dists Plot the distributions of the dates (default \code{plot.dists=TRUE}).
+#' @param same.heights Plot the distributions of the dates all at the same maximum height (default \code{same.height=FALSE}).
 #' @param normalise.dists By default, the distributions of more precise dates will cover less time and will thus peak higher than less precise dates. This can be avoided by specifying \code{normalise.dists=FALSE}.
 #' @author Maarten Blaauw, J. Andres Christen
 #' @return NA
@@ -251,10 +254,10 @@ add.dates <- function(mn, sdev, depth, cc=1, above=1e-6, ex=10, normal=TRUE, nor
 #' @references
 #' Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive 
 #' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474. 
-#' \url{https://projecteuclid.org/download/pdf_1/euclid.ba/1339616472}
+#' \url{https://projecteuclid.org/euclid.ba/1339616472}
 #' @export
 ### produce plots of the calibrated distributions
-calib.plot <- function(set=get('info'), BCAD=set$BCAD, cc=set$cc, rotate.axes=FALSE, rev.d=FALSE, rev.age=FALSE, rev.yr=rev.age, age.lim=c(), yr.lim=age.lim, date.res=100, d.lab=c(), age.lab=c(), yr.lab=age.lab, height=15, mirror=TRUE, up=TRUE, cutoff=.001, C14.col=rgb(0,0,1,.5), C14.border=rgb(0,0,1,.75), cal.col=rgb(0,.5,.5,.5), cal.border=rgb(0,.5,.5,.75), dates.col=c(), slump.col=grey(0.8), new.plot=TRUE, plot.dists=TRUE, normalise.dists=TRUE) {
+calib.plot <- function(set=get('info'), BCAD=set$BCAD, cc=set$cc, rotate.axes=FALSE, rev.d=FALSE, rev.age=FALSE, rev.yr=rev.age, age.lim=c(), yr.lim=age.lim, date.res=100, d.lab=c(), age.lab=c(), yr.lab=age.lab, height=15, calheight=1, mirror=TRUE, up=TRUE, cutoff=.001, C14.col=rgb(0,0,1,.5), C14.border=rgb(0,0,1,.75), cal.col=rgb(0,.5,.5,.5), cal.border=rgb(0,.5,.5,.75), dates.col=c(), slump.col=grey(0.8), new.plot=TRUE, plot.dists=TRUE, same.heights=FALSE, normalise.dists=TRUE) {
   height <- length(set$d.min:set$d.max) * height/50
   if(length(age.lim) == 0)
     lims <- c()  
@@ -268,10 +271,10 @@ calib.plot <- function(set=get('info'), BCAD=set$BCAD, cc=set$cc, rotate.axes=FA
     } 
   if(length(age.lab) == 0)
     age.lab <- ifelse(set$BCAD, "BC/AD", paste("cal", set$age.unit, " BP"))
-  age.lim <- c(age.min, age.max)  
+  age.lim <- extendrange(c(age.min, age.max), f=0.01)
   if(rev.age)
     age.lim <- age.lim[2:1]
-  dlim <- range(set$d)
+  dlim <- range(set$elbows)
   if(rev.d)
     dlim <- dlim[2:1]
   if(length(d.lab) == 0)
@@ -289,17 +292,21 @@ calib.plot <- function(set=get('info'), BCAD=set$BCAD, cc=set$cc, rotate.axes=FA
   if(plot.dists)
     for(i in 1:length(set$calib$probs)) {
       cal <- cbind(set$calib$probs[[i]])
-        d <- set$calib$d[[i]]
+      d <- set$calib$d[[i]]
       if(BCAD)
         cal[,1] <- 1950-cal[,1]
       o <- order(cal[,1])
-#      if(normalise.dists)
-#        cal <- cbind(cal[o,1], height*cal[o,2]/sum(cal[,2])) else
-#          cal <- cbind(cal[o,1], height*cal[o,2]/max(cal[,2]))
+      cal <- cbind(cal[o,1], cal[o,2])
+      if(same.heights)
+        cal[,2] <- cal[,2]/max(cal[,2])
+      if(normalise.dists)
+        cal[,2] <- cal[,2]/sum(cal[,2])
       cal <- cal[cal[,2] >= cutoff,]  
-	  cal[,2] <- height*cal[,2]
+      cal[,2] <- height*cal[,2]
+      if(ncol(set$dets) > 4 && set$dets[i,5] == 0) # cal BP date
+        cal[,2] <- calheight*cal[,2]
       cal <- approx(cal[,1], cal[,2], seq(min(cal[,1]), max(cal[,1]), length=100)) # tmp
-	  
+
       if(mirror)
         pol <- cbind(c(d-cal$y, d+rev(cal$y)), c(cal$x, rev(cal$x))) else
          if(up)
@@ -315,7 +322,7 @@ calib.plot <- function(set=get('info'), BCAD=set$BCAD, cc=set$cc, rotate.axes=FA
           border <- cal.border
         }
       if(length(dates.col) > 0) {
-	    col <- dates.col[i]
+        col <- dates.col[i]
         border <- dates.col[i]
       }
       polygon(pol, col=col, border=border)
@@ -357,6 +364,7 @@ calib.plot <- function(set=get('info'), BCAD=set$BCAD, cc=set$cc, rotate.axes=FA
   ## use Gaussian or t (Christen and Perez Radiocarbon 2009) calibration
   if(round(set$t.b-set$t.a) !=1)
     stop("t.b - t.a should always be 1, check the manual", call.=FALSE)
+    
   d.cal <- function(cc, rcmean, w2, t.a, t.b) {
     if(set$normal)
       cal <- cbind(cc[,1], dnorm(cc[,2], rcmean, sqrt(cc[,3]^2+w2))) else
@@ -364,9 +372,9 @@ calib.plot <- function(set=get('info'), BCAD=set$BCAD, cc=set$cc, rotate.axes=FA
     cal[,2] <- cal[,2]/sum(cal[,2])
     if(length(which(cal[,2]>set$cutoff)) > 5) # ensure that also very precise dates get a range of probabilities
       cal[which(cal[,2]>set$cutoff),] else {
-        calx <- seq(min(cal[,1]), max(cal[,1]), length=20)
+        calx <- seq(min(cal[,1]), max(cal[,1]), length=100)
         caly <- approx(cal[,1], cal[,2], calx)$y
-        cbind(calx, caly/sum(caly))
+        cbind(calx, caly/sum(caly), deparse.level = 0)
       }
   }
 
@@ -374,25 +382,25 @@ calib.plot <- function(set=get('info'), BCAD=set$BCAD, cc=set$cc, rotate.axes=FA
   calib <- list(d=dat[,4])
   if(ncol(dat)==4) { # only one type of dates (e.g., calBP, or all IntCal13 C14 dates)
     if(set$cc==0) {
-      #x <- seq(min(dat[,2])-max(100,10*max(dat[,3])), max(dat[,2])+max(100,10*max(dat[,3])), length=max(1e3, 100*date.res)) 
-	  x <- seq(min(dat[,2])-(5*max(dat[,3])), max(dat[,2])+(5*max(dat[,3])), by=5) # simplify, May 2019
-	  if(length(x) < 5 || length(x) > 200) # if too few/many resulting years, make 20 vals
-	    x <- seq(min(dat[,2])-(5*max(dat[,3])), max(dat[,2])+(5*max(dat[,3])), length=20)
+      x <- seq(min(dat[,2])-(5*max(dat[,3])), max(dat[,2])+(5*max(dat[,3])), by=5) # simplify, May 2019
+      if(length(x) > 100) # if too many resulting years, make 100 vals
+        x <- seq(min(dat[,2])-(5*max(dat[,3])), max(dat[,2])+(5*max(dat[,3])), length=100)
       ccurve <- cbind(x, x, rep(0,length(x))) # dummy 1:1 curve
-    } else
+    } else {
         if(set$cc==1) ccurve <- cc1 else
           if(set$cc==2) ccurve <- cc2 else
             if(set$cc==3) ccurve <- cc3 else
               ccurve <- cc4
+      }        
     for(i in 1:nrow(dat))
       calib$probs[[i]] <- d.cal(ccurve, dat[i,2]-delta.R, dat[i,3]^2+delta.STD^2, set$t.a, set$t.b)
   } else
       for(i in 1:nrow(dat)) {
         dets <- as.numeric(dat[i,])
         if(dets[5]==0) {
-		  x <- seq(dets[2]-(5*dets[3]), dets[2]+(5*dets[3]), by=5) # simplify, May 2019
-		  if(length(x) < 5 || length(x) > 200) # if too few/many resulting years, make 20 vals
-            x <- seq(dets[2]-(5*dets[3]), dets[2]+(5*dets[3]), length=20)  
+          x <- seq(dets[2]-(5*dets[3]), dets[2]+(5*dets[3]), by=5) # simplify, May 2019
+          if(length(x) < 5 || length(x) > 100) # if too many resulting years, make 100 vals
+            x <- seq(dets[2]-(5*dets[3]), dets[2]+(5*dets[3]), length=100)
           ccurve <- cbind(x, x, rep(0,length(x))) # dummy 1:1 curve
         } else
             if(dets[5]==1) ccurve <- cc1 else if(dets[5]==2) ccurve <- cc2 else

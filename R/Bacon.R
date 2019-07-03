@@ -5,21 +5,22 @@
 #' 
 #' @docType package
 #' @author Maarten Blaauw <maarten.blaauw@qub.ac.uk> J. Andres Christen <jac@cimat.mx>
-#' @importFrom grDevices dev.cur dev.off pdf dev.copy2pdf grey rgb dev.list
-#' @importFrom graphics abline box curve hist image layout legend lines par plot points polygon segments rect
+#' @importFrom grDevices dev.cur dev.off pdf dev.copy2pdf grey rgb dev.list extendrange
+#' @importFrom graphics abline box curve hist image layout legend lines par plot points polygon segments rect axis
 #' @importFrom stats approx dbeta density dgamma dnorm dunif lm quantile rnorm weighted.mean
 #' @importFrom utils read.csv read.table write.table packageName txtProgressBar setTxtProgressBar 
 #' @importFrom Rcpp evalCpp
 #' @importFrom coda gelman.diag mcmc.list as.mcmc 
+
 #' @useDynLib rbacon
 #' @name rbacon
 NULL
 
-# do:
+# do: check fs::path(dir, data_name) as cross-platform alternative to specifying paths
 
-# done: 
+# done:  
 
-# for future versions: produce greyscale proxy graph with proxy uncertainties?, smooth bacon, check/adapt behaviour of AgesOfEvents around hiatuses, add function to estimate best thickness, check w Andres if correction to remove -5.0 cal BP in IntCal13 and SHCal13 curves was done correctly, F14C, if hiatus or boundary plot acc.posts of the individual sections?, allow for asymmetric cal BP errors (e.g. read from files), make more consistent use of dark for all functions (incl. flux and accrate.age.ghost), remove darkest?, introduce write.Bacon function to write files only once user agrees with the model, proxy.ghost very slow with long/detailed cores - optimization possible?, check again if/how Bacon gets confused by Windows usernames with non-ascii characters (works fine on Mac)
+# for future versions: add vignette(s). produce greyscale proxy graph with proxy uncertainties?, smooth bacon, check/adapt behaviour of AgesOfEvents around hiatuses, add function to estimate best thickness, check w Andres if correction to remove -5.0 cal BP in IntCal13 and SHCal13 curves was done correctly, F14C, if hiatus or boundary plot acc.posts of the individual sections?, allow for asymmetric cal BP errors (e.g. read from files), make more consistent use of dark for all functions (incl. flux and accrate.age.ghost), remove darkest?, introduce write.Bacon function to write files only once user agrees with the model, proxy.ghost very slow with long/detailed cores - optimization possible?, check again if/how/when Bacon gets confused by Windows usernames with non-ascii characters (works fine on Mac)
 
 #' @name Bacon 
 #' @title Main age-depth modelling function
@@ -131,6 +132,7 @@ NULL
 #' @param date.res Date distributions are plotted using \code{date.res=100} segments by default.
 #' @param age.res Resolution or amount of greyscale pixels to cover the age scale of the age-model plot. Default \code{yr.res=200}.
 #' @param yr.res Deprecated - use age.res instead
+#' @param close.connections Internal option to close connections after a run. Default \code{close.connections=TRUE}. 
 #' @param ... options for the age-depth graph. See \link{agedepth} and \link{calib.plot}
 #' @author Maarten Blaauw, J. Andres Christen
 #' @return An age-depth model graph, its age estimates, and a summary.
@@ -145,7 +147,7 @@ NULL
 #' @seealso \url{http://www.chrono.qub.ac.uk/blaauw/manualBacon_2.3.pdf}
 #' @references
 #' Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474. 
-#' \url{https://projecteuclid.org/download/pdf_1/euclid.ba/1339616472}
+#' \url{https://projecteuclid.org/euclid.ba/1339616472}
 #' 
 #' Christen, J.A., Perez E., S., 2010. A new robust statistical model for radiocarbon data. Radiocarbon 51, 1047-1059.
 #' 
@@ -167,7 +169,7 @@ NULL
 #' Journal of Ecology 77: 1-23.
 #'
 #' @export
-Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=NA, d.by=1, depths.file=FALSE, depths=c(), depth.unit="cm", age.unit="yr", unit=depth.unit, acc.shape=1.5, acc.mean=20, mem.strength=4, mem.mean=0.7, boundary=NA, hiatus.depths=NA, hiatus.max=10000, add=c(), after=.000001, cc=1, cc1="IntCal13", cc2="Marine13", cc3="SHCal13", cc4="ConstCal", ccdir="", postbomb=0, delta.R=0, delta.STD=0, t.a=3, t.b=4, normal=FALSE, suggest=TRUE, reswarn=c(10,200), remember=TRUE, ask=TRUE, run=TRUE, defaults="default_settings.txt", sep=",", dec=".", runname="", slump=c(), BCAD=FALSE, ssize=2000, th0=c(), burnin=min(500, ssize), MinAge=c(), MaxAge=c(), MinYr=MinAge, MaxYr=MaxAge, cutoff=.001, plot.pdf=TRUE, dark=1, date.res=100, age.res=200, yr.res=age.res, ...) {
+Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=NA, d.by=1, depths.file=FALSE, depths=c(), depth.unit="cm", age.unit="yr", unit=depth.unit, acc.shape=1.5, acc.mean=20, mem.strength=4, mem.mean=0.7, boundary=NA, hiatus.depths=NA, hiatus.max=10000, add=c(), after=.0001/thick, cc=1, cc1="IntCal13", cc2="Marine13", cc3="SHCal13", cc4="ConstCal", ccdir="", postbomb=0, delta.R=0, delta.STD=0, t.a=3, t.b=4, normal=FALSE, suggest=TRUE, reswarn=c(10,200), remember=TRUE, ask=TRUE, run=TRUE, defaults="default_settings.txt", sep=",", dec=".", runname="", slump=c(), BCAD=FALSE, ssize=2000, th0=c(), burnin=min(500, ssize), MinAge=c(), MaxAge=c(), MinYr=MinAge, MaxYr=MaxAge, cutoff=.001, plot.pdf=TRUE, dark=1, date.res=100, age.res=200, yr.res=age.res, close.connections=TRUE, ...) {
   # Check coredir and if required, copy example file in core directory
   coredir <- assign_coredir(coredir, core, ask)
   if(core == "MSB2K" || core == "RLGH3") {
@@ -248,9 +250,9 @@ Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=
     info$th0 <- round(rnorm(2, max(MinAge, dets[1,2]), dets[1,3]))
   info$th0[info$th0 < info$MinAge] <- info$MinAge # otherwise twalk will not start
 
-  ### assign depths, possibly suggest alternative value for thick
+  ### assign depths
   if(length(depths) == 0)
-    depths <- seq(info$d.min, info$d.max, by=info$d.by) 
+    depths <- seq(info$d.min, info$d.max, by=d.by) # was info$d.by
   if(depths.file) { 
     dfile <- paste0(info$coredir, info$core, "/", info$core, "_depths.txt")
     if(!file.exists(dfile))
@@ -265,12 +267,13 @@ Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=
   if(max(depths) > info$d.max)
     info$d.max <- max(depths)
 
-  info$d <- seq(floor(info$d.min), ceiling(info$d.max), by=thick)
-  info$K <- length(info$d)
+  info$elbows <- seq(floor(info$d.min), ceiling(info$d.max), by=thick)
+  info$K <- length(info$elbows)
+  info$cK <- info$d.min+(info$thick*info$K) # the maximum depth to be used by the bacon model
 
   # stop and warn if hiatus.depths conflict with other parameters
   if(!is.na(info$hiatus.depths[1]) || !is.na(info$boundary[1])) {
-	ifelse(is.na(info$boundary[1]), hd <- info$hiatus.depths, hd <- info$boundary)
+    ifelse(is.na(info$boundary[1]), hd <- info$hiatus.depths, hd <- info$boundary)
     if(min(hd) < info$d.min) # hiatus above core top
       stop("cannot have hiatus above the core's top depth. Adapt hiatus.depths or d.min.", call.=FALSE)
     if(max(hd)+info$thick > info$d.max)
@@ -278,30 +281,33 @@ Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=
     if(length(hd) > 1) { # then check for how far separated hiatuses are
       above <- c()
       for(i in hd)
-        above <- c(above, max(which(info$d <= i))) # find the section top of each hiatus
-	  if(any(diff(above) < 2)) # stop if fewer than 2 section elbows separating hiatuses
-        stop("we need at least 2 section elbows between hiatuses. Choose fewer hiatuses, different depths, more sections (decrease thick) or a different d.min.\n ", call.=FALSE)
-	}
+        above <- c(above, max(which(info$elbows <= i))) # find the section top of each hiatus
+        if(any(diff(above) < 2)) # stop if fewer than 2 section elbows separating hiatuses
+          stop("we need at least 2 section elbows between hiatuses. Choose fewer hiatuses, different depths, more sections (decrease thick) or a different d.min.\n ", call.=FALSE)
+    }
   } 
   
-  ans <- "n"
-  if(suggest)
-    if(length(reswarn) == 2)
-      if(info$K < min(reswarn)) {
-        sugg <- pretty(thick*(info$K/min(reswarn)), 10)
-        sugg <- min(sugg[sugg>0])
-        ans <- readline(cat(" Warning, the current value for thick, ", thick, ", will result in very few age-model sections (", info$K, ", not very flexible). Suggested maximum value for thick: ", sugg, " OK? (y/n) ", sep=""))
-      } else
-        if(info$K > max(reswarn)) {
-          sugg <- max(pretty(thick*(info$K/max(reswarn))))
-          ans <- readline(cat(" Warning, the current value for thick, ", thick, ", will result in very many age-model sections (", info$K, ", possibly hard to run). Suggested minimum value for thick: ", sugg, " OK? (y/n) ", sep=""))
-        }
-  if(tolower(substr(ans, 1, 1)) == "y") {
-    cat(" OK, setting thick to ", sugg, "\n")
-    thick <- sugg
-    info$d <- seq(floor(info$d.min), ceiling(info$d.max), by=thick)
-    info$K <- length(info$d)
-  }
+   ans <- "n"
+    if(suggest)
+      if(length(reswarn) == 2)
+        if(info$K < min(reswarn)) {
+          sugg <- pretty(thick*(info$K/min(reswarn)), 10)
+          sugg <- min(sugg[sugg>0])
+          ans <- readline(cat(" Warning, the current value for thick, ", thick, ", will result in very few age-model sections (", info$K, ", not very flexible). Suggested maximum value for thick: ", sugg, " OK? (y/n) ", sep=""))
+        } else
+          if(info$K > max(reswarn)) {
+            sugg <- max(pretty(thick*(info$K/max(reswarn))))
+            ans <- readline(cat(" Warning, the current value for thick, ", thick, ", will result in very many age-model sections (", info$K, ", possibly hard to run). Suggested minimum value for thick: ", sugg, " OK? (y/n) ", sep=""))
+          }
+    if(tolower(substr(ans, 1, 1)) == "y") {
+      cat(" OK, setting thick to ", sugg, "\n")
+      thick <- sugg
+      info$elbows <- seq(floor(info$d.min), ceiling(info$d.max), by=thick)
+      if(length(info$slump) > 0) # why here, and not a few lines later?
+        info$elbows <- seq(floor(info$d.min), toslump(ceiling(info$d.max), info$slump), by=thick)
+      info$K <- length(info$elbows)
+      info$cK <- info$d.min+(info$thick*info$K) # the maximum depth to be used by the bacon model
+    }
 
   ### prepare for any slumps
   if(length(slump) > 0) {
@@ -309,13 +315,20 @@ Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=
       stop("slumps need both upper and lower depths. Please check the manual", call.=FALSE)
     slump <- matrix(sort(slump), ncol=2, byrow=TRUE)
     info$slump <- slump
-    info$slumpfree <- excise(depths, slump, info$d.by)
-    info$slumpboundary <- excise(sort(info$boundary), slump, info$d.by) # check
-    info$slumphiatus <- excise(sort(info$hiatus.depths), slump, info$d.by) # check
-    if(!is.na(info$slumpboundary[1]))
+
+    slumpdmax <- toslump(ceiling(info$d.max), slump)
+	info$elbows <- seq(floor(info$d.min), slumpdmax, by=thick)
+    info$K <- length(info$elbows)
+    info$cK <- info$d.min+(info$thick*info$K) # the maximum depth to be used by the bacon model
+
+	info$slumpfree <- toslump(depths, slump)
+    info$slumphiatus <- toslump(info$hiatus.depths, slump) # check
+	if(!is.na(info$boundary[1])) {
+      info$slumpboundary <- toslump(info$boundary, slump) # check
       info$slumphiatus <- info$slumpboundary
+    }
     slumpdets <- info$dets
-    slumpdets[,4] <- excise(slumpdets[,4], slump, info$d.by)
+    slumpdets[,4] <- toslump(slumpdets[,4], slump, remove=FALSE) # dates within slumps are not removed
     info$slumpdets <- slumpdets[!is.na(slumpdets[,4]),]  
   }
 
@@ -334,7 +347,7 @@ Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=
       boundary <- info$slumpboundary  
     info$hiatus.depths <- boundary
     if(length(add) == 0)
-      add <- info$acc.mean # then add a short (max)hiatus that is hopefully large enough not to crash Bacon but will not affect the chronology much. Needs more work
+      add <- info$acc.mean # then add a short (max)hiatus, large enough not to crash Bacon but not affect the chronology much. Needs more work
     info$hiatus.max <- add  
   }
   .assign_to_global("info", info)  
@@ -343,7 +356,7 @@ Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=
     ### plot initial data and priors
     pn <- c(1,2,3,3)
     if(!is.na(info$hiatus.depths[1])) # was ...hiatus.depths)[1])
-      if(is.na(info$boundary)[1])
+      if(is.na(info$boundary[1]))
         pn <- c(1,2,3,4,4,4)
     layout(matrix(pn, nrow=2, byrow=TRUE), heights=c(.3,.7))
     par(mar=c(3,3,1,1), mgp=c(1.5,.7,.0), bty="l")
@@ -360,18 +373,18 @@ Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=
     txt <- paste(info$prefix, ".bacon", sep="")
     bacon(txt, outfile, ssize, ccdir)
     scissors(burnin, info)
-    agedepth(info, BCAD=BCAD, depths.file=depths.file, depths=depths, talk=TRUE, ...)
-    if(plot.pdf) 
+    agedepth(info, BCAD=BCAD, depths.file=depths.file, depths=depths, talk=TRUE, age.unit=age.unit, depth.unit=depth.unit, ...)
+    if(plot.pdf)
       if(interactive())
-        if(length(dev.list()) > 0 ) # then try to save plotting time 
-          dev.copy2pdf(file=paste0(info$prefix, ".pdf")) else {
-            pdf(file=paste(info$prefix, ".pdf", sep=""))
-            agedepth(info, BCAD=BCAD, depths.file=depths.file, depths=depths, talk=FALSE, ...)
+        if(length(dev.list()) > 0) 
+          dev.copy2pdf(file=paste0(info$prefix, ".pdf")) else { 
+            pdf(file=paste0(info$prefix, ".pdf"))
+            agedepth(info, BCAD=BCAD, depths.file=depths.file, depths=depths, talk=FALSE, age.unit=age.unit, depth.unit=depth.unit, ...)
             dev.off()
           } 
-    }  
+  }  
 
-  ### run bacon if initial graphs seem OK; run automatically, not at all, or only plot the age-depth model
+### run bacon if initial graphs seem OK; run automatically, not at all, or only plot the age-depth model
   .write.Bacon.file(info)
   if(!run)
     prepare() else
@@ -380,9 +393,11 @@ Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=
           prepare()
           ans <- readline(cat("  Run", core, "with", info$K, "sections? (Y/n) "))
           ans <- tolower(substr(ans,1,1))[1]
-          if(ans=="y" || ans == "")
-            cook() else cat("  OK. Please adapt settings.\n\n")
-          }
-  # closeAllConnections()
+          if(ans=="y" || ans=="")
+            cook() else
+              cat("  OK. Please adapt settings.\n\n")
+        }
+  if(close.connections)
+    closeAllConnections()
 }
 

@@ -465,7 +465,7 @@ assign_coredir <- function(coredir, core, ask=TRUE) {
     }
 
   if(!is.na(hiatus.depths[1])) { 
-    if(is.na(boundary[1]))
+    if(is.null(boundary[1]))
       cat("\n  Hiatus set at depth(s)", hiatus.depths, "\n") else
         cat("\n  Boundary set at depth(s)", boundary, "\n")
     if(length(set$acc.shape)==1)
@@ -485,13 +485,14 @@ assign_coredir <- function(coredir, core, ask=TRUE) {
         ",  ", set$hiatus.max[i], ";", sep="", file=fl)
   }
 
-  ### final parameters
+  cK <- set$d.min+(set$thick*set$K)
+  ### final parameters - dmax now calculated as dmin+(dC*K)
   wrapup <- paste("\n\n##\t\t K   MinAge   MaxAge   th0   th0p   w.a   w.b   alpha  beta  dmin  dmax",
     "\nBacon 0: ", ifelse(set$normal, "FixNor", "FixT"), ", ", set$K,
     ",  ", set$MinAge, ",  ", set$MaxAge, ",  ", set$th0[1], ",  ", set$th0[2],
     ",  ", set$mem.strength*set$mem.mean, ",  ", set$mem.strength*(1-set$mem.mean),
     ",  ", set$acc.shape[1], ",  ", set$acc.shape[1]/set$acc.mean[1], ", ", set$d.min,
-    ", ", set$d.max, ";\n", sep="")
+    ", ", cK, ";\n", sep="")
   cat(wrapup, file=fl)
   close(fl)
 }
