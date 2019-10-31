@@ -102,6 +102,7 @@ NULL
 #' @param suggest If initial analysis of the data indicates abnormally slow or fast accumulation rates, Bacon will suggest to change the prior.
 #'  Also, if the length of the core would cause too few or too many sections with the default settings, Bacon will suggest an alternative section thickness \code{thick}. 
 #'  Accept these suggested alternative settings by typing "y" (or "yes please" if you prefer to be polite), or leave as is by typing "n" (or anything else, really). To get rid of these suggestions, use \code{suggest=FALSE}. 
+#' @param autoAcceptSuggest If autoAcceptSuggest is TRUE all suggest prompts will be automatically answered "y". If FALSE readline prompts will be given (see suggest to automatically answer "n").
 #' @param reswarn Bacon will warn you if the number of sections lies outside the safe range (default between 10 and 200 sections; 
 #' \code{reswarn=c(10,200)}). Too few sections could lead to an `elbowy' model while with too many sections the modelling process can get lost,
 #'  resulting in age-models far away from the dated depths. 
@@ -162,7 +163,7 @@ NULL
 #' Journal of Ecology 77: 1-23.
 #'
 #' @export
-Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=NA, d.by=1, depths.file=FALSE, depths=c(), unit="cm", acc.shape=1.5, acc.mean=20, mem.strength=4, mem.mean=0.7, boundary=NA, hiatus.depths=NA, hiatus.max=10000, add=100, after=.000001, cc=1, cc1="IntCal13", cc2="Marine13", cc3="SHCal13", cc4="ConstCal", ccdir="", postbomb=0, delta.R=0, delta.STD=0, t.a=3, t.b=4, normal=FALSE, suggest=TRUE, reswarn=c(10,200), remember=TRUE, ask=TRUE, run=TRUE, defaults="default_settings.txt", sep=",", dec=".", runname="", slump=c(), BCAD=FALSE, ssize=2000, th0=c(), burnin=min(500, ssize), MinYr=c(), MaxYr=c(), cutoff=.001, plot.pdf=TRUE, dark=1, date.res=100, yr.res=200, ...) {
+Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=NA, d.by=1, depths.file=FALSE, depths=c(), unit="cm", acc.shape=1.5, acc.mean=20, mem.strength=4, mem.mean=0.7, boundary=NA, hiatus.depths=NA, hiatus.max=10000, add=100, after=.000001, cc=1, cc1="IntCal13", cc2="Marine13", cc3="SHCal13", cc4="ConstCal", ccdir="", postbomb=0, delta.R=0, delta.STD=0, t.a=3, t.b=4, normal=FALSE, suggest=TRUE, autoAcceptSuggest = FALSE, reswarn=c(10,200), remember=TRUE, ask=TRUE, run=TRUE, defaults="default_settings.txt", sep=",", dec=".", runname="", slump=c(), BCAD=FALSE, ssize=2000, th0=c(), burnin=min(500, ssize), MinYr=c(), MaxYr=c(), cutoff=.001, plot.pdf=TRUE, dark=1, date.res=100, yr.res=200, ...) {
   # Check coredir and if required, copy example file in core directory
   coredir <- assign_coredir(coredir, core, ask)
   if(core == "MSB2K" || core == "RLGH3") {
@@ -199,7 +200,11 @@ Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=
       ballpacc <- ballpacc[ballpacc > 0] # do not suggest 0
       sugg <- sugg[order(ballpacc)[1]] # suggest rounded acc.rate with lowest absolute difference
       if(!sugg %in% acc.mean) {
-        ans <- readline(cat(" Ballpark estimates suggest changing the prior for acc.mean to ", sugg, " yr/", unit, ". OK? (y/n)  ", sep=""))
+        if (autoAcceptSuggest) {
+          ans <- "y"
+        } else {
+          ans <- readline(cat(" Ballpark estimates suggest changing the prior for acc.mean to ", sugg, " yr/", unit, ". OK? (y/n)  ", sep=""))
+        }
         if(tolower(substr(ans,1,1)) == "y")
           acc.mean <- sugg else
             cat(" No problem, using prior acc.mean=", acc.mean, " yr/", unit, "\n", sep="")
@@ -262,11 +267,19 @@ Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=
       if(info$K < min(reswarn)) {
         sugg <- pretty(thick*(info$K/min(reswarn)), 10)
         sugg <- min(sugg[sugg>0])
-        ans <- readline(cat(" Warning, the current value for thick, ", thick, ", will result in very few age-model sections (", info$K, ", not very flexible). Suggested maximum value for thick: ", sugg, " OK? (y/n) ", sep=""))
+        if (autoAcceptSuggest) {
+          ans <- "y"
+        } else {
+          ans <- readline(cat(" Warning, the current value for thick, ", thick, ", will result in very few age-model sections (", info$K, ", not very flexible). Suggested maximum value for thick: ", sugg, " OK? (y/n) ", sep=""))
+        }
       } else
         if(info$K > max(reswarn)) {
           sugg <- max(pretty(thick*(info$K/max(reswarn))))
-          ans <- readline(cat(" Warning, the current value for thick, ", thick, ", will result in very many age-model sections (", info$K, ", possibly hard to run). Suggested minimum value for thick: ", sugg, " OK? (y/n) ", sep=""))
+          if (autoAcceptSuggest) {
+            ans <- "y"
+          } else {
+            ans <- readline(cat(" Warning, the current value for thick, ", thick, ", will result in very many age-model sections (", info$K, ", possibly hard to run). Suggested minimum value for thick: ", sugg, " OK? (y/n) ", sep=""))
+          }
         }
   if(tolower(substr(ans, 1, 1)) == "y") {
     cat(" OK, setting thick to ", sugg, "\n")
@@ -348,7 +361,11 @@ Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=
       if(!ask) 
         cook() else {
           prepare()
-          ans <- readline(cat("  Run", core, "with", info$K, "sections? (y/n) "))
+          if (autoAcceptSuggest) {
+            ans <- "y"
+          } else {
+            ans <- readline(cat("  Run", core, "with", info$K, "sections? (y/n) "))
+          }
           if(tolower(substr(ans,1,1))[1]=="y")
             cook() else cat("  OK. Please adapt settings.\n\n")
           }
