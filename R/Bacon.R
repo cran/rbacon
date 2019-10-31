@@ -102,6 +102,7 @@ NULL
 #' @param suggest If initial analysis of the data indicates abnormally slow or fast accumulation rates, Bacon will suggest to change the prior.
 #'  Also, if the length of the core would cause too few or too many sections with the default settings, Bacon will suggest an alternative section thickness \code{thick}. 
 #'  Accept these suggested alternative settings by typing "y" (or "yes please" if you prefer to be polite), or leave as is by typing "n" (or anything else, really). To get rid of these suggestions, use \code{suggest=FALSE}. 
+#' @param autoAcceptSuggest If autoAcceptSuggest is TRUE all suggest prompts will be automatically answered "y". If FALSE readline prompts will be given (see suggest to automatically answer "n").
 #' @param reswarn Bacon will warn you if the number of sections lies outside the safe range (default between 10 and 200 sections; 
 #' \code{reswarn=c(10,200)}). Too few sections could lead to an `elbowy' model while with too many sections the modelling process can get lost,
 #'  resulting in age-models far away from the dated depths. 
