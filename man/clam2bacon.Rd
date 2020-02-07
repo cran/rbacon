@@ -4,15 +4,20 @@
 \alias{clam2bacon}
 \title{Translate clam .csv files to Bacon .csv files.}
 \usage{
-clam2bacon(core, clamdir = "clam_runs", bacondir = "Bacon_runs",
-  sep = ",", cc = 1)
+clam2bacon(
+  core,
+  clamdir = "clam_runs",
+  bacondir = "Plum_runs",
+  sep = ",",
+  cc = 1
+)
 }
 \arguments{
 \item{core}{The name of the core for which a clam .csv.file needs to be translated into a Bacon .csv file}
 
 \item{clamdir}{The directory where the clam runs reside. Defaults to \code{coredir="clam_runs"}.}
 
-\item{bacondir}{The directory where the Bacon runs reside. Defaults to \code{coredir="Bacon_runs"}.}
+\item{bacondir}{The directory where the Bacon runs reside. Defaults to \code{coredir="Plum_runs"}.}
 
 \item{sep}{The separator for the .csv files. Defaults to \code{sep=","}.}
 

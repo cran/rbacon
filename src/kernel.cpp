@@ -1,6 +1,6 @@
 /*
- *  kernel.c
- *  
+ *  kernel.cpp
+ *
  *
  *  Created by jac on 29/04/2009.
  *
@@ -90,30 +90,30 @@ double *kernel1::Simh(double *x, double *xp, int n, double  beta, int *phi) {
 }
 
 double kernel1::GU(double *h, double *x, double *xp, int n) const {
-	
+
     if(h==NULL || n==0 || x==NULL|| xp == NULL){} //avoid warning JEV
 
-	return -2;
+	return -2.0;
 }
 
 
 //----------------------------------- K 2 --------------------------------------
 //This is parameter aw in the paper
 double Phi2Sim(double aw) {
-	
+
 	double u = Un01();
-	return ((aw/(1.0+aw))*(-1.0+2.0*u+aw*u*u));
+	return ((aw/(1.0+aw))*(-1.0 + 2.0*u + aw*u*u ));
 }
 
 double *kernel2::Simh(double *x, double *xp, int n,double  beta, int *phi) {
     beta=0;
-        
+
 	//double *h = vector(n);
 
         for(int i=0; i<n; i++) {
                 h[i] = x[i] + phi[i]*(x[i]-xp[i])*Phi2Sim(PARAMETER_aw);
         }
-        
+
 	return h;
 }
 
@@ -124,7 +124,7 @@ double kernel2::GU(double *h, double *x, double *xp, int n) const {
 }
 
 
-//----------------------------------- K 3 --------------------------------------
+//----------------------------------- K 3 Hop --------------------------------------
 double *kernel3::Simh(double *x, double *xp, int n,double  beta, int *phi)  {
 
 		//double *h = vector(n);
@@ -148,7 +148,7 @@ double *kernel3::Simh(double *x, double *xp, int n,double  beta, int *phi)  {
 
 double kernel3::GU(double *h, double *x, double *xp, int n) const {
 
-        if(!vector_cmp(x,xp,2)) {
+        if(vector_cmp(x,xp,n) != 1) {
 
 //				int i;//avoid warning JEV
 
@@ -159,13 +159,13 @@ double kernel3::GU(double *h, double *x, double *xp, int n) const {
                         intProd += (h[j]-xp[j])*(h[j]-xp[j]);
 
 				//it is assumed that Simh is just called and we have the correct sigma
-                return ((n/2)*log(2.0*M_PI) + n*log(sigma) + 0.5*(1/(sigma*sigma))*intProd);
-        }		
-        else return -1;
+                return ((n/2.0)*log(2.0*M_PI) + n*log(sigma) + 0.5*(1.0/(sigma*sigma))*intProd);
+        }
+        else return -1.0;
 }
 
 
-//----------------------------------- K 4 --------------------------------------
+//----------------------------------- K 4 Blow--------------------------------------
 double *kernel4::Simh(double *x, double *xp, int n,double  beta, int *phi)  {
 
         //double *rest = vector(n);
@@ -201,5 +201,5 @@ double kernel4::GU(double *h, double *x, double *xp, int n) const {
                 intProd += (h[j]-xp[j])*(h[j]-xp[j]);
 
 		//it is assumed that Simh is just called and we have the correct sigma
-        return ((n/2)*log(2.0*M_PI) + n*log(sigma) + 0.5*(1/(sigma*sigma))*intProd);
+        return ((n/2.0)*log(2.0*M_PI) + n*log(sigma) + 0.5*(1.0/(sigma*sigma))*intProd);
 }

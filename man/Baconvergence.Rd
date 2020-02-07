@@ -4,7 +4,7 @@
 \alias{Baconvergence}
 \title{Test to identify poorly mixed MCMC runs.}
 \usage{
-Baconvergence(core = "MSB2K", runs = 5, suggest = FALSE, ...)
+Baconvergence(core = "MSB2K", runs = 5, suggest = FALSE, verbose = TRUE, ...)
 }
 \arguments{
 \item{core}{Name of the core, given using quotes. Defaults to one of the cores provided with rbacon, \code{core="MSB2K"}.}
@@ -12,6 +12,8 @@ Baconvergence(core = "MSB2K", runs = 5, suggest = FALSE, ...)
 \item{runs}{Amount of runs to test for mixing. Default \code{runs=5}.}
 
 \item{suggest}{If initial analysis of the data indicates abnormally slow or fast accumulation rates, Bacon will suggest to change the prior.}
+
+\item{verbose}{Provide feedback on what is happening (default \code{verbose=TRUE}).}
 
 \item{...}{additional options that can be given to the Bacon function.}
 }
@@ -22,12 +24,12 @@ NA
 Test how well-mixed and converged the MCMC runs are with the chosen core and settings, by running the core several times and comparing the different runs using the Gelman and Rubin Reduction factor (Brooks and Gelman, 1998).
 }
 \details{
-Generally Bacon will perform millions of MCMC iterations for each age-model run, although only a fraction 
-of these will be stored. In most cases the remaining MCMC iterations will be well mixed (the upper left panel 
+Generally Bacon will perform millions of MCMC iterations for each age-model run, although only a fraction
+of these will be stored. In most cases the remaining MCMC iterations will be well mixed (the upper left panel
 of the fit of the iterations shows no strange features such as sudden systematic drops or rises).
- However if the iterations seem not well mixed, or if too few remain (say less than a few hundred), 
- then you could check the Gelman and Rubin Reduction Factor. Too high differences (high Factors) between runs 
-indicate poor MCMC mixing. Robust MCMC mixing is indicated by a Gelman and Rubin Reduction factor 
+ However if the iterations seem not well mixed, or if too few remain (say less than a few hundred),
+ then you could check the Gelman and Rubin Reduction Factor. Too high differences (high Factors) between runs
+indicate poor MCMC mixing. Robust MCMC mixing is indicated by a Gelman and Rubin Reduction factor
 (Brooks and Gelman, 1998) below the 1.05 safety threshold.
 }
 \examples{
@@ -36,11 +38,11 @@ indicate poor MCMC mixing. Robust MCMC mixing is indicated by a Gelman and Rubin
   }
 }
 \references{
-Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive 
-gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474. 
+Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive
+gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
 \url{https://projecteuclid.org/euclid.ba/1339616472}
 Brooks, SP. and Gelman, A. (1998) General methods for monitoring
-convergence of iterative simulations. 
+convergence of iterative simulations.
 _Journal of Computational and Graphical Statistics_, *7*, 434-455.
 }
 \seealso{

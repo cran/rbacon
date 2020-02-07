@@ -3,7 +3,6 @@
 \docType{package}
 \name{rbacon}
 \alias{rbacon}
-\alias{rbacon-package}
 \title{rbacon}
 \description{
 Bacon produces Bayesian age-depth models from dated deposits, reconstructing Bayesian 

@@ -4,13 +4,12 @@
 \alias{bacon2clam}
 \title{Translate Bacon .csv files to clam .csv files.}
 \usage{
-bacon2clam(core, bacondir = "Bacon_runs", clamdir = "clam_runs",
-  sep = ",")
+bacon2clam(core, bacondir = "Plum_runs", clamdir = "clam_runs", sep = ",")
 }
 \arguments{
 \item{core}{The name of the core for which a Bacon .csv.file needs to be translated into a clam .csv file}
 
-\item{bacondir}{The directory where the Bacon runs reside. Defaults to \code{coredir="Bacon_runs"}.}
+\item{bacondir}{The directory where the Bacon runs reside. Defaults to \code{coredir="Plum_runs"}.}
 
 \item{clamdir}{The directory where the clam runs reside. Defaults to \code{coredir="clam_runs"}.}
 
@@ -28,8 +27,8 @@ Assumes that Bacon .csv files with 4 columns indicate 14C dates. Please make sur
 \examples{
 {
 \donttest{
- tmpfl <- tempfile()	
-  Bacon(run=FALSE, ask=FALSE, coredir=tmpfl)	
+ tmpfl <- tempfile()
+  Bacon(run=FALSE, ask=FALSE, coredir=tmpfl)
   bacon2clam("MSB2K", bacondir=tmpfl, clamdir=tmpfl)
  }
 }

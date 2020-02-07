@@ -4,12 +4,27 @@
 \alias{accrate.depth.ghost}
 \title{Plot modelled accumulation rates against the depths of a core.}
 \usage{
-accrate.depth.ghost(set = get("info"), d = set$elbows, d.lim = c(),
-  acc.lim = c(), d.lab = c(), cmyr = FALSE, acc.lab = c(),
-  dark = 1, grey.res = 100, prob = 0.95, plot.range = TRUE,
-  range.col = grey(0.5), range.lty = 2, plot.mean = TRUE,
-  mean.col = "red", mean.lty = 2, rotate.axes = FALSE,
-  rev.d = FALSE, rev.acc = FALSE)
+accrate.depth.ghost(
+  set = get("info"),
+  d = set$elbows,
+  d.lim = c(),
+  acc.lim = c(),
+  d.lab = c(),
+  cmyr = FALSE,
+  acc.lab = c(),
+  dark = 1,
+  grey.res = 100,
+  prob = 0.95,
+  plot.range = TRUE,
+  range.col = grey(0.5),
+  range.lty = 2,
+  plot.mean = TRUE,
+  mean.col = "red",
+  mean.lty = 2,
+  rotate.axes = FALSE,
+  rev.d = FALSE,
+  rev.acc = FALSE
+)
 }
 \arguments{
 \item{set}{Detailed information of the current run, stored within this session's memory as variable info.}
@@ -58,7 +73,7 @@ Plot grey-scale representation of modelled accumulation rates over a core's dept
 }
 \details{
 This plot shows the modelled accumulation rates in grey-scales, where darker grey indicates more likely accumulation rates.
-Axis limits for accumulation rates are estimated automatically, however upper limits can be very variable (and thus hard to predict) 
+Axis limits for accumulation rates are estimated automatically, however upper limits can be very variable (and thus hard to predict)
 if calculated in cm/yr; therefore you might want to manually adapt the axis limits after plotting with default settings (e.g., \code{acc.lim=c(0,1)}). See also \code{accrate.age.ghost}, \code{accrate.depth} and \code{accrate.age}.
 }
 \examples{
@@ -68,8 +83,8 @@ if calculated in cm/yr; therefore you might want to manually adapt the axis limi
   accrate.depth.ghost()
 }
 \references{
-Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive 
-gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474. 
+Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive
+gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
 \url{https://projecteuclid.org/euclid.ba/1339616472}
 }
 \seealso{

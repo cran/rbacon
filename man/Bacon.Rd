@@ -4,31 +4,78 @@
 \alias{Bacon}
 \title{Main age-depth modelling function}
 \usage{
-Bacon(core = "MSB2K", thick = 5, coredir = "", prob = 0.95,
-  d.min = NA, d.max = NA, d.by = 1, depths.file = FALSE,
-  depths = c(), depth.unit = "cm", age.unit = "yr",
-  unit = depth.unit, acc.shape = 1.5, acc.mean = 20,
-  mem.strength = 4, mem.mean = 0.7, boundary = NA,
-  hiatus.depths = NA, hiatus.max = 10000, add = c(),
-  after = 1e-04/thick, cc = 1, cc1 = "IntCal13", cc2 = "Marine13",
-  cc3 = "SHCal13", cc4 = "ConstCal", ccdir = "", postbomb = 0,
-  delta.R = 0, delta.STD = 0, t.a = 3, t.b = 4, normal = FALSE,
-  suggest = TRUE, reswarn = c(10, 200), remember = TRUE,
-  ask = TRUE, run = TRUE, defaults = "default_settings.txt",
-  sep = ",", dec = ".", runname = "", slump = c(), BCAD = FALSE,
-  ssize = 2000, th0 = c(), burnin = min(500, ssize), MinAge = c(),
-  MaxAge = c(), MinYr = MinAge, MaxYr = MaxAge, cutoff = 0.001,
-  plot.pdf = TRUE, dark = 1, date.res = 100, age.res = 200,
-  yr.res = age.res, close.connections = TRUE, ...)
+Bacon(
+  core = "MSB2K",
+  thick = 5,
+  coredir = "",
+  prob = 0.95,
+  d.min = NA,
+  d.max = NA,
+  d.by = 1,
+  seed = NA,
+  depths.file = FALSE,
+  depths = c(),
+  depth.unit = "cm",
+  age.unit = "yr",
+  unit = depth.unit,
+  acc.shape = 1.5,
+  acc.mean = 20,
+  mem.strength = 4,
+  mem.mean = 0.7,
+  boundary = NA,
+  hiatus.depths = NA,
+  hiatus.max = 10000,
+  add = c(),
+  after = 1e-04/thick,
+  cc = 1,
+  cc1 = "IntCal13",
+  cc2 = "Marine13",
+  cc3 = "SHCal13",
+  cc4 = "ConstCal",
+  ccdir = "",
+  postbomb = 0,
+  delta.R = 0,
+  delta.STD = 0,
+  t.a = 3,
+  t.b = 4,
+  normal = FALSE,
+  suggest = TRUE,
+  reswarn = c(10, 200),
+  remember = TRUE,
+  ask = TRUE,
+  run = TRUE,
+  defaults = "defaultBacon_settings.txt",
+  sep = ",",
+  dec = ".",
+  runname = "",
+  slump = c(),
+  BCAD = FALSE,
+  ssize = 2000,
+  th0 = c(),
+  burnin = min(500, ssize),
+  MinAge = c(),
+  MaxAge = c(),
+  MinYr = MinAge,
+  MaxYr = MaxAge,
+  cutoff = 0.001,
+  plot.pdf = TRUE,
+  dark = 1,
+  date.res = 100,
+  age.res = 200,
+  yr.res = age.res,
+  close.connections = TRUE,
+  verbose = TRUE,
+  ...
+)
 }
 \arguments{
-\item{core}{Name of the core, given using quotes. Defaults to one of the cores provided with rbacon, \code{core="MSB2K"}. 
+\item{core}{Name of the core, given using quotes. Defaults to one of the cores provided with rbacon, \code{core="MSB2K"}.
 An alternative core provided with this package is RLGH3 (Jones et al., 1989).
-To run your own core, produce a .csv file with the dates as outlined in the manual, add a folder with the core's name to the default directory for cores (see \code{coredir}), and save the .csv file there. For example, the file's location and name could be \code{Bacon_runs/MyCore/MyCore.csv}. Then run Bacon as follows: \code{Bacon("MyCore")}}
+To run your own core, produce a .csv file with the dates as outlined in the manual, add a folder with the core's name to the default directory for cores (see \code{coredir}), and save the .csv file there. For example, the file's location and name could be \code{Plum_runs/MyCore/MyCore.csv}. Then run Bacon as follows: \code{Bacon("MyCore")}}
 
 \item{thick}{Bacon will divide the core into sections of equal thickness specified by thick (default \code{thick=5}).}
 
-\item{coredir}{Folder where the core's files \code{core} are and/or will be located. This will be a folder with the core's name, within either the folder \code{coredir='Bacon_runs/'}, or the folder Cores/ if it already exists within R's working directory, or a custom-built folder. For example, use \code{coredir="."} to place the core's folder within the current working directory, or \code{coredir="F:"} if you want to put the core's folder and files on a USB drive loaded under F:.
+\item{coredir}{Folder where the core's files \code{core} are and/or will be located. This will be a folder with the core's name, within either the folder \code{coredir='Plum_runs/'}, or the folder Cores/ if it already exists within R's working directory, or a custom-built folder. For example, use \code{coredir="."} to place the core's folder within the current working directory, or \code{coredir="F:"} if you want to put the core's folder and files on a USB drive loaded under F:.
 Thinner (and thus more) sections will result in smoother age-models, but too many sections can cause `run-away' models.}
 
 \item{prob}{Confidence interval to report. This should lie between 0 and 1, default 0.95 (95 \%).}
@@ -39,9 +86,11 @@ Thinner (and thus more) sections will result in smoother age-models, but too man
 
 \item{d.by}{Depth intervals at which ages are calculated. Defaults to \code{d.by=1}.}
 
+\item{seed}{Seed used for C++ executions, if it is not assigned then the seed is set by system.}
+
 \item{depths.file}{By default, Bacon will calculate the ages for the depths \code{d.min} to \code{d.max} in steps of \code{d.by}.
-If \code{depths.file=TRUE}, Bacon will read a file containing the depths for which you require ages. 
-This file, containing the depths in a single column without a header, should be stored within \code{coredir}, 
+If \code{depths.file=TRUE}, Bacon will read a file containing the depths for which you require ages.
+This file, containing the depths in a single column without a header, should be stored within \code{coredir},
 and its name should start with the core's name and end with `_depths.txt'. Then specify \code{depths.file=TRUE} (default \code{FALSE}). See also \code{depths}.}
 
 \item{depths}{By default, Bacon will calculate the ages for the depths \code{d.min} to \code{d.max} in steps of \code{d.by}.
@@ -53,23 +102,23 @@ Alternative depths can be provided as, e.g., \code{depths=seq(0, 100, length=500
 
 \item{unit}{Deprecated and replaced by \code{depth.unit}.}
 
-\item{acc.shape}{The prior for the accumulation rate consists of a gamma distribution with two parameters. 
+\item{acc.shape}{The prior for the accumulation rate consists of a gamma distribution with two parameters.
 Its shape is set by acc.shape (default \code{acc.shape=1.5}; higher values result in more peaked shapes).}
 
-\item{acc.mean}{The accumulation rate prior consists of a gamma distribution with two parameters. Its mean is set by acc.mean (default \code{acc.mean=20} yr/cm (or whatever age or depth units are chosen), 
+\item{acc.mean}{The accumulation rate prior consists of a gamma distribution with two parameters. Its mean is set by acc.mean (default \code{acc.mean=20} yr/cm (or whatever age or depth units are chosen),
 which can be changed to, e.g., 5, 10 or 50 for different kinds of deposits). Multiple values can be given in case of hiatuses or boundaries, e.g., Bacon(hiatus.depths=23, acc.mean=c(5,20))}
 
 \item{mem.strength}{The prior for the memory (dependence of accumulation rate between neighbouring depths) is a beta distribution, which looks much like the gamma distribution.
 but its values are always between 0 (no assumed memory) and 1 (100\% memory). Its default settings of \code{mem.strength=4}
 (higher values result in more peaked shapes) allow for a large range of posterior memory values.}
 
-\item{mem.mean}{The prior for the memory is a beta distribution, which looks much like the gamma distribution but 
+\item{mem.mean}{The prior for the memory is a beta distribution, which looks much like the gamma distribution but
 its values are always between 0 (no assumed memory) and 1 (100\% memory). Its default settings of \code{mem.mean=0.7}
 allow for a large range of posterior memory values.}
 
 \item{boundary}{The assumed depths of any boundary, which divides sections of different accumulation rate regimes (e.g., as indicated by major change in the stratigraphy). No hiatus is assumed between these sections, and memory is reset crossing the boundary. Different accumulation priors can be set for the sections above and below the boundary, e.g., \code{acc.mean=c(5, 20)}. See also \code{hiatus.depths}, \code{mem.mean}, \code{acc.mean} and \code{acc.shape}. Setting many boundaries might not work, and having more than one boundary per model section (see \code{'thick'}) might not work either.}
 
-\item{hiatus.depths}{The assumed depths for any hiatus should be provided as, e.g., 
+\item{hiatus.depths}{The assumed depths for any hiatus should be provided as, e.g.,
 \code{hiatus.depths=20} for one at 20cm depth, and \code{hiatus.depths=c(20,40)} for two hiatuses at 20 and 40 cm depth.}
 
 \item{hiatus.max}{The prior for the maximum length of the hiatus. Hiatus length is a uniform distribution, with equal probabilities between 0 and \code{hiatus.max} yr (or whatever other \code{age.unit} is chosen).}
@@ -78,7 +127,7 @@ allow for a large range of posterior memory values.}
 
 \item{after}{Sets a short section above and below hiatus.depths within which to calculate ages. For internal calculations - do not change.}
 
-\item{cc}{Calibration curve for C-14 dates: \code{cc=1} for IntCal13 (northern hemisphere terrestrial), \code{cc=2} for Marine13 (marine), 
+\item{cc}{Calibration curve for C-14 dates: \code{cc=1} for IntCal13 (northern hemisphere terrestrial), \code{cc=2} for Marine13 (marine),
 \code{cc=3} for SHCal13 (southern hemisphere terrestrial). For dates that are already on the cal BP scale use \code{cc=0}.}
 
 \item{cc1}{For northern hemisphere terrestrial 14C dates (IntCal13).}
@@ -89,7 +138,7 @@ allow for a large range of posterior memory values.}
 
 \item{cc4}{Use an alternative curve (3 columns: cal BP, 14C age, error, separated by white spaces and saved as a plain-text file). See \code{ccdir}.}
 
-\item{ccdir}{Directory where the calibration curves for C14 dates \code{cc} are located. By default \code{ccdir=""} since they are loaded into R's memory. 
+\item{ccdir}{Directory where the calibration curves for C14 dates \code{cc} are located. By default \code{ccdir=""} since they are loaded into R's memory.
 For example, use \code{ccdir="."} to choose current working directory, or \code{ccdir="Curves/"} to choose sub-folder \code{Curves/}. Note that all calibration curves should reside in the same directory. If you want to add a custom-built curve, put it in the directory where the default calibration curves are (probably \code{list.files(paste0(.libPaths(), "/rbacon/extdata/Curves/"))}).
 Alternatively produce a new folder, and add your curve as well as the default calibration curves there (cc1, cc2 and cc3; e.g., \code{write.table(copyCalibrationCurve(1), "./3Col_intcal13.14C", sep="\t")}.)}
 
@@ -99,27 +148,27 @@ Alternatively produce a new folder, and add your curve as well as the default ca
 
 \item{delta.STD}{Error of core-wide age offsets (e.g., regional marine offsets).}
 
-\item{t.a}{The dates are treated using the student's t distribution by default (\code{normal=FALSE}). 
-The student's t-distribution has two parameters, t.a and t.b, set at 3 and 4 by default (see Christen and Perez, 2010). 
-If you want to assign narrower error distributions (more closely resembling the normal distribution), set t.a and t.b at for example 33 and 34 respectively (e.g., for specific dates in your .csv file). 
+\item{t.a}{The dates are treated using the student's t distribution by default (\code{normal=FALSE}).
+The student's t-distribution has two parameters, t.a and t.b, set at 3 and 4 by default (see Christen and Perez, 2010).
+If you want to assign narrower error distributions (more closely resembling the normal distribution), set t.a and t.b at for example 33 and 34 respectively (e.g., for specific dates in your .csv file).
 For symmetry reasons, t.a must always be equal to t.b-1.}
 
-\item{t.b}{The dates are treated using the student's t distribution by default (\code{normal=FALSE}). 
-The student's t-distribution has two parameters, t.a and t.b, set at 3 and 4 by default (see Christen and Perez, 2010). 
-If you want to assign narrower error distributions (more closely resembling the normal distribution), set t.a and t.b at for example 33 and 34 respectively (e.g., for specific dates in your .csv file). 
+\item{t.b}{The dates are treated using the student's t distribution by default (\code{normal=FALSE}).
+The student's t-distribution has two parameters, t.a and t.b, set at 3 and 4 by default (see Christen and Perez, 2010).
+If you want to assign narrower error distributions (more closely resembling the normal distribution), set t.a and t.b at for example 33 and 34 respectively (e.g., for specific dates in your .csv file).
 For symmetry reasons, t.a must always be equal to t.b-1.}
 
 \item{normal}{By default, Bacon uses the student's t-distribution to treat the dates. Use \code{normal=TRUE} to use the normal/Gaussian distribution. This will generally give higher weight to the dates.}
 
 \item{suggest}{If initial analysis of the data indicates abnormally slow or fast accumulation rates, Bacon will suggest to change the prior.
-Also, if the length of the core would cause too few or too many sections with the default settings, Bacon will suggest an alternative section thickness \code{thick}. 
+Also, if the length of the core would cause too few or too many sections with the default settings, Bacon will suggest an alternative section thickness \code{thick}.
 Accept these suggested alternative settings by typing "y" (or "yes please" if you prefer to be polite), or leave as is by typing "n" (or anything else, really). To get rid of these suggestions, use \code{suggest=FALSE}.}
 
-\item{reswarn}{Bacon will warn you if the number of sections lies outside the safe range (default between 10 and 200 sections; 
+\item{reswarn}{Bacon will warn you if the number of sections lies outside the safe range (default between 10 and 200 sections;
 \code{reswarn=c(10,200)}). Too few sections could lead to an `elbowy' model while with too many sections the modelling process can get lost,
  resulting in age-models far away from the dated depths.}
 
-\item{remember}{Bacon will try to remember which settings you have applied to your cores (default \code{remember=TRUE}). If you run into inconsistencies or other problems, 
+\item{remember}{Bacon will try to remember which settings you have applied to your cores (default \code{remember=TRUE}). If you run into inconsistencies or other problems,
 try running your core again with \code{remember=FALSE}, or, start cleanly by typing \code{Bacon.cleanup()}.}
 
 \item{ask}{By default Bacon will ask you to confirm that you want to run the core with the provided settings. Disable this using \code{ask=FALSE} (e.g., for batch runs).}
@@ -167,6 +216,8 @@ Lower values will result in lighter grey but values >1 are not allowed.}
 
 \item{close.connections}{Internal option to close connections after a run. Default \code{close.connections=TRUE}.}
 
+\item{verbose}{Provide feedback on what is happening (default \code{verbose=TRUE}).}
+
 \item{...}{options for the age-depth graph. See \link{agedepth} and \link{calib.plot}}
 }
 \value{
@@ -176,22 +227,22 @@ An age-depth model graph, its age estimates, and a summary.
 This is the main age-depth modelling function of the rbacon package.
 }
 \details{
-Bacon is an approach to age-depth modelling that uses Bayesian statistics in order to reconstruct Bayesian 
+Bacon is an approach to age-depth modelling that uses Bayesian statistics in order to reconstruct Bayesian
 accumulation histories for deposits, through combining radiocarbon and other dates with prior information ('Blaauw' and 'Christen', 2011).
 
-Bacon divides a core into many thin vertical sections (by default of \code{thick=5} cm thickness), 
-and through millions of Markov Chain Monte Carlo (MCMC) iterations estimates 
-the accumulation rate (in years/cm; so more correctly, sedimentation times) for each of these sections. 
-Combined with an estimated starting date for the first section, these accumulation rates then form the age-depth model. 
-The accumulation rates are constrained by prior information on the accumulation rate (\code{acc.mean, acc.shape)} and its 
+Bacon divides a core into many thin vertical sections (by default of \code{thick=5} cm thickness),
+and through millions of Markov Chain Monte Carlo (MCMC) iterations estimates
+the accumulation rate (in years/cm; so more correctly, sedimentation times) for each of these sections.
+Combined with an estimated starting date for the first section, these accumulation rates then form the age-depth model.
+The accumulation rates are constrained by prior information on the accumulation rate (\code{acc.mean, acc.shape)} and its
 variability between neighbouring depths, or "memory" (\code{mem.mean, mem.strength}). Hiatuses can be introduced as well, also constrained by prior information (\code{hiatus.max}).
 
-Although Bacon works with any kind of absolute dates (e.g., OSL, tephra or other dates on a calendar scale), 
-it is often used to age-model 14C-dated sequences. Radiocarbon dates should be calibrated using either IntCal13 
-(for terrestrial northern hemisphere material; Reimer et al., 2013), Marine13 (for marine dates; Reimer et al., 2013), 
-SHCal13 (for southern hemisphere dates; Hogg et al., 2013) or any other calibration curve (see below), while modern 14C 
-dates are calibrated using one of the post-bomb calibration curves (NH1, NH2 or NH3 for the northern hemisphere, 
-SH1-2 or SH3 for the southern hemisphere; Hua et al., 2013). See \url{http://calib.org/CALIBomb} if you are unsure which 
+Although Bacon works with any kind of absolute dates (e.g., OSL, tephra or other dates on a calendar scale),
+it is often used to age-model 14C-dated sequences. Radiocarbon dates should be calibrated using either IntCal13
+(for terrestrial northern hemisphere material; Reimer et al., 2013), Marine13 (for marine dates; Reimer et al., 2013),
+SHCal13 (for southern hemisphere dates; Hogg et al., 2013) or any other calibration curve (see below), while modern 14C
+dates are calibrated using one of the post-bomb calibration curves (NH1, NH2 or NH3 for the northern hemisphere,
+SH1-2 or SH3 for the southern hemisphere; Hua et al., 2013). See \url{http://calib.org/CALIBomb} if you are unsure which
 postbomb curve you need. If Bacon finds postbomb dates (negative 14C ages) and you haven't specified a postbomb curve,
 you will be prompted. Provide postbomb curves as, e.g., \code{postbomb=1} for the NH1 postbomb curve (2 for NH2, 3 for NH3, 4 for SH1-2, 5 for SH3).
 
@@ -199,7 +250,7 @@ For calendar dates, i.e. dates that are already on the calendar scale and thus s
 }
 \examples{
 \dontshow{
-  Bacon(run=FALSE, coredir=tempfile()) 
+  Bacon(run=FALSE, coredir=tempfile())
 }
 \donttest{
   Bacon(ask=FALSE, coredir=tempfile())
@@ -207,7 +258,7 @@ For calendar dates, i.e. dates that are already on the calendar scale and thus s
 }
 }
 \references{
-Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474. 
+Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
 \url{https://projecteuclid.org/euclid.ba/1339616472}
 
 Christen, J.A., Perez E., S., 2010. A new robust statistical model for radiocarbon data. Radiocarbon 51, 1047-1059.
@@ -222,11 +273,11 @@ Hogg, A.G., Hua, Q., Blackwell, P.G., Buck, C.E., Guilderson, T.P., Heaton, T.J.
 Reimer, P.J., Reimer, R., Turney, C.S.M., Zimmerman, S.R.H., 2013. ShCal13 Southern Hemisphere
 calibration, 0-50,000 cal yr BP. Radiocarbon 55(4), <doi:10.2458/azu_js_rc.55.16783>.
 
-Hua, Q., Barbetti, M., Rakowski, A.Z., 2013. Atmospheric radiocarbon for the period 1950-2010. 
+Hua, Q., Barbetti, M., Rakowski, A.Z., 2013. Atmospheric radiocarbon for the period 1950-2010.
 Radiocarbon 55(4), <doi:10.2458/azu_js_rc.v55i2.16177>.
 
 Jones, V.J., Stevenson, A.C., Battarbee, R.W., 1989. Acidification of lakes in Galloway, south west Scotland
-- a diatom and pollen study of the post-glacial history of the Round Loch of Glenhead. 
+- a diatom and pollen study of the post-glacial history of the Round Loch of Glenhead.
 Journal of Ecology 77: 1-23.
 }
 \seealso{

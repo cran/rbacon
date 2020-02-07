@@ -1,32 +1,36 @@
 Package: rbacon
 Type: Package
 Title: Age-Depth Modelling using Bayesian Statistics
-Version: 2.3.9.1
-Date: 2019-07-03
+Version: 2.4.0
+Date: 2020-02-06
 Authors@R: c(
     person("Maarten", "Blaauw", email = "maarten.blaauw@qub.ac.uk", role = c("aut", "cre")),
-    person("J. Andres", "Christen", email = "jac@cimat.mx", role = "aut"),
+    person("J. Andres", "Christen", email = "jac@cimat.mx", role = c("aut", "ctb", "cph")),
+    person("Marco A.", "Aquino L.", email = "Marco.AquinoLopez@mu.ie", role="aut"),
 	person("Judith", "Esquivel Vazquez", email = "", role = "ctb"),
+  person("Oscar M.", "Gonzalez V.", email = "", role = "ctb"),
 	person("Ted", "Belding", role = "cph"),
 	person("James", "Theiler", role = "cph"),
 	person("Brian", "Gough", role = "cph"),
 	person("Charles", "Karney", role = "cph"))
-Description: Bacon is an approach to age-depth modelling that uses Bayesian statistics to reconstruct accumulation histories for deposits, through combining radiocarbon and other dates with prior information. See Blaauw & Christen (2011) <doi:10.1214/11-BA618>.
+Description: An approach to age-depth modelling that uses Bayesian statistics to reconstruct accumulation histories for deposits, through combining radiocarbon and other dates with prior information. See Blaauw & Christen (2011) <doi:10.1214/11-BA618>.
 Encoding: UTF-8
+Repository: CRAN
 License: GPL (>= 2)
 NeedsCompilation: yes
 Imports: Rcpp (>= 0.12.12), coda (>= 0.19-1), grDevices, graphics,
         stats, utils
 LinkingTo: Rcpp
-RoxygenNote: 6.1.1
-Packaged: 2019-07-03 15:42:43 UTC; maarten
+RoxygenNote: 7.0.2
 Author: Maarten Blaauw [aut, cre],
-  J. Andres Christen [aut],
+  J. Andres Christen [aut, ctb, cph],
+  Marco A. Aquino L. [aut],
   Judith Esquivel Vazquez [ctb],
+  Oscar M. Gonzalez V. [ctb],
   Ted Belding [cph],
   James Theiler [cph],
   Brian Gough [cph],
   Charles Karney [cph]
 Maintainer: Maarten Blaauw <maarten.blaauw@qub.ac.uk>
-Repository: CRAN
-Date/Publication: 2019-07-03 16:30:03 UTC
+Date/Publication: 2020-02-07 06:00:02 UTC
+Packaged: 2020-02-06 22:57:01 UTC; maarten

@@ -4,11 +4,24 @@
 \alias{Bacon.hist}
 \title{Calculate age distributions of depths.}
 \usage{
-Bacon.hist(d, set = get("info"), BCAD = set$BCAD, age.lab = c(),
-  age.lim = c(), hist.lab = "Frequency", calc.range = TRUE,
-  hist.lim = c(), draw = TRUE, prob = set$prob,
-  hist.col = grey(0.5), hist.border = grey(0.2), range.col = "blue",
-  med.col = "green", mean.col = "red")
+Bacon.hist(
+  d,
+  set = get("info"),
+  BCAD = set$BCAD,
+  age.lab = c(),
+  age.lim = c(),
+  hist.lab = "Frequency",
+  calc.range = TRUE,
+  hist.lim = c(),
+  draw = TRUE,
+  prob = set$prob,
+  hist.col = grey(0.5),
+  hist.border = grey(0.2),
+  range.col = "blue",
+  med.col = "green",
+  mean.col = "red",
+  verbose = TRUE
+)
 }
 \arguments{
 \item{d}{The depth or depths for which a histogram and age ranges should be provided. If multiple depths are given, then just the age ranges, median and means (no graphs) are provided for each depth.}
@@ -41,6 +54,8 @@ If \code{draw=FALSE}, then the age ranges, median and mean are given for each de
 \item{med.col}{Colour of the median. Defaults to \code{med.col="green"}.}
 
 \item{mean.col}{Colour of the mean. Defaults to \code{mn.col="red"}.}
+
+\item{verbose}{Provide feedback on what is happening (default \code{verbose=TRUE}).}
 }
 \value{
 A plot with the histogram and the age ranges, median and mean, or just the age ranges, medians and means if more than one depth \code{d} is given.
@@ -54,12 +69,12 @@ Age estimates of specific depths can also be plotted.
 \examples{
   Bacon(run=FALSE, coredir=tempfile())
   agedepth(age.res=50, d.res=50, d.by=10)
-  Bacon.hist(20) 
-  Bacon.hist(20:30) 
+  Bacon.hist(20)
+  Bacon.hist(20:30)
 }
 \references{
-Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive 
-gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474. 
+Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive
+gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
 \url{https://projecteuclid.org/euclid.ba/1339616472}
 }
 \seealso{

@@ -4,14 +4,36 @@
 \alias{accrate.age.ghost}
 \title{Plot a core's accumulation rates against calendar time.}
 \usage{
-accrate.age.ghost(set = get("info"), age.lim = c(), yr.lim = age.lim,
-  age.lab = c(), yr.lab = age.lab, age.res = 200, yr.res = age.res,
-  grey.res = 50, prob = 0.95, plot.range = TRUE,
-  range.col = grey(0.5), range.lty = 2, plot.mean = TRUE,
-  mean.col = "red", mean.lty = 2, acc.lim = c(), acc.lab = c(),
-  upper = 0.99, dark = 50, BCAD = set$BCAD, cmyr = FALSE,
-  rotate.axes = FALSE, rev.age = FALSE, rev.yr = rev.age,
-  rev.acc = FALSE, xaxs = "i", yaxs = "i", bty = "l")
+accrate.age.ghost(
+  set = get("info"),
+  age.lim = c(),
+  yr.lim = age.lim,
+  age.lab = c(),
+  yr.lab = age.lab,
+  age.res = 200,
+  yr.res = age.res,
+  grey.res = 50,
+  prob = 0.95,
+  plot.range = TRUE,
+  range.col = grey(0.5),
+  range.lty = 2,
+  plot.mean = TRUE,
+  mean.col = "red",
+  mean.lty = 2,
+  acc.lim = c(),
+  acc.lab = c(),
+  upper = 0.99,
+  dark = 50,
+  BCAD = set$BCAD,
+  cmyr = FALSE,
+  rotate.axes = FALSE,
+  rev.age = FALSE,
+  rev.yr = rev.age,
+  rev.acc = FALSE,
+  xaxs = "i",
+  yaxs = "i",
+  bty = "l"
+)
 }
 \arguments{
 \item{set}{Detailed information of the current run, stored within this session's memory as variable info.}
@@ -77,13 +99,13 @@ A greyscale plot of accumulation rate against calendar age.
 Plot a grey-scale representation of a core's estimated accumulation rates against time.
 }
 \details{
-Calculating accumulation rates against calendar age will take some time to calculate, and might show unexpected 
+Calculating accumulation rates against calendar age will take some time to calculate, and might show unexpected
 rates around the core's maximum ages (only a few of all age-model iterations will reach such ages and they will tend to have
  modelled accumulation rates for the lower depths much lower than the other iterations). Axis limits for accumulation rates
   are estimated automatically, however upper limits can be very variable (and thus hard to predict) if calculated in \code{cm/yr}.
  Therefore you might want to manually adapt the axis limits after plotting with default settings (e.g., \code{acc.lim=c(0,1)}). See also \code{accrate.depth.ghost}, \code{accrate.depth} and \code{accrate.age}.
-The grey-scale reconstruction around the oldest ages of any reconstruction often indicates very low accumulation rates. 
-This is due to only some MCMC iterations reaching those old ages, and these iterations will have modelled very slow accumulation rates. 
+The grey-scale reconstruction around the oldest ages of any reconstruction often indicates very low accumulation rates.
+This is due to only some MCMC iterations reaching those old ages, and these iterations will have modelled very slow accumulation rates.
 Currently does not deal well with hiatuses, so do not interpret accumulation rates close to depths with inferred hiatuses.
 }
 \examples{
@@ -93,8 +115,8 @@ Currently does not deal well with hiatuses, so do not interpret accumulation rat
   accrate.age.ghost()
 }
 \references{
-Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive 
-gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474. 
+Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive
+gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
 \url{https://projecteuclid.org/euclid.ba/1339616472}
 }
 \seealso{

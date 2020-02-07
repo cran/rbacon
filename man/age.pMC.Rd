@@ -22,7 +22,7 @@ pMC values from C14 ages.
 Calculate pMC values from radiocarbon ages
 }
 \details{
-Post-bomb dates are often reported as pMC or percent modern carbon. Since Bacon expects radiocarbon ages, 
+Post-bomb dates are often reported as pMC or percent modern carbon. Since Bacon expects radiocarbon ages,
 this function can be used to calculate pMC values from radiocarbon ages. The reverse function of \link{pMC.age}.
 }
 \examples{
@@ -30,8 +30,8 @@ this function can be used to calculate pMC values from radiocarbon ages. The rev
   age.pMC(-2000, 20, 1)
 }
 \references{
-Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive 
-gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474. 
+Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive
+gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
 \url{https://projecteuclid.org/euclid.ba/1339616472}
 }
 \seealso{

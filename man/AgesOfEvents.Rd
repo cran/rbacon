@@ -4,11 +4,24 @@
 \alias{AgesOfEvents}
 \title{Event probabilities against calendar age}
 \usage{
-AgesOfEvents(window, move, set = get("info"), plot.steps = FALSE,
-  BCAD = set$BCAD, age.lab = c(), yr.lab = age.lab, age.lim = c(),
-  yr.lim = age.lim, prob.lab = "probability", prob.lim = c(),
-  rotate.axes = FALSE, rev.age = TRUE, rev.yr = rev.age,
-  yaxs = "i", bty = "l")
+AgesOfEvents(
+  window,
+  move,
+  set = get("info"),
+  plot.steps = FALSE,
+  BCAD = set$BCAD,
+  age.lab = c(),
+  yr.lab = age.lab,
+  age.lim = c(),
+  yr.lim = age.lim,
+  prob.lab = "probability",
+  prob.lim = c(),
+  rotate.axes = FALSE,
+  rev.age = TRUE,
+  rev.yr = rev.age,
+  yaxs = "i",
+  bty = "l"
+)
 }
 \arguments{
 \item{window}{Width of the window.}
@@ -51,16 +64,16 @@ The resulting probabilities are plotted and saved within the core's folder (file
 Plot probability curves for events in the core, expressed against calendar age.
 }
 \details{
-Probabilities of depths with 'events' in an age-modelled core can be plotted against time, taking into account 
-chronological uncertainties (Blaauw et al. 2007). Such events could be for example core depths at which proxies 
-indicate changes toward wetter local conditions. This can be expressed as values between 0 (no event) and 1 (event at 100\% probability) 
-for each depth. 
+Probabilities of depths with 'events' in an age-modelled core can be plotted against time, taking into account
+chronological uncertainties (Blaauw et al. 2007). Such events could be for example core depths at which proxies
+indicate changes toward wetter local conditions. This can be expressed as values between 0 (no event) and 1 (event at 100\% probability)
+for each depth.
 
-Blaauw et al. 2010 propose to estimate probabilities of events by finding specific proxy features such as increasing curves. 
-Probabilities are then estimated through resampling from the proxy values, where low to modest rises of proxy curves result 
-in low event probabilities, and clear proxy rises in high probabilities. A smooth spline can be applied to adapt the balance of short-term vs long-term events. To calculate the event probabilities, 
+Blaauw et al. 2010 propose to estimate probabilities of events by finding specific proxy features such as increasing curves.
+Probabilities are then estimated through resampling from the proxy values, where low to modest rises of proxy curves result
+in low event probabilities, and clear proxy rises in high probabilities. A smooth spline can be applied to adapt the balance of short-term vs long-term events. To calculate the event probabilities,
 produce a file with two columns (depth and corresponding proxy-derived probabilities, separated by white spaces).
- Do not provide headers at the file's first line, and save the file with extension "_events.txt" within the core's Bacon folder. See Cores/MSB2K/MSB2K_events.txt (or Bacon_runs/MSB2K/MSB2K_events.txt) for an example. Events are calculated as the probability that an event took place within specific time windows - or more specifically, that the Bacon age-depth model puts depths with assigned event probabilities in that time window.  
+ Do not provide headers at the file's first line, and save the file with extension "_events.txt" within the core's Bacon folder. See Cores/MSB2K/MSB2K_events.txt (or Plum_runs/MSB2K/MSB2K_events.txt) for an example. Events are calculated as the probability that an event took place within specific time windows - or more specifically, that the Bacon age-depth model puts depths with assigned event probabilities in that time window.
 
 does not yet deal correctly with hiatuses.
 }

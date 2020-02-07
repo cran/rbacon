@@ -12,17 +12,17 @@
 #' @name clam2bacon
 #' @title Translate clam .csv files to Bacon .csv files.
 #' @description Reads a clam .csv file containing the dates, and transforms it into a Bacon .csv file.
-#' @details Please ensure that if the clam file has offset (d.R) estimates, that errors (d.STD) are provided manually, since these values cannot be determined automatically from the clam .csv file. 
+#' @details Please ensure that if the clam file has offset (d.R) estimates, that errors (d.STD) are provided manually, since these values cannot be determined automatically from the clam .csv file.
 #' @author Maarten Blaauw, J. Andres Christen
 #' @return A Bacon .csv file
 #' @param core The name of the core for which a clam .csv.file needs to be translated into a Bacon .csv file
 #' @param clamdir The directory where the clam runs reside. Defaults to \code{coredir="clam_runs"}.
-#' @param bacondir The directory where the Bacon runs reside. Defaults to \code{coredir="Bacon_runs"}.
+#' @param bacondir The directory where the Bacon runs reside. Defaults to \code{coredir="Plum_runs"}.
 #' @param sep The separator for the .csv files. Defaults to \code{sep=","}.
-#' @param cc Calibration curve for C-14 dates: \code{cc=1} for IntCal13 (northern hemisphere terrestrial), \code{cc=2} for Marine13 (marine), 
+#' @param cc Calibration curve for C-14 dates: \code{cc=1} for IntCal13 (northern hemisphere terrestrial), \code{cc=2} for Marine13 (marine),
 #' @seealso \url{http://www.chrono.qub.ac.uk/blaauw/manualBacon_2.3.pdf}
 #' @export
-clam2bacon <- function(core, clamdir="clam_runs", bacondir="Bacon_runs", sep=",", cc=1) {
+clam2bacon <- function(core, clamdir="clam_runs", bacondir="Plum_runs", sep=",", cc=1) {
   clamfl <- read.csv(paste0(clamdir, "/", core, "/", core, ".csv"), sep=sep)
   ID <- as.character(clamfl[,1])
   C14 <- clamfl[,2]
@@ -30,17 +30,17 @@ clam2bacon <- function(core, clamdir="clam_runs", bacondir="Bacon_runs", sep=","
   error <- clamfl[,4]
   res <- clamfl[,5]
   d <- clamfl[,6]
-    
+
   cc <- rep(cc, nrow(clamfl))
   cc[which(!is.na(calBP))] <- 0 # cal BP ages get cc=0
   ages <- C14
   ages[which(is.na(ages))] <- calBP[which(!is.na(calBP))]
-  
+
   if(length(res[!is.na(res)]) > 0)
-	  cat("Warning, please add reservoir effects manually to the bacon .csv file\n")
+    message("Warning, please add reservoir effects manually to the bacon .csv file")
 
   baconfl <- cbind(ID, ages, error, d, cc)
-  bacondir <- paste0(bacondir, "/", core) 
+  bacondir <- paste0(bacondir, "/", core)
   if(!dir.exists(bacondir))
     dir.create(bacondir)
   write.table(baconfl, paste0(bacondir, "/", core, ".csv"), sep=sep, row.names=FALSE, quote=FALSE)
@@ -51,23 +51,23 @@ clam2bacon <- function(core, clamdir="clam_runs", bacondir="Bacon_runs", sep=","
 #' @name bacon2clam
 #' @title Translate Bacon .csv files to clam .csv files.
 #' @description Reads a Bacon .csv file containing the dates, and transforms it into a clam .csv file.
-#' @details Assumes that Bacon .csv files with 4 columns indicate 14C dates. Please make sure this is correct. 
+#' @details Assumes that Bacon .csv files with 4 columns indicate 14C dates. Please make sure this is correct.
 #' @author Maarten Blaauw, J. Andres Christen
 #' @return A clam .csv file
 #' @param core The name of the core for which a Bacon .csv.file needs to be translated into a clam .csv file
-#' @param bacondir The directory where the Bacon runs reside. Defaults to \code{coredir="Bacon_runs"}.
+#' @param bacondir The directory where the Bacon runs reside. Defaults to \code{coredir="Plum_runs"}.
 #' @param clamdir The directory where the clam runs reside. Defaults to \code{coredir="clam_runs"}.
 #' @param sep The separator for the .csv files. Defaults to \code{sep=","}.
 #' @examples{
 #' \donttest{
-#'  tmpfl <- tempfile()	
-#'   Bacon(run=FALSE, ask=FALSE, coredir=tmpfl)	
+#'  tmpfl <- tempfile()
+#'   Bacon(run=FALSE, ask=FALSE, coredir=tmpfl)
 #'   bacon2clam("MSB2K", bacondir=tmpfl, clamdir=tmpfl)
 #'  }
 #' }
 #' @seealso \url{http://www.chrono.qub.ac.uk/blaauw/manualBacon_2.3.pdf}
 #' @export
-bacon2clam <- function(core, bacondir="Bacon_runs", clamdir="clam_runs", sep=",") {
+bacon2clam <- function(core, bacondir="Plum_runs", clamdir="clam_runs", sep=",") {
   baconfl <- read.csv(paste0(bacondir, "/", core, "/", core, ".csv"), sep=sep)
   ID <- as.character(baconfl[,1])
   ages <- baconfl[,2]
@@ -77,61 +77,44 @@ bacon2clam <- function(core, bacondir="Bacon_runs", clamdir="clam_runs", sep=","
   C14 <- rep(NA, length(ages))
   calBP <- C14
   res <- C14
-  
+
   if(ncol(baconfl) == 4) {
     C14 <- ages
-	cat("Warning, I am assuming that these are radiocarbon dates, not cal BP\n")
-  } 
+	message("Warning, I am assuming that these are radiocarbon dates, not cal BP")
+  }
   if(ncol(baconfl) >= 5) {# then cc specified
 	calBP[which(baconfl[,5] == 0)] <- ages[which(baconfl[,5] == 0)]
 	C14[which(baconfl[,5] > 0)] <- ages[which(baconfl[,5] > 0)]
-  }	
+  }
   if(ncol(baconfl) >= 7) { # then also offsets specified
     res <- baconfl[,6]
-	error <- sqrt(error^2 + baconfl[,7]^2)  
-  }	
-  
+	error <- sqrt(error^2 + baconfl[,7]^2)
+  }
+
   clamfl <- cbind(ID, C14, calBP, error, res, d)
   clamfl[is.na(clamfl)] <- ""
   clamdir <- paste0(clamdir, "/", core)
   if(!dir.exists(clamdir))
     dir.create(clamdir)
-  write.table(clamfl, paste0(clamdir, "/", core, ".csv"), sep=sep, row.names=FALSE, quote=FALSE)  
+  write.table(clamfl, paste0(clamdir, "/", core, ".csv"), sep=sep, row.names=FALSE, quote=FALSE)
 }
 
 
 
-#' @name Bacon_runs
-#' @title List the folders present in the current core directory.
-#' @description Lists all folders located within the core's directory.
-#' @details The directory is either "Bacon_runs", "Cores" or a custom-named one. 
-#' @author Maarten Blaauw, J. Andres Christen
-#' @return A list of folders
-#' @param coredir The directory where the Bacon runs reside. Defaults to \code{coredir="Bacon_runs"}.
-#' @examples
-#'   Bacon(run=FALSE, coredir=tempfile())
-#'   Bacon_runs()
-#' @seealso \url{http://www.chrono.qub.ac.uk/blaauw/manualBacon_2.3.pdf}
-#' @export
-Bacon_runs <- function(coredir=get('info')$coredir)
-  list.files(coredir)
-
-
-
-#' @name Bacon.cleanup 
+#' @name Bacon.cleanup
 #' @title Remove files made to produce the current core's age-depth model.
 #' @description Remove files .bacon, .out, .pdf, _ages.txt, and _settings.txt of current core.
 #' @details If cores behave badly, you can try cleaning up previous runs and settings, by
 #' removing files .bacon, .out, .pdf, _ages.txt, and _settings.txt of current core.
 #' @return A message stating that the files and settings of this run have been deleted.
-#' @param set Detailed information of the current run, stored within this session's memory as variable \code{info}. 
+#' @param set Detailed information of the current run, stored within this session's memory as variable \code{info}.
 #' @author Maarten Blaauw, J. Andres Christen
-#' @examples 
+#' @examples
 #'   Bacon(run=FALSE, coredir=tempfile())
 #'   Bacon.cleanup()
 #' @seealso \url{http://www.chrono.qub.ac.uk/blaauw/manualBacon_2.3.pdf}
 #' @export
-Bacon.cleanup <- function(set=get('info')) { 
+Bacon.cleanup <- function(set=get('info')) {
   files <- c(paste0(set$prefix, ".bacon"), paste0(set$prefix, ".out"),
     paste0(set$prefix, ".pdf"), paste0(set$prefix, "_ages.txt"),
     paste0(set$coredir,set$core, "/", set$core, "_settings.txt"))
@@ -140,20 +123,20 @@ Bacon.cleanup <- function(set=get('info')) {
       tmp <- file.remove(i)
   if(exists("tmp"))
     rm(tmp)
-  cat("Previous Bacon runs of core", set$core, "with thick =", set$thick, "deleted. Now try running the core again\n")
+  message("Previous Bacon runs of core", set$core, "with thick =", set$thick, "deleted. Now try running the core again\n")
 }
 
 
 
-# If coredir is left empty, check for a folder named Cores in the current working directory, and if this doesn't exist, for a folder called Bacon_runs (make this folder if it doesn't exist yet and if the user agrees).
-# Check if we have write access. If not, tell the user to provide a different, writeable location for coredir. 
+# If coredir is left empty, check for a folder named Cores in the current working directory, and if this doesn't exist, for a folder called Plum_runs (make this folder if it doesn't exist yet and if the user agrees).
+# Check if we have write access. If not, tell the user to provide a different, writeable location for coredir.
 assign_coredir <- function(coredir, core, ask=TRUE) {
   if(coredir == "") {
-    if(dir.exists("Cores")) 
+    if(dir.exists("Cores"))
       coredir <- "Cores" else
-        if(dir.exists("Bacon_runs"))
-          coredir <- "Bacon_runs" else {
-            coredir <- "Bacon_runs"
+        if(dir.exists("Plum_runs"))
+          coredir <- "Plum_runs" else {
+            coredir <- "Plum_runs"
             ans <- readline(paste0("I will create a folder called ", coredir, ", is that OK? (y/n)  "))
             if(ask)
               if(tolower(substr(ans,1,1)) == "y")
@@ -161,7 +144,7 @@ assign_coredir <- function(coredir, core, ask=TRUE) {
                   stop("No problem. Please provide an alternative folder location using coredir\n", call.=FALSE)
             if(!wdir)
               stop("cannot write into the current directory.\nPlease set coredir to somewhere where you have writing access, e.g. Desktop or ~.", call.=FALSE)
-        }    
+        }
   } else {
     if(!dir.exists(coredir))
         wdir <- dir.create(coredir, FALSE)
@@ -193,14 +176,14 @@ assign_coredir <- function(coredir, core, ask=TRUE) {
     dets <- read.table(csv.file, header=TRUE, sep=sep)
     if(file.exists(dat.file)) # deal with old .dat files
       if(file.info(csv.file)$mtime < file.info(dat.file)$mtime)
-        cat("Warning, the .dat file is newer than the .csv file! I will read the .csv file. From now on please modify ", csv.file, ", not ", dat.file, " \n", sep="") else
-          cat("Reading", csv.file, "\n")
+        message("Warning, the .dat file is newer than the .csv file! I will read the .csv file. From now on please modify ", csv.file, ", not ", dat.file) else
+          message("Reading", csv.file)
     } else {
       if(file.exists(paste0(csv.file, ".txt"))) {
         file.rename(paste0(csv.file, ".txt"), csv.file)
-        cat("Removing .txt extension from .csv file\n")
+        message("Removing .txt extension from .csv file")
       } else {
-        cat("No .csv file found, reading", dat.file, "and converting it to .csv\n")
+        message("No .csv file found, reading", dat.file, "and converting it to .csv")
         dets <- read.table(dat.file, header=TRUE)
         changed <- 1
         }
@@ -208,7 +191,7 @@ assign_coredir <- function(coredir, core, ask=TRUE) {
   name <- tolower(names(dets))
   commas <- grep(",,", readLines(csv.file)) # check if there are too many commas (e.g., lines with just commas)
   if(length(!is.na(commas)) > 0) # often an artefact of spreadsheet programs
-    stop("check the .csv file in a plain-text editor for 'orphan' commas\n", call.=FALSE) 
+    stop("check the .csv file in a plain-text editor for 'orphan' commas\n", call.=FALSE)
 
   # check if 'classic' dets file, which has a different column order from the current default
   if(ncol(dets) > 4)
@@ -218,16 +201,16 @@ assign_coredir <- function(coredir, core, ask=TRUE) {
     } else
       if(ncol(dets) == 6) { # probably an 'old' file: dR, dSTD, but could also be cc and delta.R (so no column for delta.STD)
         if(name[5] %in% dR.names && name[6] %in% dSTD.names) {
-			cat("\nHELP!!! 6!!!\n")
+			message("\nHELP!!! 6!!!")
           dets <- cbind(dets[,1:4], rep(cc, nrow(dets)), dets[,5:6]) # some shuffling
-          cat(" Assumed order of columns in dets file: lab ID, Age, error, depth, dR, dSTD. \nAdding calibration curve column (fifth column, before dR and dSTD) and saving as", csv.file, "\n")
+          message(" Assumed order of columns in dets file: lab ID, Age, error, depth, dR, dSTD. \nAdding calibration curve column (fifth column, before dR and dSTD) and saving as", csv.file)
           changed <- 1
-        } else 
+        } else
 	      stop("unexpected names for columns 5/6. If you want to include delta.R, also add a column for delta.STD. Check the manual for guidelines to producing a correct .csv file.\n", call.=FALSE)
       } else
         if(ncol(dets) == 7) { # probably a 'new' file: cc, dR, dSTD
           if(name[5] %in% cc.names && min(dets[,5]) >= 0 && max(dets[,5]) <= 4 &&
-            name[6] %in% dR.names && name[7] %in% dSTD.names) 
+            name[6] %in% dR.names && name[7] %in% dSTD.names)
               {} else
                  stop("unexpected column names, order or values in dets file. \nPlease check the manual for correct dets file formats.\n", call.=FALSE)
         } else
@@ -236,7 +219,7 @@ assign_coredir <- function(coredir, core, ask=TRUE) {
             if(name[7] %in% ta.names && name[8] %in% tb.names)
             if(range(dets[,8] - dets[,7]) == c(1,1)) { # check that these set expected student-t values
               dets <- cbind(dets[,1:4], rep(cc, nrow(dets)), dets[,5:6]) # some shuffling
-              cat(" Assumed order of columns in dets file: lab ID, Age, error, depth, dR, dSTD. \nAdding calibration curve column (fifth column, before dR and dSTD) and saving as", csv.file, "\n")
+              message(" Assumed order of columns in dets file: lab ID, Age, error, depth, dR, dSTD. \nAdding calibration curve column (fifth column, before dR and dSTD) and saving as", csv.file)
               changed <- 1
             } else
               stop("unexpected column names, order or values in dets file. \nPlease check the manual for how to produce a correct .csv file", call.=FALSE)
@@ -248,7 +231,7 @@ assign_coredir <- function(coredir, core, ask=TRUE) {
                     name[5] %in% dR.names && name[6] %in% dSTD.names && # column names as expected?
                       name[7] %in% ta.names && name[8] %in% tb.names) { # column names as expected?
                         dets <- dets[,c(1:4,9,5:8)] # shuffle colums around
-                        cat(" Assumed order of columns in dets file: lab ID, Age, error, depth, dR, dSTD, t.a, t.b, cc. \nAdapting column order and saving as", csv.file, "\n")
+                        message(" Assumed order of columns in dets file: lab ID, Age, error, depth, dR, dSTD, t.a, t.b, cc. \nAdapting column order and saving as", csv.file)
                         changed <- 1
                       } else
                         if(name[5] %in% cc.names && # oh, probably a 'new' file from more recent Bacon
@@ -265,13 +248,13 @@ assign_coredir <- function(coredir, core, ask=TRUE) {
   if(!is.numeric(dets[,2]) || !is.numeric(dets[,3]) || !is.numeric(dets[,4]))
     stop("unexpected values in dets file, I expected numbers. Check the manual.\n", call.=FALSE)
   if(min(dets[,3]) <= 0) {
-    cat("Warning, zero year errors don't exist in Bacon's world. I will increase them to 1 ", set$age.unit, " yr.\n")
+    message("Warning, zero year errors don't exist in Bacon's world. I will increase them to 1 ", set$age.unit, " yr")
     dets[dets[,3] <= 0,3] <- 1
     changed <- 1
   }
-  if(min(diff(dets[,4]) < 0)) {
-    cat("\nWarning, the depths are not in ascending order, I will correct this")
-    dets <- dets[order(set$dets[,4]),]
+  if(min(diff(dets[,4])) < 0) { #CHANGED: posible bug, error en los parentesis
+    message("Warning, the depths are not in ascending order, I will correct this")
+    dets <- dets[ order(dets[,4]), ] #CHANGED: se elimina "set" antes de dets, por un error en uso del objeto
     changed <- 1
   }
 
@@ -283,9 +266,9 @@ assign_coredir <- function(coredir, core, ask=TRUE) {
 
 
 
-# read in default values, values from previous run, any specified values, and report the desired one. Internal function. 
+# read in default values, values from previous run, any specified values, and report the desired one. Internal function.
 .Bacon.settings <- function(core, coredir, dets, thick, remember=TRUE, d.min, d.max, d.by, depths.file, slump, acc.mean, acc.shape, mem.mean, mem.strength, boundary, hiatus.depths, hiatus.max, hiatus.shape, BCAD, cc, postbomb, cc1, cc2, cc3, cc4, depth.unit, normal, t.a, t.b, delta.R, delta.STD, prob, defaults, runname, ssize, dark, MinAge, MaxAge, cutoff, age.res, after, age.unit) {
-  
+
   vals <- list(d.min, d.max, d.by, depths.file, slump, acc.mean, acc.shape, mem.mean, mem.strength, boundary, hiatus.depths, hiatus.max, BCAD, cc, postbomb, cc1, cc2, cc3, cc4, depth.unit, normal, t.a, t.b, delta.R, delta.STD, prob, age.unit)
   valnames <- c("d.min", "d.max", "d.by", "depths.file", "slump", "acc.mean", "acc.shape", "mem.mean", "mem.strength", "boundary", "hiatus.depths", "hiatus.max", "BCAD", "cc", "postbomb", "cc1", "cc2", "cc3", "cc4", "depth.unit", "normal", "t.a", "t.b", "delta.R", "delta.STD", "prob", "age.unit")
 
@@ -327,7 +310,7 @@ assign_coredir <- function(coredir, core, ask=TRUE) {
 
   d.min <- extr(1); d.max <- extr(2); d.by <- extr(3); depths.file <- extr(4)
   slump <- extr(5); acc.mean <- extr(6);
-  if(length(acc.shape) == 1) 
+  if(length(acc.shape) == 1)
     acc.shape <- extr(7)
   mem.mean <- extr(8)
   mem.strength <- extr(9)
@@ -361,7 +344,7 @@ assign_coredir <- function(coredir, core, ask=TRUE) {
   for(i in acc.shape) scat(i, " "); scat("#acc.shape\n", "")
   for(i in mem.mean) scat(i, " "); scat("#mem.mean\n", "")
   for(i in mem.strength) scat(i, " "); scat("#mem.strength\n", "")
-  for(i in boundary) scat(i, " "); scat("#boundary\n", "")	  
+  for(i in boundary) scat(i, " "); scat("#boundary\n", "")
   for(i in hiatus.depths) scat(i, " "); scat("#hiatus.depths\n", "")
   for(i in hiatus.max) scat(i, " "); scat("#hiatus.max\n", "")
   for(i in hiatus.max) scat(i, " "); scat("#hiatus.max\n", "") # redundant
@@ -384,7 +367,7 @@ assign_coredir <- function(coredir, core, ask=TRUE) {
     BCAD=BCAD, cc=cc, postbomb=postbomb,
     cc1=cc1, cc2=cc2, cc3=cc3, cc4=cc4, depth.unit=noquote(depth.unit), unit=depth.unit, age.unit=noquote(age.unit), normal=normal,
     t.a=t.a, t.b=t.b, delta.R=delta.R, delta.STD=delta.STD, prob=prob, date=date(),
-    runname=runname, ssize=ssize, dark=dark, MinAge=MinAge, MaxAge=MaxAge, 
+    runname=runname, ssize=ssize, dark=dark, MinAge=MinAge, MaxAge=MaxAge,
     cutoff=cutoff, age.res=age.res, after=after)
 }
 
@@ -421,11 +404,11 @@ assign_coredir <- function(coredir, core, ask=TRUE) {
   cat("Cal 0 : ConstCal;\nCal 1 : ",
   if(set$cc1=="IntCal13" || set$cc1=="\"IntCal13\"") "IntCal13"
     else noquote(set$cc1), ", ", set$postbomb, ";\nCal 2 : ",
-  if(set$cc2=="Marine13" || set$cc2=="\"Marine13\"") "Marine13" 
+  if(set$cc2=="Marine13" || set$cc2=="\"Marine13\"") "Marine13"
     else noquote(set$cc2), ";\nCal 3 : ",
-  if(set$cc3=="SHCal13" || set$cc3=="\"SHCal13\"") "SHCal13" 
+  if(set$cc3=="SHCal13" || set$cc3=="\"SHCal13\"") "SHCal13"
     else noquote(set$cc3), ", ", set$postbomb, ";",
-  if(set$cc4=="ConstCal" || set$cc4=="\"ConstCal\"") set$cc4 <- c() 
+  if(set$cc4=="ConstCal" || set$cc4=="\"ConstCal\"") set$cc4 <- c()
     else
       paste("\nCal 4 : GenericCal, ", set$cc4, ";", sep=""), sep="", file=fl)
   cat("\n\n##   id.   age    std   depth  delta.R  delta.STD     t.a   t.b   cc", file=fl)
@@ -464,10 +447,10 @@ assign_coredir <- function(coredir, core, ask=TRUE) {
           cc[i], ";", sep="", file=fl)
     }
 
-  if(!is.na(hiatus.depths[1])) { 
+  if(!is.na(hiatus.depths[1])) {
     if(is.null(boundary[1]))
-      cat("\n  Hiatus set at depth(s)", hiatus.depths, "\n") else
-        cat("\n  Boundary set at depth(s)", boundary, "\n")
+      message("  Hiatus set at depth(s)", hiatus.depths) else
+        message("  Boundary set at depth(s)", boundary)
     if(length(set$acc.shape)==1)
       set$acc.shape <- rep(set$acc.shape, length(hiatus.depths)+1)
     if(length(set$acc.mean)==1)
@@ -477,6 +460,7 @@ assign_coredir <- function(coredir, core, ask=TRUE) {
 #      if(length(set$hiatus.shape)==1)
 #        set$hiatus.shape <- rep(set$hiatus.shape, length(set$hiatus.depths))
     .assign_to_global ("info", set)
+
     cat("\n\n### Depths and priors for fixed hiatuses, in descending order",
       "\n##### cm  alpha beta      ha     hb", file=fl)
     for(i in length(hiatus.depths):1)
@@ -487,13 +471,23 @@ assign_coredir <- function(coredir, core, ask=TRUE) {
 
   cK <- set$d.min+(set$thick*set$K)
   ### final parameters - dmax now calculated as dmin+(dC*K)
-  wrapup <- paste("\n\n##\t\t K   MinAge   MaxAge   th0   th0p   w.a   w.b   alpha  beta  dmin  dmax",
-    "\nBacon 0: ", ifelse(set$normal, "FixNor", "FixT"), ", ", set$K,
-    ",  ", set$MinAge, ",  ", set$MaxAge, ",  ", set$th0[1], ",  ", set$th0[2],
-    ",  ", set$mem.strength*set$mem.mean, ",  ", set$mem.strength*(1-set$mem.mean),
-    ",  ", set$acc.shape[1], ",  ", set$acc.shape[1]/set$acc.mean[1], ", ", set$d.min,
-    ", ", cK, ";\n", sep="")
-  cat(wrapup, file=fl)
+  if(is.na(set$seed)){
+    wrapup <- paste("\n\n##\t\t K   MinAge   MaxAge   th0   th0p   w.a   w.b   alpha  beta  dmin  dmax",
+      "\nBacon 0: ", ifelse(set$normal, "FixNor", "FixT"), ", ", set$K,
+      ",  ", set$MinAge, ",  ", set$MaxAge, ",  ", set$th0[1], ",  ", set$th0[2],
+      ",  ", set$mem.strength*set$mem.mean, ",  ", set$mem.strength*(1-set$mem.mean),
+      ",  ", set$acc.shape[1], ",  ", set$acc.shape[1]/set$acc.mean[1], ", ", set$d.min,
+      ", ", cK, ";\n", sep="")
+    cat(wrapup, file=fl)
+  }else{
+    wrapup <- paste("\n\n##\t\t K   MinAge   MaxAge   th0   th0p   w.a   w.b   alpha  beta  dmin  dmax seed",
+      "\nBacon 0: ", ifelse(set$normal, "FixNor", "FixT"), ", ", set$K,
+      ",  ", set$MinAge, ",  ", set$MaxAge, ",  ", set$th0[1], ",  ", set$th0[2],
+      ",  ", set$mem.strength*set$mem.mean, ",  ", set$mem.strength*(1-set$mem.mean),
+      ",  ", set$acc.shape[1], ",  ", set$acc.shape[1]/set$acc.mean[1], ", ", set$d.min,
+      ", ", cK, ", ", set$seed, ";\n", sep="")
+    cat(wrapup, file=fl)
+  }
   close(fl)
 }
 

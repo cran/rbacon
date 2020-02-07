@@ -47,12 +47,12 @@ This is normally done at compile time and not here, see the makefile
 
 
 //---------------------------------------------------------------------------
-// Creates a vector  
+// Creates a vector
 double *vector(int ncols);
 
 
 //---------------------------------------------------------------------------
-// Destroys a vector  
+// Destroys a vector
 void free_vector(double *cabeza);
 
 //---------------------------------------------------------------------------
@@ -70,7 +70,7 @@ void resta_vector(double *v1, double *v2, int n, double *res);
 
 /*encuentra el  maximo  ai en valor abs de una vector y devuelve su indice*/
 void indice_max_vector(double *v, int n, int &indice, int *phi);
-	
+
 int sum(int *v, int n);
 
 
@@ -105,7 +105,7 @@ class kernel {
         public:
 			double *h; //auxiliar vector
 			void seth(double *hh) {  h = hh; }
-			
+
 			virtual ~kernel() {};
 
                 virtual double *Simh(double *x, double *xp, int n, double  beta, int *phi) = 0;
@@ -197,20 +197,20 @@ class twalk {
 
                 obj_fcn *Obj;
 
-		
+
 		/*Initial values and the poll of points updated in each iteration*/
 
                 double *x;
                 double *xp;
 				double U, Up;
-				
+
 				double *h;
 				double *rest;
 
 
 		/*Dimension of the objective function domain*/
                 int n;                  //x, xp dimension
-				
+
 				//parameters needed by methos simulations and one_move
 				double acc;            //acceptance counter
 				int val;
@@ -218,14 +218,14 @@ class twalk {
 				double propU, propUp, *y, *yp, dir,  W1, W2, A, aux, beta;
 				int *phi;
 				double mapU, *mapx;
-				
+
 
 		/*Kernel probabilities, no longer used*/
-                //double *krl_probs;     
-				
+                //double *krl_probs;
+
 		/* Saving scheme, < 0 only accepted it., otherwise only it %% abs(save_every) == 0 (1 = all iterations) */
 		/* if 0, save all iterations and save the file recacc with kernel acceptance rates etc.  For debugging info*/
-		
+
 				 int save_every;
 				 int debugg;
 
@@ -234,9 +234,9 @@ class twalk {
 
 				int nphi;
 				double pphi;
-				
 
-		
+
+
 
 		/*Selection between (y,h(x,xp)) and (h(xp,x),yp)*/
 	double select_pivot()  {
@@ -252,7 +252,7 @@ class twalk {
 
 		nphi=0;
 
-		for (int i=0; i<n; i++) 
+		for (int i=0; i<n; i++)
 			if (Un01() < pphi) {
 				phi[i] = 1;
 				nphi++;
@@ -273,20 +273,20 @@ class twalk {
         x = x1;
         xp = xp1;
         n = n1;
-		
+
 		//all this is not done correctly but it fixes for the moment the memory
 		//loss,  I'd like to change it to using Matrix.h
 		h = vector(n);
 		rest = vector(n);
-		 
+
 		k1.seth(h);
 		k2.seth(h);
 		k3.seth(h);k3.setrest(rest);
 		k4.seth(h);k4.setrest(rest);
-		
-		
+
+
 		pphi = twalk_min( n, EXP_MOV_COOR)/(double) n;
-		
+
 		mapx = vector(n);
 		y = vector(n);
 		yp =vector(n);
@@ -341,7 +341,7 @@ int init(double *xx, double *xxp) {
 	if (xx != NULL) {
 		cp_vector( xx, x, n);
 	}
-	
+
 	if (xxp != NULL) {
 		cp_vector( xxp, xp, n);
     }
@@ -373,7 +373,7 @@ int init(double *xx, double *xxp) {
             Rprintf("\n");
 			return 0;
 		}
-	
+
 		mapU = U;
 		cp_vector(x, mapx, n);
 
@@ -388,14 +388,14 @@ int init(double *xx, double *xxp) {
 #ifdef SAVEACCONLY
 		save_every = (int) -1;
 #endif
-	
+
 		return 1;
 }
 
 int one_move() {
 
 
-		/* Selection of the pivot and transition kernel*/	
+		/* Selection of the pivot and transition kernel*/
 
 
                 ker = select_kernel(val);
@@ -405,9 +405,9 @@ int one_move() {
 
 				if(dir<0.5) {                   // x is the pivot
 
-		
 
-			/* Beta is a dummy parameter in the kernel 0, 1, 3, 4 and 5 cases*/	
+
+			/* Beta is a dummy parameter in the kernel 0, 1, 3, 4 and 5 cases*/
 					beta = Simfbeta(PARAMETER_at);
 
 			/* yp is the proposal*/
@@ -415,17 +415,17 @@ int one_move() {
 					cp_vector( ker->Simh( xp, x, n, beta, phi), yp, n);
 					cp_vector( x, y, n);
 					propU = U;
-					
+
 
 			/* Verifying that the proposal is in the obj function domain */
 
 					if(Obj->insupport(yp)) {
 
-			
-				/*Evaluating the obj function in the proposal */	
+
+				/*Evaluating the obj function in the proposal */
 
 						propUp = Obj->eval( yp, 1);
-						
+
 
 				/*Computing the acceptance probability */
 
@@ -448,7 +448,7 @@ int one_move() {
 
 		/* Repeating the procedure above  but using xp as pivot*/
 
-			
+
 					beta = Simfbeta(PARAMETER_at);
 					cp_vector( ker->Simh( x, xp, n, beta, phi), y, n);
 					cp_vector( xp, yp, n);
@@ -474,20 +474,20 @@ int one_move() {
 
                 }
 
- 
+
 
 				aux = Un01();
                 if( aux < A ) {            //Accepted
 
 						acc += nphi/(double) n; //proportion of moved parameters
-						
+
 						cp_vector(y,x,n);
                         U = propU;
 
 						cp_vector(yp,xp,n);
                         Up = propUp;
 
-						
+
 
 						if (dir >= 0.5) {
 						 //y is accepted
@@ -497,17 +497,17 @@ int one_move() {
 								mapU = U;
 								cp_vector( x, mapx, n);
 							}
-							
+
 							return 1; //y accepted
 						}
 						else {//yp is accepted
 
 							Obj->AccPars(1);
-							
+
 							return -1; //yp accepted
 						}
-						
-						
+
+
 
                 }
 				else {
@@ -516,7 +516,7 @@ int one_move() {
 						Obj->NotAcc(0);
 					else //yp is not accepted
 						Obj->NotAcc(1);
-					
+
 					return 0;
 				}
 
@@ -533,17 +533,17 @@ int simulation(int Tr1, char *filename, const char* op="wt") {
 }
 
 /* Here is the implementation of the central part of the algorithm */
-int simulation(int Tr1, char *filename, const char *op="wt", int save_every1=1, double *xx=NULL, double *xxp=NULL, int silent=0) {
+int simulation(unsigned long long Tr1, char *filename, const char *op="wt", int save_every1=1, double *xx=NULL, double *xxp=NULL, int silent=0) {
 
-	
+
 	FILE *fptr;
     FILE *recacc = NULL; // JEV warning
 
-		
-    long sec=time(NULL); //beging of the twalk
+
+    long sec=time(NULL); //beginning of the twalk
     time_t temp = sec;
     if (silent == 0)
-        Rprintf("twalk: %10d iterations to run, %s", Tr1, ctime(&temp));
+        Rprintf("twalk: %12lu iterations to run, %s", Tr1, ctime(&temp));
 
 
     // ----- --- Initialization --- -----
@@ -554,7 +554,7 @@ int simulation(int Tr1, char *filename, const char *op="wt", int save_every1=1, 
     }
 
 
-	//send an estimation for the duration of the sampling if 
+	//send an estimation for the duration of the sampling if
 	//evaluating the ob. func. twice takes more than one second
 
 	long sec2=time(NULL); //last time we sent a message
@@ -566,7 +566,7 @@ int simulation(int Tr1, char *filename, const char *op="wt", int save_every1=1, 
 
 
 	save_every = save_every1;
-		
+
 	if (save_every == 0) {
 		save_every = 1;
 		debugg = 1;
@@ -574,29 +574,29 @@ int simulation(int Tr1, char *filename, const char *op="wt", int save_every1=1, 
 	else
 		debugg = 0;
 
-	
+
 	if (debugg) {
 		if ((recacc = fopen("recacc.dat", "w")) == NULL) {
-	
+
         //	fprintf( stderr, "Could not open file %s for writing\n", "recacc.dat"); JEV WARNING CHECK
             Rcpp::stop("Could not open file %s for writing\n recacc.dat");
 
         //	exit(0);
 		}
-		
+
         Rprintf("twalk: Kernel acceptance rates information to be saved in file  recacc.dat\n");
 	}
 
 
 
     // ----- --- -------------- --- -----
-    if ((fptr = (fopen(filename, op)))) { 
-		
-#ifndef _WIN32 
+    if ((fptr = (fopen(filename, op)))) {
+
+#ifndef _WIN32
 		// tmp removal lines 596-618 by Maarten and jac on 10 Jan 2019, to enable compilation on Win systems
 		//Simple function to calculate and set optimal buffer size for files ***
 		// *** see https://en.cppreference.com/w/c/io/setvbuf **
-		//jac, maarten: Changed 22OCT2018 
+		//jac, maarten: Changed 22OCT2018
 		size_t st_blksize;
 	    struct stat stats;
 
@@ -614,14 +614,14 @@ int simulation(int Tr1, char *filename, const char *op="wt", int save_every1=1, 
 			else {
 				st_blksize=stats.st_blksize;
 			}
-		
+
 		Rprintf("BUFSIZ is %d, optimal block size changed to %ld\n", BUFSIZ, st_blksize);
 #endif
-		
+
 
 		fver_vector(fptr, x, n);
         fprintf(fptr, "\t %f", U); // was %lf MB
-		
+
         if (silent == 0){
             if (save_every < 0){
                 Rprintf("twalk thinning: 1 out of every %d accepted iterations will be saved in file %s\n", abs(save_every), filename);
@@ -630,33 +630,34 @@ int simulation(int Tr1, char *filename, const char *op="wt", int save_every1=1, 
                 Rprintf("twalk: All %d iterations to be saved in file %s\n", save_every, filename);
             }
         }
-		
 
-    
+
+
 
 		int j1=1, j=0, rt;
 		long ax;
 		int acc_it=0;
-		
 
-        for(int it=1; it<=Tr1; it++) {  
-				
+
+        for(unsigned long long it=1; it<=Tr1; it++) {
+
 				rt = one_move();
-				
+
 				if ((rt == 1) || (rt == -1)) {
 						acc_it++;
+						//Rprintf("acc_it %d\n", acc_it);
 						if (save_every < 0) //Only accepted iterations are saved
 							if ((acc_it % abs(save_every)) == 0) {
 								fver_vector(fptr, x, n);
 								fprintf(fptr, "\t %13.6g", U);
 							}
-						if (debugg)			
+						if (debugg)
 							fprintf( recacc, "%d %f\n", val, nphi/(double) n);
 				}
 				else //Proposal not accepted
 					if (debugg)
 						fprintf( recacc, "%d %f\n", val, 0.0);
-					
+
 
 #ifdef FLUSHEVERYIT
 				fflush(fptr);
@@ -676,12 +677,12 @@ int simulation(int Tr1, char *filename, const char *op="wt", int save_every1=1, 
 					if (((ax=time(NULL)) - sec2) > (1 << j)*WAIT)
 					{
 						if (silent == 0) {
-                            Rprintf("twalk: %10d iterations so far. ", it);
+                            Rprintf("twalk: %lu iterations so far. ", it);
 							Remain( Tr1, it, sec, ax);
 						}
 						sec2 = ax;
 						j++;
-						j1--; //check the time as often 
+						j1--; //check the time as often
 					}
 				}
 
@@ -697,7 +698,7 @@ int simulation(int Tr1, char *filename, const char *op="wt", int save_every1=1, 
 
 	/*cp_vector( mapx, xp, n);
 	Obj->insupport(xp);
-	Up = Obj->eval( xp, 1);	
+	Up = Obj->eval( xp, 1);
 
     //printf("maxU= %f, Up= %f, MAP:", mapU, Up);
     //fver_vector( stdout, mapx, n);
@@ -712,7 +713,7 @@ int simulation(int Tr1, char *filename, const char *op="wt", int save_every1=1, 
 
         fclose(fptr);*/
 
-		
+
 
 		//return current points
 
@@ -726,9 +727,9 @@ int simulation(int Tr1, char *filename, const char *op="wt", int save_every1=1, 
 		sec = time(NULL);
         temp = sec;
 		if (silent == 0)
-            Rprintf("twalk: Finished, %4.1f%% of moved pars per iteration (ratio %f/%d). Output in file %s,\n      %s\n",
+            Rprintf("twalk: Finished, %4.1f%% of moved pars per iteration (ratio %f/%lu). Output in file %s,\n      %s\n",
                  100.0*(acc/(double) Tr1), acc, Tr1, filename, ctime(&temp));
-			
+
         return (int) rint(acc);
 
     }
@@ -740,11 +741,11 @@ int simulation(int Tr1, char *filename, const char *op="wt", int save_every1=1, 
 
 //Information messages
 //total it, current it, start time, current time
-void Remain(int Tr, int it, long sec1, long sec2) {
+void Remain(unsigned long long Tr, unsigned long long it, long sec1, long sec2) {
 
-	long ax =  //how many seconds remaining
+	unsigned long ax =  //how many seconds remaining
 
-	(long) ( (Tr - it) *  ((sec2 - sec1)/(double) it) );
+	(unsigned long) ( (Tr - it) *  ((sec2 - sec1)/(double) it) );
 
 
 	if (ax == 0) {
@@ -773,14 +774,14 @@ void Remain(int Tr, int it, long sec1, long sec2) {
 
 		ax += sec2;  //current time plus seconds remaining=end time
         time_t temp= ax;
-        Rprintf("Will finish in %s", ctime(&temp));
+        Rprintf("Will finish by %s", ctime(&temp));
     //	fflush(stdout);//JEV warning
 		return;
 	}
 }
 
 
-		
+
 
 };
 

@@ -4,9 +4,15 @@
 \alias{mix.curves}
 \title{Build a custom-made, mixed calibration curve.}
 \usage{
-mix.curves(proportion = 0.5, cc1 = "3Col_intcal13.14C",
-  cc2 = "3Col_marine13.14C", name = "mixed.14C", dirname = ".",
-  offset = c(0, 0), sep = "\\t")
+mix.curves(
+  proportion = 0.5,
+  cc1 = "3Col_intcal13.14C",
+  cc2 = "3Col_marine13.14C",
+  name = "mixed.14C",
+  dirname = ".",
+  offset = c(0, 0),
+  sep = "\\t"
+)
 }
 \arguments{
 \item{proportion}{Proportion of the first calibration curve required. e.g., change to \code{proportion=0.7} if \code{cc1} should contribute 70\% (and \code{cc2} 30\%) to the mixed curve.}
@@ -17,7 +23,7 @@ mix.curves(proportion = 0.5, cc1 = "3Col_intcal13.14C",
 
 \item{name}{Name of the new calibration curve.}
 
-\item{dirname}{Directory where the file will be written. If using the default \code{dirname="."}, 
+\item{dirname}{Directory where the file will be written. If using the default \code{dirname="."},
 the new curve will be saved in current working directory.}
 
 \item{offset}{Any offset and error to be applied to \code{cc2} (default 0 +- 0).}
@@ -37,8 +43,8 @@ The proportional contribution of each of both calibration curves has to be set.
 mix.curves(, dirname=tempdir())
 }
 \references{
-Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive 
-gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474. 
+Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive
+gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
 \url{https://projecteuclid.org/euclid.ba/1339616472}
 }
 \seealso{

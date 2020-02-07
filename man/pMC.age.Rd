@@ -28,11 +28,11 @@ Post-bomb dates are often reported as pMC or percent modern carbon. Since Bacon 
 \examples{
   pMC.age(110, 0.5) # a postbomb date, so with a negative 14C age
   pMC.age(80, 0.5) # prebomb dates can also be calculated
-  pMC.age(.8, 0.005, 1) # pMC expressed against 1 (not against 100\\\%)
+  pMC.age(.8, 0.005, 1) # pMC expressed against 1 (not against 100\\%)
 }
 \references{
-Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive 
-gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474. 
+Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive
+gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
  \url{https://projecteuclid.org/euclid.ba/1339616472}
 }
 \seealso{

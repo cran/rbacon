@@ -4,14 +4,36 @@
 \alias{proxy.ghost}
 \title{Proxies analysed along the depths of a core can be plotted as 'proxy-ghost' graphs against calendar time while taking into account chronological uncertainties. Here darker grey indicates more likely calendar ages for specific proxy values.}
 \usage{
-proxy.ghost(proxy = 1, proxy.lab = c(), proxy.res = 250,
-  age.res = 200, yr.res = age.res, grey.res = 100,
-  set = get("info"), dark = 1, darkest = 1, rotate.axes = FALSE,
-  proxy.rev = FALSE, age.rev = FALSE, yr.rev = age.rev,
-  plot.mean = FALSE, mean.col = "red", age.lim = c(),
-  yr.lim = age.lim, proxy.lim = c(), sep = ",", xaxs = "i",
-  yaxs = "i", xaxt = "s", yaxt = "s", bty = "l", BCAD = set$BCAD,
-  age.lab = ifelse(BCAD, "BC/AD", "cal yr BP"), yr.lab = age.lab)
+proxy.ghost(
+  proxy = 1,
+  proxy.lab = c(),
+  proxy.res = 250,
+  age.res = 200,
+  yr.res = age.res,
+  grey.res = 100,
+  set = get("info"),
+  dark = 1,
+  darkest = 1,
+  rotate.axes = FALSE,
+  proxy.rev = FALSE,
+  age.rev = FALSE,
+  yr.rev = age.rev,
+  plot.mean = FALSE,
+  mean.col = "red",
+  age.lim = c(),
+  yr.lim = age.lim,
+  proxy.lim = c(),
+  sep = ",",
+  xaxs = "i",
+  yaxs = "i",
+  xaxt = "s",
+  yaxt = "s",
+  bty = "l",
+  BCAD = set$BCAD,
+  age.lab = ifelse(BCAD, "BC/AD", "cal yr BP"),
+  yr.lab = age.lab,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{proxy}{Which proxy to use (counting from the column number in the .csv file after the depths column).}
@@ -67,6 +89,8 @@ proxy.ghost(proxy = 1, proxy.lab = c(), proxy.res = 250,
 \item{age.lab}{The labels for the calendar axis (default \code{age.lab="cal BP"} or \code{"BC/AD"} if \code{BCAD=TRUE}).}
 
 \item{yr.lab}{Deprecated - use age.lab instead}
+
+\item{verbose}{Provide feedback on what is happening (default \code{verbose=TRUE}).}
 }
 \value{
 A grey-scale graph of the proxy against calendar age.
@@ -75,7 +99,7 @@ A grey-scale graph of the proxy against calendar age.
 Proxies analysed along the depths of a core can be plotted as 'proxy-ghost' graphs against calendar time while taking into account chronological uncertainties. Here darker grey indicates more likely calendar ages for specific proxy value.
 }
 \details{
-Place a csv file with the values of proxies against depth within your core's folder. The values should be in columns separated by commas (default \code{sep=","}), the first column containing the depths and the first line (header) containing the proxy names. 
+Place a csv file with the values of proxies against depth within your core's folder. The values should be in columns separated by commas (default \code{sep=","}), the first column containing the depths and the first line (header) containing the proxy names.
 The file name should start with the core's name and end with "_proxies.csv". For an example see \code{"Bacon_coredir/MSB2K/MSB2K_proxies.csv"} or \code{"Cores/MSB2K/MSB2K_proxies.csv"}.
 }
 \examples{
@@ -86,8 +110,8 @@ The file name should start with the core's name and end with "_proxies.csv". For
 }
 }
 \references{
-Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive 
-gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474. 
+Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive
+gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
 \url{https://projecteuclid.org/euclid.ba/1339616472}
 }
 \seealso{

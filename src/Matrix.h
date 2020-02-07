@@ -39,11 +39,11 @@ protected:
 
 public:
 
-// Default Constructor. Creates a 1 by 1 matrix; sets value to zero. 
+// Default Constructor. Creates a 1 by 1 matrix; sets value to zero.
 Matrix () {
   ma = gsl_matrix_alloc( 1, 1);// Allocate memory
   set(0.0);                // Set value of data_[0] to 0.0
-  
+
   header = NULL;
 }
 
@@ -66,12 +66,12 @@ Matrix(Matrix &mat)  {
 Rprintf("Matrix::Matrix 2 ...\n");
   ma = gsl_matrix_alloc( mat.nRow(), mat.nCol());// Allocate memory
   copy(mat);
-  
+
   if (mat.Header() != NULL)
 	header = strdup(mat.Header());
   else
 	header = NULL;
-  
+
 }
 
 
@@ -112,7 +112,7 @@ int nCol() const { return ma->size2; }
 
 // Parenthesis operator function.
 // Allows access to values of Matrix via (i,j) pair.
-// Example: a(1,1) = 2*b(2,3); 
+// Example: a(1,1) = 2*b(2,3);
 // If column is unspecified, take as 1.
 double& operator() (int i, int j = 0) {
   assert(i >= 0 && (size_t)i < ma->size1);          // Bounds checking for rows
@@ -139,7 +139,7 @@ double ele(int i, int j = 0) {
 
 int filescan(char *fnam, int file_header=0) {
 	FILE *F;
-	
+
 	if ((F = fopen( fnam, "r")) == NULL)
 	{
         Rprintf( "File %s not found\n", fnam);
@@ -154,7 +154,7 @@ int filescan(char *fnam, int file_header=0) {
 			header = fgets( header, (size_t) BUFF_SIZE, F);
 			header[strlen(header)-1] = '\0'; //remove the \n
 		}
-		
+
 		//gsl_matrix_fscanf( F, ma);
 		int k=0;
 		double tmp;
@@ -174,7 +174,7 @@ int filescan(char *fnam, int file_header=0) {
         if ((size_t) k < ma->size1*ma->size2) {
                 Rprintf("WARNING: Read matrix/table from file smaller than previously opened.\n");
 		}
-	
+
 		fclose(F);
 		return 1;
 	}
@@ -188,7 +188,7 @@ gsl_matrix *Ma() { return ma; }
 // Copy function.
 // Copies values from one Matrix object to another.
 void copy(const Matrix& mat) {
-    gsl_matrix_memcpy( ma, mat.ma);	
+    gsl_matrix_memcpy( ma, mat.ma);
 }
 
 
@@ -208,7 +208,7 @@ class SubMatrix : public Matrix {
 
 private:
 	Matrix *Parent;
-	
+
 public:
 
 	SubMatrix() {
@@ -217,8 +217,8 @@ public:
 		Parent = NULL;
 		header = NULL;
 	}
-	
-	~SubMatrix() { 
+
+	~SubMatrix() {
 		ma = NULL; //we avoid the base class call to free with this
 		if (header != NULL) {
 			free(header);
@@ -227,7 +227,7 @@ public:
 
 	}
 
-	
+
 	const char *SetHeader(char *head) {
 		if (header != NULL)
 			free(header);
@@ -236,10 +236,10 @@ public:
 			header = strdup(head);
 		return header;
 	}
-	
+
 /***************** WARNING **************************/
 /** ONLY 'SUBMATRICES' USED ARE EQUAL TO THE PARENT MATRIX **/
-/** ONLY THOSE ARE USED HERE, JUST TO DELAY THE DEFINITION OF THE MATRIX **/ 
+/** ONLY THOSE ARE USED HERE, JUST TO DELAY THE DEFINITION OF THE MATRIX **/
 	void Set( Matrix *mat, size_t n1, size_t n2) {
 		//view = gsl_matrix_submatrix ( mat->Ma(), (size_t) 0, (size_t) 0, n1, n2);
         if ((n1 != (size_t)mat->nRow()) || (n2 != (size_t)mat->nCol())) {
@@ -252,11 +252,10 @@ public:
 	}
 
 
-	
+
 }; // class SubMatrix
 
 
 
 
 #endif
-

@@ -5,7 +5,7 @@
 
 #include "input.h"
 
-#define BUFFSZ 1024
+#define BUFFSZ 50000
 
 //Set to point at the beginning of each parameter in buff
 //Substitute commas or semicolon with \0
@@ -58,6 +58,9 @@ Input::Input(char *datafile, int emaxnumofcurves, int maxm, std::string ccdir) {
 	numofpars = 0;
 	rpars = new double[maxnumofpars];
 
+	plum = 0; //Flag to see if plum is being used
+	int more_pars = 0; //additional parameters
+
 
 	//Open a double array of doubles to hold the hiatuses locations, if any,
 	//0=h's 1=alpha's 2=betas's 3=ha's and 4=hb's for each hiatus section
@@ -69,14 +72,13 @@ Input::Input(char *datafile, int emaxnumofcurves, int maxm, std::string ccdir) {
 
 	FILE *F;
 
-    if ((F = fopen( datafile, "r")) == NULL)
-	{
+  if ((F = fopen( datafile, "r")) == NULL){
         Rprintf("Could not open %s for reading\n", datafile);
         Rcpp::stop("Could not open %s for reading\n", datafile);
 //		exit(-1);
 	}
 
-    Rprintf("Reading %s\n", datafile);
+  Rprintf("Reading %s\n", datafile);
 	char line[BUFFSZ];
 	char key[10];
 	int i=0, nm, j;
@@ -148,6 +150,18 @@ Input::Input(char *datafile, int emaxnumofcurves, int maxm, std::string ccdir) {
 				continue;
 			}
 
+			if (strcmp( "Plum", line) == 0) {
+
+				//                                alPhi     mPhi      alS       mS         Al
+        curves[numofcurves++] = new Plum( rpars[1], rpars[2], rpars[3], rpars[4], rpars[5],
+				                                  rpars[6], (int) rpars[7], pars[8]+1, ccdir); //a space after the comma
+				//                                theta0,   Radon case,     supported data file,
+				plum = 1; //There are 201Pb data and Plum needs to be used, flag activated.
+				more_pars = ((Plum*) curves[numofcurves-1])->MorePars();
+
+				continue;
+			}
+
 			if (strcmp( "ConstCal", line) == 0) {
 				curves[numofcurves++] = new ConstCal();
 				continue;
@@ -160,11 +174,12 @@ Input::Input(char *datafile, int emaxnumofcurves, int maxm, std::string ccdir) {
     //		exit(0);
 		}
 
+		//Rprintf("Leyendo Dets....\n");
 
-		if (strcmp( key, "Det") == 0)
-		{
+		if (strcmp( key, "Det") == 0){
 			sscanf( pars[0], " %s", line);
 					   //Det(char *enm, double ey, double estd, double x, double edeltaR, double edeltaSTD, double ea, double eb, Cal *ecc)
+
 			tmpdet = new Det(  line   ,  rpars[1],    rpars[2], rpars[3],       rpars[4],         rpars[5],  rpars[6],  rpars[7], curves[(int) rpars[8]]);
 
 			dets->AddDet(tmpdet);
@@ -183,7 +198,7 @@ Input::Input(char *datafile, int emaxnumofcurves, int maxm, std::string ccdir) {
 			hiatus_pars[3][H] = rpars[3]; //ha
 			hiatus_pars[4][H] = rpars[4]; //hb
 
-            REprintf("Hiatus at: %f\n", hiatus_pars[0][H]);
+      Rprintf("Hiatus at: %f\n", hiatus_pars[0][H]);
 
 			H++;
 
@@ -203,27 +218,28 @@ Input::Input(char *datafile, int emaxnumofcurves, int maxm, std::string ccdir) {
 			hiatus_pars[4][H] = 0.0; //hb, in this case, this one will be ignored
 
 			unsigned long int seed;
-			if (numofpars == 11)
+			if (numofpars == 12)
 				seed = 0; //automatic seed set with time()
 			else
-				seed = (unsigned long int) rpars[11];
+				seed = (unsigned long int) rpars[12];
 
 
 			//Open the Bacon object
 			sscanf( pars[0], " %s", line); //type of object
 
-			if (strcmp( line, "FixNor") == 0)
+			if (strcmp( line, "FixNor") == 0){
 					                //dets                K   H  hiatus_pars         a         b
 				bacon = new BaconFix( dets,  (int) rpars[1],  H, hiatus_pars, rpars[6], rpars[7],
-					rpars[2], rpars[3], rpars[4], rpars[5], rpars[10], rpars[11], 0,      seed);
+					rpars[2], rpars[3], rpars[4], rpars[5], rpars[10], rpars[11], 0,      seed, more_pars);
 					//MinYr     MaxYr       th0      thp0         c0       cm   useNor
+			}
 
-			if (strcmp( line, "FixT") == 0)
+			if (strcmp( line, "FixT") == 0){
 					                //dets                K   H  hiatus_pars         a         b
 				bacon = new BaconFix( dets,  (int) rpars[1],  H, hiatus_pars, rpars[6], rpars[7],
-					rpars[2], rpars[3], rpars[4], rpars[5], rpars[10], rpars[11], 1,      seed);
+					rpars[2], rpars[3], rpars[4], rpars[5], rpars[10], rpars[11], 1,      seed, more_pars);
 					//MinYr     MaxYr       th0      thp0         c0       cm  useT
-
+			}
 
 
 			//Then open the twalk object
@@ -238,9 +254,115 @@ Input::Input(char *datafile, int emaxnumofcurves, int maxm, std::string ccdir) {
 
 	bacon->ShowDescrip();
 
-    Rprintf("\n");
+  Rprintf("\n");
 }
 
+void Input::outputFiles(std::string outputfile1){
+	if(! isPlum() ) return; //the output file is correct
+
+	//printf("Plum is needed\n");
+	FILE *F, *F1, *F2/*, *F3*/;
+	char line[BUFFSZ];
+	const char delim[3] = "\t ";
+	std::string delimiter = ".out";
+	char *token;
+	int lin = 0;
+
+	double *x, w;
+	int K;
+
+	if ((F = fopen( outputfile1.c_str(), "r")) == NULL){
+		Rprintf("Could not open %s for reading\n", outputfile1.c_str());
+		Rcpp::stop("Could not open %s for reading\n", outputfile1.c_str());
+		//exit(-1);
+	}
+	//int BUFFSZ = 1024;
+
+	std::string split = outputfile1;
+
+	std::string outputFilePlum1 = split.substr(0, split.find(delimiter)) + "_bacon.out";
+	std::string outputFilePlum2 = split.substr(0, split.find(delimiter)) + "_plum.out";
+
+	//std::string outputFilePlum3 = split.substr(0, split.find(delimiter)) + "_PyPlum.csv";
+
+
+	if ((F1 = fopen( outputFilePlum1.c_str(), "w" )) == NULL){
+		Rprintf("Could not open %s for writting\n", outputFilePlum1.c_str());
+		Rcpp::stop("Could not open %s for writting\n", outputFilePlum1.c_str());
+		//exit(-1);
+	}
+
+	if ((F2 = fopen( outputFilePlum2.c_str(), "w" )) == NULL){
+		Rprintf("Could not open %s for writting\n", outputFilePlum2.c_str());
+		Rcpp::stop("Could not open %s for writting\n", outputFilePlum2.c_str());
+		//exit(-1);
+	}
+
+	/*if ((F3 = fopen( outputFilePlum3.c_str(), "w" )) == NULL){
+		Rprintf("Could not open %s for writting\n", outputFilePlum3.c_str());
+		Rcpp::stop("Could not open %s for writting\n", outputFilePlum3.c_str());
+		//exit(-1);
+	}*/
 
 
 
+	while(fgets( line, BUFFSZ, F) != NULL){
+		lin++;
+		if(lin==1) continue; //jump the first blank line
+
+		token = strtok(line, delim);
+		std::vector<double> vd;
+
+		while( token != NULL ) {
+			double tmp = atof(token);
+			vd.push_back(tmp);
+			token = strtok(NULL, delim);
+		}
+
+		for (unsigned long int i = vd.size() - (GetnPs()+2) ; i < vd.size()-1; i++) { // was just int i; MB 27 Jan 2020
+			fprintf(F2, "\t%13.6g", vd[i]); //Writes the rest of the lines to _plum.out
+		}
+		fprintf(F2, "\n");
+		//fprintf(F3, "\n"); dont change the line, the rest of the lines will be added next
+
+		K = vd.size() - ( GetnPs()+2 ) - 2;
+		x  = new double[K+2];
+		x[0] = vd[0]; //th0
+		x[K+1] = vd[K+1]; //w
+		w = x[K+1];
+		x[K]  = vd[K]; //= alpha[K]
+		for (int k=K-1; k>0; k--) {
+			x[k]  = w*x[k+1] + (1.0-w)*vd[k]; //Create the x's
+		}
+		//WATCH OUT ... NO HIATUSES!!!!!!
+
+		for (int i = 0; i < K+2; i++) {
+			fprintf(F1, "\t%13.6g", x[i]); //Writes each line to _bacon.out
+		}
+		fprintf(F1, "\t%13.6g\n", vd[ vd.size()-1 ]); //and adds the energy
+
+		/*fprintf(F3, " %13.6g, ", x[K+1]); //Writes the w to _PyPlum
+		for (int i = 1; i < K+1; i++) {
+			fprintf(F3, " %13.6g, ", vd[i]); //Writes the alphas to _PyPlum ... theta0 is ignored
+		}
+		fprintf(F3, " %13.6g\n", vd[ vd.size()-1 ]); //and adds the energy to _PyPlum*/
+
+
+		delete x;
+
+	}
+
+	fclose(F);
+	fclose(F1);
+	fclose(F2);
+
+	if(remove( outputfile1.c_str()) !=0 ){
+		REprintf("PLUM: ERROR: Couldn't remove the file %s\n", outputfile1.c_str());
+		Rcpp::stop("PLUM: ERROR: Couldn't remove the file %s\n", outputfile1.c_str());
+	}
+	if(rename( outputFilePlum1.c_str(), outputfile1.c_str() ) !=0 ){
+		REprintf("PLUM: ERROR: Couldn't create the file %s\n", outputfile1.c_str());
+		Rcpp::stop("PLUM: ERROR: Couldn't create the file %s\n", outputfile1.c_str());
+	}
+
+}

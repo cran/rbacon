@@ -7,7 +7,7 @@
 scissors(burnin, set = get("info"))
 }
 \arguments{
-\item{burnin}{Number of iterations to remove  of the iterative time series. If this value is higher than the amount of remaining iterations, 
+\item{burnin}{Number of iterations to remove  of the iterative time series. If this value is higher than the amount of remaining iterations,
 a warning is given and the iterations are not removed. If the provided number is negative, the iterations will be removed from the end of the run, not from the start. If a range is given, this range of iterations is removed.}
 
 \item{set}{Detailed information of the current run, stored within this session's memory as variable \code{info}.}
@@ -19,10 +19,10 @@ NA
 Removes iterations of the MCMC time series, and then updates the output file.
 }
 \details{
-Bacon will perform millions of MCMC iterations for each age-model run by default, although only a fraction 
-of these will be stored. In most cases the remaining MCMC iterations will be well mixed (the upper left panel 
+Bacon will perform millions of MCMC iterations for each age-model run by default, although only a fraction
+of these will be stored. In most cases the remaining MCMC iterations will be well mixed (the upper left panel
 of the fit of the iterations shows no undesirable features such as trends or sudden systematic drops or rises).
-If the run has a visible remaining burn-in, scissors can be used to remove them. 
+If the run has a visible remaining burn-in, scissors can be used to remove them.
 To remove, e.g., the first 300 iterations, type \code{scissors(300)}. To remove the last 300 iterations, type \code{scissors(-300)}. To remove iterations 300 to 600, type \code{scissors(300:600)}.
 }
 \examples{
@@ -39,8 +39,8 @@ To remove, e.g., the first 300 iterations, type \code{scissors(300)}. To remove 
 
 }
 \references{
-Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive 
-gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474. 
+Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive
+gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
 \url{https://projecteuclid.org/euclid.ba/1339616472}
 }
 \seealso{

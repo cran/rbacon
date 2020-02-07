@@ -4,8 +4,13 @@
 \alias{Bacon.Age.d}
 \title{Output all ages for a single depth.}
 \usage{
-Bacon.Age.d(d, set = get("info"), its = set$output, BCAD = set$BCAD,
-  remove = FALSE)
+Bacon.Age.d(
+  d,
+  set = get("info"),
+  its = set$output,
+  BCAD = set$BCAD,
+  remove = FALSE
+)
 }
 \arguments{
 \item{d}{The depth of which Bacon age estimates are to be returned. Has to be a single depth.}
@@ -25,7 +30,7 @@ Outputs all MCMC-derived ages for a given depth.
 Output all MCMC-derived age estimates for a given depth.
 }
 \details{
-Obtaining an age-depth model is often only a step towards a goal, e.g., plotting a core's 
+Obtaining an age-depth model is often only a step towards a goal, e.g., plotting a core's
 fossil series ('proxies') against calendar time. Bacon.Age.d can be used to list all MCMC-derived age estimates for a given (single) depth, for example to calculate mean ages for a depth.
 }
 \examples{
@@ -35,8 +40,8 @@ fossil series ('proxies') against calendar time. Bacon.Age.d can be used to list
   mean(ages.d20)
 }
 \references{
-Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive 
-gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474. 
+Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive
+gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
  \url{https://projecteuclid.org/euclid.ba/1339616472}
 }
 \seealso{

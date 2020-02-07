@@ -4,14 +4,33 @@
 \alias{flux.age.ghost}
 \title{Plot flux rates for proxies.}
 \usage{
-flux.age.ghost(proxy = 1, age.lim = c(), yr.lim = age.lim,
-  age.res = 200, yr.res = age.res, set = get("info"), flux = c(),
-  plot.range = TRUE, prob = 0.8, range.col = grey(0.5),
-  range.lty = 2, plot.mean = TRUE, mean.col = "red", mean.lty = 2,
-  flux.lim = c(), flux.lab = "flux", upper = 0.95, dark = set$dark,
-  BCAD = set$BCAD, age.lab = c(), yr.lab = age.lab,
-  rotate.axes = FALSE, rev.flux = FALSE, rev.age = FALSE,
-  rev.yr = rev.age)
+flux.age.ghost(
+  proxy = 1,
+  age.lim = c(),
+  yr.lim = age.lim,
+  age.res = 200,
+  yr.res = age.res,
+  set = get("info"),
+  flux = c(),
+  plot.range = TRUE,
+  prob = 0.8,
+  range.col = grey(0.5),
+  range.lty = 2,
+  plot.mean = TRUE,
+  mean.col = "red",
+  mean.lty = 2,
+  flux.lim = c(),
+  flux.lab = "flux",
+  upper = 0.95,
+  dark = set$dark,
+  BCAD = set$BCAD,
+  age.lab = c(),
+  yr.lab = age.lab,
+  rotate.axes = FALSE,
+  rev.flux = FALSE,
+  rev.age = FALSE,
+  rev.yr = rev.age
+)
 }
 \arguments{
 \item{proxy}{Which proxy to use (counting from the column number in the .csv file after the depths column).}
@@ -26,7 +45,7 @@ flux.age.ghost(proxy = 1, age.lim = c(), yr.lim = age.lim,
 
 \item{set}{Detailed information of the current run, stored within this session's memory as variable info.}
 
-\item{flux}{Define a flux variable within the R session (consisting of depths and their proxy concentrations in two columns) and provide the name of this variable, e.g.: 
+\item{flux}{Define a flux variable within the R session (consisting of depths and their proxy concentrations in two columns) and provide the name of this variable, e.g.:
 \code{flux.age.ghost(flux=flux1)}. If left empty (\code{flux=c()}), a flux file is expected (see \code{proxy}).}
 
 \item{plot.range}{Plot curves that indicate a probability range, at resolution of yr.res.}
@@ -72,13 +91,13 @@ A plot of flux rates.
 Plot grey-scale representation of estimated flux rates for proxies against calendar age.
 }
 \details{
-To plot flux rates (e.g. pollen grains/cm2/yr) as greyscales, 
+To plot flux rates (e.g. pollen grains/cm2/yr) as greyscales,
 provide a plain text file with headers and the data in columns separated by commas, ending in '_flux.csv'
-and saved in your core's folder. The first column should contain the depths, and the next columns should contain 
-the proxy concentration values (leaving missing values empty). Then type for example \code{flux.age.ghost(1)} to plot the 
+and saved in your core's folder. The first column should contain the depths, and the next columns should contain
+the proxy concentration values (leaving missing values empty). Then type for example \code{flux.age.ghost(1)} to plot the
 flux values for the first proxy in the .csv file. Instead of using a _flux.csv file, a flux variable can also be defined
- within the R session (consisting of depths and their proxy concentrations in two columns). Then provide the name of this variable, e.g.: \code{flux.age.ghost(flux=flux1)}. 
-See Bacon_runs/MSB2K/MSB2K_flux.csv for an example.
+ within the R session (consisting of depths and their proxy concentrations in two columns). Then provide the name of this variable, e.g.: \code{flux.age.ghost(flux=flux1)}.
+See Plum_runs/MSB2K/MSB2K_flux.csv for an example.
 }
 \examples{
 \donttest{
@@ -88,8 +107,8 @@ See Bacon_runs/MSB2K/MSB2K_flux.csv for an example.
 }
 }
 \references{
-Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive 
-gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474. 
+Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive
+gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
 \url{https://projecteuclid.org/euclid.ba/1339616472}
 }
 \seealso{

@@ -22,22 +22,22 @@ all MCMC estimates of accumulation rate of the chosen age.
 Obtain accumulation rates (in years per cm, so actually sedimentation times) as estimated by the MCMC iterations for any age of a core.
 }
 \details{
-Considering accumulation rates is crucial for age-depth modelling, and even more so if they are subsequently 
+Considering accumulation rates is crucial for age-depth modelling, and even more so if they are subsequently
 used for calculating proxy influx values, or interpreted as proxy for environmental change such as carbon accumulation. See also \code{accrate.age.ghost}, \code{accrate.depth} and \code{accrate.depth.ghost}.
-Bacon deals explicitly with accumulation rate and its variability through defining prior distributions. 
-This function obtains accumulation rates (in years per cm, so actually sedimentation times) as estimated 
+Bacon deals explicitly with accumulation rate and its variability through defining prior distributions.
+This function obtains accumulation rates (in years per cm, so actually sedimentation times) as estimated
 by the MCMC iterations for any age of a core. Deals with only 1 age at a time. See also \code{accrate.depth}.
 }
 \examples{
   Bacon(run=FALSE, coredir=tempfile())
   agedepth(yr.res=50, d.res=50, d.by=10)
   accrate.a5000 = accrate.age(5000)
-  plot(accrate.a5000, pch='.')   
+  plot(accrate.a5000, pch='.')
   hist(accrate.a5000)
 }
 \references{
-Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive 
-gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474. 
+Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive
+gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
  \url{https://projecteuclid.org/euclid.ba/1339616472}
 }
 \seealso{

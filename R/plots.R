@@ -2,18 +2,18 @@
 #' @name proxy.ghost
 #' @title Proxies analysed along the depths of a core can be plotted as 'proxy-ghost' graphs against calendar time while taking into account chronological uncertainties. Here darker grey indicates more likely calendar ages for specific proxy values.
 #' @description Proxies analysed along the depths of a core can be plotted as 'proxy-ghost' graphs against calendar time while taking into account chronological uncertainties. Here darker grey indicates more likely calendar ages for specific proxy value.
-#' @details Place a csv file with the values of proxies against depth within your core's folder. The values should be in columns separated by commas (default \code{sep=","}), the first column containing the depths and the first line (header) containing the proxy names. 
+#' @details Place a csv file with the values of proxies against depth within your core's folder. The values should be in columns separated by commas (default \code{sep=","}), the first column containing the depths and the first line (header) containing the proxy names.
 #' The file name should start with the core's name and end with "_proxies.csv". For an example see \code{"Bacon_coredir/MSB2K/MSB2K_proxies.csv"} or \code{"Cores/MSB2K/MSB2K_proxies.csv"}.
-#' @param proxy Which proxy to use (counting from the column number in the .csv file after the depths column). 
+#' @param proxy Which proxy to use (counting from the column number in the .csv file after the depths column).
 #' @param proxy.lab Label of the proxy axis. Default names are taken from the csv file.
 #' @param proxy.res Greyscale pixels are calculated for \code{proxy.res=250} proxy values by default, as a compromise between image quality and calculation speed. If the output looks very pixel-like (e.g., when choosing to plot only part of the record using proxy.lim), set this option to higher values.
 #' @param age.res Resolution or amount of greyscale pixels to cover the age scale of the age-model plot. Default \code{age.res=250} as a compromise between image quality and calculation speed. If the output looks very pixel-like (e.g., when choosing to plot only part of the record using age.lim), set this option to higher values.
 #' @param yr.res Deprecated - use age.res instead
-#' @param grey.res Grey-scale resolution of the proxy graph. Default \code{grey.res=100}. 
+#' @param grey.res Grey-scale resolution of the proxy graph. Default \code{grey.res=100}.
 #' @param set Detailed information of the current run, stored within this session's memory as variable info.
 #' @param dark By default, the darkest grey value is assigned to the most likely value within the entire core (normalised to 1; \code{dark=1}). By setting dark to, e.g., \code{dark=.8}, all values of and above 0.8 will be darkest (and values below that threshold will be lighter grey the lower their probabilities).
-#' @param darkest Darkness of the most likely value. Is black by default (\code{darkest=1}); lower values will result in lighter grey.  
-#' @param rotate.axes The default is to plot the calendar horizontally, however the plot can be rotated (\code{rotate.axes=TRUE}). 
+#' @param darkest Darkness of the most likely value. Is black by default (\code{darkest=1}); lower values will result in lighter grey.
+#' @param rotate.axes The default is to plot the calendar horizontally, however the plot can be rotated (\code{rotate.axes=TRUE}).
 #' @param proxy.rev The proxy axis can be reversed if \code{proxy.rev=TRUE}.
 #' @param age.rev The calendar axis can be reversed using \code{yr.rev=TRUE}.
 #' @param yr.rev Deprecated - use age.rev instead
@@ -23,16 +23,17 @@
 #' @param yr.lim Deprecated - use age.lim instead
 #' @param proxy.lim Ranges of the proxy axis, calculated automatically by default (\code{proxy.lim=c()}).
 #' @param sep Separator between the fields of the plain text file containing the depth and proxy data.
-#' @param xaxs Extension of x-axis. By default, no white-space will be added at the axis extremes (\code{xaxs="i"}). See ?par for other options. 
-#' @param yaxs Extension of y-axis. By default, no white-space will be added at the axis extremes (\code{xaxs="i"}). See ?par for other options. 
+#' @param xaxs Extension of x-axis. By default, no white-space will be added at the axis extremes (\code{xaxs="i"}). See ?par for other options.
+#' @param yaxs Extension of y-axis. By default, no white-space will be added at the axis extremes (\code{xaxs="i"}). See ?par for other options.
 #' @param xaxt The x-axis is plotted by default, but this can be switched off using \code{xaxt="n"}.
 #' @param yaxt The y-axis is plotted by default, but this can be switched off using \code{yaxt="n"}.
 #' @param bty Type of box to be drawn around the plot (\code{"n"} for none, and \code{"l"} (default), \code{"7"}, \code{"c"}, \code{"u"}, or \code{"o"} for correspondingly shaped boxes).
-#' @param BCAD The calendar scale of graphs and age output-files is in \code{cal BP} by default, but can be changed to BC/AD using \code{BCAD=TRUE}. 
+#' @param BCAD The calendar scale of graphs and age output-files is in \code{cal BP} by default, but can be changed to BC/AD using \code{BCAD=TRUE}.
 #' @param age.lab The labels for the calendar axis (default \code{age.lab="cal BP"} or \code{"BC/AD"} if \code{BCAD=TRUE}).
 #' @param yr.lab Deprecated - use age.lab instead
+#' @param verbose Provide feedback on what is happening (default \code{verbose=TRUE}).
 #' @author Maarten Blaauw, J. Andres Christen
-#' @return A grey-scale graph of the proxy against calendar age. 
+#' @return A grey-scale graph of the proxy against calendar age.
 #' @examples
 #' \donttest{
 #'   Bacon(ask=FALSE, coredir=tempfile())
@@ -41,11 +42,11 @@
 #' }
 #' @seealso \url{http://www.chrono.qub.ac.uk/blaauw/manualBacon_2.3.pdf}
 #' @references
-#' Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive 
-#' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474. 
+#' Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive
+#' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
 #' \url{https://projecteuclid.org/euclid.ba/1339616472}
 #' @export
-proxy.ghost <- function(proxy=1, proxy.lab=c(), proxy.res=250, age.res=200, yr.res=age.res, grey.res=100, set=get('info'), dark=1, darkest=1, rotate.axes=FALSE, proxy.rev=FALSE, age.rev=FALSE, yr.rev=age.rev, plot.mean=FALSE, mean.col="red", age.lim=c(), yr.lim=age.lim, proxy.lim=c(), sep=",", xaxs="i", yaxs="i", xaxt="s", yaxt="s", bty="l", BCAD=set$BCAD, age.lab=ifelse(BCAD, "BC/AD", "cal yr BP"), yr.lab=age.lab) {
+proxy.ghost <- function(proxy=1, proxy.lab=c(), proxy.res=250, age.res=200, yr.res=age.res, grey.res=100, set=get('info'), dark=1, darkest=1, rotate.axes=FALSE, proxy.rev=FALSE, age.rev=FALSE, yr.rev=age.rev, plot.mean=FALSE, mean.col="red", age.lim=c(), yr.lim=age.lim, proxy.lim=c(), sep=",", xaxs="i", yaxs="i", xaxt="s", yaxt="s", bty="l", BCAD=set$BCAD, age.lab=ifelse(BCAD, "BC/AD", "cal yr BP"), yr.lab=age.lab, verbose=TRUE) {
   if(length(set$Tr)==0)
     stop("please first run agedepth()", call.=FALSE)
   proxies <- read.csv(paste(set$coredir, set$core, "/", set$core, "_proxies.csv", sep=""), header=TRUE, sep=sep)
@@ -54,7 +55,7 @@ proxy.ghost <- function(proxy=1, proxy.lab=c(), proxy.res=250, age.res=200, yr.r
   proxy <- cbind(as.numeric(proxies[,1]), as.numeric(proxies[,proxy+1]))
   proxy <- proxy[!is.na(proxy[,2]),]
   proxy <- proxy[which(proxy[,1] <= set$d.max),]
-  proxy <- proxy[which(proxy[,1] >= set$d.min),]  
+  proxy <- proxy[which(proxy[,1] >= set$d.min),]
   pr.mn.ages <- approx(set$ranges[,1], set$ranges[,5], proxy[,1], rule=1)$y
   if(length(unique(proxy[,2]))==1)
     stop("this proxy's values remain constant throughout the core, and cannot be proxy-ghosted!", call.=FALSE)
@@ -72,9 +73,10 @@ proxy.ghost <- function(proxy=1, proxy.lab=c(), proxy.res=250, age.res=200, yr.r
     if(length(tmp) == 0)
       d.length[i,] <- d.length[i-1,]
   }
-  cat("Calculating histograms\n")
+  if(verbose)
+    message("Calculating histograms")
   Bacon.hist(ds, set, calc.range=FALSE)
-  hists <- get('hists') 
+  hists <- get('hists')
   cat("\n")
 
   age.min <- c()
@@ -96,7 +98,7 @@ proxy.ghost <- function(proxy=1, proxy.lab=c(), proxy.res=250, age.res=200, yr.r
     for(j in 1:length(age.seq))
       max.counts[i,j] <- max(all.counts[d.length[i,1]:d.length[i,2],j])
   if(dark>1)
-    stop("dark values larger than 1 are not allowed\n", call.=FALSE) else  
+    stop("dark values larger than 1 are not allowed\n", call.=FALSE) else
       max.counts[max.counts > dark] <- dark
   if(length(age.lim)==0)
     if(xaxs=="r")
@@ -116,7 +118,7 @@ proxy.ghost <- function(proxy=1, proxy.lab=c(), proxy.res=250, age.res=200, yr.r
     proxy.lim <- proxy.lim[2:1]
   if(rotate.axes) {
     image(proxyseq, age.seq, max.counts, xlim=proxy.lim, ylim=age.lim, col=grey(seq(1, 1-darkest, length=grey.res)), ylab=age.lab, xlab=proxy.lab, xaxs=xaxs, yaxs=yaxs, xaxt=xaxt, yaxt=yaxt)
-    if(plot.mean) 
+    if(plot.mean)
       lines(proxy[,2], pr.mn.ages, col=mean.col)
   } else {
     image(age.seq, proxyseq, t(max.counts), xlim=age.lim, ylim=proxy.lim, col=grey(seq(1, 1-darkest, length=grey.res)), xlab=age.lab, ylab=proxy.lab, xaxs=xaxs, yaxs=yaxs, xaxt=xaxt, yaxt=yaxt)
@@ -149,23 +151,23 @@ proxy.ghost <- function(proxy=1, proxy.lab=c(), proxy.res=250, age.res=200, yr.r
 #' @name AgesOfEvents
 #' @title Event probabilities against calendar age
 #' @description Plot probability curves for events in the core, expressed against calendar age.
-#' @details Probabilities of depths with 'events' in an age-modelled core can be plotted against time, taking into account 
-#' chronological uncertainties (Blaauw et al. 2007). Such events could be for example core depths at which proxies 
-#' indicate changes toward wetter local conditions. This can be expressed as values between 0 (no event) and 1 (event at 100\% probability) 
-#' for each depth. 
-#' 
-#' Blaauw et al. 2010 propose to estimate probabilities of events by finding specific proxy features such as increasing curves. 
-#' Probabilities are then estimated through resampling from the proxy values, where low to modest rises of proxy curves result 
-#' in low event probabilities, and clear proxy rises in high probabilities. A smooth spline can be applied to adapt the balance of short-term vs long-term events. To calculate the event probabilities, 
+#' @details Probabilities of depths with 'events' in an age-modelled core can be plotted against time, taking into account
+#' chronological uncertainties (Blaauw et al. 2007). Such events could be for example core depths at which proxies
+#' indicate changes toward wetter local conditions. This can be expressed as values between 0 (no event) and 1 (event at 100\% probability)
+#' for each depth.
+#'
+#' Blaauw et al. 2010 propose to estimate probabilities of events by finding specific proxy features such as increasing curves.
+#' Probabilities are then estimated through resampling from the proxy values, where low to modest rises of proxy curves result
+#' in low event probabilities, and clear proxy rises in high probabilities. A smooth spline can be applied to adapt the balance of short-term vs long-term events. To calculate the event probabilities,
 #' produce a file with two columns (depth and corresponding proxy-derived probabilities, separated by white spaces).
-#'  Do not provide headers at the file's first line, and save the file with extension "_events.txt" within the core's Bacon folder. See Cores/MSB2K/MSB2K_events.txt (or Bacon_runs/MSB2K/MSB2K_events.txt) for an example. Events are calculated as the probability that an event took place within specific time windows - or more specifically, that the Bacon age-depth model puts depths with assigned event probabilities in that time window.  
+#'  Do not provide headers at the file's first line, and save the file with extension "_events.txt" within the core's Bacon folder. See Cores/MSB2K/MSB2K_events.txt (or Plum_runs/MSB2K/MSB2K_events.txt) for an example. Events are calculated as the probability that an event took place within specific time windows - or more specifically, that the Bacon age-depth model puts depths with assigned event probabilities in that time window.
 #'
 #' does not yet deal correctly with hiatuses.
 #' @param window Width of the window.
 #' @param move Step size with which the window moves.
 #' @param set Detailed information of the current run, stored within this session's memory as variable \code{info}.
 #' @param plot.steps Plot probability values step-wise (defaults to \code{plot.steps=FALSE}, which plots smooth curves instead).
-#' @param BCAD The calendar scale of graphs and age output-files is in \code{cal BP} by default, but can be changed to BC/AD using \code{BCAD=TRUE}. 
+#' @param BCAD The calendar scale of graphs and age output-files is in \code{cal BP} by default, but can be changed to BC/AD using \code{BCAD=TRUE}.
 #' @param age.lab The labels for the calendar axis (default \code{age.lab="cal BP"} or \code{"BC/AD"} if \code{BCAD=TRUE}).
 #' @param yr.lab Deprecated - use age.lab instead
 #' @param age.lim Minimum and maximum calendar age ranges, calculated automatically by default (\code{age.lim=c()}).
@@ -205,13 +207,13 @@ AgesOfEvents <- function(window, move, set=get('info'), plot.steps=FALSE, BCAD=s
   if(!is.numeric(probs[1,1]))
     stop("first line of the _events.txt file should NOT contain titles; please remove them", call.=FALSE)
   if(min(probs[,1]) < min(set$elbows) || max(probs[,1]) > max(set$elbows)) {
-    cat("some depths in the _events.txt file go beyond the age-model; I will remove them", call.=FALSE)
+    message("some depths in the _events.txt file go beyond the age-model; I will remove them")
     file.rename(probfile, paste(probfile, "_backup", sep=""))
     probs <- probs[which(probs[,1] >= min(set$elbows)),]
     probs <- probs[which(probs[,1] <= max(set$elbows)),]
     write.table(probs, probfile, col.names=FALSE, row.names=FALSE, quote=FALSE)
   }
-  
+
   if(length(age.lim) == 0) {
     min.age <- min(set$ranges[,2])
     max.age <- max(set$ranges[,3])
@@ -220,7 +222,7 @@ AgesOfEvents <- function(window, move, set=get('info'), plot.steps=FALSE, BCAD=s
       min.age <- min(age.lim)
       max.age <- max(age.lim)
     }
-  
+
   events(min.age, max.age, move, window, outfile, MCMCname, nrow(set$output), set$K, set$elbows[1], set$thick, probfile, nrow(probs))
   probs <- read.table(outfile)
   if(BCAD) {
@@ -235,7 +237,8 @@ AgesOfEvents <- function(window, move, set=get('info'), plot.steps=FALSE, BCAD=s
     probs <- cbind(c(min(probs[,1]), probs[d.sort[,1],1], max(probs[,1])), c(0,probs[d.sort[,2],2],0))
   } else
       probs <- cbind(c(min(probs[,1]), probs[,1], max(probs[,1])), c(0,probs[,2],0))
-  par(yaxs=yaxs, bty=bty)
+  oldpar <- par(yaxs=yaxs, bty=bty)
+  on.exit(par(oldpar))
 
   if(rev.age)
     age.lim <- rev(age.lim)
@@ -251,8 +254,7 @@ AgesOfEvents <- function(window, move, set=get('info'), plot.steps=FALSE, BCAD=s
       plot(probs, type="n", xlab=age.lab, ylab=prob.lab, ylim=prob.lim, xlim=age.lim)
       polygon(probs, col="grey")
     }
-  if(move > window) cat("\nAre you sure you want the window widths to be smaller than the moves?\n")
+  if(move > window) 
+    message("\nAre you sure you want the window widths to be smaller than the moves?")
   invisible(probs)
 }
-
-

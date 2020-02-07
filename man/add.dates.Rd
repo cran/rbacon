@@ -4,11 +4,27 @@
 \alias{add.dates}
 \title{Add dates to age-depth plots}
 \usage{
-add.dates(mn, sdev, depth, cc = 1, above = 1e-06, ex = 10,
-  normal = TRUE, normalise = TRUE, t.a = 3, t.b = 4,
-  age.res = 100, times = 20, col = rgb(1, 0, 0, 0.5),
-  border = rgb(1, 0, 0, 0.5), rotate.axes = FALSE, mirror = TRUE,
-  up = TRUE, BCAD = FALSE, pch = 4)
+add.dates(
+  mn,
+  sdev,
+  depth,
+  cc = 1,
+  above = 1e-06,
+  ex = 10,
+  normal = TRUE,
+  normalise = TRUE,
+  t.a = 3,
+  t.b = 4,
+  age.res = 100,
+  times = 20,
+  col = rgb(1, 0, 0, 0.5),
+  border = rgb(1, 0, 0, 0.5),
+  rotate.axes = FALSE,
+  mirror = TRUE,
+  up = TRUE,
+  BCAD = FALSE,
+  pch = 4
+)
 }
 \arguments{
 \item{mn}{Reported mean of the date. Can be multiple dates.}
@@ -27,14 +43,14 @@ add.dates(mn, sdev, depth, cc = 1, above = 1e-06, ex = 10,
 
 \item{normalise}{By default, the date is normalised to an area of 1 (\code{normalise=TRUE}).}
 
-\item{t.a}{The dates are treated using the student's t distribution by default (\code{normal=FALSE}). 
-The student's t-distribution has two parameters, t.a and t.b, set at 3 and 4 by default (see Christen and Perez, 2010). 
-If you want to assign narrower error distributions (more closely resembling the normal distribution), set t.a and t.b at for example 33 and 34 respectively (e.g., for specific dates in your .csv file). 
+\item{t.a}{The dates are treated using the student's t distribution by default (\code{normal=FALSE}).
+The student's t-distribution has two parameters, t.a and t.b, set at 3 and 4 by default (see Christen and Perez, 2010).
+If you want to assign narrower error distributions (more closely resembling the normal distribution), set t.a and t.b at for example 33 and 34 respectively (e.g., for specific dates in your .csv file).
 For symmetry reasons, t.a must always be equal to t.b-1.}
 
-\item{t.b}{The dates are treated using the student's t distribution by default (\code{normal=FALSE}). 
-The student's t-distribution has two parameters, t.a and t.b, set at 3 and 4 by default (see Christen and Perez, 2010). 
-If you want to assign narrower error distributions (more closely resembling the normal distribution), set t.a and t.b at for example 33 and 34 respectively (e.g., for specific dates in your .csv file). 
+\item{t.b}{The dates are treated using the student's t distribution by default (\code{normal=FALSE}).
+The student's t-distribution has two parameters, t.a and t.b, set at 3 and 4 by default (see Christen and Perez, 2010).
+If you want to assign narrower error distributions (more closely resembling the normal distribution), set t.a and t.b at for example 33 and 34 respectively (e.g., for specific dates in your .csv file).
 For symmetry reasons, t.a must always be equal to t.b-1.}
 
 \item{age.res}{Resolution of the date's distribution. Defaults to \code{date.res=100}.}
@@ -65,13 +81,15 @@ Add dated depths to plots, e.g. to show dates that weren't used in the age-depth
 Sometimes it is useful to add additional dating information to age-depth plots, e.g., to show outliers or how dates calibrate with different estimated offsets.
 }
 \examples{
+\donttest{
   Bacon(run=FALSE, coredir=tempfile())
   agedepth()
   add.dates(5000, 100, 60)
 }
+}
 \references{
-Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive 
-gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474. 
+Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive
+gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
 \url{https://projecteuclid.org/euclid.ba/1339616472}
 }
 \seealso{
