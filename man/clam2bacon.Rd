@@ -7,7 +7,7 @@
 clam2bacon(
   core,
   clamdir = "clam_runs",
-  bacondir = "Plum_runs",
+  bacondir = "Bacon_runs",
   sep = ",",
   cc = 1
 )
@@ -17,7 +17,7 @@ clam2bacon(
 
 \item{clamdir}{The directory where the clam runs reside. Defaults to \code{coredir="clam_runs"}.}
 
-\item{bacondir}{The directory where the Bacon runs reside. Defaults to \code{coredir="Plum_runs"}.}
+\item{bacondir}{The directory where the Bacon runs reside. Defaults to \code{coredir="Bacon_runs"}.}
 
 \item{sep}{The separator for the .csv files. Defaults to \code{sep=","}.}
 
@@ -33,7 +33,7 @@ Reads a clam .csv file containing the dates, and transforms it into a Bacon .csv
 Please ensure that if the clam file has offset (d.R) estimates, that errors (d.STD) are provided manually, since these values cannot be determined automatically from the clam .csv file.
 }
 \seealso{
-\url{http://www.chrono.qub.ac.uk/blaauw/manualBacon_2.3.pdf}
+\url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
 }
 \author{
 Maarten Blaauw, J. Andres Christen

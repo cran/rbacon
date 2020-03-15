@@ -25,7 +25,7 @@ Copy the radiocarbon calibration curve defined by cc into memory.
 intcal13 <- copyCalibrationCurve(1)
 }
 \seealso{
-\url{http://www.chrono.qub.ac.uk/blaauw/manualBacon_2.3.pdf}
+\url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
 }
 \author{
 Maarten Blaauw, J. Andres Christen

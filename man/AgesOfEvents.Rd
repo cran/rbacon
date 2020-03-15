@@ -73,7 +73,7 @@ Blaauw et al. 2010 propose to estimate probabilities of events by finding specif
 Probabilities are then estimated through resampling from the proxy values, where low to modest rises of proxy curves result
 in low event probabilities, and clear proxy rises in high probabilities. A smooth spline can be applied to adapt the balance of short-term vs long-term events. To calculate the event probabilities,
 produce a file with two columns (depth and corresponding proxy-derived probabilities, separated by white spaces).
- Do not provide headers at the file's first line, and save the file with extension "_events.txt" within the core's Bacon folder. See Cores/MSB2K/MSB2K_events.txt (or Plum_runs/MSB2K/MSB2K_events.txt) for an example. Events are calculated as the probability that an event took place within specific time windows - or more specifically, that the Bacon age-depth model puts depths with assigned event probabilities in that time window.
+ Do not provide headers at the file's first line, and save the file with extension "_events.txt" within the core's Bacon folder. See Cores/MSB2K/MSB2K_events.txt (or Bacon_runs/MSB2K/MSB2K_events.txt) for an example. Events are calculated as the probability that an event took place within specific time windows - or more specifically, that the Bacon age-depth model puts depths with assigned event probabilities in that time window.
 
 does not yet deal correctly with hiatuses.
 }
@@ -90,7 +90,7 @@ Blaauw, M., Wohlfarth, B., Christen, J.A., Ampel, L., Veres, D., Hughen, K.A., P
 \url{https://projecteuclid.org/euclid.ba/1339616472}
 }
 \seealso{
-\url{http://www.chrono.qub.ac.uk/blaauw/manualBacon_2.3.pdf}
+\url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
 }
 \author{
 Maarten Blaauw, J. Andres Christen

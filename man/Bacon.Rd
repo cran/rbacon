@@ -71,11 +71,11 @@ Bacon(
 \arguments{
 \item{core}{Name of the core, given using quotes. Defaults to one of the cores provided with rbacon, \code{core="MSB2K"}.
 An alternative core provided with this package is RLGH3 (Jones et al., 1989).
-To run your own core, produce a .csv file with the dates as outlined in the manual, add a folder with the core's name to the default directory for cores (see \code{coredir}), and save the .csv file there. For example, the file's location and name could be \code{Plum_runs/MyCore/MyCore.csv}. Then run Bacon as follows: \code{Bacon("MyCore")}}
+To run your own core, produce a .csv file with the dates as outlined in the manual, add a folder with the core's name to the default directory for cores (see \code{coredir}), and save the .csv file there. For example, the file's location and name could be \code{Bacon_runs/MyCore/MyCore.csv}. Then run Bacon as follows: \code{Bacon("MyCore")}}
 
 \item{thick}{Bacon will divide the core into sections of equal thickness specified by thick (default \code{thick=5}).}
 
-\item{coredir}{Folder where the core's files \code{core} are and/or will be located. This will be a folder with the core's name, within either the folder \code{coredir='Plum_runs/'}, or the folder Cores/ if it already exists within R's working directory, or a custom-built folder. For example, use \code{coredir="."} to place the core's folder within the current working directory, or \code{coredir="F:"} if you want to put the core's folder and files on a USB drive loaded under F:.
+\item{coredir}{Folder where the core's files \code{core} are and/or will be located. This will be a folder with the core's name, within either the folder \code{coredir='Bacon_runs/'}, or the folder Cores/ if it already exists within R's working directory, or a custom-built folder. For example, use \code{coredir="."} to place the core's folder within the current working directory, or \code{coredir="F:"} if you want to put the core's folder and files on a USB drive loaded under F:.
 Thinner (and thus more) sections will result in smoother age-models, but too many sections can cause `run-away' models.}
 
 \item{prob}{Confidence interval to report. This should lie between 0 and 1, default 0.95 (95 \%).}
@@ -281,7 +281,7 @@ Jones, V.J., Stevenson, A.C., Battarbee, R.W., 1989. Acidification of lakes in G
 Journal of Ecology 77: 1-23.
 }
 \seealso{
-\url{http://www.chrono.qub.ac.uk/blaauw/manualBacon_2.3.pdf}
+\url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
 }
 \author{
 Maarten Blaauw, J. Andres Christen

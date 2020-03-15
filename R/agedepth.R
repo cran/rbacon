@@ -220,7 +220,7 @@ agedepth <- function(set=get('info'), BCAD=set$BCAD, depth.unit="cm", age.unit="
   if(!dates.only) {
     if(verbose)
       message("Preparing ghost graph... ")
-    .agedepth.ghost(set, rotate.axes=rotate.axes, BCAD=BCAD, d.res=d.res, age.res=age.res, grey.res=grey.res, dark=dark, colours=greyscale, age.lim=age.lim)
+    .agedepth.ghost(set, rotate.axes=rotate.axes, rev.d=rev.d, BCAD=BCAD, d.res=d.res, age.res=age.res, grey.res=grey.res, dark=dark, colours=greyscale, age.lim=age.lim)
   }
 
   if(length(set$slump) > 0 )

@@ -19,9 +19,9 @@
 #' @param yr.rev Deprecated - use age.rev instead
 #' @param plot.mean The mean ages of the proxy values can be added using \code{plot.mean=TRUE}.
 #' @param mean.col Colour of the weighted mean ages of the proxy values.
-#' @param age.lim Minimum and maximum calendar age ranges, calculated automatically by default (\code{yr.lim=c()}).
+#' @param age.lim Minimum and maximum calendar age ranges, calculated automatically by default (\code{yr.lim=NULL}).
 #' @param yr.lim Deprecated - use age.lim instead
-#' @param proxy.lim Ranges of the proxy axis, calculated automatically by default (\code{proxy.lim=c()}).
+#' @param proxy.lim Ranges of the proxy axis, calculated automatically by default (\code{proxy.lim=NULL}).
 #' @param sep Separator between the fields of the plain text file containing the depth and proxy data.
 #' @param xaxs Extension of x-axis. By default, no white-space will be added at the axis extremes (\code{xaxs="i"}). See ?par for other options.
 #' @param yaxs Extension of y-axis. By default, no white-space will be added at the axis extremes (\code{xaxs="i"}). See ?par for other options.
@@ -40,13 +40,13 @@
 #'   layout(1)
 #'   proxy.ghost()
 #' }
-#' @seealso \url{http://www.chrono.qub.ac.uk/blaauw/manualBacon_2.3.pdf}
+#' @seealso \url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
 #' @references
 #' Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive
 #' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
 #' \url{https://projecteuclid.org/euclid.ba/1339616472}
 #' @export
-proxy.ghost <- function(proxy=1, proxy.lab=c(), proxy.res=250, age.res=200, yr.res=age.res, grey.res=100, set=get('info'), dark=1, darkest=1, rotate.axes=FALSE, proxy.rev=FALSE, age.rev=FALSE, yr.rev=age.rev, plot.mean=FALSE, mean.col="red", age.lim=c(), yr.lim=age.lim, proxy.lim=c(), sep=",", xaxs="i", yaxs="i", xaxt="s", yaxt="s", bty="l", BCAD=set$BCAD, age.lab=ifelse(BCAD, "BC/AD", "cal yr BP"), yr.lab=age.lab, verbose=TRUE) {
+proxy.ghost <- function(proxy=1, proxy.lab=NULL, proxy.res=250, age.res=200, yr.res=age.res, grey.res=100, set=get('info'), dark=1, darkest=1, rotate.axes=FALSE, proxy.rev=FALSE, age.rev=FALSE, yr.rev=age.rev, plot.mean=FALSE, mean.col="red", age.lim=NULL, yr.lim=age.lim, proxy.lim=NULL, sep=",", xaxs="i", yaxs="i", xaxt="s", yaxt="s", bty="l", BCAD=set$BCAD, age.lab=ifelse(BCAD, "BC/AD", "cal yr BP"), yr.lab=age.lab, verbose=TRUE) {
   if(length(set$Tr)==0)
     stop("please first run agedepth()", call.=FALSE)
   proxies <- read.csv(paste(set$coredir, set$core, "/", set$core, "_proxies.csv", sep=""), header=TRUE, sep=sep)
@@ -60,8 +60,8 @@ proxy.ghost <- function(proxy=1, proxy.lab=c(), proxy.res=250, age.res=200, yr.r
   if(length(unique(proxy[,2]))==1)
     stop("this proxy's values remain constant throughout the core, and cannot be proxy-ghosted!", call.=FALSE)
   proxyseq <- seq(min(proxy[,2]), max(proxy[,2]), length=proxy.res)
-  out <- list(yrseq=c(), binned=c(), maxs=c())
-  ds <- c()
+#  out <- list(yrseq=c(), binned=c(), maxs=c())
+  ds <- NULL
   d.length <- array(1, dim=c(proxy.res, 2))
 
   for(i in 1:proxy.res) {
@@ -160,7 +160,7 @@ proxy.ghost <- function(proxy=1, proxy.lab=c(), proxy.res=250, age.res=200, yr.r
 #' Probabilities are then estimated through resampling from the proxy values, where low to modest rises of proxy curves result
 #' in low event probabilities, and clear proxy rises in high probabilities. A smooth spline can be applied to adapt the balance of short-term vs long-term events. To calculate the event probabilities,
 #' produce a file with two columns (depth and corresponding proxy-derived probabilities, separated by white spaces).
-#'  Do not provide headers at the file's first line, and save the file with extension "_events.txt" within the core's Bacon folder. See Cores/MSB2K/MSB2K_events.txt (or Plum_runs/MSB2K/MSB2K_events.txt) for an example. Events are calculated as the probability that an event took place within specific time windows - or more specifically, that the Bacon age-depth model puts depths with assigned event probabilities in that time window.
+#'  Do not provide headers at the file's first line, and save the file with extension "_events.txt" within the core's Bacon folder. See Cores/MSB2K/MSB2K_events.txt (or Bacon_runs/MSB2K/MSB2K_events.txt) for an example. Events are calculated as the probability that an event took place within specific time windows - or more specifically, that the Bacon age-depth model puts depths with assigned event probabilities in that time window.
 #'
 #' does not yet deal correctly with hiatuses.
 #' @param window Width of the window.
@@ -188,7 +188,7 @@ proxy.ghost <- function(proxy=1, proxy.lab=c(), proxy.res=250, age.res=200, yr.r
 #'   agedepth(yr.res=50)
 #'   AgesOfEvents(100, 10)
 #' }
-#' @seealso \url{http://www.chrono.qub.ac.uk/blaauw/manualBacon_2.3.pdf}
+#' @seealso \url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
 #' @references
 #' Blaauw, M., Christen, J.A., Mauquoy, D., van der Plicht, J., Bennett, K.D. (2007) Testing the timing of radiocarbon-dated events between proxy archives. _The Holocene_, *17*, 283-288.
 #' Blaauw, M., Wohlfarth, B., Christen, J.A., Ampel, L., Veres, D., Hughen, K.A., Preusser, F., Svensson, A. (2010) Were last glacial climate events simultaneous between Greenland and France? A quantitative comparison using non-tuned chronologies. _Journal of Quaternary Science_ *25*, 387-394.

@@ -17,12 +17,12 @@
 #' @return A Bacon .csv file
 #' @param core The name of the core for which a clam .csv.file needs to be translated into a Bacon .csv file
 #' @param clamdir The directory where the clam runs reside. Defaults to \code{coredir="clam_runs"}.
-#' @param bacondir The directory where the Bacon runs reside. Defaults to \code{coredir="Plum_runs"}.
+#' @param bacondir The directory where the Bacon runs reside. Defaults to \code{coredir="Bacon_runs"}.
 #' @param sep The separator for the .csv files. Defaults to \code{sep=","}.
 #' @param cc Calibration curve for C-14 dates: \code{cc=1} for IntCal13 (northern hemisphere terrestrial), \code{cc=2} for Marine13 (marine),
-#' @seealso \url{http://www.chrono.qub.ac.uk/blaauw/manualBacon_2.3.pdf}
+#' @seealso \url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
 #' @export
-clam2bacon <- function(core, clamdir="clam_runs", bacondir="Plum_runs", sep=",", cc=1) {
+clam2bacon <- function(core, clamdir="clam_runs", bacondir="Bacon_runs", sep=",", cc=1) {
   clamfl <- read.csv(paste0(clamdir, "/", core, "/", core, ".csv"), sep=sep)
   ID <- as.character(clamfl[,1])
   C14 <- clamfl[,2]
@@ -55,7 +55,7 @@ clam2bacon <- function(core, clamdir="clam_runs", bacondir="Plum_runs", sep=",",
 #' @author Maarten Blaauw, J. Andres Christen
 #' @return A clam .csv file
 #' @param core The name of the core for which a Bacon .csv.file needs to be translated into a clam .csv file
-#' @param bacondir The directory where the Bacon runs reside. Defaults to \code{coredir="Plum_runs"}.
+#' @param bacondir The directory where the Bacon runs reside. Defaults to \code{coredir="Bacon_runs"}.
 #' @param clamdir The directory where the clam runs reside. Defaults to \code{coredir="clam_runs"}.
 #' @param sep The separator for the .csv files. Defaults to \code{sep=","}.
 #' @examples{
@@ -65,9 +65,9 @@ clam2bacon <- function(core, clamdir="clam_runs", bacondir="Plum_runs", sep=",",
 #'   bacon2clam("MSB2K", bacondir=tmpfl, clamdir=tmpfl)
 #'  }
 #' }
-#' @seealso \url{http://www.chrono.qub.ac.uk/blaauw/manualBacon_2.3.pdf}
+#' @seealso \url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
 #' @export
-bacon2clam <- function(core, bacondir="Plum_runs", clamdir="clam_runs", sep=",") {
+bacon2clam <- function(core, bacondir="Bacon_runs", clamdir="clam_runs", sep=",") {
   baconfl <- read.csv(paste0(bacondir, "/", core, "/", core, ".csv"), sep=sep)
   ID <- as.character(baconfl[,1])
   ages <- baconfl[,2]
@@ -112,7 +112,7 @@ bacon2clam <- function(core, bacondir="Plum_runs", clamdir="clam_runs", sep=",")
 #' @examples
 #'   Bacon(run=FALSE, coredir=tempfile())
 #'   Bacon.cleanup()
-#' @seealso \url{http://www.chrono.qub.ac.uk/blaauw/manualBacon_2.3.pdf}
+#' @seealso \url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
 #' @export
 Bacon.cleanup <- function(set=get('info')) {
   files <- c(paste0(set$prefix, ".bacon"), paste0(set$prefix, ".out"),
@@ -128,15 +128,15 @@ Bacon.cleanup <- function(set=get('info')) {
 
 
 
-# If coredir is left empty, check for a folder named Cores in the current working directory, and if this doesn't exist, for a folder called Plum_runs (make this folder if it doesn't exist yet and if the user agrees).
+# If coredir is left empty, check for a folder named Cores in the current working directory, and if this doesn't exist, for a folder called Bacon_runs (make this folder if it doesn't exist yet and if the user agrees).
 # Check if we have write access. If not, tell the user to provide a different, writeable location for coredir.
 assign_coredir <- function(coredir, core, ask=TRUE) {
   if(coredir == "") {
     if(dir.exists("Cores"))
       coredir <- "Cores" else
-        if(dir.exists("Plum_runs"))
-          coredir <- "Plum_runs" else {
-            coredir <- "Plum_runs"
+        if(dir.exists("Bacon_runs"))
+          coredir <- "Bacon_runs" else {
+            coredir <- "Bacon_runs"
             ans <- readline(paste0("I will create a folder called ", coredir, ", is that OK? (y/n)  "))
             if(ask)
               if(tolower(substr(ans,1,1)) == "y")
@@ -269,7 +269,7 @@ assign_coredir <- function(coredir, core, ask=TRUE) {
 # read in default values, values from previous run, any specified values, and report the desired one. Internal function.
 .Bacon.settings <- function(core, coredir, dets, thick, remember=TRUE, d.min, d.max, d.by, depths.file, slump, acc.mean, acc.shape, mem.mean, mem.strength, boundary, hiatus.depths, hiatus.max, hiatus.shape, BCAD, cc, postbomb, cc1, cc2, cc3, cc4, depth.unit, normal, t.a, t.b, delta.R, delta.STD, prob, defaults, runname, ssize, dark, MinAge, MaxAge, cutoff, age.res, after, age.unit) {
 
-  vals <- list(d.min, d.max, d.by, depths.file, slump, acc.mean, acc.shape, mem.mean, mem.strength, boundary, hiatus.depths, hiatus.max, BCAD, cc, postbomb, cc1, cc2, cc3, cc4, depth.unit, normal, t.a, t.b, delta.R, delta.STD, prob, age.unit)
+  vals <- list(d.min, d.max, d.by, depths.file, slump, acc.mean, acc.shape, mem.mean, mem.strength, boundary, hiatus.depths, hiatus.max, BCAD, cc, postbomb, cc1, cc2, cc3, cc4, depth.unit, normal, t.a, t.b, delta.R, delta.STD, prob, age.unit) # do these now need the length for each parameter where available?
   valnames <- c("d.min", "d.max", "d.by", "depths.file", "slump", "acc.mean", "acc.shape", "mem.mean", "mem.strength", "boundary", "hiatus.depths", "hiatus.max", "BCAD", "cc", "postbomb", "cc1", "cc2", "cc3", "cc4", "depth.unit", "normal", "t.a", "t.b", "delta.R", "delta.STD", "prob", "age.unit")
 
   extr <- function(i, def=deffile, pre=prevfile, exists.pre=prevf, rem=remember, sep=" ", isnum=TRUE) {

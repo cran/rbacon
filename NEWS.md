@@ -1,3 +1,6 @@
+ # rbacon 2.4.1
+* Updated the code to deal with changes in how base-R deals with c() in loops, as suggested by Martin Maechler's e-mail 29 February 2020
+
 # rbacon 2.4.0
 * The MCMC code has been updated to remove bugs and to accommodate runs with the upcoming 'rplum' package for 210Pb dating
 * Added functions which are required to run the 'rplum' package (although 'rbacon' does not require 'rplum' to be installed)

@@ -162,7 +162,7 @@
     if( n.supp == 0 ) { # the number of supported data
       if( radonCase < 0 )
         radonCase = 0
-      supportedData <- c()
+      supportedData <- NULL
     } else if( n.supp >0 ){
       if( radonCase < 0 )
         radonCase = 1
@@ -186,7 +186,7 @@
     if( max(is.na(supportedData)) > 0 ){
       message("Missing values are detected; the radon case is set to 1\n")
 
-      elim <- c()
+      elim <- NULL
       for(i in 1:nrow(supportedData)){
         if( max(is.na(supportedData[i,])) > 0 ){
           elim <- c( elim, i )
@@ -235,8 +235,6 @@
     stop("Unexpected column names, order or values in dets file. \nPlease check the manual for how to produce a correct dets file.\n", call.=FALSE)
   }
 
-
-
   # more sanity checks for dets values
   if(!is.numeric(dets[,plumdataColumn]) || !is.numeric(dets[,stdColumn]) || !is.numeric(dets[,depthColumn]))
     stop("unexpected values in dets file, I expected numbers. Check the manual.\n", call.=FALSE)
@@ -253,7 +251,6 @@
   }
 
   dets = dets[,c(idColumn, plumdataColumn, stdColumn, depthColumn, deltaColumn, rhoColumn)]
-
   list(dets, supportedData, radonCase, date.sample, detsOrig, n.supp)
 }
 
@@ -265,7 +262,7 @@
   defaults, runname, ssize, dark, MinAge, MaxAge, cutoff, age.res, after, age.unit,
   supportedData, date.sample, Al, phi.shape, phi.mean, s.shape, s.mean, radonCase, Bqkg, n.supp) {
 
-  vals <- list(d.min, d.max, d.by, depths.file, slump, acc.mean, acc.shape, mem.mean, mem.strength, boundary, hiatus.depths, hiatus.max, BCAD, cc, postbomb, cc1, cc2, cc3, cc4, depth.unit, normal, t.a, t.b, delta.R, delta.STD, prob, age.unit)
+  vals <- list(d.min, d.max, d.by, depths.file, slump, acc.mean, acc.shape, mem.mean, mem.strength, boundary, hiatus.depths, hiatus.max, BCAD, cc, postbomb, cc1, cc2, cc3, cc4, depth.unit, normal, t.a, t.b, delta.R, delta.STD, prob, age.unit) # do these now need the lengths of all the values, e.g. d.min=numeric(1) ?
   valnames <- c("d.min", "d.max", "d.by", "depths.file", "slump", "acc.mean", "acc.shape", "mem.mean", "mem.strength", "boundary", "hiatus.depths", "hiatus.max", "BCAD", "cc", "postbomb", "cc1", "cc2", "cc3", "cc4", "depth.unit", "normal", "t.a", "t.b", "delta.R", "delta.STD", "prob", "age.unit")
   #TODO: modificar para que acepte el vector de soportado y los valores propios de plum, como es el nombre de archivo de soportado y los paremetros como "Al"
   extr <- function(i, def=deffile, pre=prevfile, exists.pre=prevf, rem=remember, sep=" ", isnum=TRUE) {
@@ -482,7 +479,7 @@
     else noquote(set$cc2), ";\nCal 3 : ",
   if(set$cc3=="SHCal13" || set$cc3=="\"SHCal13\"") "SHCal13"
     else noquote(set$cc3), ", ", set$postbomb, ";",
-  if(set$cc4=="ConstCal" || set$cc4=="\"ConstCal\"") set$cc4 <- c()
+			if(set$cc4=="ConstCal" || set$cc4=="\"ConstCal\"") set$cc4 <- NULL
     else
       paste("\nCal 4 : GenericCal, ", set$cc4, ";", sep=""), sep="", file=fl)
   cat("\nCal 4 : ConstCal;", sep="", file=fl)

@@ -6,7 +6,7 @@
 \usage{
 proxy.ghost(
   proxy = 1,
-  proxy.lab = c(),
+  proxy.lab = NULL,
   proxy.res = 250,
   age.res = 200,
   yr.res = age.res,
@@ -20,9 +20,9 @@ proxy.ghost(
   yr.rev = age.rev,
   plot.mean = FALSE,
   mean.col = "red",
-  age.lim = c(),
+  age.lim = NULL,
   yr.lim = age.lim,
-  proxy.lim = c(),
+  proxy.lim = NULL,
   sep = ",",
   xaxs = "i",
   yaxs = "i",
@@ -66,11 +66,11 @@ proxy.ghost(
 
 \item{mean.col}{Colour of the weighted mean ages of the proxy values.}
 
-\item{age.lim}{Minimum and maximum calendar age ranges, calculated automatically by default (\code{yr.lim=c()}).}
+\item{age.lim}{Minimum and maximum calendar age ranges, calculated automatically by default (\code{yr.lim=NULL}).}
 
 \item{yr.lim}{Deprecated - use age.lim instead}
 
-\item{proxy.lim}{Ranges of the proxy axis, calculated automatically by default (\code{proxy.lim=c()}).}
+\item{proxy.lim}{Ranges of the proxy axis, calculated automatically by default (\code{proxy.lim=NULL}).}
 
 \item{sep}{Separator between the fields of the plain text file containing the depth and proxy data.}
 
@@ -115,7 +115,7 @@ gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
 \url{https://projecteuclid.org/euclid.ba/1339616472}
 }
 \seealso{
-\url{http://www.chrono.qub.ac.uk/blaauw/manualBacon_2.3.pdf}
+\url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
 }
 \author{
 Maarten Blaauw, J. Andres Christen

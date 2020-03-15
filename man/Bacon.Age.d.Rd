@@ -45,7 +45,7 @@ gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
  \url{https://projecteuclid.org/euclid.ba/1339616472}
 }
 \seealso{
-\url{http://www.chrono.qub.ac.uk/blaauw/manualBacon_2.3.pdf}
+\url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
 }
 \author{
 Maarten Blaauw, J. Andres Christen

@@ -4,12 +4,12 @@
 \alias{bacon2clam}
 \title{Translate Bacon .csv files to clam .csv files.}
 \usage{
-bacon2clam(core, bacondir = "Plum_runs", clamdir = "clam_runs", sep = ",")
+bacon2clam(core, bacondir = "Bacon_runs", clamdir = "clam_runs", sep = ",")
 }
 \arguments{
 \item{core}{The name of the core for which a Bacon .csv.file needs to be translated into a clam .csv file}
 
-\item{bacondir}{The directory where the Bacon runs reside. Defaults to \code{coredir="Plum_runs"}.}
+\item{bacondir}{The directory where the Bacon runs reside. Defaults to \code{coredir="Bacon_runs"}.}
 
 \item{clamdir}{The directory where the clam runs reside. Defaults to \code{coredir="clam_runs"}.}
 
@@ -34,7 +34,7 @@ Assumes that Bacon .csv files with 4 columns indicate 14C dates. Please make sur
 }
 }
 \seealso{
-\url{http://www.chrono.qub.ac.uk/blaauw/manualBacon_2.3.pdf}
+\url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
 }
 \author{
 Maarten Blaauw, J. Andres Christen

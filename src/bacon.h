@@ -11,7 +11,7 @@ Bacon
  NEW VERSION OF BACON: With Plum and USING THE ALPHA'S AS PARAMETERS
  instead of the x's ... that is: x_j = w x_{j+1} + (1-w) alpha_j
 
- Use the alpha_j's as parameter and then transform to x_j ... this is the way Nico and Maroc does it.
+ Use the alpha_j's as parameter and then transform to x_j ... this is the way Nico and Marco does it.
 
  The array X is is now used to communicate with the twalk.  This is then transalated to x (and thetas) in
  the SetThetas function, that now uses the object's variable x.  Everything remains the same afterwards.
@@ -72,7 +72,7 @@ class BaconFix: public Bacon {
 			int H; //number of hiatuses
 			double *h; //location of the hiatuses
 
-			int useT; //=1 to use the t model, =0 to use the noermal model
+			int useT; //=1 to use the t model, =0 to use the normal model
 
 			double w, w0, wp0;
 

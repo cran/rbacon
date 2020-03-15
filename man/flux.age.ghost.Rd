@@ -97,7 +97,7 @@ and saved in your core's folder. The first column should contain the depths, and
 the proxy concentration values (leaving missing values empty). Then type for example \code{flux.age.ghost(1)} to plot the
 flux values for the first proxy in the .csv file. Instead of using a _flux.csv file, a flux variable can also be defined
  within the R session (consisting of depths and their proxy concentrations in two columns). Then provide the name of this variable, e.g.: \code{flux.age.ghost(flux=flux1)}.
-See Plum_runs/MSB2K/MSB2K_flux.csv for an example.
+See Bacon_runs/MSB2K/MSB2K_flux.csv for an example.
 }
 \examples{
 \donttest{
@@ -112,7 +112,7 @@ gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
 \url{https://projecteuclid.org/euclid.ba/1339616472}
 }
 \seealso{
-\url{http://www.chrono.qub.ac.uk/blaauw/manualBacon_2.3.pdf}
+\url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
 }
 \author{
 Maarten Blaauw, J. Andres Christen

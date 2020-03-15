@@ -27,7 +27,7 @@
 #'   agedepth()
 #' }
 #'
-#' @seealso \url{http://www.chrono.qub.ac.uk/blaauw/manualBacon_2.3.pdf}
+#' @seealso \url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
 #' @references
 #' Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive
 #' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
@@ -76,7 +76,7 @@ scissors <- function(burnin, set=get('info')) {
 #'   agedepth()
 #' }
 #'
-#' @seealso \url{http://www.chrono.qub.ac.uk/blaauw/manualBacon_2.3.pdf}
+#' @seealso \url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
 #' @references
 #' Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive
 #' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
@@ -118,21 +118,21 @@ thinner <- function(proportion=0.1, set=get('info')) {
 #'   \donttest{
 #'     Baconvergence(runs=2, ssize=100, coredir=tempfile()) # a quick-and-dirty toy example
 #'   }
-#' @seealso \url{http://www.chrono.qub.ac.uk/blaauw/manualBacon_2.3.pdf}
+#' @seealso \url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
 #' @references
 #' Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive
 #' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
 #' \url{https://projecteuclid.org/euclid.ba/1339616472}
 #' Brooks, SP. and Gelman, A. (1998) General methods for monitoring
 #' convergence of iterative simulations.
-#' _Journal of Computational and Graphical Statistics_, *7*, 434-455.
+#' _Journal of Computational and Graphical Statistics, *7*, 434-455.
 #' @export
 Baconvergence <- function(core="MSB2K", runs=5, suggest=FALSE, verbose=TRUE, ...) {
   MCMC <- list()
   for(i in 1:runs) { # now the other runs
     cat("run number", i, "...\n")
     Bacon(core=core, suggest=suggest, run=TRUE, ask=FALSE, ...)
-	set <- get('info')
+    set <- get('info')
     if(i == 1)
       nm <- set$prefix
     MCMC[[i]] <- read.table(paste0(nm, ".out"))

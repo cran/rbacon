@@ -15,7 +15,7 @@
 #'   agedepth(age.res=50, d.res=50, d.by=10)
 #'   ages.d20 = Bacon.Age.d(20)
 #'   mean(ages.d20)
-#' @seealso \url{http://www.chrono.qub.ac.uk/blaauw/manualBacon_2.3.pdf}
+#' @seealso \url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
 #' @references
 #' Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive
 #' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
@@ -34,7 +34,7 @@ Bacon.Age.d <- function(d, set=get('info'), its=set$output, BCAD=set$BCAD, remov
      hiatus.depths <- set$slumphiatus
   }
 
-  ages <- c()
+  ages <- numeric(nrow(its)) # to sort R-base problem with c() and loops
   if(!is.na(d))
     if(d >= set$d.min) { # we cannot calculate ages of depths above the top depth
       topages <- as.vector(its[,1]) # ages for the core top
@@ -44,7 +44,7 @@ Bacon.Age.d <- function(d, set=get('info'), its=set$output, BCAD=set$BCAD, remov
       ages <- topages + (set$thick * cumaccs[,maxd]) + # topages + xi * dC + ...
 	   ((d-set$elbows[maxd]) * accs[,maxd]) # ... remaining bit of lowest section
 
-      # now using a uniform jump, not gamma.
+      # now using a uniform jump, not gamma
       if(!is.na(hiatus.depths[1]))
         for(i in 1:length(hiatus.depths)) {
           above <- max(which(set$elbows < hiatus.depths[i]), 1)[1]
@@ -75,8 +75,11 @@ hiatus.slopes <- function(set=get('info'), hiatus.option=1) {
 
   its <- cbind(set$output)
   w <- its[,ncol(its)]^(1/set$thick)
-  set$slope.below <- list(); set$slope.above <- list()
-  set$elbow.below <- list(); set$elbow.above <- list(); set$above <- c()
+  set$slope.below <- numeric(nrow(its))
+  set$slope.above <- numeric(nrow(its))
+  set$elbow.below <- numeric(nrow(its))
+  set$elbow.above <- numeric(nrow(its))
+  set$above <- numeric(1)
   topages <- as.vector(its[,1]) # ages for the core top
   accs <- as.matrix(its[,1+(1:set$K)]) # the accumulation rates xi for each section
   cumaccs <- set$thick * cbind(0, t(apply(accs, 1, cumsum))) # cumulative accumulation
@@ -84,45 +87,45 @@ hiatus.slopes <- function(set=get('info'), hiatus.option=1) {
 
   for(i in 1:length(hiatus.depths)) {
     above <- max(which(elbows < hiatus.depths[i]), 1) ### is this the correct one?
-	elbow.below <- elbow.ages[,above+1]
-	elbow.above <- elbow.ages[,above]
-	orig.slope <- accs[,above]
+      elbow.below <- elbow.ages[,above+1]
+      elbow.above <- elbow.ages[,above]
+      orig.slope <- accs[,above]
 
     if(hiatus.option == 0) { # then do nothing
       slope.below <- orig.slope
-	  slope.above <- orig.slope
+      slope.above <- orig.slope
     }
-	if(hiatus.option == 1) { # then extrapolate slopes above/below section w hiatus
-	  slope.below <- its[,above+2]
-	  slope.above <- its[,above]
-	}
-	if(hiatus.option == 2) { # then w-weighted for below, and prior-only for above
+    if(hiatus.option == 1) { # then extrapolate slopes above/below section w hiatus
+      slope.below <- its[,above+2]
+      slope.above <- its[,above]
+    }
+    if(hiatus.option == 2) { # then w-weighted for below, and prior-only for above
       slope.below <- w*set$output[,above+2] + (1-w)*set$acc.mean[i+1]
-  	  slope.above <- rep(set$acc.mean[i], nrow(its))
+      slope.above <- rep(set$acc.mean[i], nrow(its))
     }
 
-	# now calculate the ages at the hiatus/boundary, coming from below and from above
-  	ages.above <- elbow.above + (slope.above * (hiatus.depths[i] - elbows[above]))
+    # now calculate the ages at the hiatus/boundary, coming from below and from above
+    ages.above <- elbow.above + (slope.above * (hiatus.depths[i] - elbows[above]))
     ages.below <- elbow.below - (slope.below * (elbows[above+1] - hiatus.depths[i]))
 
     if(!is.na(set$boundary[1])) { # then set the boundary's elbow at ages.below for both sections
-	  if(length(set$slumpboundary) > 0)
-		boundary <- set$slumpboundary else
-	      boundary <- set$boundary
-	  ages.boundary <- elbow.below - (slope.below * (elbows[above+1] - set$boundary[i]))
-	  slope.above <- (ages.boundary - elbow.above) / (set$boundary[i] - elbows[above])
-	  slope.below <- (ages.below - ages.boundary) / (elbows[above+1] - set$boundary[i])
+      if(length(set$slumpboundary) > 0)
+        boundary <- set$slumpboundary else
+          boundary <- set$boundary
+      ages.boundary <- elbow.below - (slope.below * (elbows[above+1] - set$boundary[i]))
+      slope.above <- (ages.boundary - elbow.above) / (set$boundary[i] - elbows[above])
+      slope.below <- (ages.below - ages.boundary) / (elbows[above+1] - set$boundary[i])
     }
 
-	# for sections with reversals, use the original slopes
-  	reversed <- c(which(elbow.above > ages.above),
-	  which(ages.above > ages.below),
-	    which(ages.below > elbow.below),
-		which(slope.below < 0), which(slope.above < 0))
-	if(length(reversed) > 0) {
-  	  slope.above[reversed] <- orig.slope[reversed]
-  	  slope.below[reversed] <- orig.slope[reversed]
-    }
+    # for sections with reversals, use the original slopes
+    reversed <- c(which(elbow.above > ages.above),
+      which(ages.above > ages.below),
+      which(ages.below > elbow.below),
+      which(slope.below < 0), which(slope.above < 0))
+   if(length(reversed) > 0) {
+     slope.above[reversed] <- orig.slope[reversed]
+     slope.below[reversed] <- orig.slope[reversed]
+   }
 
     # store the updated information
     set$elbow.below[[i]] <- elbow.below
@@ -164,7 +167,7 @@ hiatus.slopes <- function(set=get('info'), hiatus.option=1) {
 #'   agedepth(age.res=50, d.res=50, d.by=10)
 #'   Bacon.hist(20)
 #'   Bacon.hist(20:30)
-#' @seealso \url{http://www.chrono.qub.ac.uk/blaauw/manualBacon_2.3.pdf}
+#' @seealso \url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
 #' @references
 #' Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive
 #' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
@@ -177,7 +180,7 @@ Bacon.hist <- function(d, set=get('info'), BCAD=set$BCAD, age.lab=c(), age.lim=c
     .assign_to_global("set", set)
   }
   hist3 <- function(d, BCAD) {
-    hsts <- c(); maxhist <- 0; minhist <- 1
+    hsts <- list(); maxhist <- 0; minhist <- 1
     pb <- txtProgressBar(min=0, max=max(1,length(d)-1), style = 3)
     for(i in 1:length(d)) {
       if(length(d) > 1)
@@ -200,7 +203,8 @@ Bacon.hist <- function(d, set=get('info'), BCAD=set$BCAD, age.lab=c(), age.lim=c
   hists <- hist3(d, BCAD)
   .assign_to_global("hists", hists)
 
-  rng <- c()
+  # rng <- c()
+  rng <- array(NA, dim=c(length(d), 4)) # to deal with new R which does not like to fill c() using loops
   if(calc.range)
     rng <- Bacon.rng(d, set, BCAD, prob)
 
@@ -270,7 +274,7 @@ Bacon.rng <- function(d, set=get('info'), BCAD=set$BCAD, prob=set$prob) {
 #'   Bacon(run=FALSE, coredir=tempfile())
 #'   agedepth(age.res=50, d.res=50, d.by=10)
 #'   lines(agemodel.it(5), col="red")
-#' @seealso \url{http://www.chrono.qub.ac.uk/blaauw/manualBacon_2.3.pdf}
+#' @seealso \url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
 #' @references
 #' Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive
 #' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.

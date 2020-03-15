@@ -10,7 +10,7 @@
 #' @author Maarten Blaauw, J. Andres Christen
 #' @examples
 #' intcal13 <- copyCalibrationCurve(1)
-#' @seealso \url{http://www.chrono.qub.ac.uk/blaauw/manualBacon_2.3.pdf}
+#' @seealso \url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
 #' @export
 copyCalibrationCurve <- function(cc=1, postbomb=FALSE) {
   if(postbomb) {
@@ -49,7 +49,7 @@ copyCalibrationCurve <- function(cc=1, postbomb=FALSE) {
 #' @return A file containing the custom-made calibration curve, based on calibration curves \code{cc1} and \code{cc2}.
 #' @examples
 #' mix.curves(, dirname=tempdir())
-#' @seealso \url{http://www.chrono.qub.ac.uk/blaauw/manualBacon_2.3.pdf}
+#' @seealso \url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
 #' @references
 #' Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive
 #' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
@@ -86,7 +86,7 @@ mix.curves <- function(proportion=.5, cc1="3Col_intcal13.14C", cc2="3Col_marine1
 #'   pMC.age(110, 0.5) # a postbomb date, so with a negative 14C age
 #'   pMC.age(80, 0.5) # prebomb dates can also be calculated
 #'   pMC.age(.8, 0.005, 1) # pMC expressed against 1 (not against 100\%)
-#' @seealso \url{http://www.chrono.qub.ac.uk/blaauw/manualBacon_2.3.pdf}
+#' @seealso \url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
 #' @references
 #' Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive
 #' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
@@ -114,7 +114,7 @@ pMC.age <- function(mn, sdev, ratio=100, decimals=0) {
 #' @examples
 #'   age.pMC(-2000, 20)
 #'   age.pMC(-2000, 20, 1)
-#' @seealso \url{http://www.chrono.qub.ac.uk/blaauw/manualBacon_2.3.pdf}
+#' @seealso \url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
 #' @references
 #' Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive
 #' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
@@ -165,7 +165,7 @@ age.pMC <- function(mn, sdev, ratio=100, decimals=3) {
 #'   agedepth()
 #'   add.dates(5000, 100, 60)
 #' }
-#' @seealso \url{http://www.chrono.qub.ac.uk/blaauw/manualBacon_2.3.pdf}
+#' @seealso \url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
 #' @references
 #' Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive
 #' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
@@ -251,7 +251,7 @@ add.dates <- function(mn, sdev, depth, cc=1, above=1e-6, ex=10, normal=TRUE, nor
 #'   Bacon(run=FALSE, coredir=tempfile())
 #'   calib.plot()
 #'
-#' @seealso \url{http://www.chrono.qub.ac.uk/blaauw/manualBacon_2.3.pdf}
+#' @seealso \url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
 #' @references
 #' Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive
 #' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
@@ -466,7 +466,7 @@ calib.plot <- function(set=get('info'), BCAD=set$BCAD, cc=set$cc, rotate.axes=FA
 #'   Bacon(run=FALSE, coredir=tempfile())
 #'   calib.plot()
 #'
-#' @seealso \url{http://www.chrono.qub.ac.uk/blaauw/manualBacon_2.3.pdf}
+#' @seealso \url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
 #' @references
 #' Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive
 #' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
@@ -606,7 +606,7 @@ draw.pbmodelled <- function(set=get('info'), BCAD=set$BCAD, rotate.axes=FALSE, r
     d.lim <- d.lim[2:1]
    
   if(length(set$phi) > 0) {
-    Ai <- list(x=c(), y=c())
+    Ai <- list(x=NULL, y=NULL)
     hght <- 0; pbmin <- c(); pbmax <- 0
     A.rng <- array(0, dim=c(n,2))
     for(i in 1:length(depths)) {

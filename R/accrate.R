@@ -22,7 +22,7 @@
 #'   hist(d20)
 #'   d20 <- accrate.depth(20, cmyr=TRUE) # to calculate accumulation rates in cm/yr
 #'   mean(d20)
-#' @seealso \url{http://www.chrono.qub.ac.uk/blaauw/manualBacon_2.3.pdf}
+#' @seealso \url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
 #' @references
 #' Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive
 #' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
@@ -58,7 +58,7 @@ accrate.depth <- function(d, set=get('info'), cmyr=FALSE) {
 #'   accrate.a5000 = accrate.age(5000)
 #'   plot(accrate.a5000, pch='.')
 #'   hist(accrate.a5000)
-#' @seealso \url{http://www.chrono.qub.ac.uk/blaauw/manualBacon_2.3.pdf}
+#' @seealso \url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
 #' @references
 #' Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive
 #' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
@@ -118,7 +118,7 @@ accrate.age <- function(age, set=get('info'), cmyr=FALSE, BCAD=set$BCAD) {
 #'   agedepth(yr.res=50, d.res=50, d.by=10)
 #'   layout(1)
 #'   accrate.depth.ghost()
-#' @seealso \url{http://www.chrono.qub.ac.uk/blaauw/manualBacon_2.3.pdf}
+#' @seealso \url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
 #' @references
 #' Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive
 #' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
@@ -126,7 +126,7 @@ accrate.age <- function(age, set=get('info'), cmyr=FALSE, BCAD=set$BCAD) {
 #' @export
 accrate.depth.ghost <- function(set=get('info'), d=set$elbows, d.lim=c(), acc.lim=c(), d.lab=c(), cmyr=FALSE, acc.lab=c(), dark=1, grey.res=100, prob=0.95, plot.range=TRUE, range.col=grey(0.5), range.lty=2, plot.mean=TRUE, mean.col="red", mean.lty=2, rotate.axes=FALSE, rev.d=FALSE, rev.acc=FALSE) {
   max.acc <- 0; max.dens <- 0
-  acc <- list(); min.rng <- c(); max.rng <- c(); mn.rng <- c()
+  acc <- list(); min.rng <- numeric(length(d)); max.rng <- numeric(length(d)); mn.rng <- numeric(length(d))
   for(i in 1:length(d))
     if(length(acc.lim) == 0)
       acc[[i]] <- density(accrate.depth(d[i], set, cmyr=cmyr), from=0) else
@@ -232,7 +232,7 @@ accrate.depth.ghost <- function(set=get('info'), d=set$elbows, d.lim=c(), acc.li
 #'   agedepth(yr.res=50, d.res=50, d.by=10)
 #'   layout(1)
 #'   accrate.age.ghost()
-#' @seealso \url{http://www.chrono.qub.ac.uk/blaauw/manualBacon_2.3.pdf}
+#' @seealso \url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
 #' @references
 #' Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive
 #' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
@@ -250,7 +250,7 @@ accrate.age.ghost <- function(set=get('info'), age.lim=c(), yr.lim=age.lim, age.
   age.seq <- seq(min.age, max.age, length=age.res)
   pb <- txtProgressBar(min=0, max=max(1,length(age.seq)-1), style = 3)
   max.y <- 0; all.x <- c()
-  hist.list <- list(x=c(), y=c(), min.rng=c(), max.rng=c(), mn.rng=c())
+  hist.list <- list(x=NULL, y=NULL, min.rng=numeric(length(age.seq)), max.rng=numeric(length(age.seq)), mn.rng=numeric(length(age.seq)))
   for(i in 1:length(age.seq)) {
     setTxtProgressBar(pb, i)
     acc <- accrate.age(age.seq[i], set, cmyr=cmyr)
@@ -295,20 +295,24 @@ accrate.age.ghost <- function(set=get('info'), age.lim=c(), yr.lim=age.lim, age.
   if(rotate.axes) {
     plot(0, type="n", xlim=acc.lim, xlab=acc.lab, ylim=age.lim, ylab=age.lab, xaxs=xaxs, yaxs=yaxs)
     for(i in 2:length(age.seq)) {
+      x <- sort(unlist(hist.list$x[[i]]))
+      y <- sort(unlist(hist.list$y[[i]]))
       if(BCAD)
-        image(sort(hist.list$x[[i]]), 1950-hist.list$yr[c(i,i-1)], t(t(matrix(hist.list$y[[i]]))),
-          col=grey(seq(1, 1-min(1,max(hist.list$y[[i]])*dark/max.y), length=grey.res)), add=TRUE) else
-          image(sort(hist.list$x[[i]]), hist.list$yr[c(i-1,i)], t(t(matrix(hist.list$y[[i]]))),
-            col=grey(seq(1, 1-min(1,max(hist.list$y[[i]])*dark/max.y), length=grey.res)), add=TRUE)
+        image(x, 1950-unlist(hist.list$yr[c(i,i-1)]), t(t(matrix(y))),
+          col=grey(seq(1, 1-min(1,max(y)*dark/max.y), length=grey.res)), add=TRUE) else
+          image(x, unlist(hist.list$yr[c(i-1,i)]), t(t(matrix(y))),
+            col=grey(seq(1, 1-min(1,max(y)*dark/max.y), length=grey.res)), add=TRUE)
     }
   } else {
         plot(0, type="n", xlim=age.lim, xlab=age.lab, ylim=acc.lim, ylab=acc.lab, xaxs=xaxs, yaxs=yaxs)
         for(i in 2:length(age.seq)) {
+          x <- sort(unlist(hist.list$x[[i]]))
+          y <- sort(unlist(hist.list$y[[i]]))
           if(BCAD)
-            image(sort(1950-hist.list$yr[c(i,i-1)]), hist.list$x[[i]], t(matrix(hist.list$y[[i]])),
-              col=grey(seq(1, 1-min(1,max(hist.list$y[[i]])*dark/max.y), length=grey.res)), add=TRUE) else
-              image(sort(hist.list$yr[c(i-1,i)]), hist.list$x[[i]], t(matrix(hist.list$y[[i]])),
-                col=grey(seq(1, 1-min(1,max(hist.list$y[[i]])*dark/max.y), length=grey.res)), add=TRUE)
+            image(1950-sort(unlist(hist.list$yr[c(i,i-1)])), x, t(matrix(y)),
+              col=grey(seq(1, 1-min(1,max(y)*dark/max.y), length=grey.res)), add=TRUE) else
+              image(sort(unlist(hist.list$yr[c(i-1,i)])), x, t(matrix(y)),
+                col=grey(seq(1, 1-min(1,max(y)*dark/max.y), length=grey.res)), add=TRUE)
         }
       }
    if(plot.range)
@@ -339,7 +343,7 @@ accrate.age.ghost <- function(set=get('info'), age.lim=c(), yr.lim=age.lim, age.
 #' the proxy concentration values (leaving missing values empty). Then type for example \code{flux.age.ghost(1)} to plot the
 #' flux values for the first proxy in the .csv file. Instead of using a _flux.csv file, a flux variable can also be defined
 #'  within the R session (consisting of depths and their proxy concentrations in two columns). Then provide the name of this variable, e.g.: \code{flux.age.ghost(flux=flux1)}.
-#' See Plum_runs/MSB2K/MSB2K_flux.csv for an example.
+#' See Bacon_runs/MSB2K/MSB2K_flux.csv for an example.
 #' @param proxy Which proxy to use (counting from the column number in the .csv file after the depths column).
 #' @param age.lim Minimum and maximum calendar age ranges, calculated automatically by default (\code{age.lim=c()}).
 #' @param yr.lim Deprecated - use age.lim instead
@@ -374,7 +378,7 @@ accrate.age.ghost <- function(set=get('info'), age.lim=c(), yr.lim=age.lim, age.
 #'   agedepth(yr.res=50)
 #'   flux.age.ghost(1)
 #' }
-#' @seealso \url{http://www.chrono.qub.ac.uk/blaauw/manualBacon_2.3.pdf}
+#' @seealso \url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
 #' @references
 #' Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive
 #' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
