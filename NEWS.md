@@ -1,4 +1,9 @@
- # rbacon 2.4.1
+# rbacon 2.4.2
+* Reverted the c/c++ code back to that of version 2.3.9.1, owing to problems with the code introduced in version 2.4.0 (posteriors of memory and age-model are apparently too wide)
+* Repaired bug that caused an error when using slumps or boundaries
+* Enhanced behaviour of rotate.axes option
+
+# rbacon 2.4.1
 * Updated the code to deal with changes in how base-R deals with c() in loops, as suggested by Martin Maechler's e-mail 29 February 2020
 
 # rbacon 2.4.0

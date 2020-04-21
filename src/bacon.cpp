@@ -123,8 +123,6 @@ int bacon( std::string inputfile1, std::string outputfile1 , int ssize, std::str
 
   All.PrintNumWarnings();
 
-  All.outputFiles(outputfile1);
-
   /*
   char  ax2[BUFFSIZE];
   //File to save the thinned twalk output
@@ -189,3 +187,6 @@ int bacon( std::string inputfile1, std::string outputfile1 , int ssize, std::str
 
 
 }
+
+
+

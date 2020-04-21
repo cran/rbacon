@@ -17,10 +17,6 @@
   dseq <- dseq[-d.inside]
   }
 
-  if(rotate.axes)
-	  dseq <- rev(dseq)
-  if(rev.d)
-	  dseq <- rev(dseq)
   Bacon.hist(dseq, set, BCAD=BCAD, calc.range=FALSE, draw=FALSE)
   hists <- get('hists')
   scales <- array(0, dim=c(length(dseq), age.res))
@@ -37,9 +33,10 @@
     dark <- 10 * minmax/maxmax
   scales[scales > dark] <- dark
   dseq <- sort(dseq)
+
   if(rotate.axes)
-    image(ageseq, dseq, t(scales), add=TRUE, col=colours, useRaster=TRUE) else
-      image(dseq, ageseq, scales, add=TRUE, col=colours, useRaster=TRUE)
+    image(ageseq, dseq, t(scales), add=TRUE, col=colours, useRaster=FALSE) else
+      image(dseq, ageseq, scales, add=TRUE, col=colours, useRaster=FALSE)
 }
 
 

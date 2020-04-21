@@ -136,8 +136,8 @@ public:
         Rprintf("GenericCal: Reading from file: %s, %d rows, 3 cols.\n", filename.c_str(), numrows);
 
         if (CC.filescan((char*)filename.c_str()) == 0) {
-          REprintf("Cal: ERROR: Could not find generic cal. curve, file not found: %s\n", filename.c_str());
-          Rcpp::stop("Cal: ERROR: Could not find generic cal. curve, file not found: %s\n", filename.c_str());
+           REprintf("Cal: ERROR: Could not find generic cal. curve, file not found: %s\n", filename.c_str());
+            Rcpp::stop("Cal: ERROR: Could not find generic cal. curve, file not found: %s\n", filename.c_str());
         //	exit(0);
 		}
 
@@ -192,7 +192,7 @@ public:
 		//printf(" %d: %6.3f %6.3f %6.3f\n", k, CC( k, 0), theta, CC( k+1, 0));
 
 		mu = CC(k,1) + (theta-CC(k,0))*(CC(k+1,1)-CC(k,1))/(CC(k+1,0)-CC(k,0));
-		sig = CC(k,2) + (theta-CC(k,0))*(CC(k+1,2)-CC(k,2))/(CC(k+1,0)-CC(k,0));
+		sig =CC(k,2) + (theta-CC(k,0))*(CC(k+1,2)-CC(k,2))/(CC(k+1,0)-CC(k,0));
 
 		return mu;
 	}
@@ -343,7 +343,7 @@ public:
 							mu = CC(k,1) + (theta-CC(k,0))*(CC(k+1,1)-CC(k,1))/100.0;
 							sig = CC(k,2);
 						}
-        }
+        }					
             return mu;
 	}
 
@@ -433,7 +433,7 @@ public:
                  sig = CC(k,2);
         }
         else
-        {       // MB added '{' on 30 Jan 2019 to avoid indentation warning while compiling on Fedora. This '{' was placed correctly for IntCal13 (line 318)
+        {       // MB added '{' on 30 Jan 2019 to avoid indentation warning while compiling on Fedora. This '{' was placed correctly for IntCal13 (line 318)    
                 if (fcmp(theta, 10500.0) != 1)
                 {       //************** NB: 0 is the number of rows before cal year 0
                         k = 0 + (int) floor(theta/5.0);
@@ -461,7 +461,7 @@ public:
                                         mu = CC(k,1) + (theta-CC(k,0))*(CC(k+1,1)-CC(k,1))/100.0;
                                         sig =CC(k,2);
                                 }
-        }       // MB added '}' on 30 Jan 2019 to avoid indentation warning while compiling on Fedora
+        }       // MB added '}' on 30 Jan 2019 to avoid indentation warning while compiling on Fedora                   
                 return mu;
         }
 
@@ -632,115 +632,7 @@ public:
 };
 
 
-class Plum : public Cal {
 
-	double alPhi, mPhi, alS, mS; //a priori pars form phi and PS
-	double Al, theta0; //Detection limit.
-	int radon;
-	int nS; //number of supported observations
-	Matrix *SB;
-	SubMatrix S; //To hold supported data
-
-public:
-	// Parameters for the apriori for \Phi and P^S .  radon=0 No radon, radon =1 Radon case (A) and radon =2 Radon case (B).
-	// and fnam the file name for the supportted data
-    Plum( double alPhi_, double mPhi_, double alS_, double mS_, double Al_, double theta0_, int radon_, const char *fnam, std::string ccdir ) : Cal(0) {
-      Rprintf("Calibration 'curve' used to handle 210Pb data (Plum).\n");
-      //printf("Calibration 'curve' used to handle 210Pb data (Plum).\n");
-		  alPhi = alPhi_;
-  		mPhi = mPhi_;
-  		alS = alS_;
-  		mS = mS_;
-  		Al = Al_;
-  		radon = radon_;
-      theta0 = theta0_;
-
-      //printf("alPhi %lf mPhi %lf alS %lf ms %lf Al %lf radon %d theta0 %lf\n", alPhi, mPhi, alS, mS, Al, radon, theta0);
-
-  		// Read the supported data file, two colouns only no header, y^S_i and s_i
-      //std::string filename = std::string(ccdir)+std::string(fnam);
-      std::string filename = std::string(fnam);
-
-
-  		//Count the number of lines in the file
-  		FILE *F;
-      if ((F = fopen( filename.c_str(), "r")) == NULL) {
-        REprintf("Plum: ERROR: Could not find supported data, file not found: %s\n", filename.c_str());
-        //printf("Plum: ERROR: Could not find supported data, file not found: %s\n", filename.c_str());
-        Rcpp::stop("Plum: ERROR: Could not find supported data, file not found: %s\n", filename.c_str());
-        //exit(0);
-      }
-
-      Rprintf("Supported data file %s\n", filename.c_str());
-
-  		int numrows=0;
-  		char ln[GENCCMAXLINLEN];
-  		while (!feof(F)) {
-        char* result=fgets(ln, GENCCMAXLINLEN, F); //JEV warning
-        if(result==NULL){}//JEV warning
-        numrows++;
-		  }
-		  numrows--;
-		  fclose(F);
-
-  		//Read the file as usual:
-  		SB = new Matrix( numrows, 2);
-
-  		S.Set( SB, SB->nRow(), SB->nCol());
-
-      Rprintf("Plum: Reading supported data from file: %s, %d rows, 2 cols.\n", filename.c_str(), numrows);
-      //printf("Plum: Reading supported data from file: %s, %d rows, 2 cols.\n", filename.c_str(), numrows);
-
-      if (S.filescan((char*)filename.c_str()) == 0) {
-        REprintf("Plum: ERROR: Could not find supported data, file not found: %s\n", filename.c_str());
-        //printf("Plum: ERROR: Could not find supported data, file not found: %s\n", filename.c_str());
-        Rcpp::stop("Plum: ERROR: Could not find supported data, file not found: %s\n", filename.c_str());
-        //exit(0);
-		  }
-
-
-
-		  nS = S.nRow();
-		  for (int j=0; j < nS; j++) {
-        //printf("S(%d, %d) = %lf\n", j, 1, S(j,1));
-        S( j, 1) = S( j, 1)*S( j, 1); //store the variances
-		  }
-
-
-
-	}
-
-	double cal(double theta) {
-		mu = theta; //The identity
-		sig = 0.0;
-		return theta;
-	}
-
-  const char* Name() { return "Plum"; }
-
-	//Here is simply the identity
-	double U( double y, double vr, double theta) { return 0.5*sqr(y - theta)/vr; }
-	double Ut( double y, double vr, double theta, double a, double b) { return (a + 0.5)*log( b + 0.5*sqr(y - theta)/vr); }
-
-	double MinCal() { return -1.0e300; }
-	double MaxCal() { return 1.0e300; }
-
-	int NS() { return nS; }
-	double yS(int j) { return S( j, 0); } // the supported data
-	double s2(int j) { return S( j, 1); }
-	int MorePars() {
-		if (radon < 2)
-			return 2; // No Radon or Radon case (A), Phi and PS are the additional parameters
-		else
-			return 1 + nS; //Radon case (B), Phi and n_S additional parameters
-	}
-	double GetAl() { return Al; }
-  double GetTheta0() { return theta0; }
-  double GetAlPhi() { return alPhi; }
-  double GetMPhi() { return mPhi; }
-  double GetAlS() { return alS; }
-  double GetMS() { return mS; }
-};
 
 
 /******* Class Det *******/
@@ -757,9 +649,6 @@ protected:
 
 	double deltaR;	// delta-R (reservoir correction)
 	double deltaSTD;	// delta-R std dev. (reservoir correction)
-
-  int is_210Pb; //flag to verify if this is a 210Pb datum is_201Pb=1 if it is a 210Pb datum
-	double rho, delta; //rho (density) for 210Pb, delta (thickness)
 
 	double a, b; //prior parameters for the t distribution
 
@@ -785,22 +674,9 @@ public:
 
 		cc = ecc;
 
-    if (strcmp( cc->Name(), "Plum") == 0) { //It is a 210Pb datum
-      is_210Pb = 1;
-      delta = deltaR;
-      rho = deltaSTD;
-      std = std*rho;
-      med = y*rho;
-      vr = sqr(std);
-      corrstd = std;
-    } else {
-      is_210Pb = 0;
-      rho = 0.0;
-      delta = 0.0;
-      med = y - deltaR;
-      vr = sqr(std) + sqr(deltaSTD);
-      corrstd = sqrt(vr);
-    }
+		med = y - deltaR;
+		vr = sqr(std) + sqr(deltaSTD);
+		corrstd = sqrt(vr);
 
 	}
 
@@ -824,11 +700,6 @@ public:
 	double res_mean() { return deltaR; }
 	double res_std() { return deltaSTD; }
 	double d() { return x; }
-
-  int Is210Pb() { return is_210Pb; }
-	double Delta210Pb() { return delta; }
-	double Rho210Pb() { return rho; }
-	const Cal *GetCC() { return cc; }
 
 	//exp(-U) will be the likelihood for this determination.
 	double U(double theta) { return cc->U( med, vr, theta); }
@@ -889,10 +760,6 @@ public:
 	double SetY(int j, double y) {  return det[j]->ChangeCorrMean(y); }
 	double SetSd(int j, double y) {  return det[j]->ChangeSd(y); }
 
-  int Is210Pb(int j)  {  return det[j]->Is210Pb(); }
-	double Rho210Pb(int j) { return det[j]->Rho210Pb(); }
-	double Delta210Pb(int j) { return det[j]->Delta210Pb(); }
-	const Cal *GetCC(int j) { return det[j]->GetCC();}
 
 	double U(int j, double theta)  { return det[j]->U(theta); }
 	double Ut(int j, double theta) { return det[j]->Ut(theta); }

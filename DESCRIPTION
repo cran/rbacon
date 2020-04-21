@@ -1,8 +1,8 @@
 Package: rbacon
 Type: Package
 Title: Age-Depth Modelling using Bayesian Statistics
-Version: 2.4.1
-Date: 2020-03-15
+Version: 2.4.2
+Date: 2020-04-21
 Authors@R: c(
     person("Maarten", "Blaauw", email = "maarten.blaauw@qub.ac.uk", role = c("aut", "cre")),
     person("J. Andres", "Christen", email = "jac@cimat.mx", role = c("aut", "ctb", "cph")),
@@ -32,5 +32,5 @@ Author: Maarten Blaauw [aut, cre],
   Brian Gough [cph],
   Charles Karney [cph]
 Maintainer: Maarten Blaauw <maarten.blaauw@qub.ac.uk>
-Date/Publication: 2020-03-15 16:10:02 UTC
-Packaged: 2020-03-15 15:51:41 UTC; maarten
+Date/Publication: 2020-04-21 18:20:09 UTC
+Packaged: 2020-04-21 17:51:01 UTC; maarten

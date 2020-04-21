@@ -322,9 +322,9 @@ assign_coredir <- function(coredir, core, ask=TRUE) {
   depth.unit <- extr(20, isnum=FALSE); normal <- extr(21); t.a <- extr(22); t.b <- extr(23)
   delta.R <- extr(24); delta.STD <- extr(25); prob <- extr(26); age.unit <- extr(27, isnum=FALSE)
 
-  if(is.na(d.min) || d.min=="NA")
+  if(is.na(d.min)) # removed || d.min == "NA" 10 April 2020
     d.min <- min(dets[,4])
-  if(is.na(d.max) || d.max=="NA")
+  if(is.na(d.max)) # removed || d.max == "NA" 10 April 2020
     d.max <- max(dets[,4])
   if(length(acc.shape) < length(acc.mean))
     acc.shape <- rep(acc.shape, length(acc.mean)) else
@@ -450,7 +450,7 @@ assign_coredir <- function(coredir, core, ask=TRUE) {
   if(!is.na(hiatus.depths[1])) {
     if(is.null(boundary[1]))
       message("  Hiatus set at depth(s)", hiatus.depths) else
-        message("  Boundary set at depth(s)", boundary)
+        message("  Boundary set at depth(s) ", boundary)
     if(length(set$acc.shape)==1)
       set$acc.shape <- rep(set$acc.shape, length(hiatus.depths)+1)
     if(length(set$acc.mean)==1)

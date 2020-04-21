@@ -50,10 +50,10 @@ Bacon.Age.d <- function(d, set=get('info'), its=set$output, BCAD=set$BCAD, remov
           above <- max(which(set$elbows < hiatus.depths[i]), 1)[1]
           below <- above + 1
           if(d > set$elbows[above] && d <= set$elbows[below]) { # adapt ages for sections with hiatus
-            if(d > hiatus.depths[i])
-  	          ages <- set$elbow.below[[i]] - (set$slope.below[[i]] * (set$elbows[below] - d)) else
-	            ages <- set$elbow.above[[i]] + (set$slope.above[[i]] * (d - set$elbows[above]))
-	      }
+            if(d > hiatus.depths[i]) # April 2020, changed snippets below from [[i]]] to [,i]
+              ages <- set$elbow.below[,i] - (set$slope.below[,i] * (set$elbows[below] - d)) else
+                ages <- set$elbow.above[,i] + (set$slope.above[,i] * (d - set$elbows[above]))
+            }
         }
     }
   if(BCAD)
@@ -75,10 +75,13 @@ hiatus.slopes <- function(set=get('info'), hiatus.option=1) {
 
   its <- cbind(set$output)
   w <- its[,ncol(its)]^(1/set$thick)
-  set$slope.below <- numeric(nrow(its))
-  set$slope.above <- numeric(nrow(its))
-  set$elbow.below <- numeric(nrow(its))
-  set$elbow.above <- numeric(nrow(its))
+  fillvals <- array(NA, dim=c(nrow(its), length(hiatus.depths))) # 17 Apr 2020
+#  set$slope.below <- numeric(nrow(its))  # 17 Apr 2020
+#  set$slope.above <- numeric(nrow(its))  # 17 Apr 2020
+  set$slope.below <- fillvals  # 17 Apr 2020
+  set$slope.above <- fillvals  # 17 Apr 2020
+  set$elbow.below <- fillvals # 17 Apr 2020
+  set$elbow.above <- fillvals # 17 Apr 2020
   set$above <- numeric(1)
   topages <- as.vector(its[,1]) # ages for the core top
   accs <- as.matrix(its[,1+(1:set$K)]) # the accumulation rates xi for each section
@@ -128,10 +131,15 @@ hiatus.slopes <- function(set=get('info'), hiatus.option=1) {
    }
 
     # store the updated information
-    set$elbow.below[[i]] <- elbow.below
-    set$elbow.above[[i]] <- elbow.above
-    set$slope.below[[i]] <- slope.below
-    set$slope.above[[i]] <- slope.above
+    # set$elbow.below[[i]] <- elbow.below # commented Apr 2020
+    # set$elbow.above[[i]] <- elbow.above
+    # set$slope.below[[i]] <- slope.below
+    # set$slope.above[[i]] <- slope.above
+    set$elbow.below[,i] <- elbow.below # new April 2020
+    set$elbow.above[,i] <- elbow.above # new 
+    set$slope.below[,i] <- slope.below # new
+    set$slope.above[,i] <- slope.above # new
+    
     set$above <- above
   }
   return(set)
