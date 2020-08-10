@@ -124,20 +124,20 @@ Input::Input(char *datafile, int emaxnumofcurves, int maxm, std::string ccdir) {
 		{
 			sscanf( pars[0], " %s", line); //c. curve name
 
-			if (strcmp( "IntCal13", line) == 0) {   //int bomb
-                curves[numofcurves++] = new IntCal13((int) rpars[1], ccdir);
+			if (strcmp( "IntCal20", line) == 0) {   //int bomb
+                curves[numofcurves++] = new IntCal20((int) rpars[1], ccdir);
 
 				continue;
 			}
 
-			if (strcmp( "Marine13", line) == 0) {
-                curves[numofcurves++] = new Marine13(ccdir);
+			if (strcmp( "Marine20", line) == 0) {
+                curves[numofcurves++] = new Marine20(ccdir);
 
 				continue;
 			}
 
-			if (strcmp( "SHCal13", line) == 0) {
-                curves[numofcurves++] = new SHCal13((int) rpars[1], ccdir);
+			if (strcmp( "SHCal20", line) == 0) {
+                curves[numofcurves++] = new SHCal20((int) rpars[1], ccdir);
 
 				continue;
 			}

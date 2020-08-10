@@ -7,8 +7,8 @@
 copyCalibrationCurve(cc = 1, postbomb = FALSE)
 }
 \arguments{
-\item{cc}{Calibration curve for 14C dates: \code{cc=1} for IntCal13 (northern hemisphere terrestrial), \code{cc=2} for Marine13 (marine),
-\code{cc=3} for SHCal13 (southern hemisphere terrestrial).}
+\item{cc}{Calibration curve for 14C dates: \code{cc=1} for IntCal20 (northern hemisphere terrestrial), \code{cc=2} for Marine20 (marine),
+\code{cc=3} for SHCal20 (southern hemisphere terrestrial).}
 
 \item{postbomb}{Use \code{postbomb=TRUE} to get a postbomb calibration curve (default \code{postbbomb=FALSE}).}
 }
@@ -22,7 +22,7 @@ Copy one of the the calibration curves into memory.
 Copy the radiocarbon calibration curve defined by cc into memory.
 }
 \examples{
-intcal13 <- copyCalibrationCurve(1)
+intcal20 <- copyCalibrationCurve(1)
 }
 \seealso{
 \url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}

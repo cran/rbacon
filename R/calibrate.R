@@ -4,12 +4,12 @@
 #' @description Copy one of the the calibration curves into memory.
 #' @details Copy the radiocarbon calibration curve defined by cc into memory.
 #' @return The calibration curve (invisible).
-#' @param cc Calibration curve for 14C dates: \code{cc=1} for IntCal13 (northern hemisphere terrestrial), \code{cc=2} for Marine13 (marine),
-#' \code{cc=3} for SHCal13 (southern hemisphere terrestrial).
+#' @param cc Calibration curve for 14C dates: \code{cc=1} for IntCal20 (northern hemisphere terrestrial), \code{cc=2} for Marine20 (marine),
+#' \code{cc=3} for SHCal20 (southern hemisphere terrestrial).
 #' @param postbomb Use \code{postbomb=TRUE} to get a postbomb calibration curve (default \code{postbbomb=FALSE}).
 #' @author Maarten Blaauw, J. Andres Christen
 #' @examples
-#' intcal13 <- copyCalibrationCurve(1)
+#' intcal20 <- copyCalibrationCurve(1)
 #' @seealso \url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
 #' @export
 copyCalibrationCurve <- function(cc=1, postbomb=FALSE) {
@@ -21,9 +21,9 @@ copyCalibrationCurve <- function(cc=1, postbomb=FALSE) {
             if(cc==5) fl <- "postbomb_SH3.14C" else
               stop("calibration curve doesn't exist\n", call.=FALSE)
   } else
-  if(cc==1) fl <- "3Col_intcal13.14C" else
-    if(cc==2) fl <- "3Col_marine13.14C" else
-      if(cc==3) fl <- "3Col_shcal13.14C" else
+  if(cc==1) fl <- "3Col_intcal20.14C" else
+    if(cc==2) fl <- "3Col_marine20.14C" else
+      if(cc==3) fl <- "3Col_shcal20.14C" else
         stop("calibration curve doesn't exist\n", call.=FALSE)
   cc <- system.file("extdata/Curves", fl, package='rbacon')
   cc <- read.table(cc)
@@ -38,8 +38,8 @@ copyCalibrationCurve <- function(cc=1, postbomb=FALSE) {
 #' @details The proportional contribution of each of both calibration curves has to be set.
 #'
 #' @param proportion Proportion of the first calibration curve required. e.g., change to \code{proportion=0.7} if \code{cc1} should contribute 70\% (and \code{cc2} 30\%) to the mixed curve.
-#' @param cc1 The first calibration curve to be mixed. Defaults to the northern hemisphere terrestrial curve IntCal13.
-#' @param cc2 The second calibration curve to be mixed. Defaults to the marine curve IntCal13.
+#' @param cc1 The first calibration curve to be mixed. Defaults to the northern hemisphere terrestrial curve IntCal20.
+#' @param cc2 The second calibration curve to be mixed. Defaults to the marine curve IntCal20.
 #' @param name Name of the new calibration curve.
 #' @param dirname Directory where the file will be written. If using the default \code{dirname="."},
 #' the new curve will be saved in current working directory.
@@ -55,7 +55,7 @@ copyCalibrationCurve <- function(cc=1, postbomb=FALSE) {
 #' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
 #' \url{https://projecteuclid.org/euclid.ba/1339616472}
 #' @export
-mix.curves <- function(proportion=.5, cc1="3Col_intcal13.14C", cc2="3Col_marine13.14C", name="mixed.14C", dirname=".", offset=c(0,0), sep="\t") {
+mix.curves <- function(proportion=.5, cc1="3Col_intcal20.14C", cc2="3Col_marine20.14C", name="mixed.14C", dirname=".", offset=c(0,0), sep="\t") {
   ccloc <- paste0(system.file("extdata", package='rbacon'), "/Curves/")
   dirname <- .validateDirectoryName(dirname)
 
@@ -135,7 +135,7 @@ age.pMC <- function(mn, sdev, ratio=100, decimals=3) {
 #' @param mn Reported mean of the date. Can be multiple dates.
 #' @param sdev Reported error of the date. Can be multiple dates.
 #' @param depth Depth of the date.
-#' @param cc The calibration curve to use: \code{cc=1} for IntCal13 (northern hemisphere terrestrial), \code{cc=2} for Marine13 (marine), \code{cc=0} for none (dates that are already on the cal BP scale).
+#' @param cc The calibration curve to use: \code{cc=1} for IntCal20 (northern hemisphere terrestrial), \code{cc=2} for Marine20 (marine), \code{cc=0} for none (dates that are already on the cal BP scale).
 #' @param above Treshold for plotting of probability values. Defaults to \code{above=1e-3}.
 #' @param ex Exaggeration of probability distribution plots. Defaults to \code{ex=50}.
 #' @param normal By default, Bacon uses the student's t-distribution to treat the dates. Use \code{normal=TRUE} to use the normal/Gaussian distribution. This will generally give higher weight to the dates.
@@ -334,14 +334,14 @@ calib.plot <- function(set=get('info'), BCAD=set$BCAD, cc=set$cc, rotate.axes=FA
 # calibrate C14 dates and calculate distributions for any calendar dates
 .bacon.calib <- function(dat, set=get('info'), date.res=100, normal=set$normal, t.a=set$t.a, t.b=set$t.b, delta.R=set$delta.R, delta.STD=set$delta.STD, ccdir="") {
   # read in the curves
-  if(set$cc1=="IntCal13" || set$cc1=="\"IntCal13\"")
-    cc1 <- read.table(paste(ccdir, "3Col_intcal13.14C",sep="")) else
+  if(set$cc1=="IntCal20" || set$cc1=="\"IntCal20\"")
+    cc1 <- read.table(paste(ccdir, "3Col_intcal20.14C",sep="")) else
       cc1 <- read.csv(paste(ccdir, set$cc1, ".14C", sep=""), header=FALSE, skip=11)[,1:3]
-  if(set$cc2=="Marine13" || set$cc2=="\"Marine13\"")
-    cc2 <- read.table(paste(ccdir, "3Col_marine13.14C",sep="")) else
+  if(set$cc2=="Marine20" || set$cc2=="\"Marine20\"")
+    cc2 <- read.table(paste(ccdir, "3Col_marine20.14C",sep="")) else
       cc2 <- read.csv(paste(ccdir, set$cc2, ".14C", sep=""), header=FALSE, skip=11)[,1:3]
-  if(set$cc3=="SHCal13" || set$cc3=="\"SHCal13\"")
-    cc3 <- read.table(paste(ccdir, "3Col_shcal13.14C",sep="")) else
+  if(set$cc3=="SHCal20" || set$cc3=="\"SHCal20\"")
+    cc3 <- read.table(paste(ccdir, "3Col_shcal20.14C",sep="")) else
       cc3 <- read.csv(paste(ccdir, set$cc3, ".14C", sep=""), header=FALSE, skip=11)[,1:3]
   if(set$cc4=="ConstCal" || set$cc4=="\"ConstCal\"") cc4 <- NA else
     cc4 <- read.table(paste(ccdir, set$cc4, sep=""))[,1:3]
@@ -361,7 +361,6 @@ calib.plot <- function(set=get('info'), BCAD=set$BCAD, cc=set$cc, rotate.axes=FA
         cc1 <- rbind(bomb, cc1, deparse.level=0) else
           cc3 <- rbind(bomb, cc3, deparse.level=0)
   }
-
   ## use Gaussian or t (Christen and Perez Radiocarbon 2009) calibration
   if(round(set$t.b-set$t.a) !=1)
     stop("t.b - t.a should always be 1, check the manual", call.=FALSE)
@@ -381,7 +380,7 @@ calib.plot <- function(set=get('info'), BCAD=set$BCAD, cc=set$cc, rotate.axes=FA
 
   # now calibrate all dates
   calib <- list(d=dat[,4])
-  if(ncol(dat)==4) { # only one type of dates (e.g., calBP, or all IntCal13 C14 dates)
+  if(ncol(dat)==4) { # only one type of dates (e.g., calBP, or all IntCal20 C14 dates)
     if(set$cc==0) {
       x <- seq(min(dat[,2])-(5*max(dat[,3])), max(dat[,2])+(5*max(dat[,3])), by=5) # simplify, May 2019
       if(length(x) > 100) # if too many resulting years, make 100 vals
@@ -397,23 +396,22 @@ calib.plot <- function(set=get('info'), BCAD=set$BCAD, cc=set$cc, rotate.axes=FA
       calib$probs[[i]] <- d.cal(ccurve, dat[i,2]-delta.R, dat[i,3]^2+delta.STD^2, set$t.a, set$t.b)
   } else
       for(i in 1:nrow(dat)) {
-        dets <- as.numeric(dat[i,])
+        dets <- c(NA, as.numeric(dat[i,-1])) # the first column is not numeric
         if(dets[5]==0) {
           x <- seq(dets[2]-(5*dets[3]), dets[2]+(5*dets[3]), by=5) # simplify, May 2019
           if(length(x) < 5 || length(x) > 100) # if too many resulting years, make 100 vals
             x <- seq(dets[2]-(5*dets[3]), dets[2]+(5*dets[3]), length=100)
           ccurve <- cbind(x, x, rep(0,length(x))) # dummy 1:1 curve
-        } else
+        } else {
             if(dets[5]==1) ccurve <- cc1 else if(dets[5]==2) ccurve <- cc2 else
               if(dets[5]==3) ccurve <- cc3 else ccurve <- cc4
-
+              }
         delta.R <- set$delta.R; delta.STD <- set$delta.STD; t.a <- set$t.a; t.b <- set$t.b
         if(length(dets) >= 7 && dets[5] > 0) { # the user provided age offsets; only for C14 dates
           delta.R <- dets[6]
           delta.STD <- dets[7]
         }
-
-        if(length(dets) >= 9) { # the user provided t.a and t.b values for each date
+      if(length(dets) >= 9) { # the user provided t.a and t.b values for each date
           t.a <- dets[8]
           t.b <- dets[9]
           if(round(t.b-t.a) != 1)

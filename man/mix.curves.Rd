@@ -6,8 +6,8 @@
 \usage{
 mix.curves(
   proportion = 0.5,
-  cc1 = "3Col_intcal13.14C",
-  cc2 = "3Col_marine13.14C",
+  cc1 = "3Col_intcal20.14C",
+  cc2 = "3Col_marine20.14C",
   name = "mixed.14C",
   dirname = ".",
   offset = c(0, 0),
@@ -17,9 +17,9 @@ mix.curves(
 \arguments{
 \item{proportion}{Proportion of the first calibration curve required. e.g., change to \code{proportion=0.7} if \code{cc1} should contribute 70\% (and \code{cc2} 30\%) to the mixed curve.}
 
-\item{cc1}{The first calibration curve to be mixed. Defaults to the northern hemisphere terrestrial curve IntCal13.}
+\item{cc1}{The first calibration curve to be mixed. Defaults to the northern hemisphere terrestrial curve IntCal20.}
 
-\item{cc2}{The second calibration curve to be mixed. Defaults to the marine curve IntCal13.}
+\item{cc2}{The second calibration curve to be mixed. Defaults to the marine curve IntCal20.}
 
 \item{name}{Name of the new calibration curve.}
 

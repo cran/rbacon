@@ -33,7 +33,7 @@ add.dates(
 
 \item{depth}{Depth of the date.}
 
-\item{cc}{The calibration curve to use: \code{cc=1} for IntCal13 (northern hemisphere terrestrial), \code{cc=2} for Marine13 (marine), \code{cc=0} for none (dates that are already on the cal BP scale).}
+\item{cc}{The calibration curve to use: \code{cc=1} for IntCal20 (northern hemisphere terrestrial), \code{cc=2} for Marine20 (marine), \code{cc=0} for none (dates that are already on the cal BP scale).}
 
 \item{above}{Treshold for plotting of probability values. Defaults to \code{above=1e-3}.}
 

@@ -473,11 +473,11 @@
   fl <- file(set$bacon.file, "w")
   cat("## Ran on", set$date, "\n\n", file=fl)
   cat("Cal 0 : ConstCal;\nCal 1 : ",
-  if(set$cc1=="IntCal13" || set$cc1=="\"IntCal13\"") "IntCal13"
+  if(set$cc1=="IntCal20" || set$cc1=="\"IntCal20\"") "IntCal20"
     else noquote(set$cc1), ", ", set$postbomb, ";\nCal 2 : ",
-  if(set$cc2=="Marine13" || set$cc2=="\"Marine13\"") "Marine13"
+  if(set$cc2=="Marine20" || set$cc2=="\"Marine20\"") "Marine20"
     else noquote(set$cc2), ";\nCal 3 : ",
-  if(set$cc3=="SHCal13" || set$cc3=="\"SHCal13\"") "SHCal13"
+  if(set$cc3=="SHCal20" || set$cc3=="\"SHCal20\"") "SHCal20"
     else noquote(set$cc3), ", ", set$postbomb, ";",
 			if(set$cc4=="ConstCal" || set$cc4=="\"ConstCal\"") set$cc4 <- NULL
     else

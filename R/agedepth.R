@@ -66,7 +66,7 @@
 #' @param slump.col Colour of slumps. Defaults to \code{slump.col=grey(0.8)}.
 #' @param normalise.dists By default, the distributions of more precise dates will cover less time and will thus peak higher than less precise dates. This can be avoided by specifying \code{normalise.dists=FALSE}.
 #' @param same.heights Plot the distributions of the dates all at the same maximum height (default \code{same.height=FALSE}).
-#' @param cc Calibration curve for 14C dates: \code{cc=1} for IntCal13 (northern hemisphere terrestrial), \code{cc=2} for Marine13 (marine), \code{cc=3} for SHCal13 (southern hemisphere terrestrial). For dates that are already on the cal BP scale use \code{cc=0}.
+#' @param cc Calibration curve for 14C dates: \code{cc=1} for IntCal20 (northern hemisphere terrestrial), \code{cc=2} for Marine20 (marine), \code{cc=3} for SHCal20 (southern hemisphere terrestrial). For dates that are already on the cal BP scale use \code{cc=0}.
 #' @param title The title of the age-depth model is plotted on the main panel. By default this is the core's name. To leave empty: \code{title=""}.
 #' @param title.location Location of the title. Default \code{title.location='top'}.
 #' @param after Sets a short section above and below hiatus.depths within which to calculate ages. For internal calculations - do not change.
@@ -128,7 +128,7 @@ agedepth <- function(set=get('info'), BCAD=set$BCAD, depth.unit="cm", age.unit="
       .PlotLogPost(set, 0, set$Tr, xaxs=xaxs, yaxs=yaxs) # convergence information
       oldpar <- par(mar=c(3,0,1,.5)) # reduce white space
       on.exit(par(oldpar))         	
-      .PlotAccPost(set, depth.unit=unit, age.unit=age.unit, xaxs=xaxs, yaxs=yaxs)
+      .PlotAccPost(set, depth.unit=depth.unit, age.unit=age.unit, xaxs=xaxs, yaxs=yaxs)
       .PlotMemPost(set, set$core, set$K, "", set$mem.strength, set$mem.mean, ds=1, thick=set$thick, xaxs=xaxs, yaxs=yaxs)
       if(!is.na(set$hiatus.depths[1]))
         if(is.na(set$boundary[1]))
@@ -220,7 +220,7 @@ agedepth <- function(set=get('info'), BCAD=set$BCAD, depth.unit="cm", age.unit="
   if(!dates.only) {
     if(verbose)
       message("Preparing ghost graph... ")
-    .agedepth.ghost(set, rotate.axes=rotate.axes, rev.d=rev.d, BCAD=BCAD, d.res=d.res, age.res=age.res, grey.res=grey.res, dark=dark, colours=greyscale, age.lim=age.lim)
+    .agedepth.ghost(set, rotate.axes=rotate.axes, BCAD=BCAD, d.res=d.res, age.res=age.res, grey.res=grey.res, dark=dark, colours=greyscale, age.lim=age.lim)
   }
 
   if(length(set$slump) > 0 )

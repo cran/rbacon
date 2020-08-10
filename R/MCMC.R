@@ -130,7 +130,7 @@ thinner <- function(proportion=0.1, set=get('info')) {
 Baconvergence <- function(core="MSB2K", runs=5, suggest=FALSE, verbose=TRUE, ...) {
   MCMC <- list()
   for(i in 1:runs) { # now the other runs
-    cat("run number", i, "...\n")
+    message("run number", i, "...\n")
     Bacon(core=core, suggest=suggest, run=TRUE, ask=FALSE, ...)
     set <- get('info')
     if(i == 1)
@@ -156,8 +156,8 @@ Baconvergence <- function(core="MSB2K", runs=5, suggest=FALSE, verbose=TRUE, ...
 
   rt <- gelman.diag(mcmc.list(lapply(MCMC, as.mcmc)), autoburnin=FALSE, transform=TRUE, confidence=0.97)
   if(verbose) {
-    message("Did", runs, "Bacon runs.")
-    message("Gelman and Rubin Reduction Factor", rt$mpsrf, " (smaller and closer to 1 is better).")
+    message("Did ", runs, " Bacon runs.")
+    message("Gelman and Rubin Reduction Factor ", rt$mpsrf, " (smaller and closer to 1 is better).")
     if(rt$mpsrf > 1.05)
       message("Probably not a robust MCMC run! Too much difference between runs, above the 1.05 threshold. Increase sample size?\n") else
         message("Robust MCMC mixing, below the 1.05 safety threshold.\n")
@@ -181,9 +181,6 @@ overlap <- function(set=get('info'), digits=0, verbose=TRUE) {
         inside[i] <- 0
   }
   inside <- 100*sum(inside)/length(d)
-  if(verbose) {
-    if(inside < 80)
-      cat("Warning! Only ")
-    message(round(inside, digits), "% of the dates overlap with the age-depth model (", 100*set$prob, "% ranges)")
-  }
+  if(verbose) 
+    message(if(inside < 80) "Warning! Only ", round(inside, digits), "% of the dates overlap with the age-depth model (", 100*set$prob, "% ranges)")
 }

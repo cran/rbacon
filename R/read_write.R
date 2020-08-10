@@ -19,7 +19,7 @@
 #' @param clamdir The directory where the clam runs reside. Defaults to \code{coredir="clam_runs"}.
 #' @param bacondir The directory where the Bacon runs reside. Defaults to \code{coredir="Bacon_runs"}.
 #' @param sep The separator for the .csv files. Defaults to \code{sep=","}.
-#' @param cc Calibration curve for C-14 dates: \code{cc=1} for IntCal13 (northern hemisphere terrestrial), \code{cc=2} for Marine13 (marine),
+#' @param cc Calibration curve for C-14 dates: \code{cc=1} for IntCal20 (northern hemisphere terrestrial), \code{cc=2} for Marine20 (marine),
 #' @seealso \url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
 #' @export
 clam2bacon <- function(core, clamdir="clam_runs", bacondir="Bacon_runs", sep=",", cc=1) {
@@ -402,11 +402,11 @@ assign_coredir <- function(coredir, core, ask=TRUE) {
   fl <- file(set$bacon.file, "w")
   cat("## Ran on", set$date, "\n\n", file=fl)
   cat("Cal 0 : ConstCal;\nCal 1 : ",
-  if(set$cc1=="IntCal13" || set$cc1=="\"IntCal13\"") "IntCal13"
+  if(set$cc1=="IntCal20" || set$cc1=="\"IntCal20\"") "IntCal20"
     else noquote(set$cc1), ", ", set$postbomb, ";\nCal 2 : ",
-  if(set$cc2=="Marine13" || set$cc2=="\"Marine13\"") "Marine13"
+  if(set$cc2=="Marine20" || set$cc2=="\"Marine20\"") "Marine20"
     else noquote(set$cc2), ";\nCal 3 : ",
-  if(set$cc3=="SHCal13" || set$cc3=="\"SHCal13\"") "SHCal13"
+  if(set$cc3=="SHCal20" || set$cc3=="\"SHCal20\"") "SHCal20"
     else noquote(set$cc3), ", ", set$postbomb, ";",
   if(set$cc4=="ConstCal" || set$cc4=="\"ConstCal\"") set$cc4 <- c()
     else

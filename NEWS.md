@@ -1,3 +1,7 @@
+# rbacon 2.4.3
+* replaced 'cat' with 'message' or 'warning' where possible
+* updated to the IntCal20 calibration curves (Reimer et al., 2020)
+
 # rbacon 2.4.2
 * Reverted the c/c++ code back to that of version 2.3.9.1, owing to problems with the code introduced in version 2.4.0 (posteriors of memory and age-model are apparently too wide)
 * Repaired bug that caused an error when using slumps or boundaries

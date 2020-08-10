@@ -207,7 +207,7 @@ and its name should start with the core's name and end with '_depths.txt'. Then 
 
 \item{same.heights}{Plot the distributions of the dates all at the same maximum height (default \code{same.height=FALSE}).}
 
-\item{cc}{Calibration curve for 14C dates: \code{cc=1} for IntCal13 (northern hemisphere terrestrial), \code{cc=2} for Marine13 (marine), \code{cc=3} for SHCal13 (southern hemisphere terrestrial). For dates that are already on the cal BP scale use \code{cc=0}.}
+\item{cc}{Calibration curve for 14C dates: \code{cc=1} for IntCal20 (northern hemisphere terrestrial), \code{cc=2} for Marine20 (marine), \code{cc=3} for SHCal20 (southern hemisphere terrestrial). For dates that are already on the cal BP scale use \code{cc=0}.}
 
 \item{title}{The title of the age-depth model is plotted on the main panel. By default this is the core's name. To leave empty: \code{title=""}.}
 

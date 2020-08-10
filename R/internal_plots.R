@@ -3,7 +3,7 @@
 #################### user-invisible plot functions ####################
 
 # to plot greyscale/ghost graphs of the age-depth model
-.agedepth.ghost <- function(set=get('info'), d.min=set$d.min, d.max=set$d.max, BCAD=set$BCAD, rotate.axes=FALSE, rev.d=FALSE, d.res=400, age.res=400, grey.res=100, dark=c(), colours=rgb(0,0,0,seq(0,1, length=100)), age.lim) {
+.agedepth.ghost <- function(set=get('info'), d.min=set$d.min, d.max=set$d.max, BCAD=set$BCAD, rotate.axes=FALSE, d.res=400, age.res=400, grey.res=100, dark=c(), colours=rgb(0,0,0,seq(0,1, length=100)), age.lim) {
   dseq <- seq(d.min, d.max, length=d.res)
   if(set$isplum) # plum has a strange feature with a grey shape appearing
     dseq <- dseq[-1] # at dmin. Thus removing the first depth

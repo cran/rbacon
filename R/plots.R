@@ -77,7 +77,7 @@ proxy.ghost <- function(proxy=1, proxy.lab=NULL, proxy.res=250, age.res=200, yr.
     message("Calculating histograms")
   Bacon.hist(ds, set, calc.range=FALSE)
   hists <- get('hists')
-  cat("\n")
+  message("\n")
 
   age.min <- c()
   age.max <- c()

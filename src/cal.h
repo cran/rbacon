@@ -10,6 +10,7 @@
 #include "ranfun.h"
 #include "Matrix.h"
 
+
 //#define IntCal13FNAM "Curves/3Col_intcal13.14C"
 #define IntCal13FNAM "3Col_intcal13.14C"
 #define IntCal13ROWS 5141
@@ -24,6 +25,23 @@
 #define SHCal13FNAM "3Col_shcal13.14C"
 #define SHCal13ROWS 5141
 #define SHCal13COLS 3
+
+
+//#define IntCal20FNAM "Curves/3Col_intcal20.14C"
+#define IntCal20FNAM "3Col_intcal20.14C"
+#define IntCal20ROWS 9501
+#define IntCal20COLS 3
+
+//#define Marine20FNAM "Curves/3Col_marine20.14C"
+#define Marine20FNAM "3Col_marine20.14C"
+#define Marine20ROWS 5501
+#define Marine20COLS 3
+
+//#define SHCal20FNAM "Curves/3Col_shcal20.14C"
+#define SHCal20FNAM "3Col_shcal20.14C"
+#define SHCal20ROWS 9501
+#define SHCal20COLS 3
+
 
 #define GENCCMAXLINLEN 255
 #define GENCCCOLS 3
@@ -225,7 +243,420 @@ public:
 	double MaxCal() { return maxcal; }
 };
 
-/* draft curve for IntCal13 */
+
+/* draft curve for IntCal20 */
+class IntCal20 : public Cal {
+
+protected:
+
+	Matrix *CCB;
+	SubMatrix CC;
+	SubMatrix A;
+	int Bomb;
+	Cal *bombcc;
+	char name[255];
+	double mincal, const2;
+
+public:
+
+	IntCal20(int bomb, std::string ccdir) : Cal(IntCal20ROWS) {
+
+	CCB = new Matrix( IntCal20ROWS, IntCal20COLS);
+	CC.Set( CCB, CCB->nRow(), CCB->nCol());
+
+	std::string filename= ccdir+IntCal20FNAM;
+
+	Rprintf("IntCal20: Reading from file: %s\n", filename.c_str());
+
+
+	if (CC.filescan((char*)filename.c_str()) == 0) {
+		REprintf("Cal: ERROR: Could not find IntCal20 cal. curve, file not found: %s\n", filename.c_str());
+		Rcpp::stop("Cal: ERROR: Could not find IntCal20 cal. curve, file not found: %s\n", filename.c_str());
+		//  exit(0);
+	}
+
+		const2 = 0.5*log(2.0 * M_PI); //M_PI defined in gsl library
+
+		const char *postbombfnam[] = { POSTBOMBFNAMS };
+
+		/** Read bomb **/
+		Bomb = bomb;
+		if (Bomb == 0) {
+			mincal = 0.0; // no bomb; 17 Dec 2018 changed -5.0 to 0.0
+			sprintf( name, "IntCal20");
+		}
+		else
+			if (Bomb < 6) { // curve number, not cal BP yr. 26 March 2019: Was Bomb < 5 but now there are 5 postbomb curves
+
+			bombcc = new GenericCal(postbombfnam[Bomb], ccdir);
+			mincal = bombcc->MinCal();
+			sprintf( name, "IntCal20+%s", postbombfnam[Bomb]);
+			}
+			else {
+				REprintf("Bacon: ERROR: Post bomb curve: 0 None, 1 NH1, 2 NH2, 3 NH3, 4 SH1-2, 5 SH3\n");
+				Rcpp::stop("Bacon: ERROR: Post bomb curve: 0 None, 1 NH1, 2 NH2, 3 NH3, 4 SH1-2, 5 SH3\n");
+//				exit(0);
+			}
+	}
+
+	~IntCal20() {
+		A.~SubMatrix();
+		CC.~SubMatrix();
+		delete CCB;
+	}
+
+
+	double MinCal() { return mincal; }
+	double MaxCal() { return 55000.0; } // was 50000.0
+
+	virtual const char *Name() { return name; } //JEV warning
+
+
+//prototype for gsl_compare
+// x==y, 0, x<y, -1, x>y, 1.
+//int fcmp (double x, double y, double epsilon = 0.00000000001);
+	double cal(double theta)
+	{
+		if (fcmp(theta, -0.0) == -1) // value < 0 cal BP, postbomb
+		{
+			if (Bomb == 0) {
+				//fprintf( stderr, "WARNING: Calibration attempted beyond IntCal20 cal. curve limits, theta= %f\n",theta);
+				k = 0; //Extrapolation
+				mu = CC(k,1) + (theta-CC(k,0))*(CC(k+1,1)-CC(k,1))/5.0;
+				sig =CC(k,2) + (theta-CC(k,0))*(CC(k+1,2)-CC(k,2))/5.0;
+			}
+			else {
+				bombcc->cal(theta);
+				mu = bombcc->GetMu();
+				sig = bombcc->GetSig();
+			}
+
+		}
+		else { // until 5,000 cal BP, line 4999 (check!), values every year
+			if (fcmp(theta, 5000.0) != 1) // value < 5,000 cal BP
+				{
+					k = 0 + (int) floor(theta/1.0); // 0 at start was 1
+					mu = CC(k,1) + (theta-CC(k,0))*(CC(k+1,1)-CC(k,1))/1.0;
+					sig =CC(k,2) + (theta-CC(k,0))*(CC(k+1,2)-CC(k,2))/1.0;
+				}
+				else // from 5,000 until 15,000 cal BP, line 7000 (check!), values every 5 years
+					if (fcmp(theta, 15000.0) != 1)
+						{
+							k = 4999 + (int) floor((theta-5000.0)/5.0);
+							mu = CC(k,1) + (theta-CC(k,0))*(CC(k+1,1)-CC(k,1))/5.0;
+							sig = CC(k,2) + (theta-CC(k,0))*(CC(k+1,2)-CC(k,2))/5.0;
+						}
+						else // from 15,000 until until 25,000 cal BP, line 8000 (check!), values every 10 years
+							if (fcmp(theta, 25000.0) != 1)
+								{
+									k = 7000 + (int) floor((theta-15000.0)/10.0);
+									mu = CC(k,1) + (theta-CC(k,0))*(CC(k+1,1)-CC(k,1))/10.0;
+									sig = CC(k,2) + (theta-CC(k,0))*(CC(k+1,2)-CC(k,2))/10.0;
+								}
+								else // from 25,000 until 55,000 cal BP, line 9500, values every 20 years
+									if (fcmp(theta, 55000.0) != 1)
+										{
+											k = 8000 + (int) floor((theta-25000.0)/20.0);
+											mu = CC(k,1) + (theta-CC(k,0))*(CC(k+1,1)-CC(k,1))/20.0;
+											sig = CC(k,2) + (theta-CC(k,0))*(CC(k+1,2)-CC(k,2))/20.0;
+										}
+										else // value > 55,000 cal BP, extrapolate
+											{
+												k = IntCal20ROWS - 2;
+												mu = CC(k,1) + (theta-CC(k,0))*(CC(k+1,1)-CC(k,1))/100.0;
+												sig = CC(k,2);
+											}
+		}
+		return mu;
+	}
+
+	double U( double y, double vr, double theta)
+	{
+		cal(theta);
+
+		double tau = 1.0/(vr + sqr(sig));
+
+		return const2 - 0.5*log(tau)  + tau * 0.5 * sqr(y-mu);
+	}
+
+	//The new energy using the t distribution
+	double Ut( double y, double vr, double theta, double a, double b)
+	{
+		cal(theta);
+
+		double tau = 1.0/(vr + sqr(sig));
+
+		return (a + 0.5)*log( b + tau * 0.5 * sqr(y-mu));
+	}
+};
+
+
+
+
+
+
+
+/////////////////////////////////////
+// Marine20
+////////////////////////////////////
+
+class Marine20 : public Cal {
+
+protected:
+
+	Matrix *CCB;
+	SubMatrix CC;
+	SubMatrix A;
+	double const2;
+
+public:
+
+    Marine20(std::string ccdir) : Cal(Marine20ROWS) {
+
+		CCB = new Matrix( Marine20ROWS, Marine20COLS);
+
+		CC.Set( CCB, CCB->nRow(), CCB->nCol());
+
+        std::string filename= std::string(ccdir)+std::string(Marine20FNAM);
+
+        Rprintf("Marine20: Reading from file: %s\n", filename.c_str());
+
+        if (CC.filescan((char*)filename.c_str()) == 0) {
+           REprintf("Cal: ERROR: Could not find Marine20 cal. curve, file not found: %s\n", filename.c_str());
+           Rcpp::stop("Cal: ERROR: Could not find Marine20 cal. curve, file not found: %s\n", filename.c_str());
+
+//			exit(0);
+		}
+
+		const2 = 0.5*log(2.0 * M_PI); //M_PI defined in gsl library
+
+
+	}
+
+	~Marine20() {
+		A.~SubMatrix();
+		CC.~SubMatrix();
+		delete CCB;
+	}
+
+
+	double MinCal() { return 0.0; }
+	double MaxCal() { return 55000.0; } // was 50000.0
+
+ const char* Name() { return "Marine20"; }
+
+
+//prototype for gsl_compare
+// x==y, 0, x<y, -1, x>y, 1.
+//int fcmp (double x, double y, double epsilon = 0.00000000001);
+	double cal(double theta)
+	{
+        if (fcmp(theta, 0.0) == -1)
+        {
+                //fprintf( stderr, "WARNING: Calibration attempted beyond marine20 cal. curve limits, theta= %f\n",theta);
+                k = 0;
+                mu = CC(k,1) + (theta-CC(k,0))*(CC(k+1,1)-CC(k,1))/5;
+                //sig <- CC(k,2); before JUDY
+                 sig = CC(k,2);
+        }
+        else   // cal BP jumps are 10 yr throughout the curve
+        {      
+            if (fcmp(theta, 55000.0) != 1)
+               {
+                  k = 0 + (int) floor((theta)/10.0); 
+                  mu = CC(k,1) + (theta-CC(k,0))*(CC(k+1,1)-CC(k,1))/10.0;
+                  sig =CC(k,2) + (theta-CC(k,0))*(CC(k+1,2)-CC(k,2))/10.0;
+              }
+                  else
+                     {
+                         k = Marine20ROWS - 2;
+                         mu = CC(k,1) + (theta-CC(k,0))*(CC(k+1,1)-CC(k,1))/100.0; // why 100?
+                         sig =CC(k,2);
+                     }
+        }       
+                return mu;
+        }
+
+
+
+	double U( double y, double vr, double theta)
+	{
+        cal(theta);
+
+        double tau = 1.0/(vr + sqr(sig));
+
+        return const2 - 0.5*log(tau)  + tau * 0.5 * sqr(y-mu);
+	}
+
+
+	//The new energy using the t distribution
+	double Ut( double y, double vr, double theta, double a, double b)
+	{
+        cal(theta);
+
+        double tau = 1.0/(vr + sqr(sig));
+
+        return (a + 0.5)*log( b + tau * 0.5 * sqr(y-mu));
+	}
+
+};
+
+
+
+
+//////////////
+// SHCal20
+//////////////
+
+class SHCal20 : public Cal {
+
+protected:
+
+	Matrix *CCB;
+	SubMatrix CC;
+	SubMatrix A;
+	int Bomb;
+	Cal *bombcc;
+	char name[255];
+	double mincal, const2;
+
+public:
+
+	SHCal20(int bomb, std::string ccdir) : Cal(SHCal20ROWS) {
+
+	CCB = new Matrix( SHCal20ROWS, SHCal20COLS);
+	CC.Set( CCB, CCB->nRow(), CCB->nCol());
+
+	std::string filename= ccdir+SHCal20FNAM;
+
+	Rprintf("SHCal20: Reading from file: %s\n", filename.c_str());
+
+
+	if (CC.filescan((char*)filename.c_str()) == 0) {
+		REprintf("Cal: ERROR: Could not find SHCal20 cal. curve, file not found: %s\n", filename.c_str());
+		Rcpp::stop("Cal: ERROR: Could not find SHCal20 cal. curve, file not found: %s\n", filename.c_str());
+		//  exit(0);
+	}
+
+		const2 = 0.5*log(2.0 * M_PI); //M_PI defined in gsl library
+
+		const char *postbombfnam[] = { POSTBOMBFNAMS };
+
+		/** Read bomb **/
+		Bomb = bomb;
+		if (Bomb == 0) {
+			mincal = 0.0; // no bomb; 17 Dec 2018 changed -5.0 to 0.0
+			sprintf( name, "SHCal20");
+		}
+		else
+			if (Bomb < 6) { // curve number, not cal BP yr. 26 March 2019: Was Bomb < 5 but now there are 5 postbomb curves
+
+			bombcc = new GenericCal(postbombfnam[Bomb], ccdir);
+			mincal = bombcc->MinCal();
+			sprintf( name, "SHCal20+%s", postbombfnam[Bomb]);
+			}
+			else {
+				REprintf("Bacon: ERROR: Post bomb curve: 0 None, 1 NH1, 2 NH2, 3 NH3, 4 SH1-2, 5 SH3\n");
+				Rcpp::stop("Bacon: ERROR: Post bomb curve: 0 None, 1 NH1, 2 NH2, 3 NH3, 4 SH1-2, 5 SH3\n");
+//				exit(0);
+			}
+	}
+
+	~SHCal20() {
+		A.~SubMatrix();
+		CC.~SubMatrix();
+		delete CCB;
+	}
+
+
+	double MinCal() { return mincal; }
+	double MaxCal() { return 55000.0; } // was 50000.0
+
+	virtual const char *Name() { return name; } //JEV warning
+
+
+//prototype for gsl_compare
+// x==y, 0, x<y, -1, x>y, 1.
+//int fcmp (double x, double y, double epsilon = 0.00000000001);
+	double cal(double theta)
+	{
+		if (fcmp(theta, -0.0) == -1) // value < 0 cal BP, postbomb
+		{
+			if (Bomb == 0) {
+				//fprintf( stderr, "WARNING: Calibration attempted beyond IntCal13 cal. curve limits, theta= %f\n",theta);
+				k = 0; //Extrapolation
+				mu = CC(k,1) + (theta-CC(k,0))*(CC(k+1,1)-CC(k,1))/5.0;
+				sig =CC(k,2) + (theta-CC(k,0))*(CC(k+1,2)-CC(k,2))/5.0;
+			}
+			else {
+				bombcc->cal(theta);
+				mu = bombcc->GetMu();
+				sig = bombcc->GetSig();
+			}
+
+		}
+		else { // until 5,000 cal BP, line 4999 (check!), values every year
+			if (fcmp(theta, 5000.0) != 1) // value < 5,000 cal BP
+				{
+					k = 0 + (int) floor(theta/1.0); // 0 at start was 1
+					mu = CC(k,1) + (theta-CC(k,0))*(CC(k+1,1)-CC(k,1))/1.0;
+					sig =CC(k,2) + (theta-CC(k,0))*(CC(k+1,2)-CC(k,2))/1.0;
+				}
+				else // from 5,000 until 15,000 cal BP, line 7000 (check!), values every 5 years
+					if (fcmp(theta, 15000.0) != 1)
+						{
+							k = 4999 + (int) floor((theta-5000.0)/5.0);
+							mu = CC(k,1) + (theta-CC(k,0))*(CC(k+1,1)-CC(k,1))/5.0;
+							sig = CC(k,2) + (theta-CC(k,0))*(CC(k+1,2)-CC(k,2))/5.0;
+						}
+						else // from 15,000 until until 25,000 cal BP, line 8000 (check!), values every 10 years
+							if (fcmp(theta, 25000.0) != 1)
+								{
+									k = 7000 + (int) floor((theta-15000.0)/10.0);
+									mu = CC(k,1) + (theta-CC(k,0))*(CC(k+1,1)-CC(k,1))/10.0;
+									sig = CC(k,2) + (theta-CC(k,0))*(CC(k+1,2)-CC(k,2))/10.0;
+								}
+								else // from 25,000 until 55,000 cal BP, line 9500, values every 20 years
+									if (fcmp(theta, 55000.0) != 1)
+										{
+											k = 8000 + (int) floor((theta-25000.0)/20.0);
+											mu = CC(k,1) + (theta-CC(k,0))*(CC(k+1,1)-CC(k,1))/20.0;
+											sig = CC(k,2) + (theta-CC(k,0))*(CC(k+1,2)-CC(k,2))/20.0;
+										}
+										else // value > 55,000 cal BP, extrapolate
+											{
+												k = SHCal20ROWS - 2;
+												mu = CC(k,1) + (theta-CC(k,0))*(CC(k+1,1)-CC(k,1))/100.0;
+												sig = CC(k,2);
+											}
+		}
+		return mu;
+	}
+
+	double U( double y, double vr, double theta)
+	{
+		cal(theta);
+
+		double tau = 1.0/(vr + sqr(sig));
+
+		return const2 - 0.5*log(tau)  + tau * 0.5 * sqr(y-mu);
+	}
+
+	//The new energy using the t distribution
+	double Ut( double y, double vr, double theta, double a, double b)
+	{
+		cal(theta);
+
+		double tau = 1.0/(vr + sqr(sig));
+
+		return (a + 0.5)*log( b + tau * 0.5 * sqr(y-mu));
+	}
+};
+
+
+
+
+/* IntCal13 */
 class IntCal13 : public Cal {
 
 protected:

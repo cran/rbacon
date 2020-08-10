@@ -21,7 +21,7 @@ clam2bacon(
 
 \item{sep}{The separator for the .csv files. Defaults to \code{sep=","}.}
 
-\item{cc}{Calibration curve for C-14 dates: \code{cc=1} for IntCal13 (northern hemisphere terrestrial), \code{cc=2} for Marine13 (marine),}
+\item{cc}{Calibration curve for C-14 dates: \code{cc=1} for IntCal20 (northern hemisphere terrestrial), \code{cc=2} for Marine20 (marine),}
 }
 \value{
 A Bacon .csv file

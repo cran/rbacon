@@ -249,8 +249,9 @@ accrate.age.ghost <- function(set=get('info'), age.lim=c(), yr.lim=age.lim, age.
 
   age.seq <- seq(min.age, max.age, length=age.res)
   pb <- txtProgressBar(min=0, max=max(1,length(age.seq)-1), style = 3)
-  max.y <- 0; all.x <- c()
-  hist.list <- list(x=NULL, y=NULL, min.rng=numeric(length(age.seq)), max.rng=numeric(length(age.seq)), mn.rng=numeric(length(age.seq)))
+  max.y <- 0; all.x <- NULL
+  fill.length <- numeric(length(age.seq))
+  hist.list <- list(x=NULL, y=NULL, min.rng= fill.length, max.rng= fill.length, mn.rng= fill.length)
   for(i in 1:length(age.seq)) {
     setTxtProgressBar(pb, i)
     acc <- accrate.age(age.seq[i], set, cmyr=cmyr)
@@ -264,9 +265,9 @@ accrate.age.ghost <- function(set=get('info'), age.lim=c(), yr.lim=age.lim, age.
     hist.list$x[[i]] <- acc$x
     hist.list$y[[i]] <- acc$y/sum(acc$y)
     rng <- quantile(accs, c((1-prob)/2, 1-((1-prob)/2)))
-    hist.list$mn.rng[[i]] <- mean(accs)
-    hist.list$min.rng[[i]] <- rng[1]
-    hist.list$max.rng[[i]] <- rng[2]
+    hist.list$mn.rng[i] <- mean(accs) # was [[i]]
+    hist.list$min.rng[i] <- rng[1] # was [[i]]
+    hist.list$max.rng[i] <- rng[2] # was [[i]]
     max.y <- max(max.y, hist.list$y[[i]])
     all.x <- c(all.x, acc$x)
   }
@@ -410,7 +411,7 @@ flux.age.ghost <- function(proxy=1, age.lim=c(), yr.lim=age.lim, age.res=200, yr
     flux.d <- approx(flux[,1], flux[,2], ages.d)$y # interpolate flux (in depth) to depths belonging to each age.seq
     fluxes[i,] <- flux.d / as.numeric(set$output[i,(1+ages.i)]) # (amount / cm^3) / (yr/cm) = amount * cm-2 * yr-1
   }
-  cat("\n")
+  message("\n")
   if(length(flux.lim) == 0)
     flux.lim <- c(0, quantile(fluxes[!is.na(fluxes)], upper))
   max.dens <- 0
@@ -427,7 +428,7 @@ flux.age.ghost <- function(proxy=1, age.lim=c(), yr.lim=age.lim, age.res=200, yr
   if(rotate.axes)
     plot(0, type="n", ylim=age.lim, ylab=age.lab, xlim=flux.lim, xlab=flux.lab) else
       plot(0, type="n", xlim=age.lim, xlab=age.lab, ylim=flux.lim, ylab=flux.lab)
-  min.rng <- c(); max.rng <- c(); mn.rng <- c()
+  min.rng <- numeric(length(age.seq)); max.rng <- numeric(length(age.seq)); mn.rng <- numeric(length(age.seq))
   for(i in 2:length(age.seq)) {
     tmp <- fluxes[!is.na(fluxes[,i]),i] # all fluxes that fall at the required age.seq age
     rng <- quantile(tmp, c((1-prob)/2, 1-((1-prob)/2)))

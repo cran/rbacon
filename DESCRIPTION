@@ -1,8 +1,8 @@
 Package: rbacon
 Type: Package
 Title: Age-Depth Modelling using Bayesian Statistics
-Version: 2.4.2
-Date: 2020-04-21
+Version: 2.4.3
+Date: 2020-08-10
 Authors@R: c(
     person("Maarten", "Blaauw", email = "maarten.blaauw@qub.ac.uk", role = c("aut", "cre")),
     person("J. Andres", "Christen", email = "jac@cimat.mx", role = c("aut", "ctb", "cph")),
@@ -21,7 +21,7 @@ NeedsCompilation: yes
 Imports: coda (>= 0.19-1), graphics, grDevices, Rcpp (>= 0.12.12),
         stats, utils
 LinkingTo: Rcpp
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 Author: Maarten Blaauw [aut, cre],
   J. Andres Christen [aut, ctb, cph],
   Marco A. Aquino L. [aut],
@@ -32,5 +32,5 @@ Author: Maarten Blaauw [aut, cre],
   Brian Gough [cph],
   Charles Karney [cph]
 Maintainer: Maarten Blaauw <maarten.blaauw@qub.ac.uk>
-Date/Publication: 2020-04-21 18:20:09 UTC
-Packaged: 2020-04-21 17:51:01 UTC; maarten
+Date/Publication: 2020-08-10 19:30:02 UTC
+Packaged: 2020-08-10 15:48:01 UTC; maarten

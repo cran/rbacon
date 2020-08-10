@@ -336,9 +336,9 @@ fromslump <- function(d, slump) {
   slices <- slump[,2] - slump[,1]
   dorig <- d # original depths
   for(i in 1:nrow(slump)) {
-	below <- which(d > min(slump[i,]))
-	if(length(below) > 0)
-      dorig[below] <- dorig[below] - slices[i]
+    below <- which(d > min(slump[i,]))
+  if(length(below) > 0)
+    dorig[below] <- dorig[below] - slices[i]
   }
   return(dorig)
 }
