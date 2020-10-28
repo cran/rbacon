@@ -22,6 +22,8 @@ flux.age.ghost(
   flux.lim = c(),
   flux.lab = "flux",
   upper = 0.95,
+  rgb.scale = c(0, 0, 0),
+  rgb.res = 100,
   dark = set$dark,
   BCAD = set$BCAD,
   age.lab = c(),
@@ -67,6 +69,10 @@ flux.age.ghost(
 \item{flux.lab}{Axis labels. Defaults to \code{flux.lab="flux"}.}
 
 \item{upper}{Maximum flux rates to plot. Defaults to the upper 99\%; \code{upper=0.99}.}
+
+\item{rgb.scale}{The function to produce a coloured representation of all age-models. Needs 3 values for the intensity of red, green and blue. Defaults to grey-scales: \code{rgb.scale=c(0,0,0)}, but could also be, say, scales of red (\code{rgb.scale=c(1,0,0)}).}
+
+\item{rgb.res}{Resolution of the colour spectrum depicting the age-depth model. Default \code{rgb.res=100}.}
 
 \item{dark}{The darkest grey value is \code{dark=1} by default; lower values will result in lighter grey but \code{values >1} are not allowed.}
 

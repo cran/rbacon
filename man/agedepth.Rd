@@ -7,7 +7,7 @@
 agedepth(
   set = get("info"),
   BCAD = set$BCAD,
-  depth.unit = "cm",
+  depth.unit = set$depth.unit,
   age.unit = "yr",
   unit = depth.unit,
   d.lab = c(),
@@ -32,17 +32,16 @@ agedepth(
   age.res = 400,
   yr.res = age.res,
   date.res = 100,
-  grey.res = 100,
   rotate.axes = FALSE,
   rev.age = FALSE,
   rev.yr = rev.age,
   rev.d = FALSE,
   maxcalc = 500,
-  height = 15,
+  height = 30,
   calheight = 1,
   mirror = TRUE,
   up = TRUE,
-  cutoff = 0.001,
+  cutoff = 0.1,
   plot.range = TRUE,
   panels = layout(1),
   range.col = grey(0.5),
@@ -61,7 +60,8 @@ agedepth(
   pb.lim = c(),
   hiatus.col = grey(0.5),
   hiatus.lty = "12",
-  greyscale = grey(seq(1, 0, length = grey.res)),
+  rgb.scale = c(0, 0, 0),
+  rgb.res = 100,
   slump.col = grey(0.8),
   normalise.dists = TRUE,
   same.heights = FALSE,
@@ -88,7 +88,7 @@ agedepth(
 
 \item{BCAD}{The calendar scale of graphs and age output-files is in \code{cal BP} by default, but can be changed to BC/AD using \code{BCAD=TRUE}.}
 
-\item{depth.unit}{Units of the depths. Defaults to \code{depth.unit="cm"}.}
+\item{depth.unit}{Units of the depths. Defaults to the one provided in the Bacon() command, \code{depth.unit=set$depth.unit}.}
 
 \item{age.unit}{Units of the ages. Defaults to \code{age.unit="yr"}.}
 
@@ -141,8 +141,6 @@ and its name should start with the core's name and end with '_depths.txt'. Then 
 
 \item{date.res}{Date distributions are plotted using \code{date.res=100} points by default.}
 
-\item{grey.res}{Grey-scale resolution of the age-depth model. Default \code{grey.res=100}.}
-
 \item{rotate.axes}{By default, the age-depth model is plotted with the depths on the horizontal axis and ages on the vertical axis. This can be changed with \code{rotate.axes=TRUE}.}
 
 \item{rev.age}{The direction of the age axis, which can be reversed using \code{rev.age=TRUE}.}
@@ -161,7 +159,7 @@ and its name should start with the core's name and end with '_depths.txt'. Then 
 
 \item{up}{Directions of distributions if they are plotted non-mirrored. Default \code{up=TRUE}.}
 
-\item{cutoff}{Avoid plotting very low probabilities of date distributions (default \code{cutoff=0.001}).}
+\item{cutoff}{Avoid plotting very low probabilities of date distributions (default \code{cutoff=0.1}).}
 
 \item{plot.range}{Whether or not to plot the curves showing the confidence ranges of the age-model. Defaults to (\code{plot.range=TRUE}).}
 
@@ -199,7 +197,9 @@ and its name should start with the core's name and end with '_depths.txt'. Then 
 
 \item{hiatus.lty}{The line type of the depths of any hiatuses. Default \code{hiatus.lty=12}.}
 
-\item{greyscale}{The function to produce a coloured representation of all age-models. Defaults to grey-scales: \code{greyscale=function(x) grey(1-x)}.}
+\item{rgb.scale}{The function to produce a coloured representation of all age-models. Needs 3 values for the intensity of red, green and blue. Defaults to grey-scales: \code{rgb.scale=c(0,0,0)}, but could also be, say, scales of red (\code{rgb.scale=c(1,0,0)}).}
+
+\item{rgb.res}{Resolution of the colour spectrum depicting the age-depth model. Default \code{rgb.res=100}.}
 
 \item{slump.col}{Colour of slumps. Defaults to \code{slump.col=grey(0.8)}.}
 

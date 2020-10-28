@@ -42,12 +42,10 @@ int Input::GetPars() {
 
 Input::Input(char *datafile, int emaxnumofcurves, int maxm, std::string ccdir) {
 
-
 	//Open the array to hold all c. curves
 	maxnumofcurves = emaxnumofcurves;
 	curves = new Cal * [maxnumofcurves];
 	numofcurves = 0;
-
 	//Open the object to hold all determinations
 	dets = new Dets(maxm);
 	Det *tmpdet;
@@ -66,7 +64,6 @@ Input::Input(char *datafile, int emaxnumofcurves, int maxm, std::string ccdir) {
 		hiatus_pars[i] = new double[MAXNUMOFHIATUS]; //open each row
 	H = 0; //set to zero hiatuses at the beginning
 
-
 	FILE *F;
 
     if ((F = fopen( datafile, "r")) == NULL)
@@ -76,7 +73,7 @@ Input::Input(char *datafile, int emaxnumofcurves, int maxm, std::string ccdir) {
 //		exit(-1);
 	}
 
-    Rprintf("Reading %s\n", datafile);
+	Rprintf("Reading %s\n", datafile);
 	char line[BUFFSZ];
 	char key[10];
 	int i=0, nm, j;
@@ -203,10 +200,10 @@ Input::Input(char *datafile, int emaxnumofcurves, int maxm, std::string ccdir) {
 			hiatus_pars[4][H] = 0.0; //hb, in this case, this one will be ignored
 
 			unsigned long int seed;
-			if (numofpars == 11)
+			if (numofpars == 11)  // these 3 lines commented MB Oct 2020
 				seed = 0; //automatic seed set with time()
 			else
-				seed = (unsigned long int) rpars[11];
+				seed = (unsigned long int) rpars[12]; // was rpars[11]; Oct 2020
 
 
 			//Open the Bacon object

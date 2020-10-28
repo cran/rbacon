@@ -9,7 +9,8 @@
 #' @param proxy.res Greyscale pixels are calculated for \code{proxy.res=250} proxy values by default, as a compromise between image quality and calculation speed. If the output looks very pixel-like (e.g., when choosing to plot only part of the record using proxy.lim), set this option to higher values.
 #' @param age.res Resolution or amount of greyscale pixels to cover the age scale of the age-model plot. Default \code{age.res=250} as a compromise between image quality and calculation speed. If the output looks very pixel-like (e.g., when choosing to plot only part of the record using age.lim), set this option to higher values.
 #' @param yr.res Deprecated - use age.res instead
-#' @param grey.res Grey-scale resolution of the proxy graph. Default \code{grey.res=100}.
+#' @param rgb.scale The function to produce a coloured representation of all age-models. Needs 3 values for the intensity of red, green and blue. Defaults to grey-scales: \code{rgb.scale=c(0,0,0)}, but could also be, say, scales of red (\code{rgb.scale=c(1,0,0)}). 
+#' @param rgb.res Resolution of the colour spectrum depicting the age-depth model. Default \code{rgb.res=100}.
 #' @param set Detailed information of the current run, stored within this session's memory as variable info.
 #' @param dark By default, the darkest grey value is assigned to the most likely value within the entire core (normalised to 1; \code{dark=1}). By setting dark to, e.g., \code{dark=.8}, all values of and above 0.8 will be darkest (and values below that threshold will be lighter grey the lower their probabilities).
 #' @param darkest Darkness of the most likely value. Is black by default (\code{darkest=1}); lower values will result in lighter grey.
@@ -32,6 +33,7 @@
 #' @param age.lab The labels for the calendar axis (default \code{age.lab="cal BP"} or \code{"BC/AD"} if \code{BCAD=TRUE}).
 #' @param yr.lab Deprecated - use age.lab instead
 #' @param verbose Provide feedback on what is happening (default \code{verbose=TRUE}).
+#' @param add Add to an existing graph (default \code{add=FALSE}).
 #' @author Maarten Blaauw, J. Andres Christen
 #' @return A grey-scale graph of the proxy against calendar age.
 #' @examples
@@ -46,7 +48,7 @@
 #' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
 #' \url{https://projecteuclid.org/euclid.ba/1339616472}
 #' @export
-proxy.ghost <- function(proxy=1, proxy.lab=NULL, proxy.res=250, age.res=200, yr.res=age.res, grey.res=100, set=get('info'), dark=1, darkest=1, rotate.axes=FALSE, proxy.rev=FALSE, age.rev=FALSE, yr.rev=age.rev, plot.mean=FALSE, mean.col="red", age.lim=NULL, yr.lim=age.lim, proxy.lim=NULL, sep=",", xaxs="i", yaxs="i", xaxt="s", yaxt="s", bty="l", BCAD=set$BCAD, age.lab=ifelse(BCAD, "BC/AD", "cal yr BP"), yr.lab=age.lab, verbose=TRUE) {
+proxy.ghost <- function(proxy=1, proxy.lab=NULL, proxy.res=250, age.res=200, yr.res=age.res, rgb.scale=c(0,0,0), rgb.res=100, set=get('info'), dark=1, darkest=1, rotate.axes=FALSE, proxy.rev=FALSE, age.rev=FALSE, yr.rev=age.rev, plot.mean=FALSE, mean.col="red", age.lim=NULL, yr.lim=age.lim, proxy.lim=NULL, sep=",", xaxs="i", yaxs="i", xaxt="s", yaxt="s", bty="l", BCAD=set$BCAD, age.lab=ifelse(BCAD, "BC/AD", "cal yr BP"), yr.lab=age.lab, verbose=TRUE, add=FALSE) {
   if(length(set$Tr)==0)
     stop("please first run agedepth()", call.=FALSE)
   proxies <- read.csv(paste(set$coredir, set$core, "/", set$core, "_proxies.csv", sep=""), header=TRUE, sep=sep)
@@ -116,12 +118,13 @@ proxy.ghost <- function(proxy=1, proxy.lab=NULL, proxy.res=250, age.res=200, yr.
     proxy.lim <- range(proxyseq)
   if(proxy.rev)
     proxy.lim <- proxy.lim[2:1]
+  col <-  rgb(rgb.scale[1], rgb.scale[2], rgb.scale[3], seq(0, darkest, length=rgb.res))
   if(rotate.axes) {
-    image(proxyseq, age.seq, max.counts, xlim=proxy.lim, ylim=age.lim, col=grey(seq(1, 1-darkest, length=grey.res)), ylab=age.lab, xlab=proxy.lab, xaxs=xaxs, yaxs=yaxs, xaxt=xaxt, yaxt=yaxt)
+    image(proxyseq, age.seq, max.counts, xlim=proxy.lim, ylim=age.lim, col=col, ylab=age.lab, xlab=proxy.lab, xaxs=xaxs, yaxs=yaxs, xaxt=xaxt, yaxt=yaxt, add=add)
     if(plot.mean)
       lines(proxy[,2], pr.mn.ages, col=mean.col)
   } else {
-    image(age.seq, proxyseq, t(max.counts), xlim=age.lim, ylim=proxy.lim, col=grey(seq(1, 1-darkest, length=grey.res)), xlab=age.lab, ylab=proxy.lab, xaxs=xaxs, yaxs=yaxs, xaxt=xaxt, yaxt=yaxt)
+    image(age.seq, proxyseq, t(max.counts), xlim=age.lim, ylim=proxy.lim, col=col, xlab=age.lab, ylab=proxy.lab, xaxs=xaxs, yaxs=yaxs, xaxt=xaxt, yaxt=yaxt, add=add)
     if(plot.mean)
       lines(pr.mn.ages, proxy[,2], col=mean.col)
   }

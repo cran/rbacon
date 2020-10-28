@@ -56,7 +56,6 @@ private:
 	
 	twalk *BaconTwalk;
 
-
 public:
 
     Input(char *datafile, int maxnumofcurves, int maxm, std::string ccdir);

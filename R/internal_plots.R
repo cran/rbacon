@@ -3,7 +3,7 @@
 #################### user-invisible plot functions ####################
 
 # to plot greyscale/ghost graphs of the age-depth model
-.agedepth.ghost <- function(set=get('info'), d.min=set$d.min, d.max=set$d.max, BCAD=set$BCAD, rotate.axes=FALSE, d.res=400, age.res=400, grey.res=100, dark=c(), colours=rgb(0,0,0,seq(0,1, length=100)), age.lim) {
+.agedepth.ghost <- function(set=get('info'), d.min=set$d.min, d.max=set$d.max, BCAD=set$BCAD, rotate.axes=FALSE, d.res=400, age.res=400, rgb.res=100, dark=c(), rgb.scale=c(0,0,0), age.lim) {
   dseq <- seq(d.min, d.max, length=d.res)
   if(set$isplum) # plum has a strange feature with a grey shape appearing
     dseq <- dseq[-1] # at dmin. Thus removing the first depth
@@ -33,10 +33,11 @@
     dark <- 10 * minmax/maxmax
   scales[scales > dark] <- dark
   dseq <- sort(dseq)
+  cols <- rgb(rgb.scale[1], rgb.scale[2], rgb.scale[3], seq(0,1, length=rgb.res))
 
   if(rotate.axes)
-    image(ageseq, dseq, t(scales), add=TRUE, col=colours, useRaster=FALSE) else
-      image(dseq, ageseq, scales, add=TRUE, col=colours, useRaster=FALSE)
+    image(ageseq, dseq, t(scales), add=TRUE, col=cols, useRaster=FALSE) else
+      image(dseq, ageseq, scales, add=TRUE, col=cols, useRaster=FALSE)
 }
 
 

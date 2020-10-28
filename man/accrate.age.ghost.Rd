@@ -12,7 +12,8 @@ accrate.age.ghost(
   yr.lab = age.lab,
   age.res = 200,
   yr.res = age.res,
-  grey.res = 50,
+  rgb.scale = c(0, 0, 0),
+  rgb.res = 50,
   prob = 0.95,
   plot.range = TRUE,
   range.col = grey(0.5),
@@ -50,7 +51,9 @@ accrate.age.ghost(
 
 \item{yr.res}{Deprecated - use age.res instead}
 
-\item{grey.res}{Resolution of greyscales. Default \code{grey.res=50}, which does not aim to poke fun at a famous novel.}
+\item{rgb.scale}{The function to produce a coloured representation of all age-models. Needs 3 values for the intensity of red, green and blue. Defaults to grey-scales: \code{rgb.scale=c(0,0,0)}, but could also be, say, scales of red (\code{rgb.scale=c(1,0,0)}).}
+
+\item{rgb.res}{Resolution of the colour spectrum depicting the age-depth model. Default \code{rgb.res=100}.}
 
 \item{prob}{Probability ranges. Defaults to \code{prob=0.95}.}
 

@@ -58,11 +58,12 @@ int bacon( std::string inputfile1, std::string outputfile1 , int ssize, std::str
 //  printf("%s\n", inputfile1.c_str());
   strcpy(inputfile, inputfile1.c_str());
   //JEV avoid warning int i=0; i<inputfile1.length() ; i++
-  for (unsigned int i=0; i<inputfile1.length() ; i++){
+  //for (unsigned int i=0; i<inputfile1.length() ; i++){   // MB commented this Oct 2020 as it just repeats printing the name/location of the bacon file
 
 //     printf("'%c' ", inputfile1.c_str()[i]);
-     Rprintf("'%c' ", inputfile1.c_str()[i]);
-  }
+     // Rprintf("'%c' ", inputfile1.c_str()[i]);
+ //     Rprintf("%c", inputfile1.c_str()[i]);
+//  }
 
   char *outputfile = new char[outputfile1.length() + 1];
   //  printf("%s\n", inputfile1.c_str());

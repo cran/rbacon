@@ -11,6 +11,7 @@ Bacon(
   prob = 0.95,
   d.min = NA,
   d.max = NA,
+  add.bottom = TRUE,
   d.by = 1,
   seed = NA,
   depths.file = FALSE,
@@ -40,6 +41,7 @@ Bacon(
   t.b = 4,
   normal = FALSE,
   suggest = TRUE,
+  accept.suggestions = FALSE,
   reswarn = c(10, 200),
   remember = TRUE,
   ask = TRUE,
@@ -49,6 +51,7 @@ Bacon(
   dec = ".",
   runname = "",
   slump = c(),
+  remove = FALSE,
   BCAD = FALSE,
   ssize = 2000,
   th0 = c(),
@@ -57,7 +60,7 @@ Bacon(
   MaxAge = c(),
   MinYr = MinAge,
   MaxYr = MaxAge,
-  cutoff = 0.001,
+  cutoff = 0.1,
   plot.pdf = TRUE,
   dark = 1,
   date.res = 100,
@@ -84,9 +87,11 @@ Thinner (and thus more) sections will result in smoother age-models, but too man
 
 \item{d.max}{Maximum depth of age-depth model (use this to extrapolate to depths below the bottom dated depth).}
 
+\item{add.bottom}{Add a model section at the bottom of the core, in order to ensure the bottommost date is taken into account. Default \code{add.bottom=TRUE}. This is a new option and can cause age-models to differ from previous version. Please re-run the model if in doubt.}
+
 \item{d.by}{Depth intervals at which ages are calculated. Defaults to \code{d.by=1}.}
 
-\item{seed}{Seed used for C++ executions, if it is not assigned then the seed is set by system.}
+\item{seed}{Seed used for C++ executions. If it is not assigned (\code{seed=NA}) then the seed is set by system.}
 
 \item{depths.file}{By default, Bacon will calculate the ages for the depths \code{d.min} to \code{d.max} in steps of \code{d.by}.
 If \code{depths.file=TRUE}, Bacon will read a file containing the depths for which you require ages.
@@ -139,7 +144,7 @@ allow for a large range of posterior memory values.}
 \item{cc4}{Use an alternative curve (3 columns: cal BP, 14C age, error, separated by white spaces and saved as a plain-text file). See \code{ccdir}.}
 
 \item{ccdir}{Directory where the calibration curves for C14 dates \code{cc} are located. By default \code{ccdir=""} since they are loaded into R's memory.
-For example, use \code{ccdir="."} to choose current working directory, or \code{ccdir="Curves/"} to choose sub-folder \code{Curves/}. Note that all calibration curves should reside in the same directory. If you want to add a custom-built curve, put it in the directory where the default calibration curves are (probably \code{list.files(paste0(.libPaths(), "/rbacon/extdata/Curves/"))}).
+For example, use \code{ccdir="."} to choose current working directory, or \code{ccdir="Curves/"} to choose sub-folder \code{Curves/}. Note that all calibration curves should reside in the same directory. If you want to add a custom-built curve, put it in the directory where the default calibration curves are (probably \code{list.files(paste0(.libPaths(), "/IntCal/extdata"))}).
 Alternatively produce a new folder, and add your curve as well as the default calibration curves there (cc1, cc2 and cc3; e.g., \code{write.table(copyCalibrationCurve(1), "./3Col_intcal20.14C", sep="\t")}.)}
 
 \item{postbomb}{Use a postbomb curve for negative (i.e. postbomb) 14C ages. \code{0 = none, 1 = NH1, 2 = NH2, 3 = NH3, 4 = SH1-2, 5 = SH3}}
@@ -160,7 +165,9 @@ For symmetry reasons, t.a must always be equal to t.b-1.}
 
 \item{normal}{By default, Bacon uses the student's t-distribution to treat the dates. Use \code{normal=TRUE} to use the normal/Gaussian distribution. This will generally give higher weight to the dates.}
 
-\item{suggest}{If initial analysis of the data indicates abnormally slow or fast accumulation rates, Bacon will suggest to change the prior.
+\item{suggest}{If initial analysis of the data indicates abnormally slow or fast accumulation rates, Bacon will suggest to change the prior.}
+
+\item{accept.suggestions}{Automatically accept the suggested values. Use with care. Default \code{accept.suggestions=FALSE}.
 Also, if the length of the core would cause too few or too many sections with the default settings, Bacon will suggest an alternative section thickness \code{thick}.
 Accept these suggested alternative settings by typing "y" (or "yes please" if you prefer to be polite), or leave as is by typing "n" (or anything else, really). To get rid of these suggestions, use \code{suggest=FALSE}.}
 
@@ -184,6 +191,8 @@ try running your core again with \code{remember=FALSE}, or, start cleanly by typ
 \item{runname}{Text to add to the corename for specific runs, e.g., \code{runname="MyCore_Test1"}.}
 
 \item{slump}{Upper and lower depths of any sections of assumed abrupt accumulation, that require excising before age-modelling (and adding after age-modelling). Requires pairs of depths, e.g., \code{slump=c(10,15,60,67)} for slumps at 67-60 and 15-10 cm core depth.}
+
+\item{remove}{Whether or not to remove depths within slumps. Defaults to \code{remove=FALSE}.}
 
 \item{BCAD}{The calendar scale of graphs and age output-files is in cal BP (calendar or calibrated years before the present, where the present is AD 1950) by default, but can be changed to BC/AD using \code{BCAD=TRUE}.}
 

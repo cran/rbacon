@@ -1,11 +1,11 @@
-## Ran on Tue Dec 12 07:18:02 2017 
+## Ran on Sun Oct 18 13:30:35 2020 
 
 Cal 0 : ConstCal;
-Cal 1 : IntCal13, 0;
-Cal 2 : Marine13;
-Cal 3 : SHCal13, 0;
+Cal 1 : IntCal20, 0;
+Cal 2 : Marine20;
+Cal 3 : SHCal20, 0;
 
-##   id.   yr    std   depth  deltaR  deltaSTD     t.a   t.b   cc
+##   id.   age    std   depth  delta.R  delta.STD     t.a   t.b   cc
 Det 0 : GrA-19478 ,  4128,  65,  1.5,  0,  0,  3,  4,  1;
 Det 1 : GrA-19143 , 4106, 60, 4.5;
 Det 2 : GrA-19144 , 4046, 59, 8.5;
@@ -47,5 +47,5 @@ Det 37 : GrA-18688 , 5535, 52, 77.5;
 Det 38 : GrA-17627 , 5644, 77, 79.5;
 Det 39 : GrA-17508 , 5885, 45, 99.5;
 
-##		 K   MinYr   MaxYr   th0   th0p   w.a   w.b   alpha  beta  dmin  dmax
-Bacon 0: FixT, 20,  -1000,  1e+06,  3971,  4114,  2.8,  1.2,  1.5,  0.075, 1.5, 99.5;
+##		 K   MinAge   MaxAge   th0   th0p   w.a   w.b   alpha  beta  dmin  dmax seed
+Bacon 0: FixT, 21,  -70,  1e+06,  4141,  4040,  2.8,  1.2,  1.5,  0.075, 1.5, 106.5, 772714;

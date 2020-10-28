@@ -50,6 +50,7 @@ accrate.depth <- function(d, set=get('info'), cmyr=FALSE) {
 #' @param set Detailed information of the current run, stored within this session's memory as variable \code{info}.
 #' @param cmyr Accumulation rates can be calculated in cm/year or year/cm. By default \code{cmyr=FALSE} and accumulation rates are calculated in year per cm.
 #' @param BCAD The calendar scale of graphs and age output-files is in \code{cal BP} by default, but can be changed to BC/AD using \code{BCAD=TRUE}.
+#' @param silent Warn when ages are outside the core's range. Default \code{silent=TRUE}.
 #' @author Maarten Blaauw, J. Andres Christen
 #' @return all MCMC estimates of accumulation rate of the chosen age.
 #' @examples
@@ -64,15 +65,16 @@ accrate.depth <- function(d, set=get('info'), cmyr=FALSE) {
 #' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
 #'  \url{https://projecteuclid.org/euclid.ba/1339616472}
 #' @export
-accrate.age <- function(age, set=get('info'), cmyr=FALSE, BCAD=set$BCAD) {
+accrate.age <- function(age, set=get('info'), cmyr=FALSE, BCAD=set$BCAD, silent=TRUE) {
  ages <- cbind(set$output[,1])
- for(i in 1:set$K)
+ for(i in 1:(set$K-1))
    ages <- cbind(ages, ages[,i] + (set$thick * (set$output[,i+1])))
  if(BCAD)
    ages <- 1950 - ages
 
- if(age < min(ages) || age > max(ages))
-   message(" Warning, age outside the core's age range!\n")
+ if(!silent)
+   if(age < min(ages) || age > max(ages))
+     message(" Warning, age outside the core's age range!\n")
  accs <- c()
  for(i in 2:ncol(ages)) {
    these <- (ages[,i-1] < age) * (ages[,i] > age)
@@ -100,7 +102,8 @@ accrate.age <- function(age, set=get('info'), cmyr=FALSE, BCAD=set$BCAD) {
 #' @param cmyr Accumulation rates can be calculated in cm/year or year/cm. By default \code{cmyr=FALSE} and accumulation rates are calculated in year per cm. Axis limits are difficult to calculate when \code{cmyr=TRUE}, so a manual adaptation of \code{acc.lim} might be a good idea.
 #' @param acc.lab Axis label for the accumulation rate.
 #' @param dark The darkest grey value is dark=1 by default; lower values will result in lighter grey but values >1 are not advised.
-#' @param grey.res Grey-scale resolution. Default \code{grey.res=100}.
+#' @param rgb.scale The function to produce a coloured representation of all age-models. Needs 3 values for the intensity of red, green and blue. Defaults to grey-scales: \code{rgb.scale=c(0,0,0)}, but could also be, say, scales of red (\code{rgb.scale=c(1,0,0)}). 
+#' @param rgb.res Resolution of the colour spectrum depicting the age-depth model. Default \code{rgb.res=100}.
 #' @param prob Probability ranges. Defaults to \code{prob=0.95}.
 #' @param plot.range If \code{plot.range=TRUE}, the confidence ranges (two-tailed; half of the probability at each side) are plotted.
 #' @param range.col Colour of the confidence ranges.
@@ -124,7 +127,7 @@ accrate.age <- function(age, set=get('info'), cmyr=FALSE, BCAD=set$BCAD) {
 #' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
 #' \url{https://projecteuclid.org/euclid.ba/1339616472}
 #' @export
-accrate.depth.ghost <- function(set=get('info'), d=set$elbows, d.lim=c(), acc.lim=c(), d.lab=c(), cmyr=FALSE, acc.lab=c(), dark=1, grey.res=100, prob=0.95, plot.range=TRUE, range.col=grey(0.5), range.lty=2, plot.mean=TRUE, mean.col="red", mean.lty=2, rotate.axes=FALSE, rev.d=FALSE, rev.acc=FALSE) {
+accrate.depth.ghost <- function(set=get('info'), d=set$elbows, d.lim=c(), acc.lim=c(), d.lab=c(), cmyr=FALSE, acc.lab=c(), dark=1, rgb.scale=c(0,0,0), rgb.res=100, prob=0.95, plot.range=TRUE, range.col=grey(0.5), range.lty=2, plot.mean=TRUE, mean.col="red", mean.lty=2, rotate.axes=FALSE, rev.d=FALSE, rev.acc=FALSE) {
   max.acc <- 0; max.dens <- 0
   acc <- list(); min.rng <- numeric(length(d)); max.rng <- numeric(length(d)); mn.rng <- numeric(length(d))
   for(i in 1:length(d))
@@ -163,8 +166,10 @@ accrate.depth.ghost <- function(set=get('info'), d=set$elbows, d.lim=c(), acc.li
 
   if(rotate.axes) {
     plot(0, type="n", xlab=acc.lab, ylab=d.lab, ylim=d.lim, xlim=acc.lim)
-    for(i in 2:length(d))
-      image(acc[[i]]$x, d[c(i-1, i)], t(1-t(acc[[i]]$y)), add=TRUE, col=grey(seq(1-max(acc[[i]]$y), 1, length=grey.res)))
+    for(i in 2:length(d)) {
+      col <- rgb(rgb.scale[1], rgb.scale[2], rgb.scale[3], seq(0, 1-max(acc[[i]]$y), length=rgb.res))
+      image(acc[[i]]$x, d[c(i-1, i)], t(1-t(acc[[i]]$y)), add=TRUE, col=col)
+    }
     if(plot.range) {
       lines(min.rng, d-(set$thick/2), col=range.col, lty=range.lty)
       lines(max.rng, d-(set$thick/2), col=range.col, lty=range.lty)
@@ -173,8 +178,10 @@ accrate.depth.ghost <- function(set=get('info'), d=set$elbows, d.lim=c(), acc.li
       lines(mn.rng, d-(set$thick/2), col=mean.col, lty=mean.lty)
   } else {
       plot(0, type="n", xlab=d.lab, ylab=acc.lab, xlim=d.lim, ylim=acc.lim)
-      for(i in 2:length(d))
-        image(d[c(i-1, i)], acc[[i]]$x, 1-t(acc[[i]]$y), add=TRUE, col=grey(seq(1-max(acc[[i]]$y), 1, length=grey.res)))
+      for(i in 2:length(d)) {
+        col <- rgb(rgb.scale[1], rgb.scale[2], rgb.scale[3], seq(max(acc[[i]]$y), 0, length=rgb.res))
+        image(d[c(i-1, i)], acc[[i]]$x, 1-t(acc[[i]]$y), add=TRUE, col=col) 
+        }
       if(plot.range) {
         lines(d-(set$thick/2), min.rng, col=range.col, lty=range.lty)
         lines(d-(set$thick/2), max.rng, col=range.col, lty=range.lty)
@@ -204,7 +211,8 @@ accrate.depth.ghost <- function(set=get('info'), d=set$elbows, d.lim=c(), acc.li
 #' @param yr.lab Deprecated - use age.lab instead
 #' @param age.res Resolution or amount of greyscale pixels to cover the age scale of the age-model plot. Default \code{age.res=200}.
 #' @param yr.res Deprecated - use age.res instead
-#' @param grey.res Resolution of greyscales. Default \code{grey.res=50}, which does not aim to poke fun at a famous novel.
+#' @param rgb.scale The function to produce a coloured representation of all age-models. Needs 3 values for the intensity of red, green and blue. Defaults to grey-scales: \code{rgb.scale=c(0,0,0)}, but could also be, say, scales of red (\code{rgb.scale=c(1,0,0)}). 
+#' @param rgb.res Resolution of the colour spectrum depicting the age-depth model. Default \code{rgb.res=100}.
 #' @param prob Probability ranges. Defaults to \code{prob=0.95}.
 #' @param plot.range If \code{plot.range=TRUE}, the confidence ranges (two-tailed; half of the probability at each side) are plotted.
 #' @param range.col Colour of the confidence ranges.
@@ -238,7 +246,7 @@ accrate.depth.ghost <- function(set=get('info'), d=set$elbows, d.lim=c(), acc.li
 #' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
 #' \url{https://projecteuclid.org/euclid.ba/1339616472}
 #' @export
-accrate.age.ghost <- function(set=get('info'), age.lim=c(), yr.lim=age.lim, age.lab=c(), yr.lab=age.lab, age.res=200, yr.res=age.res, grey.res=50, prob=.95, plot.range=TRUE, range.col=grey(0.5), range.lty=2, plot.mean=TRUE, mean.col="red", mean.lty=2, acc.lim=c(), acc.lab=c(), upper=0.99, dark=50, BCAD=set$BCAD, cmyr=FALSE, rotate.axes=FALSE, rev.age=FALSE, rev.yr=rev.age, rev.acc=FALSE, xaxs="i", yaxs="i", bty="l") {
+accrate.age.ghost <- function(set=get('info'), age.lim=c(), yr.lim=age.lim, age.lab=c(), yr.lab=age.lab, age.res=200, yr.res=age.res, rgb.scale=c(0,0,0), rgb.res=50, prob=.95, plot.range=TRUE, range.col=grey(0.5), range.lty=2, plot.mean=TRUE, mean.col="red", mean.lty=2, acc.lim=c(), acc.lab=c(), upper=0.99, dark=50, BCAD=set$BCAD, cmyr=FALSE, rotate.axes=FALSE, rev.age=FALSE, rev.yr=rev.age, rev.acc=FALSE, xaxs="i", yaxs="i", bty="l") {
   if(length(yr.lim) == 0) {
     min.age <- min(set$ranges[,2])
     max.age <- max(set$ranges[,3])
@@ -293,27 +301,28 @@ accrate.age.ghost <- function(set=get('info'), age.lim=c(), yr.lim=age.lim, age.
     if(cmyr)
       acc.lab <- paste0("accumulation rate (", set$depth.unit, "/", set$age.unit, ")") else
         acc.lab <- paste0("accumulation rate (", set$age.unit, "/", set$depth.unit, ")")
+  peak <- 0
+  for(i in 1:length(age.seq))
+    peak <- max(peak, unlist(hist.list$y[[i]])) # doesn't work well owing to the very dark tail at the bottom
   if(rotate.axes) {
     plot(0, type="n", xlim=acc.lim, xlab=acc.lab, ylim=age.lim, ylab=age.lab, xaxs=xaxs, yaxs=yaxs)
     for(i in 2:length(age.seq)) {
-      x <- sort(unlist(hist.list$x[[i]]))
-      y <- sort(unlist(hist.list$y[[i]]))
+      x <- unlist(hist.list$x[[i]])
+      y <- unlist(hist.list$y[[i]])
+      col <- rgb(rgb.scale[1], rgb.scale[2], rgb.scale[3], seq(0, 1, length=rgb.res))
       if(BCAD)
-        image(x, 1950-unlist(hist.list$yr[c(i,i-1)]), t(t(matrix(y))),
-          col=grey(seq(1, 1-min(1,max(y)*dark/max.y), length=grey.res)), add=TRUE) else
-          image(x, unlist(hist.list$yr[c(i-1,i)]), t(t(matrix(y))),
-            col=grey(seq(1, 1-min(1,max(y)*dark/max.y), length=grey.res)), add=TRUE)
+        image(x, 1950-unlist(hist.list$yr[c(i,i-1)]), t(t(matrix(y))), col=col, add=TRUE) else
+          image(x, unlist(hist.list$yr[c(i-1,i)]), t(t(matrix(y))), col=col, add=TRUE)
     }
   } else {
         plot(0, type="n", xlim=age.lim, xlab=age.lab, ylim=acc.lim, ylab=acc.lab, xaxs=xaxs, yaxs=yaxs)
         for(i in 2:length(age.seq)) {
-          x <- sort(unlist(hist.list$x[[i]]))
-          y <- sort(unlist(hist.list$y[[i]]))
+          x <- unlist(hist.list$x[[i]])
+          y <- unlist(hist.list$y[[i]])
+          col <- rgb(rgb.scale[1], rgb.scale[2], rgb.scale[3], seq(0, 1, length=rgb.res))
           if(BCAD)
-            image(1950-sort(unlist(hist.list$yr[c(i,i-1)])), x, t(matrix(y)),
-              col=grey(seq(1, 1-min(1,max(y)*dark/max.y), length=grey.res)), add=TRUE) else
-              image(sort(unlist(hist.list$yr[c(i-1,i)])), x, t(matrix(y)),
-                col=grey(seq(1, 1-min(1,max(y)*dark/max.y), length=grey.res)), add=TRUE)
+            image(1950-sort(unlist(hist.list$yr[c(i,i-1)])), x, t(matrix(y)), col=col, add=TRUE) else
+              image(sort(unlist(hist.list$yr[c(i-1,i)])), x, t(matrix(y)), col=col, add=TRUE)
         }
       }
    if(plot.range)
@@ -363,6 +372,8 @@ accrate.age.ghost <- function(set=get('info'), age.lim=c(), yr.lim=age.lim, age.
 #' @param mean.col Red seems nice.
 #' @param mean.lty Line type of the means.
 #' @param upper Maximum flux rates to plot. Defaults to the upper 99\%; \code{upper=0.99}.
+#' @param rgb.scale The function to produce a coloured representation of all age-models. Needs 3 values for the intensity of red, green and blue. Defaults to grey-scales: \code{rgb.scale=c(0,0,0)}, but could also be, say, scales of red (\code{rgb.scale=c(1,0,0)}). 
+#' @param rgb.res Resolution of the colour spectrum depicting the age-depth model. Default \code{rgb.res=100}.
 #' @param dark The darkest grey value is \code{dark=1} by default; lower values will result in lighter grey but \code{values >1} are not allowed.
 #' @param BCAD The calendar scale of graphs and age output-files is in \code{cal BP} by default, but can be changed to BC/AD using \code{BCAD=TRUE}.
 #' @param age.lab The labels for the calendar axis (default \code{age.lab="cal BP"} or \code{"BC/AD"} if \code{BCAD=TRUE}).
@@ -385,7 +396,7 @@ accrate.age.ghost <- function(set=get('info'), age.lim=c(), yr.lim=age.lim, age.
 #' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
 #' \url{https://projecteuclid.org/euclid.ba/1339616472}
 #' @export
-flux.age.ghost <- function(proxy=1, age.lim=c(), yr.lim=age.lim, age.res=200, yr.res=age.res, set=get('info'), flux=c(), plot.range=TRUE, prob=.8, range.col=grey(0.5), range.lty=2, plot.mean=TRUE, mean.col="red", mean.lty=2, flux.lim=c(), flux.lab="flux", upper=.95, dark=set$dark, BCAD=set$BCAD, age.lab=c(), yr.lab=age.lab, rotate.axes=FALSE, rev.flux=FALSE, rev.age=FALSE, rev.yr=rev.age) {
+flux.age.ghost <- function(proxy=1, age.lim=c(), yr.lim=age.lim, age.res=200, yr.res=age.res, set=get('info'), flux=c(), plot.range=TRUE, prob=.8, range.col=grey(0.5), range.lty=2, plot.mean=TRUE, mean.col="red", mean.lty=2, flux.lim=c(), flux.lab="flux", upper=.95, rgb.scale=c(0,0,0), rgb.res=100, dark=set$dark, BCAD=set$BCAD, age.lab=c(), yr.lab=age.lab, rotate.axes=FALSE, rev.flux=FALSE, rev.age=FALSE, rev.yr=rev.age) {
   if(length(flux) == 0) { # then read a .csv file, expecting data in columns with headers
     flux <- read.csv(paste(set$coredir, set$core, "/", set$core, "_flux.csv", sep=""))
     flux <- cbind(flux[,1], flux[,1+proxy])
@@ -438,11 +449,10 @@ flux.age.ghost <- function(proxy=1, age.lim=c(), yr.lim=age.lim, age.res=200, yr
     if(length(tmp[tmp>=0]) > 2) {
       flux.hist <- density(tmp, from=0, to=max(flux.lim))
       flux.hist$y <- flux.hist$y - min(flux.hist$y) # no negative fluxes
+      col <- rgb(rgb.scale[1], rgb.scale[2], rgb.scale[3], seq(0, max(flux.hist$y)/max.dens, length=rgb.res))
       if(rotate.axes)
-        image(flux.hist$x, age.seq[c(i-1,i)], matrix(flux.hist$y/max.dens), add=TRUE,
-          col=grey(seq(1, max(0, 1-dark*(max(flux.hist$y)/max.dens)), length=100))) else
-          image(age.seq[c(i-1,i)], flux.hist$x, t(matrix(flux.hist$y/max.dens)), add=TRUE,
-            col=grey(seq(1, max(0, 1-dark*(max(flux.hist$y)/max.dens)), length=100)))
+        image(flux.hist$x, age.seq[c(i-1,i)], matrix(flux.hist$y), add=TRUE, col=col) else
+          image(age.seq[c(i-1,i)], flux.hist$x, t(matrix(flux.hist$y)), add=TRUE, col=col)
     }
   }
  if(plot.range)

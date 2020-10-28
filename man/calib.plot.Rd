@@ -18,11 +18,11 @@ calib.plot(
   d.lab = c(),
   age.lab = c(),
   yr.lab = age.lab,
-  height = 15,
+  height = 30,
   calheight = 1,
   mirror = TRUE,
   up = TRUE,
-  cutoff = 0.001,
+  cutoff = 0.1,
   C14.col = rgb(0, 0, 1, 0.5),
   C14.border = rgb(0, 0, 1, 0.75),
   cal.col = rgb(0, 0.5, 0.5, 0.5),
@@ -70,7 +70,7 @@ calib.plot(
 
 \item{up}{Directions of distributions if they are plotted non-mirrored. Default \code{up=TRUE}.}
 
-\item{cutoff}{Avoid plotting very low probabilities of date distributions (default \code{cutoff=0.001}).}
+\item{cutoff}{Avoid plotting very low probabilities of date distributions (default \code{cutoff=0.1}).}
 
 \item{C14.col}{Colour of the calibrated distributions of the dates. Default is semi-transparent blue: \code{rgb(0,0,1,.35)}.}
 

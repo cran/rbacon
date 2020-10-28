@@ -7,7 +7,7 @@
 #' @param set Detailed information of the current run, stored within this session's memory as variable info.
 #' @param its The set of MCMC iterations to be used. Defaults to the entire MCMC output, \code{its=set$output}.
 #' @param BCAD The calendar scale of graphs and age output-files is in \code{cal BP} by default, but can be changed to BC/AD using \code{BCAD=TRUE}.
-#' @param remove Whether or not to remove NA values (ages within slumps)
+#' @param na.rm Whether or not to remove NA values (ages within slumps)
 #' @author Maarten Blaauw, J. Andres Christen
 #' @return Outputs all MCMC-derived ages for a given depth.
 #' @examples
@@ -21,7 +21,7 @@
 #' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
 #'  \url{https://projecteuclid.org/euclid.ba/1339616472}
 #' @export
-Bacon.Age.d <- function(d, set=get('info'), its=set$output, BCAD=set$BCAD, remove=FALSE) {
+Bacon.Age.d <- function(d, set=get('info'), its=set$output, BCAD=set$BCAD, na.rm=FALSE) {
   if(length(d) > 1)
     stop("Bacon.Age.d can handle one depth at a time only", call.=FALSE)
   if(length(its) == 0)
@@ -29,7 +29,7 @@ Bacon.Age.d <- function(d, set=get('info'), its=set$output, BCAD=set$BCAD, remov
 
   hiatus.depths <- set$hiatus.depths
   if(length(set$slump) > 0) {
-   d <- toslump(d, set$slump, remove=remove)
+   d <- toslump(d, set$slump, remove=na.rm)
    if(!is.na(hiatus.depths[1]))
      hiatus.depths <- set$slumphiatus
   }
@@ -60,6 +60,159 @@ Bacon.Age.d <- function(d, set=get('info'), its=set$output, BCAD=set$BCAD, remov
     ages <- 1950 - ages
   return(c(ages))
 }
+
+
+
+#' @name Bacon.d.Age
+#' @title Output all ages for a single depth.
+#' @description Output all MCMC-derived age estimates for a given depth.
+#' @details Obtaining an age-depth model is often only a step towards a goal, e.g., plotting a core's
+#' fossil series ('proxies') against calendar time. Bacon.d.Age can be used to list all MCMC-derived depths belonging to a given (single) age, for example to calculate mean depths belonging to a modelled depth. 
+#' This function was kindly written and provided by Timon Netzel (Bonn University).
+#' @param age The age estimate for which depths are to be returned. Has to be a single age.
+#' @param set Detailed information of the current run, stored within this session's memory as variable info.
+#' @param its The set of MCMC iterations to be used. Defaults to the entire MCMC output, \code{its=set$output}.
+#' @param BCAD The calendar scale of graphs and age output-files is in \code{cal BP} by default, but can be changed to BC/AD using \code{BCAD=TRUE}.
+#' @param na.rm Whether or not to remove NA values (ages within slumps)
+#' @author Maarten Blaauw, J. Andres Christen
+#' @return Outputs all MCMC-derived ages for a given depth.
+#' @examples
+#'   Bacon(run=FALSE, coredir=tempfile())
+#'   agedepth(age.res=50, d.res=50, d.by=10)
+#'   ages.d20 = Bacon.Age.d(20)
+#'   mean(ages.d20)
+#' @seealso \url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
+#' @references
+#' Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive
+#' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
+#'  \url{https://projecteuclid.org/euclid.ba/1339616472}
+#' @export
+Bacon.d.Age <- function(age, set=get("info"), BCAD=set$BCAD, its=set$output, na.rm=FALSE ){
+
+  if(BCAD) 
+    age <- 1950 - age # if the customer decides to enter the age in BCAD
+  if(length(age) > 1) 
+    stop("Bacon.d.Age can handle one age at a time only", call. = FALSE)
+  if(length(its) == 0 ) 
+    stop("core's data not yet in memory. Please run agedepth first\n", call. = FALSE)
+
+  # create elbow ages
+  elbows <- set$elbows
+  topages <- as.vector(its[,1]) # ages for the core top
+  accs <- as.matrix(its[,1+(1:set$K)]) # the accumulation rates xi for each section
+  cumaccs <- set$thick * cbind(0, t(apply(accs, 1, cumsum))) # cumulative accumulation
+  elbow.ages <- topages + cumaccs
+
+  if ( age <= min(elbow.ages) || age > max(elbow.ages) ) 
+    message(" Warning, age outside the core's age range!\n")
+
+  # prepare slump
+  hiatus.depths <- set$hiatus.depths
+  if(length(set$slump) > 0) {
+    diff.slumps <- apply(set$slump,1,diff,na.rm=T)  # vector containing the difference of each slump
+    if ( !is.na(hiatus.depths[1]) ) 
+      hiatus.depths <- set$slumphiatus
+  }
+    
+    # prepare hiatus
+    hiatus.check <- rep(0,ncol(elbow.ages)) # vector containing the information for each elbow whether there is a hiatus (1) or no hiatus (0)
+    if ( !is.na(hiatus.depths[1]) ){ 
+        # if there is no slump
+        if ( length(set$slump) == 0 ) 
+            hiatus.depths <- set$hiatus.depths
+        # where are the hiatuses
+        for ( i in 1:length(hiatus.depths) ) {
+            hiatus.check[ min(which(elbows > hiatus.depths[i])) ] <- 1
+        }
+    }
+
+    # intersections which are below the last elbow
+    these.bottom <- which( elbow.ages[, ncol(elbow.ages)] < age ) 
+    
+    # summary of the depths corresponding to the chosen age
+    depths <- rep(NA,nrow(its))
+    for ( i in 2:ncol(elbow.ages) ){
+    
+        # consideration of hiatuses
+        if ( hiatus.check[i] == 1 ){ 
+            for ( j in 1:length(hiatus.depths) ) {
+                above <- max(which(elbows < hiatus.depths[j]), 1)[1]
+                below <- above + 1
+                # two age ranges for one hiatus (below/above) with the adapted slopes (could be included in the info list)
+                ages.above <- set$elbow.above[,j] + (set$slope.above[,j] * (hiatus.depths[j] - elbows[above]))
+                ages.below <- set$elbow.below[,j] - (set$slope.below[,j] * (elbows[below] - hiatus.depths[j]))
+                # intersections below and above
+                these.above <- (elbow.ages[, above] < age) * (ages.above > age) 
+                these.below <- (ages.below < age) * (elbow.ages[, below] > age) 
+                # find the depths which correspond to the intersections below and above the hiatus
+                if ( sum(these.above, na.rm=T) > 0 ){
+                    # slopes above hiatus
+                    accs.above <- (1/set$slope.above[,j])[which(these.above==1)]
+                    # age difference with the last age range above the hiatus
+                    age.diff.above <- age - elbow.ages[which(these.above==1), above]
+                    # depths: last depth above hiatus depth + slopes * age difference
+                    depths[which(these.above==1)] <- elbows[above] + accs.above * age.diff.above
+                }
+                if ( sum(these.below, na.rm=T) > 0 ){
+                    # slopes below hiatus
+                    accs.below <- (1/set$slope.below[,j])[which(these.below==1)]
+                    # age difference with the lower hiatus age range 
+                    age.diff.below  <- age - ages.below[which(these.below==1)]
+                    # depths: hiatus depth + slopes * age difference 
+                    depths[which(these.below==1)] <- hiatus.depths[j] + accs.below * age.diff.below
+                }
+            }
+        } else{
+            # consideration of the cases without hiatuses
+            
+            # find the correct intersections
+            these <- (elbow.ages[, i - 1] < age) * (elbow.ages[, i] > age)
+
+            # find the depths which correspond to these intersections
+            if ( sum(these, na.rm=T) > 0 ){ 
+                # which slopes
+                accs <- 1/set$output[which(these == 1), i]
+                # difference between the age and the elbow ages found
+                age.diff <- age - elbow.ages[which(these == 1), i - 1]
+                # depths: elbow depth + slopes *  age difference
+                depths[which(these==1)] <- elbows[i-1] + accs * age.diff
+            }
+            
+            # find these intersections which are below the last elbow
+            if( length(these.bottom)  > 0 & i == ncol(elbow.ages) ){
+                # slopes below last elbow
+                accs.bottom <- 1/set$output[these.bottom, i]
+                # difference between the age and the last elbow ages found
+                age.diff.bottom <-  age - elbow.ages[these.bottom, i ]
+                # depth: last elbow + slopes *  age difference 
+                depths[these.bottom] <- elbows[i-1] + accs.bottom * age.diff.bottom
+            }
+        }  
+    }
+    
+    # Query: remove NA entries if some entries are not NA (happens for some hiatuses).
+    # In these cases the depth vector does not have the same length for different age.
+    # In cases where the age entered is younger than min(elbow.ages), each entry in depth is NA and is returned as such.
+    if( !all(is.na(depths)) & na.rm ) depths <- depths[!is.na(depths)]
+ 
+    # consideration of slumps
+    if ( length(set$slump) > 0 ) {
+        for( j in 1:nrow(set$slump) ){
+            # which depths are below the slump
+            these.below.slump <- (depths >= set$slump[j,1]) 
+            below.slump <- sum(these.below.slump, na.rm = T)
+            if ( below.slump > 0 ){
+                # shift the found depths with the slump depths above
+                these.shift <- which(these.below.slump==1)
+                depths[these.shift] <- depths[these.shift] + diff.slumps[j]  
+            }
+        }
+    }
+ 
+    # output
+    return(depths)
+}
+
 
 
 # First get ages and slopes of c's just above and below hiatus.
@@ -256,14 +409,16 @@ Bacon.rng <- function(d, set=get('info'), BCAD=set$BCAD, prob=set$prob) {
   if(length(d) > 1)
     pb <- txtProgressBar(min=0, max=max(1, length(d)-1), style=3)
   rng <- array(NA, dim=c(length(d), 4))
+
   for(i in 1:length(d)) {
     ages <- Bacon.Age.d(d[i], set, BCAD=BCAD)
 	  if(length(!is.na(ages)) > 0) {
       rng[i,1:3] <- quantile(ages[!is.na(ages)], c(((1-prob)/2), 1-((1-prob)/2), .5))
       rng[i,4] <- mean(ages[!is.na(ages)])
     }
-    if(length(d) > 1)
-      setTxtProgressBar(pb, i)
+
+  if(length(d) > 1)
+    setTxtProgressBar(pb, i)
   }
   if(length(d) > 1)
     close(pb)
@@ -308,6 +463,7 @@ agemodel.it <- function(it, set=get('info'), BCAD=set$BCAD) {
 toslump <- function(d, slump, remove=FALSE) {
   d <- sort(d)
   slump <- matrix(sort(slump), ncol=2, byrow=TRUE)
+ # slump <<- slump
   slices <- c(0, slump[,2] - slump[,1])
   dfree <- d
   for(i in 1:nrow(slump)) {
@@ -321,7 +477,7 @@ toslump <- function(d, slump, remove=FALSE) {
 
     if(length(inside) > 0) # depths within slump
       if(min(d) < max(slump[i,]))
-	    if(remove)
+        if(remove)
           dfree[inside] <- NA else
             dfree[inside] <- slump[i,1] - sum(slices[1:i])
   }

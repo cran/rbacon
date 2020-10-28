@@ -10,7 +10,8 @@ proxy.ghost(
   proxy.res = 250,
   age.res = 200,
   yr.res = age.res,
-  grey.res = 100,
+  rgb.scale = c(0, 0, 0),
+  rgb.res = 100,
   set = get("info"),
   dark = 1,
   darkest = 1,
@@ -32,7 +33,8 @@ proxy.ghost(
   BCAD = set$BCAD,
   age.lab = ifelse(BCAD, "BC/AD", "cal yr BP"),
   yr.lab = age.lab,
-  verbose = TRUE
+  verbose = TRUE,
+  add = FALSE
 )
 }
 \arguments{
@@ -46,7 +48,9 @@ proxy.ghost(
 
 \item{yr.res}{Deprecated - use age.res instead}
 
-\item{grey.res}{Grey-scale resolution of the proxy graph. Default \code{grey.res=100}.}
+\item{rgb.scale}{The function to produce a coloured representation of all age-models. Needs 3 values for the intensity of red, green and blue. Defaults to grey-scales: \code{rgb.scale=c(0,0,0)}, but could also be, say, scales of red (\code{rgb.scale=c(1,0,0)}).}
+
+\item{rgb.res}{Resolution of the colour spectrum depicting the age-depth model. Default \code{rgb.res=100}.}
 
 \item{set}{Detailed information of the current run, stored within this session's memory as variable info.}
 
@@ -91,6 +95,8 @@ proxy.ghost(
 \item{yr.lab}{Deprecated - use age.lab instead}
 
 \item{verbose}{Provide feedback on what is happening (default \code{verbose=TRUE}).}
+
+\item{add}{Add to an existing graph (default \code{add=FALSE}).}
 }
 \value{
 A grey-scale graph of the proxy against calendar age.

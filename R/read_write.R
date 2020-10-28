@@ -123,7 +123,9 @@ Bacon.cleanup <- function(set=get('info')) {
       tmp <- file.remove(i)
   if(exists("tmp"))
     rm(tmp)
-  message("Previous Bacon runs of core", set$core, "with thick =", set$thick, "deleted. Now try running the core again\n")
+#  if(exists('info')) # new Oct 2020
+#    rm(info)
+  message("Previous Bacon runs of core ", set$core, " with thick=", set$thick, " ", set$depth.unit, " deleted. Now try running the core again\n")
 }
 
 
@@ -175,7 +177,7 @@ assign_coredir <- function(coredir, core, ask=TRUE) {
   if(file.exists(csv.file)) {
     dets <- read.table(csv.file, header=TRUE, sep=sep)
     if(file.exists(dat.file)) # deal with old .dat files
-      if(file.info(csv.file)$mtime < file.info(dat.file)$mtime)
+      if(file.mtime(csv.file) < file.mtime(dat.file))
         message("Warning, the .dat file is newer than the .csv file! I will read the .csv file. From now on please modify ", csv.file, ", not ", dat.file) else
           message("Reading", csv.file)
     } else {
@@ -471,7 +473,7 @@ assign_coredir <- function(coredir, core, ask=TRUE) {
 
   cK <- set$d.min+(set$thick*set$K)
   ### final parameters - dmax now calculated as dmin+(dC*K)
-  if(is.na(set$seed)){
+  if(is.na(set$seed)) {
     wrapup <- paste("\n\n##\t\t K   MinAge   MaxAge   th0   th0p   w.a   w.b   alpha  beta  dmin  dmax",
       "\nBacon 0: ", ifelse(set$normal, "FixNor", "FixT"), ", ", set$K,
       ",  ", set$MinAge, ",  ", set$MaxAge, ",  ", set$th0[1], ",  ", set$th0[2],
@@ -479,13 +481,13 @@ assign_coredir <- function(coredir, core, ask=TRUE) {
       ",  ", set$acc.shape[1], ",  ", set$acc.shape[1]/set$acc.mean[1], ", ", set$d.min,
       ", ", cK, ";\n", sep="")
     cat(wrapup, file=fl)
-  }else{
+  } else {
     wrapup <- paste("\n\n##\t\t K   MinAge   MaxAge   th0   th0p   w.a   w.b   alpha  beta  dmin  dmax seed",
       "\nBacon 0: ", ifelse(set$normal, "FixNor", "FixT"), ", ", set$K,
       ",  ", set$MinAge, ",  ", set$MaxAge, ",  ", set$th0[1], ",  ", set$th0[2],
       ",  ", set$mem.strength*set$mem.mean, ",  ", set$mem.strength*(1-set$mem.mean),
       ",  ", set$acc.shape[1], ",  ", set$acc.shape[1]/set$acc.mean[1], ", ", set$d.min,
-      ", ", cK, ", ", set$seed, ";\n", sep="")
+      ", ", cK, ", ", as.integer(set$seed), ";\n", sep="")
     cat(wrapup, file=fl)
   }
   close(fl)

@@ -13,7 +13,8 @@ accrate.depth.ghost(
   cmyr = FALSE,
   acc.lab = c(),
   dark = 1,
-  grey.res = 100,
+  rgb.scale = c(0, 0, 0),
+  rgb.res = 100,
   prob = 0.95,
   plot.range = TRUE,
   range.col = grey(0.5),
@@ -43,7 +44,9 @@ accrate.depth.ghost(
 
 \item{dark}{The darkest grey value is dark=1 by default; lower values will result in lighter grey but values >1 are not advised.}
 
-\item{grey.res}{Grey-scale resolution. Default \code{grey.res=100}.}
+\item{rgb.scale}{The function to produce a coloured representation of all age-models. Needs 3 values for the intensity of red, green and blue. Defaults to grey-scales: \code{rgb.scale=c(0,0,0)}, but could also be, say, scales of red (\code{rgb.scale=c(1,0,0)}).}
+
+\item{rgb.res}{Resolution of the colour spectrum depicting the age-depth model. Default \code{rgb.res=100}.}
 
 \item{prob}{Probability ranges. Defaults to \code{prob=0.95}.}
 
