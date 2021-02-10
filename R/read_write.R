@@ -20,7 +20,6 @@
 #' @param bacondir The directory where the Bacon runs reside. Defaults to \code{coredir="Bacon_runs"}.
 #' @param sep The separator for the .csv files. Defaults to \code{sep=","}.
 #' @param cc Calibration curve for C-14 dates: \code{cc=1} for IntCal20 (northern hemisphere terrestrial), \code{cc=2} for Marine20 (marine),
-#' @seealso \url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
 #' @export
 clam2bacon <- function(core, clamdir="clam_runs", bacondir="Bacon_runs", sep=",", cc=1) {
   clamfl <- read.csv(paste0(clamdir, "/", core, "/", core, ".csv"), sep=sep)
@@ -65,7 +64,6 @@ clam2bacon <- function(core, clamdir="clam_runs", bacondir="Bacon_runs", sep=","
 #'   bacon2clam("MSB2K", bacondir=tmpfl, clamdir=tmpfl)
 #'  }
 #' }
-#' @seealso \url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
 #' @export
 bacon2clam <- function(core, bacondir="Bacon_runs", clamdir="clam_runs", sep=",") {
   baconfl <- read.csv(paste0(bacondir, "/", core, "/", core, ".csv"), sep=sep)
@@ -112,7 +110,6 @@ bacon2clam <- function(core, bacondir="Bacon_runs", clamdir="clam_runs", sep=","
 #' @examples
 #'   Bacon(run=FALSE, coredir=tempfile())
 #'   Bacon.cleanup()
-#' @seealso \url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
 #' @export
 Bacon.cleanup <- function(set=get('info')) {
   files <- c(paste0(set$prefix, ".bacon"), paste0(set$prefix, ".out"),
@@ -161,7 +158,7 @@ assign_coredir <- function(coredir, core, ask=TRUE) {
 
 
 # read the dets file, converting old formats to new ones if so required
-.read.dets <- function(core, coredir, set=get('info'), sep=",", dec=".", cc=1) {
+read.dets <- function(core, coredir, set=get('info'), sep=",", dec=".", cc=1) {
   # if a .csv file exists, read it (checking that it is more recent than any .dat file in the folder). Otherwise, read the .dat file, check the columns, report back if >4 (>5?) columns, and convert to .csv (report this also)
   csv.file <- paste(coredir,  core, "/", core, ".csv", sep="")
   dat.file <- paste(coredir,  core, "/", core, ".dat", sep="")
@@ -185,7 +182,7 @@ assign_coredir <- function(coredir, core, ask=TRUE) {
         file.rename(paste0(csv.file, ".txt"), csv.file)
         message("Removing .txt extension from .csv file")
       } else {
-        message("No .csv file found, reading", dat.file, "and converting it to .csv")
+        message("No .csv file found, reading", dat.file, " and converting it to .csv")
         dets <- read.table(dat.file, header=TRUE)
         changed <- 1
         }
@@ -376,7 +373,7 @@ assign_coredir <- function(coredir, core, ask=TRUE) {
 
 
 # write files to be read by the main Bacon age-depth modelling function
-.write.Bacon.file <- function(set=get('info')) {
+write.Bacon.file <- function(set=get('info')) {
   if(length(set$slump) > 0) {
     dets <- set$slumpdets
     hiatus.depths <- set$slumphiatus
@@ -451,8 +448,8 @@ assign_coredir <- function(coredir, core, ask=TRUE) {
 
   if(!is.na(hiatus.depths[1])) {
     if(is.null(boundary[1]))
-      message("  Hiatus set at depth(s)", hiatus.depths) else
-        message("  Boundary set at depth(s) ", boundary)
+      message("  Hiatus set at depth(s)", paste("", hiatus.depths)) else
+        message("  Boundary set at depth(s) ",  paste("", boundary))
     if(length(set$acc.shape)==1)
       set$acc.shape <- rep(set$acc.shape, length(hiatus.depths)+1)
     if(length(set$acc.mean)==1)
@@ -461,7 +458,7 @@ assign_coredir <- function(coredir, core, ask=TRUE) {
       set$hiatus.max <- rep(set$hiatus.max, length(hiatus.depths))
 #      if(length(set$hiatus.shape)==1)
 #        set$hiatus.shape <- rep(set$hiatus.shape, length(set$hiatus.depths))
-    .assign_to_global ("info", set)
+    assign_to_global ("info", set)
 
     cat("\n\n### Depths and priors for fixed hiatuses, in descending order",
       "\n##### cm  alpha beta      ha     hb", file=fl)
@@ -496,7 +493,7 @@ assign_coredir <- function(coredir, core, ask=TRUE) {
 
 
 # function to read output files into memory
-.Bacon.AnaOut <- function(fnam, set=get('info')) {
+Bacon.AnaOut <- function(fnam, set=get('info')) {
   out <- read.table(fnam)
   n <- ncol(out)-1
   set$n <- n
@@ -510,6 +507,6 @@ assign_coredir <- function(coredir, core, ask=TRUE) {
 
 # function to load results in global environment
 # parameter position defaults to 1, which equals an assignment to the global environment
-.assign_to_global <- function(key, val, pos=1) {
+assign_to_global <- function(key, val, pos=1) {
   assign(key, val, envir=as.environment(pos) )
 }

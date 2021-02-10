@@ -27,11 +27,6 @@
 #'   agedepth()
 #' }
 #'
-#' @seealso \url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
-#' @references
-#' Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive
-#' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
-#' \url{https://projecteuclid.org/euclid.ba/1339616472}
 #' @export
 scissors <- function(burnin, set=get('info')) {
   output <- read.table(paste(set$prefix, ".out", sep=""))
@@ -51,7 +46,7 @@ scissors <- function(burnin, set=get('info')) {
 
   info <- get('info')
   info$output <- output
-  .assign_to_global ("info", info)
+  assign_to_global ("info", info)
 }
 
 
@@ -76,11 +71,6 @@ scissors <- function(burnin, set=get('info')) {
 #'   agedepth()
 #' }
 #'
-#' @seealso \url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
-#' @references
-#' Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive
-#' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
-#' \url{https://projecteuclid.org/euclid.ba/1339616472}
 #' @export
 thinner <- function(proportion=0.1, set=get('info')) {
   output <- read.table(paste(set$prefix, ".out", sep=""))
@@ -92,7 +82,7 @@ thinner <- function(proportion=0.1, set=get('info')) {
 
   info <- get('info')
   info$output <- output
-  .assign_to_global ("info", info)
+  assign_to_global ("info", info)
 }
 
 
@@ -118,11 +108,7 @@ thinner <- function(proportion=0.1, set=get('info')) {
 #'   \donttest{
 #'     Baconvergence(runs=2, ssize=100, coredir=tempfile()) # a quick-and-dirty toy example
 #'   }
-#' @seealso \url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
 #' @references
-#' Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive
-#' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
-#' \url{https://projecteuclid.org/euclid.ba/1339616472}
 #' Brooks, SP. and Gelman, A. (1998) General methods for monitoring
 #' convergence of iterative simulations.
 #' _Journal of Computational and Graphical Statistics, *7*, 434-455.

@@ -23,9 +23,6 @@ removing files .bacon, .out, .pdf, _ages.txt, and _settings.txt of current core.
   Bacon(run=FALSE, coredir=tempfile())
   Bacon.cleanup()
 }
-\seealso{
-\url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
-}
 \author{
 Maarten Blaauw, J. Andres Christen
 }

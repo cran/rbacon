@@ -3,7 +3,7 @@
 #################### user-invisible plot functions ####################
 
 # to plot greyscale/ghost graphs of the age-depth model
-.agedepth.ghost <- function(set=get('info'), d.min=set$d.min, d.max=set$d.max, BCAD=set$BCAD, rotate.axes=FALSE, d.res=400, age.res=400, rgb.res=100, dark=c(), rgb.scale=c(0,0,0), age.lim) {
+agedepth.ghost <- function(set=get('info'), d.min=set$d.min, d.max=set$d.max, BCAD=set$BCAD, rotate.axes=FALSE, d.res=400, age.res=400, rgb.res=100, dark=c(), rgb.scale=c(0,0,0), cutoff=0.001, age.lim) {
   dseq <- seq(d.min, d.max, length=d.res)
   if(set$isplum) # plum has a strange feature with a grey shape appearing
     dseq <- dseq[-1] # at dmin. Thus removing the first depth
@@ -34,7 +34,9 @@
   scales[scales > dark] <- dark
   dseq <- sort(dseq)
   cols <- rgb(rgb.scale[1], rgb.scale[2], rgb.scale[3], seq(0,1, length=rgb.res))
-
+  
+  scales[scales<cutoff] <- NA # so that 'gridpoints' with probs very close to 0 are not plotted as white but empty
+  
   if(rotate.axes)
     image(ageseq, dseq, t(scales), add=TRUE, col=cols, useRaster=FALSE) else
       image(dseq, ageseq, scales, add=TRUE, col=cols, useRaster=FALSE)
@@ -43,19 +45,20 @@
 
 
 # Time series of the log of the posterior
-.PlotLogPost <- function(set, from=0, to=set$Tr, xaxs="i", yaxs="i")
+PlotLogPost <- function(set, from=0, to=set$Tr, xaxs="i", yaxs="i", panel.size=.9)
   plot(from:(to-1), -set$Us[(from+1):to], type="l",
-    ylab="Log of Objective", xlab="Iteration", main="", xaxs=xaxs, yaxs=yaxs, col=grey(0.4))
+    ylab="Log of Objective", xlab="Iteration", main="", xaxs=xaxs, yaxs=yaxs, col=grey(0.4), cex.axis=panel.size)
 
 
 
 # plot the prior for the accumulation rate
-.PlotAccPrior <- function(s, mn, set=get('info'), depth.unit=depth.unit, age.unit=age.unit, main="", xlim=c(0, 3*max(mn)), xlab=c(), ylab="Density", add=FALSE, legend=TRUE, cex=.9) {
+PlotAccPrior <- function(s, mn, set=get('info'), depth.unit=depth.unit, age.unit=age.unit, main="", xlim=c(0, 3*max(mn)), xlab=c(), ylab="Density", add=FALSE, legend=TRUE, csize=.9) {
   o <- order(s, decreasing=TRUE)
   priors <- unique(cbind(s[o],mn[o])[,1:2])
   x <- 0
   if(length(xlab) == 0)
-	xlab <- paste0("Acc. rate (", noquote(age.unit), "/", noquote(depth.unit), ")")
+    xlab <- paste0("Acc. rate (", noquote(age.unit), "/", noquote(depth.unit), ")")
+
   if(length(priors) == 2) {
     curve(dgamma(x, s, s/mn), col=3, lwd=2, from=0, to=max(xlim), xlim=xlim, xlab=xlab, ylab=ylab, add=add)
     txt <- paste("acc.shape: ", priors[1], "\nacc.mean: ", priors[2])
@@ -67,13 +70,13 @@
       txt <- paste("acc.shape: ", toString(priors[,1]), "\nacc.mean: ", toString(priors[,2]))
     }
   if(legend)
-    legend("topleft", txt, bty="n", cex=cex, text.col=2, xjust=1)
+    legend("topleft", txt, bty="n", cex=csize, text.col=2, xjust=1)
 }
 
 
 
 # plot the prior for the memory (= accumulation rate varibility between neighbouring depths)
-.PlotMemPrior <- function(s, mn, thick, ds=1, set=get('info'), xlab="Memory (ratio)", ylab="Density", main="", add=FALSE, legend=TRUE, cex=.9) {
+PlotMemPrior <- function(s, mn, thick, ds=1, set=get('info'), xlab="Memory (ratio)", ylab="Density", main="", add=FALSE, legend=TRUE, csize=.9) {
   o <- order(s, decreasing=TRUE)
   priors <- unique(cbind(s[o],mn[o])[,1:2])
   x <- 0
@@ -89,7 +92,7 @@
       txt <- paste("acc.shape: ", toString(priors[,1]), "\nacc.mean: ", toString(priors[,2]))
     }
   if(legend)
-    legend("topleft", txt, bty="n", cex=cex, text.col=2, xjust=0)
+    legend("topleft", txt, bty="n", cex=csize, text.col=2, xjust=0)
   warn <- FALSE
   for(i in s)
     for(j in mn)
@@ -101,24 +104,24 @@
 
 
 # plot the prior for the hiatus length
-.PlotHiatusPrior <- function(mx=set$hiatus.max, hiatus=set$hiatus.depths, set=get('info'), xlab=paste0("Hiatus size (", set$age.unit, ")"), ylab="Density", main="", xlim=c(0, 1.1*max(mx)), add=FALSE, legend=TRUE) {
+PlotHiatusPrior <- function(mx=set$hiatus.max, hiatus=set$hiatus.depths, set=get('info'), xlab=paste0("Hiatus size (", set$age.unit, ")"), ylab="Density", main="", xlim=c(0, 1.1*max(mx)), add=FALSE, legend=TRUE, csize=.9) {
   if(add)
     lines(c(0, 0, mx, mx), c(0, 1/mx, 1/mx, 0), col=3, lwd=2) else
       plot(c(0, 0, mx, mx), c(0, 1/mx, 1/mx, 0), xlab=xlab, ylab=ylab, xlim=xlim, type="l", col=3, lwd=2)
 
   txt <- paste("hiatus.max: ", toString(mx))
   if(legend)
-    legend("topleft", txt, bty="n", cex=.7, text.col=2, xjust=0)
+    legend("topleft", txt, bty="n", cex=csize, text.col=2, xjust=0)
 }
 
 
 
 # plot the Supported prior (for plum)
-.PlotSuppPrior <- function(set=get('info'), xaxs="i", yaxs="i", legend=TRUE, cex=.9) {
+PlotSuppPrior <- function(set=get('info'), xaxs="i", yaxs="i", legend=TRUE, csize=.9) {
   if(set$Bqkg)
     lab = "s.Bq/Kg" else 
       lab = "dpm/g"
-	  
+
   x <- 0
   s = set$s.shape
   mn = set$s.mean
@@ -126,13 +129,13 @@
   curve(dgamma(x, s, s/mn), col=3, lwd=2, from=0, to=max(xlim), xlim=xlim, xlab=lab, ylab="")
   txt <- paste("Supported", "\nS.shape: ", s, "\nS.mean: ", mn)
   if(legend)
-    legend("topleft", txt, bty="n", cex=cex, text.col=2, xjust=0)
+    legend("topleft", txt, bty="n", cex=csize, text.col=2, xjust=0)
 }
 
 
 
 # to plot the prior for Supply (for plum)
-.PlotPhiPrior <- function(s, mn, set=get('info'), depth.unit=depth.unit, age.unit=age.unit, main="", xlim=c(0, 3*max(mn)), xlab="Bq/m^2 yr", ylab="", add=FALSE, legend=TRUE, cex=.9) {
+PlotPhiPrior <- function(s, mn, set=get('info'), depth.unit=depth.unit, age.unit=age.unit, main="", xlim=c(0, 3*max(mn)), xlab="Bq/m^2 yr", ylab="", add=FALSE, legend=TRUE, csize=.9) {
   x <- 0
   s = set$phi.shape
   mn = set$phi.mean
@@ -141,13 +144,13 @@
 
   txt <- paste( "Influx", "\nAl: ", toString(round(set$Al,2)), "\nPhi.shape: ", toString(round(s,2)), "\nPhi.mean: ", toString(round(mn,2)) )
   if(legend)
-    legend("topleft", txt, bty="n", cex=cex, text.col=2, xjust=0)
+    legend("topleft", txt, bty="n", cex=csize, text.col=2, xjust=0)
 }
 
 
 
 # plot the posterior (and prior) of the accumulation rate
-.PlotAccPost <- function(set=get('info'), s=set$acc.shape, mn=set$acc.mean, main="", depth.unit=set$depth.unit, age.unit=set$age.unit, ylab="Frequency", xaxs="i", yaxs="i") {
+PlotAccPost <- function(set=get('info'), s=set$acc.shape, mn=set$acc.mean, main="", depth.unit=set$depth.unit, age.unit=set$age.unit, ylab="Frequency", xaxs="i", yaxs="i", yaxt="n", prior.size=.9, panel.size=.9) {
   hi <- 2:(set$K-1)
   if(!is.na(set$hiatus.depths)[1])
     for(i in set$hiatus.depths)
@@ -163,29 +166,29 @@
       max.y <- max(maxprior, post[,2])
   lim.x <- range(0, post[,1], 2*mn)
   acc.lab <- paste0("Acc. rate (", age.unit, "/", depth.unit, ")")
-  plot(0, type="n", xlim=lim.x, xlab=acc.lab, ylim=c(0, 1.05*max.y), ylab="", xaxs=xaxs, yaxs=yaxs, yaxt="n")
+  plot(0, type="n", xlim=lim.x, xlab=acc.lab, ylim=c(0, 1.05*max.y), ylab="", xaxs=xaxs, yaxs=yaxs, yaxt=yaxt, cex.axis=panel.size)
   polygon(post, col=grey(.8), border=grey(.4))
-  .PlotAccPrior(s, mn, add=TRUE, xlim=lim.x, xlab="", ylab=ylab, main=main)
+  PlotAccPrior(s, mn, add=TRUE, xlim=lim.x, xlab="", ylab=ylab, main=main, csize=prior.size)
 }
 
 
 
 # plot the posterior (and prior) of the memory
-.PlotMemPost <- function(set=get('info'), corenam, K, main="", s=set$mem.strength, mn=set$mem.mean, xlab=paste("Memory"), ylab="Density", ds=1, thick, xaxs="i", yaxs="i") {
+PlotMemPost <- function(set=get('info'), corenam, K, main="", s=set$mem.strength, mn=set$mem.mean, xlab=paste("Memory"), ylab="Density", ds=1, thick, xaxs="i", yaxs="i", yaxt="n", prior.size=.9, panel.size=.9) {
   post <- density(set$output[,set$n]^(1/set$thick), from=0, to=1)
   post <- cbind(c(min(post$x), post$x, max(post$x)), c(0, post$y, 0))
   maxprior <- max(dbeta((0:100)/100, s*mn, s*(1-mn)))
   if(is.infinite(max(maxprior))) max.y <- max(post[,2]) else
     max.y <- max(maxprior, max(post[,2]))
-  plot(0, type="n", xlab=xlab, xlim=range(post[,1]), ylim=c(0, 1.05*max.y), ylab="", main="", xaxs=xaxs, yaxs=yaxs, yaxt="n")
+  plot(0, type="n", xlab=xlab, xlim=range(post[,1]), ylim=c(0, 1.05*max.y), ylab="", main="", xaxs=xaxs, yaxs=yaxs, yaxt=yaxt, cex.axis=panel.size)
   polygon(post, col=grey(.8), border=grey(.4))
-  .PlotMemPrior(s, mn, thick, add=TRUE, xlab="", ylab=ylab, main=main)
+  PlotMemPrior(s, mn, thick, add=TRUE, xlab="", ylab=ylab, main=main, csize=prior.size)
 }
 
 
 
 # plot the posterior (and prior) of the hiatus
-.PlotHiatusPost <- function(set=get('info'), mx=set$hiatus.max, main="", xlim=c(), xlab=paste0("Hiatus size (", set$age.unit, ")"), ylab="Frequency", after=set$after, xaxs="i", yaxs="i") {
+PlotHiatusPost <- function(set=get('info'), mx=set$hiatus.max, main="", xlim=c(), xlab=paste0("Hiatus size (", set$age.unit, ")"), ylab="Frequency", after=set$after, xaxs="i", yaxs="i", yaxt="n", prior.size=.9, panel.size=.9) {
   gaps <- c()
   for(i in set$hiatus.depths) {
     below <- Bacon.Age.d(i+after, set)
@@ -199,17 +202,17 @@
     gaps <- density(gaps, from=0)
     max.y <- max(max.y, gaps$y)
   }
-  plot(0, type="n", main="", xlab=xlab, xlim=xlim, ylab=ylab, ylim=c(0, max.y), xaxs=xaxs, yaxs=yaxs, yaxt="n")
+  plot(0, type="n", main="", xlab=xlab, xlim=xlim, ylab=ylab, ylim=c(0, max.y), xaxs=xaxs, yaxs=yaxs, yaxt=yaxt, cex.axis=panel.size)
   if(length(gaps) > 1)
     polygon(cbind(c(min(gaps$x), gaps$x, max(gaps$x)), c(0,gaps$y,0)),
     col=grey(.8), border=grey(.4))
-  .PlotHiatusPrior(add=TRUE, xlab="", ylab=ylab, main=main)
+  PlotHiatusPrior(add=TRUE, xlab="", ylab=ylab, main=main, csize=prior.size)
 }
 
 
 
 # plot the Supported data (for plum)
-.PlotSuppPost <- function(set=get('info'), xaxs="i", yaxs="i", legend=TRUE, cex=.9){
+PlotSuppPost <- function(set=get('info'), xaxs="i", yaxs="i", legend=TRUE, cex=.9, yaxt="n", prior.size=.9, panel.size=.9) {
   lab <- ifelse(set$Bqkg, "Bq/kg", "dpm/g")
 
   if(set$nPs > 1) {
@@ -219,7 +222,7 @@
       rng[i,22] <- mean( set$ps[,i] )
     }
 
-    plot(0, type="n", ylim=c(min( rng[,1]), max(rng[,21])), xlim=c(min( set$detsPlum[,4]), max(set$detsPlum[,4])), main="", xlab="Depth (cm)", ylab=lab)
+    plot(0, type="n", ylim=c(min( rng[,1]), max(rng[,21])), xlim=c(min( set$detsPlum[,4]), max(set$detsPlum[,4])), main="", xlab="Depth (cm)", ylab=lab, yaxt=yaxt, cex=panel.size)
     n = 21
     colorby = 1.0 / (n/2)
     for(i in 1:(n/2)) {
@@ -231,28 +234,28 @@
 
   } else {
     post <- density(set$ps)
-    plot(post, type="n", xlab=lab, main="", ylab="", yaxt="n")
+    plot(post, type="n", xlab=lab, main="", ylab="", yaxt=yaxt, cex.axis=panel.size)
     polygon(post, col=grey(.8), border=grey(.4))
     lines(seq(min(set$ps),max(set$ps),.05), dgamma(seq(min(set$ps), max(set$ps), .05), shape=set$s.shape, scale=set$s.mean/set$s.shape), col=3, lwd=2)
   }
   txt <- paste0("supported", "\ns.shape: ", set$s.shape, "\ns.mean: ", set$s.mean)  
 
   if(legend)
-    legend("topright", txt, bty="n", cex=cex, text.col=2, adj=c(0,.2))
+    legend("topright", txt, bty="n", cex=prior.size, text.col=2, adj=c(0,.2))
 }
 
 
 
 # plot the Supply data (for plum)
-.PlotPhiPost <- function(set=get('info'), xlab=paste0("Bq/",expression(m^2)," yr"), ylab="", xaxs="i", yaxs="i", legend=TRUE, cex=.9){
+PlotPhiPost <- function(set=get('info'), xlab=paste0("Bq/",expression(m^2)," yr"), ylab="", xaxs="i", yaxs="i", legend=TRUE, cex=.9, yaxt="n", csize=.8, prior.size=.9, panel.size=.9) {
   post <- density(set$phi)
-  plot(post, type="n", xlab=xlab, ylab=ylab, main="", yaxt="n")
+  plot(post, type="n", xlab=xlab, ylab=ylab, main="", yaxt=yaxt, cex.axis=panel.size)
   polygon(post, col=grey(.8), border=grey(.4))
 
-  lines(seq(min(set$phi),max(set$phi),length=50),dgamma(seq(min(set$phi),max(set$phi),length=50),shape=set$phi.shape,scale=set$phi.mean/set$phi.shape), col=3, lwd=2)
+lines(seq(min(set$phi),max(set$phi),length=50),dgamma(seq(min(set$phi),max(set$phi),length=50),shape=set$phi.shape,scale=set$phi.mean/set$phi.shape), col=3, lwd=2)
 
   txt <- paste( "influx", "\nAl: ", toString(round(set$Al,2)), "\nphi.shape: ", toString(round(set$phi.shape,2)), "\nphi.mean: ", toString(round(set$phi.mean,2)) )
 
   if(legend)
-    legend("topright", txt, bty="n", cex=cex, text.col=2, adj=c(0,.2))
+    legend("topright", txt, bty="n", cex=prior.size, text.col=2, adj=c(0,.2))
 }

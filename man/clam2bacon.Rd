@@ -32,9 +32,6 @@ Reads a clam .csv file containing the dates, and transforms it into a Bacon .csv
 \details{
 Please ensure that if the clam file has offset (d.R) estimates, that errors (d.STD) are provided manually, since these values cannot be determined automatically from the clam .csv file.
 }
-\seealso{
-\url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
-}
 \author{
 Maarten Blaauw, J. Andres Christen
 }

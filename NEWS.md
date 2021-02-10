@@ -1,3 +1,16 @@
+# rbacon 2.5.1
+* Adapted the default prior for memory to 0.5 (mean) and 10 (strength), to repair a bug with the original bacon c++ code. This default should work with most cores and give similar results to the previous settings for the memory prior
+* Updated c/c++ code (as used in version 2.4.1 with some minor additional updates) 
+* pMC.age and other IntCal functions should now load as expected (without having to specify, e.g., IntCal::pMC.age)
+* the heights of the calibrated distributions should now scale better according to how precise they are
+* the add.dates function now handles postbomb dates. It can also store the calibrated information using, e.g., tmp <- add.dates(2450,30,20); tmp
+* The greyscale age-depth graph is now more easily exported to external graphics editors, because areas with very low probabilities are now left empty (instead of plotted as white)
+* corrected a bug where ages above d.min received incorrect ages
+* Added an option prior.ticks to show tickmarks and values on the vertical axes of the panels that show the prior distributions. These are not drawn by default, as they don't provide much information and clutter the graphs
+* Added new options title.size and prior.fontsize for the size of the fonts of the core's title and the red information on settings in the top panels, respectively
+* Repaired the functions accrate.depth(), accrate.age(), accrate.depth.ghost() and accrate.age.ghost()
+* agemodel.it now treats the upper depth of a core as expected
+
 # rbacon 2.5.0
 * updated src/kernel.cpp and src/twalk.h, to repair a bug in one of the moves ('hop'). This means we can now add the updated MCMC code of version 2.4.0 again and accommodate code to run 210Pb-dated cores (via the package rplum) 
 * Radiocarbon calibration curves are now loaded from the imported IntCal R package, and have been removed from the rbacon package to save space and remove duplication
@@ -7,7 +20,7 @@
 * Repaired bug with greyscales accrate.age.ghost
 * if the file with the dates has been modified more recently than a loaded run (e.g., dates could have been added, removed or changed), then a warning is now given that Bacon.cleanup should be ran
 * Added a new function Bacon.d.Age to provide the depths belonging to a specific modelled age (kindly contributed by Timon Netzel)
-* Depth units are now respected better by the agedepth function
+* Depth units are now handled better by the agedepth function
 * New option accept.suggestions, which automatically accepts suggestions regarding acc.rate and thick. Use with caution (this option was kindly suggested by Quinn Asena)
 * By default, a section is now added below the bottom-most dated depth, in order to ensure that the this depth is always taken into account. Defaults to add.bottom=TRUE. 
 * The calibrated distributions should now be of the same size again, so that more precise dates peaks more than less precise ones (suggested by Tiffany Napier). 

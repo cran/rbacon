@@ -5,14 +5,16 @@
 #' @title Add dates to age-depth plots
 #' @description Add dated depths to plots, e.g. to show dates that weren't used in the age-depth model
 #' @details Sometimes it is useful to add additional dating information to age-depth plots, e.g., to show outliers or how dates calibrate with different estimated offsets.
-#' @param mn Reported mean of the date. Can be multiple dates.
+#' @param mn Reported mean of the date. Can be multiple dates. Negative numbers indicate postbomb dates (if cc > 0).
 #' @param sdev Reported error of the date. Can be multiple dates.
 #' @param depth Depth of the date.
 #' @param cc The calibration curve to use: \code{cc=1} for IntCal20 (northern hemisphere terrestrial), \code{cc=2} for Marine20 (marine), \code{cc=0} for none (dates that are already on the cal BP scale).
+#' @param set Detailed information of the current run, stored within this session's memory as variable \code{info}.
 #' @param above Treshold for plotting of probability values. Defaults to \code{above=1e-3}.
-#' @param ex Exaggeration of probability distribution plots. Defaults to \code{ex=50}.
+#' @param postbomb Use a postbomb curve for negative (i.e. postbomb) 14C ages. \code{0 = none, 1 = NH1, 2 = NH2, 3 = NH3, 4 = SH1-2, 5 = SH3}
 #' @param normal By default, Bacon uses the student's t-distribution to treat the dates. Use \code{normal=TRUE} to use the normal/Gaussian distribution. This will generally give higher weight to the dates.
-#' @param normalise By default, the date is normalised to an area of 1 (\code{normalise=TRUE}).
+#' @param delta.R Mean of core-wide age offsets (e.g., regional marine offsets).
+#' @param delta.STD Error of core-wide age offsets (e.g., regional marine offsets).
 #' @param t.a The dates are treated using the student's t distribution by default (\code{normal=FALSE}).
 #' The student's t-distribution has two parameters, t.a and t.b, set at 3 and 4 by default (see Christen and Perez, 2010).
 #' If you want to assign narrower error distributions (more closely resembling the normal distribution), set t.a and t.b at for example 33 and 34 respectively (e.g., for specific dates in your .csv file).
@@ -21,8 +23,11 @@
 #' The student's t-distribution has two parameters, t.a and t.b, set at 3 and 4 by default (see Christen and Perez, 2010).
 #' If you want to assign narrower error distributions (more closely resembling the normal distribution), set t.a and t.b at for example 33 and 34 respectively (e.g., for specific dates in your .csv file).
 #' For symmetry reasons, t.a must always be equal to t.b-1.
-#' @param age.res Resolution of the date's distribution. Defaults to \code{date.res=100}.
-#' @param times The extent of the range to be calculated for each date. Defaults to \code{times=20}.
+#' @param date.res Resolution of the date's distribution. Defaults to \code{date.res=100}.
+#' @param height The heights of the distributions of the dates. See also \code{normalise.dists}.
+#' @param calheight Multiplier for the heights of the distributions of dates on the calendar scale. Defaults to \code{calheight=1}.
+#' @param agesteps Step size for age units of the distribution. Default \code{agesteps=1}.
+#' @param cutoff Avoid plotting very low probabilities of date distributions (default \code{cutoff=0.005}).
 #' @param col The colour of the ranges of the date. Default is semi-transparent red: \code{col=rgb(1,0,0,.5)}.
 #' @param border The colours of the borders of the date. Default is semi-transparent red: \code{border=rgb(1,0,0,0.5)}.
 #' @param rotate.axes The default of plotting age on the horizontal axis and event probability on the vertical one can be changed with \code{rotate.axes=TRUE}.
@@ -30,6 +35,7 @@
 #' @param up Directions of distributions if they are plotted non-mirrored. Default \code{up=TRUE}.
 #' @param BCAD The calendar scale of graphs is in \code{cal BP} by default, but can be changed to BC/AD using \code{BCAD=TRUE}.
 #' @param pch The shape of any marker to be added to the date. Defaults to a cross, \code{pch=4}. To leave empty, use \code{pch=NA}.
+#' @param ccdir Directory where the calibration curves for C14 dates \code{cc} are located. By default \code{ccdir=""}.
 #' @author Maarten Blaauw, J. Andres Christen
 #' @return A date's distribution, added to an age-depth plot.
 #' @examples
@@ -38,49 +44,46 @@
 #'   agedepth()
 #'   add.dates(5000, 100, 60)
 #' }
-#' @seealso \url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
-#' @references
-#' Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive
-#' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
-#' \url{https://projecteuclid.org/euclid.ba/1339616472}
 #' @export
-add.dates <- function(mn, sdev, depth, cc=1, above=1e-6, ex=10, normal=TRUE, normalise=TRUE, t.a=3, t.b=4, age.res=100, times=20, col=rgb(1,0,0,.5), border=rgb(1,0,0,.5), rotate.axes=FALSE, mirror=TRUE, up=TRUE, BCAD=FALSE, pch=4) {
-  if(cc > 0)
-    cc <- IntCal::copyCalibrationCurve(cc)
+add.dates <- function(mn, sdev, depth, cc=1, set=get('info'), above=1e-6, postbomb=0, normal=TRUE, delta.R=set$delta.R, delta.STD=set$delta.STD, t.a=set$t.a, t.b=set$t.b, date.res=100, height=1, calheight=1, agesteps=1, cutoff=0.005, col=rgb(1,0,0,.5), border=rgb(1,0,0,.5), rotate.axes=FALSE, mirror=TRUE, up=TRUE, BCAD=FALSE, pch=4, ccdir="") {
+  if(ccdir == "")
+    ccdir <- system.file("extdata", package="IntCal")
+  ccdir <- .validateDirectoryName(ccdir)
 
-  for(i in 1:length(mn)) {
-    yrs <- seq(mn[i]-times*sdev[i], mn[i]+times*sdev[i], length=age.res)
-    if(length(cc) < 2)
-      cc <- cbind(yrs, yrs, rep(0, length(yrs)))
-    ages <- approx(cc[,1], cc[,2], yrs)$y
-    errors <- approx(cc[,1], cc[,3], yrs)$y
+  if(mn < 0 && cc > 0)
+    if(postbomb == 0)
+      stop("Negative C-14 age, please provide a postbomb curve, e.g. postbomb=1")
+  
+  dat <- cbind(mn, mn, sdev, depth, cc, delta.R, delta.STD, t.a, t.b)
+  probs <- .bacon.calib(dat, set, date.res, cutoff, postbomb, normal, t.a, t.b, delta.R, delta.STD, ccdir) 
 
-  if(normal)
-    probs <- dnorm(ages, mn[i], sqrt(sdev[i] + errors)^2) else
-      probs <- (t.b + (mn[i]-ages)^2  / (2*(sdev[i]^2 + errors^2))) ^ (-1*(t.a+0.5))
-  if(normalise)
-    probs <- probs / sum(probs)
-  these <- which(probs >= above)
-  if(length(these) > 0) {
-    yrs <- yrs[these]
-    probs <- probs[these]
-  }
+  for(i in 1:nrow(dat)) {
+    d <- probs$d[[i]]
+    yrs <- probs$probs[[i]][,1]
+    cal <- probs$probs[[i]][,2]
+
+    if(BCAD)
+      yrs <- 1950-yrs
+    cal <- approx(yrs, cal, seq(min(yrs), max(yrs), by=agesteps))
+    cal <- cbind(cal$x, cal$y/sum(cal$y))
+    cal[,2] <- 3 * height * cal[,2] * (set$d.max - set$d.min) # scale the height of the blobs with the depth axis
+    if(dat[i,5] == 0) # cal BP dates could have different relative height:
+      cal[,2] <- calheight * cal[,2]
 
   if(!up)
     up <- -1
-  if(BCAD)
-    yrs <- 1950 - yrs
   if(mirror)
-    pol <- cbind(depth[i] + ex*c(probs, -rev(probs)), c(yrs, rev(yrs))) else
-      pol <- cbind(depth[i] - up*ex*c(0, probs,  0), c(min(yrs), yrs, max(yrs)))
+    pol <- cbind(d + c(cal[,2], -rev(cal[,2])), c(cal[,1], rev(cal[,1]))) else
+      pol <- cbind(d - up*c(0, cal[,2],  0), c(min(cal[,1]), cal[,1], max(cal[,1])))
   if(rotate.axes)
     pol <- pol[,2:1]
   polygon(pol, col=col, border=border)
   if(length(pch) > 0)
     if(rotate.axes)
-      points(mean(yrs), depth[i], col=border, pch=pch) else
-        points(depth[i], mean(yrs), col=border, pch=pch)
-  }
+      points(mean(yrs), d, col=border, pch=pch) else
+        points(d, mean(yrs), col=border, pch=pch)
+    }
+  invisible(probs)
 }
 
 
@@ -116,23 +119,15 @@ add.dates <- function(mn, sdev, depth, cc=1, above=1e-6, ex=10, normal=TRUE, nor
 #' @param slump.col Colour of slumps. Defaults to \code{slump.col=grey(0.8)}.
 #' @param new.plot Start a new plot (\code{new.plot=TRUE}) or plot over an existing plot (\code{new.plot=FALSE}).
 #' @param plot.dists Plot the distributions of the dates (default \code{plot.dists=TRUE}).
-#' @param same.heights Plot the distributions of the dates all at the same maximum height (default \code{same.height=FALSE}).
-#' @param normalise.dists By default, the distributions of more precise dates will cover less time and will thus peak higher than less precise dates. This can be avoided by specifying \code{normalise.dists=FALSE}.
+#' @param same.heights Plot the distributions of the dates all at the same maximum height (default \code{same.height=FALSE}), which instead normalises the distributions (all have an area of 1).
 #' @author Maarten Blaauw, J. Andres Christen
 #' @return NA
 #' @examples
 #'   Bacon(run=FALSE, coredir=tempfile())
 #'   calib.plot()
-#'
-#' @seealso \url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
-#' @references
-#' Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive
-#' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
-#' \url{https://projecteuclid.org/euclid.ba/1339616472}
 #' @export
 ### produce plots of the calibrated distributions
-calib.plot <- function(set=get('info'), BCAD=set$BCAD, cc=set$cc, rotate.axes=FALSE, rev.d=FALSE, rev.age=FALSE, rev.yr=rev.age, age.lim=c(), yr.lim=age.lim, date.res=100, d.lab=c(), age.lab=c(), yr.lab=age.lab, height=30, calheight=1, mirror=TRUE, up=TRUE, cutoff=.1, C14.col=rgb(0,0,1,.5), C14.border=rgb(0,0,1,.75), cal.col=rgb(0,.5,.5,.5), cal.border=rgb(0,.5,.5,.75), dates.col=c(), slump.col=grey(0.8), new.plot=TRUE, plot.dists=TRUE, same.heights=FALSE, normalise.dists=TRUE) {
-  #height <- length(set$d.min:set$d.max) * height/50
+calib.plot <- function(set=get('info'), BCAD=set$BCAD, cc=set$cc, rotate.axes=FALSE, rev.d=FALSE, rev.age=FALSE, rev.yr=rev.age, age.lim=c(), yr.lim=age.lim, date.res=100, d.lab=c(), age.lab=c(), yr.lab=age.lab, height=1, calheight=1, mirror=TRUE, up=TRUE, cutoff=.1, C14.col=rgb(0,0,1,.5), C14.border=rgb(0,0,1,.75), cal.col=rgb(0,.5,.5,.5), cal.border=rgb(0,.5,.5,.75), dates.col=c(), slump.col=grey(0.8), new.plot=TRUE, plot.dists=TRUE, same.heights=FALSE) {
   if(length(age.lim) == 0)
     lims <- c()
   for(i in 1:length(set$calib$probs))
@@ -163,21 +158,26 @@ calib.plot <- function(set=get('info'), BCAD=set$BCAD, cc=set$cc, rotate.axes=FA
       abline(h=set$slump, lty=2, col=slump.col) else
         abline(v=set$slump, lty=2, col=slump.col)
 
+  maxhght <- 0; agesteps <- c()
+  if(plot.dists) 
+    for(i in 1:length(set$calib$probs)) {
+      maxhght[i] <- max(set$calib$probs[[i]][,2] / sum(set$calib$probs[[i]][,2]))
+      agesteps <- min(agesteps, diff(set$calib$probs[[1]][,1]))
+    }
+
   if(plot.dists)
     for(i in 1:length(set$calib$probs)) {
       cal <- cbind(set$calib$probs[[i]])
       d <- set$calib$d[[i]]
       if(BCAD)
         cal[,1] <- 1950-cal[,1]
-      o <- order(cal[,1])
-      cal <- cbind(cal[o,1], cal[o,2])
+      cal <- approx(cal[,1], cal[,2], seq(min(cal[,1]), max(cal[,1]), by=agesteps)) # all dists should have the same binsize
+      cal <- cbind(cal$x, cal$y/sum(cal$y))
       if(same.heights)
         cal[,2] <- cal[,2]/max(cal[,2])
-      if(normalise.dists)
-        cal[,2] <- cal[,2]/sum(cal[,2])
-      cal[,2] <- height*cal[,2]
-      if(ncol(set$dets) > 4 && set$dets[i,5] == 0) # cal BP date
-        cal[,2] <- calheight*cal[,2]
+      cal[,2] <- ((height * cal[,2])/median(maxhght))/25 * (max(dlim) - min(dlim)) # scale the height of the blobs with the core length
+      if(ncol(set$dets) > 4 && set$dets[i,5] == 0) # cal BP dates could have different relative height:
+        cal[,2] <- calheight * cal[,2]
 
       if(mirror)
         pol <- cbind(c(d-cal[,2], d+rev(cal[,2])), c(cal[,1], rev(cal[,1]))) else
@@ -203,7 +203,7 @@ calib.plot <- function(set=get('info'), BCAD=set$BCAD, cc=set$cc, rotate.axes=FA
 
 
 # calibrate C14 dates and calculate distributions for any calendar dates
-.bacon.calib <- function(dat, set=get('info'), date.res=100, cutoff=0.05, normal=set$normal, t.a=set$t.a, t.b=set$t.b, delta.R=set$delta.R, delta.STD=set$delta.STD, ccdir="") {
+.bacon.calib <- function(dat, set=get('info'), date.res=100, cutoff=0.005, postbomb=set$postbomb, normal=set$normal, t.a=set$t.a, t.b=set$t.b, delta.R=set$delta.R, delta.STD=set$delta.STD, ccdir="") {
   # read in the curves
   if(set$cc1=="IntCal20" || set$cc1=="\"IntCal20\"")
     cc1 <- read.table(paste0(ccdir, "3Col_intcal20.14C")) else
@@ -215,15 +215,15 @@ calib.plot <- function(set=get('info'), BCAD=set$BCAD, cc=set$cc, rotate.axes=FA
     cc3 <- read.table(paste0(ccdir, "3Col_shcal20.14C")) else
       cc3 <- read.csv(paste0(ccdir, set$cc3, ".14C"), header=FALSE, skip=11)[,1:3]
   if(set$cc4=="ConstCal" || set$cc4=="\"ConstCal\"") cc4 <- NA else
-    cc4 <- read.table(paste(ccdir, set$cc4, sep=""))[,1:3]
+    cc4 <- read.table(paste0(ccdir, set$cc4))[,1:3]
 
-  if(set$postbomb != 0) {
-    if(set$postbomb==1) bomb <- read.table(paste0(ccdir,"postbomb_NH1.14C"))[,1:3] else
-      if(set$postbomb==2) bomb <- read.table(paste0(ccdir,"postbomb_NH2.14C"))[,1:3] else
-        if(set$postbomb==3) bomb <- read.table(paste0(ccdir,"postbomb_NH3.14C"))[,1:3] else
-          if(set$postbomb==4) bomb <- read.table(paste0(ccdir,"postbomb_SH1-2.14C"))[,1:3] else
-            if(set$postbomb==5) bomb <- read.table(paste0(ccdir,"postbomb_SH3.14C"))[,1:3] else
-              stop("cannot find postbomb curve #", set$postbomb, " (use values of 1 to 5 only)", call.=FALSE)
+  if(postbomb != 0) {
+    if(postbomb==1) bomb <- read.table(paste0(ccdir,"postbomb_NH1.14C"))[,1:3] else
+      if(postbomb==2) bomb <- read.table(paste0(ccdir,"postbomb_NH2.14C"))[,1:3] else
+        if(postbomb==3) bomb <- read.table(paste0(ccdir,"postbomb_NH3.14C"))[,1:3] else
+          if(postbomb==4) bomb <- read.table(paste0(ccdir,"postbomb_SH1-2.14C"))[,1:3] else
+            if(postbomb==5) bomb <- read.table(paste0(ccdir,"postbomb_SH3.14C"))[,1:3] else
+              stop("cannot find postbomb curve #", postbomb, " (use values of 1 to 5 only)", call.=FALSE)
       bomb.x <- seq(max(bomb[,1]), min(bomb[,1]), by=-.1) # interpolate
       bomb.y <- approx(bomb[,1], bomb[,2], bomb.x)$y
       bomb.z <- approx(bomb[,1], bomb[,3], bomb.x)$y
@@ -239,21 +239,24 @@ calib.plot <- function(set=get('info'), BCAD=set$BCAD, cc=set$cc, rotate.axes=FA
   d.cal <- function(cc, rcmean, w2, t.a, t.b) { # formula updated Oct 2020
     if(set$normal)
       cal <- cbind(cc[,1], dnorm(cc[,2], rcmean, sqrt(cc[,3]^2+w2))) else
-        cal <- cbind(cc[,1], (t.b+ ((rcmean-cc[,2])^2) / (2*(cc[,3]^2 + w2))) ^ (-1*(t.a+0.5))) # student-t	   
-    cal[,2] <- cal[,2]/sum(cal[,2]) # normalise
-    these <- which(cal[,2] >= cutoff*max(cal[,2])) # keep those with values >% of the maximum height  
-    cal <- cal[these,]
-
-    calx <- seq(min(cal[,1]), max(cal[,1]), length=date.res)
-    caly <- approx(cal[,1], cal[,2], calx)$y
-    cbind(calx, caly/sum(caly), deparse.level = 0)
+        cal <- cbind(cc[,1], (t.b+ ((rcmean-cc[,2])^2) / (2*(cc[,3]^2 + w2))) ^ (-1*(t.a+0.5))) # student-t
+    cal[,2] <- cal[,2] / sum(cal[,2]) # normalise
+    
+    cal.left <- min(which(cal[,2]/max(cal[,2]) >= cutoff)) # remove outer bits
+    cal.right <- nrow(cal) - min(which(cal[nrow(cal):1,2]/max(cal[,2]) >= cutoff)) # ... here too
+     #   cat(i, ", ", cal[cal.left,1], ", ", cal[cal.right,1], "\n")
+    return(cal[cal.left:cal.right,])
   }
 
   # now calibrate all dates
   calib <- list(d=dat[,4])
   if(ncol(dat)==4) { # only one type of dates (e.g., calBP, or all IntCal20 C14 dates)
     if(set$cc==0) {
-      x <- seq(min(dat[,2])-(5*max(dat[,3])), max(dat[,2])+(5*max(dat[,3])), length=date.res)
+      xsteps <- min(dat[,3])/5 # minimum step size to cover the smallest error
+      xseq1 <- seq(min(dat[,2])-(4*max(dat[,3])), max(dat[,2])+(4*max(dat[,3])), length=100*date.res)
+      xseq2 <- seq(min(dat[,2])-(4*max(dat[,3])), max(dat[,2])+(4*max(dat[,3])), by=xsteps)
+      xlength <- max(length(xseq1), length(xseq2)) # choose the longest vector
+      x <- seq(min(dat[,2])-(4*max(dat[,3])), max(dat[,2])+(4*max(dat[,3])), length=xlength)
       ccurve <- cbind(x, x, rep(0,length(x))) # dummy 1:1 curve
     } else {
         if(set$cc==1) ccurve <- cc1 else
@@ -267,7 +270,7 @@ calib.plot <- function(set=get('info'), BCAD=set$BCAD, cc=set$cc, rotate.axes=FA
       for(i in 1:nrow(dat)) {
         dets <- c(NA, as.numeric(dat[i,-1])) # the first column is not numeric
         if(dets[5]==0) {
-          x <- seq(dets[2]-(5*dets[3]), dets[2]+(5*dets[3]), length=date.res)
+          x <- seq(dets[2]-(4*dets[3]), dets[2]+(4*dets[3]), length=date.res)
           ccurve <- cbind(x, x, rep(0,length(x))) # dummy 1:1 curve
         } else {
             if(dets[5]==1) ccurve <- cc1 else if(dets[5]==2) ccurve <- cc2 else
@@ -330,12 +333,6 @@ calib.plot <- function(set=get('info'), BCAD=set$BCAD, cc=set$cc, rotate.axes=FA
 #' @examples
 #'   Bacon(run=FALSE, coredir=tempfile())
 #'   calib.plot()
-#'
-#' @seealso \url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
-#' @references
-#' Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive
-#' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
-#' \url{https://projecteuclid.org/euclid.ba/1339616472}
 #' @export
 ### produce plots of the calibrated distributions
 calib.plumbacon.plot <- function(set=get('info'), BCAD=set$BCAD, cc=set$cc, firstPlot = FALSE, rotate.axes=FALSE, rev.d=FALSE, rev.age=FALSE, rev.yr=rev.age, age.lim=c(), yr.lim=age.lim, date.res=100, d.lab=c(), age.lab=c(), yr.lab=age.lab, height=15, calheight=1, mirror=TRUE, up=TRUE, cutoff=.001, C14.col=rgb(0,0,1,.5), C14.border=rgb(0,0,1,.75), cal.col=rgb(0,.5,.5,.5), cal.border=rgb(0,.5,.5,.75), dates.col=c(), slump.col=grey(0.8), new.plot=TRUE, plot.dists=TRUE, same.heights=FALSE, normalise.dists=TRUE) {
@@ -497,7 +494,7 @@ draw.pbmodelled <- function(set=get('info'), BCAD=set$BCAD, rotate.axes=FALSE, r
     # save the values for later; DOESN'T WORK and I don't understand why not
     set$Ai <- Ai
     set$A.rng <- A.rng
-    .assign_to_global("info", set)
+    assign_to_global("info", set)
   
     if(rotate.axes) # add a secondary axis for the Pb values
       { # todo

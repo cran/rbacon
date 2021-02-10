@@ -147,6 +147,7 @@ double *kernel3::Simh(double *x, double *xp, int n,double  beta, int *phi)  {
 }
 
 double kernel3::GU(double *h, double *x, double *xp, int n) const {
+ //if(vector_cmp(x,xp,n) != 1) {  // should this if statement go?
 
 	    double intProd = 0.0;
 
@@ -155,6 +156,9 @@ double kernel3::GU(double *h, double *x, double *xp, int n) const {
 
 	//it is assumed that Simh is just called and we have the correct sigma
         return ((n/2.0)*log(2.0*M_PI) + n*log(sigma) + 0.5*(1.0/(sigma*sigma))*intProd);
+            
+ //      }
+ //   else return -1.0;
 }
 
 

@@ -36,14 +36,6 @@ for any depth of a core. Deals with only 1 depth at a time. See also \code{accra
   d20 <- accrate.depth(20, cmyr=TRUE) # to calculate accumulation rates in cm/yr
   mean(d20)
 }
-\references{
-Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive
-gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
-\url{https://projecteuclid.org/euclid.ba/1339616472}
-}
-\seealso{
-\url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
-}
 \author{
 Maarten Blaauw, J. Andres Christen
 }

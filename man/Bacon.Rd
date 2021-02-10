@@ -21,8 +21,8 @@ Bacon(
   unit = depth.unit,
   acc.shape = 1.5,
   acc.mean = 20,
-  mem.strength = 4,
-  mem.mean = 0.7,
+  mem.strength = 10,
+  mem.mean = 0.5,
   boundary = NA,
   hiatus.depths = NA,
   hiatus.max = 10000,
@@ -60,7 +60,7 @@ Bacon(
   MaxAge = c(),
   MinYr = MinAge,
   MaxYr = MaxAge,
-  cutoff = 0.1,
+  cutoff = 0.01,
   plot.pdf = TRUE,
   dark = 1,
   date.res = 100,
@@ -91,7 +91,7 @@ Thinner (and thus more) sections will result in smoother age-models, but too man
 
 \item{d.by}{Depth intervals at which ages are calculated. Defaults to \code{d.by=1}.}
 
-\item{seed}{Seed used for C++ executions. If it is not assigned (\code{seed=NA}) then the seed is set by system.}
+\item{seed}{Seed used for C++ executions. If it is not assigned (\code{seed=NA}; default) then the seed is set by system.}
 
 \item{depths.file}{By default, Bacon will calculate the ages for the depths \code{d.min} to \code{d.max} in steps of \code{d.by}.
 If \code{depths.file=TRUE}, Bacon will read a file containing the depths for which you require ages.
@@ -114,12 +114,12 @@ Its shape is set by acc.shape (default \code{acc.shape=1.5}; higher values resul
 which can be changed to, e.g., 5, 10 or 50 for different kinds of deposits). Multiple values can be given in case of hiatuses or boundaries, e.g., Bacon(hiatus.depths=23, acc.mean=c(5,20))}
 
 \item{mem.strength}{The prior for the memory (dependence of accumulation rate between neighbouring depths) is a beta distribution, which looks much like the gamma distribution.
-but its values are always between 0 (no assumed memory) and 1 (100\% memory). Its default settings of \code{mem.strength=4}
-(higher values result in more peaked shapes) allow for a large range of posterior memory values.}
+but its values are always between 0 (no assumed memory) and 1 (100\% memory). Its default settings of \code{mem.strength=10}
+(higher values result in more peaked shapes) allow for a large range of posterior memory values. Please note that the default memory prior has been updated from rbacon version 2.5.1. on, to repair a bug.}
 
 \item{mem.mean}{The prior for the memory is a beta distribution, which looks much like the gamma distribution but
-its values are always between 0 (no assumed memory) and 1 (100\% memory). Its default settings of \code{mem.mean=0.7}
-allow for a large range of posterior memory values.}
+its values are always between 0 (no assumed memory) and 1 (100\% memory). Its default settings of \code{mem.mean=0.5}
+allow for a large range of posterior memory values. Please note that the default memory prior has been updated from rbacon version 2.5.1. on, to repair a bug.}
 
 \item{boundary}{The assumed depths of any boundary, which divides sections of different accumulation rate regimes (e.g., as indicated by major change in the stratigraphy). No hiatus is assumed between these sections, and memory is reset crossing the boundary. Different accumulation priors can be set for the sections above and below the boundary, e.g., \code{acc.mean=c(5, 20)}. See also \code{hiatus.depths}, \code{mem.mean}, \code{acc.mean} and \code{acc.shape}. Setting many boundaries might not work, and having more than one boundary per model section (see \code{'thick'}) might not work either.}
 
@@ -143,7 +143,7 @@ allow for a large range of posterior memory values.}
 
 \item{cc4}{Use an alternative curve (3 columns: cal BP, 14C age, error, separated by white spaces and saved as a plain-text file). See \code{ccdir}.}
 
-\item{ccdir}{Directory where the calibration curves for C14 dates \code{cc} are located. By default \code{ccdir=""} since they are loaded into R's memory.
+\item{ccdir}{Directory where the calibration curves for C14 dates \code{cc} are located. By default \code{ccdir=""}.
 For example, use \code{ccdir="."} to choose current working directory, or \code{ccdir="Curves/"} to choose sub-folder \code{Curves/}. Note that all calibration curves should reside in the same directory. If you want to add a custom-built curve, put it in the directory where the default calibration curves are (probably \code{list.files(paste0(.libPaths(), "/IntCal/extdata"))}).
 Alternatively produce a new folder, and add your curve as well as the default calibration curves there (cc1, cc2 and cc3; e.g., \code{write.table(copyCalibrationCurve(1), "./3Col_intcal20.14C", sep="\t")}.)}
 
@@ -243,7 +243,7 @@ Bacon divides a core into many thin vertical sections (by default of \code{thick
 and through millions of Markov Chain Monte Carlo (MCMC) iterations estimates
 the accumulation rate (in years/cm; so more correctly, sedimentation times) for each of these sections.
 Combined with an estimated starting date for the first section, these accumulation rates then form the age-depth model.
-The accumulation rates are constrained by prior information on the accumulation rate (\code{acc.mean, acc.shape)} and its
+The accumulation rates are constrained by prior information on the accumulation rate (\code{acc.mean, acc.shape}) and its
 variability between neighbouring depths, or "memory" (\code{mem.mean, mem.strength}). Hiatuses can be introduced as well, also constrained by prior information (\code{hiatus.max}).
 
 Although Bacon works with any kind of absolute dates (e.g., OSL, tephra or other dates on a calendar scale),
@@ -254,8 +254,9 @@ dates are calibrated using one of the post-bomb calibration curves (NH1, NH2 or 
 SH1-2 or SH3 for the southern hemisphere; Hua et al., 2013). See \url{http://calib.org/CALIBomb/} if you are unsure which
 postbomb curve you need. If Bacon finds postbomb dates (negative 14C ages) and you haven't specified a postbomb curve,
 you will be prompted. Provide postbomb curves as, e.g., \code{postbomb=1} for the NH1 postbomb curve (2 for NH2, 3 for NH3, 4 for SH1-2, 5 for SH3).
-
 For calendar dates, i.e. dates that are already on the calendar scale and thus should not be calibrated, set\code{cc=0}.
+
+From version 2.5.1 on (i.e., since February 2021), the default memory prior has changed to \code{mem.mean=0.5} and \code{mem.strength=10}. Previously used c++ code contained a bug which caused the prior information for the memory not to be taken into account correctly. Now that this bug has been repaired, the default memory prior has been updated such that it should work for most types of cores, and should result in similar output to previous versions of Bacon. There is no need to re-do previous runs. However, it is considered good practice to test the impact of different settings on a site's age-depth model (e.g., thick, acc.mean, acc.shape, mem.mean, acc.strength).
 }
 \examples{
 \dontshow{
@@ -268,25 +269,21 @@ For calendar dates, i.e. dates that are already on the calendar scale and thus s
 }
 \references{
 Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
-\url{https://projecteuclid.org/euclid.ba/1339616472}
 
 Christen, J.A., Perez E., S., 2010. A new robust statistical model for radiocarbon data. Radiocarbon 51, 1047-1059. 
 
-Reimer et al., 2020. The IntCal20 Northern Hemisphere radiocarbon age calibration curve (0–55 cal kBP). Radiocarbon 62. doi: 10.1017/RDC.2020.41
+Reimer et al., 2020. The IntCal20 Northern Hemisphere radiocarbon age calibration curve (0–55 cal kBP). Radiocarbon 62. \doi{10.1017/RDC.2020.41}
 
-Hogg et al. 2020 SHCal20 Southern Hemisphere calibration, 0-55,000 years cal BP. Radiocarbon 62. doi: 10.1017/RDC.2020.59
+Hogg et al. 2020 SHCal20 Southern Hemisphere calibration, 0-55,000 years cal BP. Radiocarbon 62. \doi{10.1017/RDC.2020.59}
 
-Hughen et al. 2020 Marine20-the marine radiocarbon age calibration curve (0-55,000 cal BP). Radiocarbon 62. doi: 10.1017/RDC.2020.68.
+Hughen et al. 2020 Marine20-the marine radiocarbon age calibration curve (0-55,000 cal BP). Radiocarbon 62. \doi{10.1017/RDC.2020.68}
 
 Hua, Q., Barbetti, M., Rakowski, A.Z., 2013. Atmospheric radiocarbon for the period 1950-2010.
-Radiocarbon 55(4), <doi:10.2458/azu_js_rc.v55i2.16177>.
+Radiocarbon 55(4), \doi{10.2458/azu_js_rc.v55i2.16177}
 
 Jones, V.J., Stevenson, A.C., Battarbee, R.W., 1989. Acidification of lakes in Galloway, south west Scotland
 - a diatom and pollen study of the post-glacial history of the Round Loch of Glenhead.
 Journal of Ecology 77: 1-23.
-}
-\seealso{
-\url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
 }
 \author{
 Maarten Blaauw, J. Andres Christen

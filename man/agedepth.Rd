@@ -37,7 +37,7 @@ agedepth(
   rev.yr = rev.age,
   rev.d = FALSE,
   maxcalc = 500,
-  height = 30,
+  height = 1,
   calheight = 1,
   mirror = TRUE,
   up = TRUE,
@@ -67,13 +67,17 @@ agedepth(
   same.heights = FALSE,
   cc = set$cc,
   title = set$core,
-  title.location = "top",
+  title.location = "topleft",
+  title.size = 1.5,
   after = set$after,
   bty = "l",
   mar = c(3, 3, 1, 1),
   mgp = c(1.5, 0.7, 0),
   xaxs = "r",
   yaxs = "i",
+  prior.ticks = "n",
+  prior.fontsize = 0.9,
+  toppanel.fontsize = 0.9,
   xaxt = "s",
   yaxt = "s",
   plot.pb = TRUE,
@@ -211,7 +215,9 @@ and its name should start with the core's name and end with '_depths.txt'. Then 
 
 \item{title}{The title of the age-depth model is plotted on the main panel. By default this is the core's name. To leave empty: \code{title=""}.}
 
-\item{title.location}{Location of the title. Default \code{title.location='top'}.}
+\item{title.location}{Location of the title. Default \code{title.location='topleft'}.}
+
+\item{title.size}{Size of the title font. Defaults to \code{title.size=1.5}.}
 
 \item{after}{Sets a short section above and below hiatus.depths within which to calculate ages. For internal calculations - do not change.}
 
@@ -224,6 +230,12 @@ and its name should start with the core's name and end with '_depths.txt'. Then 
 \item{xaxs}{Extension of x-axis. By default, add some extra white-space at both extremes (\code{xaxs="r"}). See ?par for other options.}
 
 \item{yaxs}{Extension of y-axis. By default, add no extra white-space at both extremes (\code{yaxs="i"}). See ?par for other options.}
+
+\item{prior.ticks}{Plot tickmarks and values on the vertical axes for the prior and posterior distributions. Defaults to no tick marks (\code{prior.ticks="n"}). Set to \code{prior.ticks="s"} to plot the tick marks. Note that these values are of little practical use, as they correspond poorly to, e.g., the mean and strength values. All that matters is that the areas of both the prior and the posterior distributions sum to 1; wider distributions tend to give lower peaks, and narrower distributions higher peaks.}
+
+\item{prior.fontsize}{Font size of the prior, relative to R's standard size. Defaults to \code{prior.fontsize=0.9}.}
+
+\item{toppanel.fontsize}{Font size of the top panels, relative to R's standard size. Defaults to \code{prior.fontsize=0.9}.}
 
 \item{xaxt}{Whether or not to plot the x-axis. Can be used to adapt axes after a plot. See ?par for other options.}
 
@@ -258,11 +270,6 @@ again using the command \code{agedepth()}.
   Bacon(ask=FALSE, coredir=tempfile())
   agedepth()
 }
-}
-\references{
-Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive
-gamma process. Bayesian Analysis 6 (2011), no. 3, 457--474.
-\url{https://projecteuclid.org/euclid.ba/1339616472}
 }
 \author{
 Maarten Blaauw, J. Andres Christen

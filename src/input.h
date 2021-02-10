@@ -47,6 +47,8 @@ private:
 	int H; //Number of hiatuses
 	double **hiatus_pars; //location for the hiatuses and prior parameters
 
+    int plum; //=1 if Plum (210Pb dating) is needed
+
 //	double th0; //Initial values for theta0  JEV warning
 //	double thp0; JEV warning
 			
@@ -87,11 +89,16 @@ public:
 	//Print number of warnings
 	void PrintNumWarnings() { return bacon->PrintNumWarnings(); }
 	
-	
 	double Getc0() { return bacon->Getc0(); }
 	double GetcK() { return bacon->GetcK(); }
 	int GetK() { return K; }
 
+	int isPlum(){ return plum; }
+
+	int GetnPs(){ return bacon->GetnPs(); }
+
+	void outputFiles(std::string outputfile1);
+	
 	/*void PrintCal( FILE *F, double c0, double cK, double by, const double *x) {
 
 		bacon->SetThetas(x);

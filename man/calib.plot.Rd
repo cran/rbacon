@@ -18,7 +18,7 @@ calib.plot(
   d.lab = c(),
   age.lab = c(),
   yr.lab = age.lab,
-  height = 30,
+  height = 1,
   calheight = 1,
   mirror = TRUE,
   up = TRUE,
@@ -31,8 +31,7 @@ calib.plot(
   slump.col = grey(0.8),
   new.plot = TRUE,
   plot.dists = TRUE,
-  same.heights = FALSE,
-  normalise.dists = TRUE
+  same.heights = FALSE
 )
 }
 \arguments{
@@ -88,9 +87,7 @@ calib.plot(
 
 \item{plot.dists}{Plot the distributions of the dates (default \code{plot.dists=TRUE}).}
 
-\item{same.heights}{Plot the distributions of the dates all at the same maximum height (default \code{same.height=FALSE}).}
-
-\item{normalise.dists}{By default, the distributions of more precise dates will cover less time and will thus peak higher than less precise dates. This can be avoided by specifying \code{normalise.dists=FALSE}.}
+\item{same.heights}{Plot the distributions of the dates all at the same maximum height (default \code{same.height=FALSE}), which instead normalises the distributions (all have an area of 1).}
 }
 \value{
 NA
@@ -105,15 +102,6 @@ It can be used to produce custom-built graphs.
 \examples{
   Bacon(run=FALSE, coredir=tempfile())
   calib.plot()
-
-}
-\references{
-Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive
-gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
-\url{https://projecteuclid.org/euclid.ba/1339616472}
-}
-\seealso{
-\url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
 }
 \author{
 Maarten Blaauw, J. Andres Christen

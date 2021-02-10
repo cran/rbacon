@@ -15,11 +15,6 @@
 #'   agedepth(age.res=50, d.res=50, d.by=10)
 #'   ages.d20 = Bacon.Age.d(20)
 #'   mean(ages.d20)
-#' @seealso \url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
-#' @references
-#' Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive
-#' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
-#'  \url{https://projecteuclid.org/euclid.ba/1339616472}
 #' @export
 Bacon.Age.d <- function(d, set=get('info'), its=set$output, BCAD=set$BCAD, na.rm=FALSE) {
   if(length(d) > 1)
@@ -36,7 +31,7 @@ Bacon.Age.d <- function(d, set=get('info'), its=set$output, BCAD=set$BCAD, na.rm
 
   ages <- numeric(nrow(its)) # to sort R-base problem with c() and loops
   if(!is.na(d))
-    if(d >= set$d.min) { # we cannot calculate ages of depths above the top depth
+    if(d >= min(set$elbows)) { # we cannot calculate ages of depths above the top depth; was > d.min before Feb 2021
       topages <- as.vector(its[,1]) # ages for the core top
       maxd <- max(which(set$elbows <= d)) # find the relevant sections
       accs <- as.matrix(its[,1+(1:maxd)]) # the accumulation rates xi for each relevant section
@@ -55,10 +50,12 @@ Bacon.Age.d <- function(d, set=get('info'), its=set$output, BCAD=set$BCAD, na.rm
                 ages <- set$elbow.above[,i] + (set$slope.above[,i] * (d - set$elbows[above]))
             }
         }
-    }
-  if(BCAD)
-    ages <- 1950 - ages
-  return(c(ages))
+    } else
+         ages <- NA # Feb 2021
+
+    if(BCAD)
+      ages <- 1950 - ages
+    return(c(ages))
 }
 
 
@@ -81,11 +78,6 @@ Bacon.Age.d <- function(d, set=get('info'), its=set$output, BCAD=set$BCAD, na.rm
 #'   agedepth(age.res=50, d.res=50, d.by=10)
 #'   ages.d20 = Bacon.Age.d(20)
 #'   mean(ages.d20)
-#' @seealso \url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
-#' @references
-#' Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive
-#' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
-#'  \url{https://projecteuclid.org/euclid.ba/1339616472}
 #' @export
 Bacon.d.Age <- function(age, set=get("info"), BCAD=set$BCAD, its=set$output, na.rm=FALSE ){
 
@@ -132,7 +124,6 @@ Bacon.d.Age <- function(age, set=get("info"), BCAD=set$BCAD, its=set$output, na.
     # summary of the depths corresponding to the chosen age
     depths <- rep(NA,nrow(its))
     for ( i in 2:ncol(elbow.ages) ){
-    
         # consideration of hiatuses
         if ( hiatus.check[i] == 1 ){ 
             for ( j in 1:length(hiatus.depths) ) {
@@ -162,7 +153,7 @@ Bacon.d.Age <- function(age, set=get("info"), BCAD=set$BCAD, its=set$output, na.
                     depths[which(these.below==1)] <- hiatus.depths[j] + accs.below * age.diff.below
                 }
             }
-        } else{
+        } else {
             # consideration of the cases without hiatuses
             
             # find the correct intersections
@@ -328,17 +319,12 @@ hiatus.slopes <- function(set=get('info'), hiatus.option=1) {
 #'   agedepth(age.res=50, d.res=50, d.by=10)
 #'   Bacon.hist(20)
 #'   Bacon.hist(20:30)
-#' @seealso \url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
-#' @references
-#' Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive
-#' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
-#' \url{https://projecteuclid.org/euclid.ba/1339616472}
 #' @export
 Bacon.hist <- function(d, set=get('info'), BCAD=set$BCAD, age.lab=c(), age.lim=c(), hist.lab="Frequency", calc.range=TRUE, hist.lim=c(), draw=TRUE, prob=set$prob, hist.col=grey(0.5), hist.border=grey(.2), range.col="blue", med.col="green", mean.col="red", verbose=TRUE) {
   outfile <- paste(set$prefix, ".out", sep="")
   if(length(set$output) == 0 || length(set$Tr) == 0) {
-    set <- .Bacon.AnaOut(outfile, set)
-    .assign_to_global("set", set)
+    set <- Bacon.AnaOut(outfile, set)
+    assign_to_global("set", set)
   }
   hist3 <- function(d, BCAD) {
     hsts <- list(); maxhist <- 0; minhist <- 1
@@ -362,7 +348,7 @@ Bacon.hist <- function(d, set=get('info'), BCAD=set$BCAD, age.lab=c(), age.lim=c
     return(hsts)
   }
   hists <- hist3(d, BCAD)
-  .assign_to_global("hists", hists)
+  assign_to_global("hists", hists)
 
   # rng <- c()
   rng <- array(NA, dim=c(length(d), 4)) # to deal with new R which does not like to fill c() using loops
@@ -402,8 +388,8 @@ Bacon.hist <- function(d, set=get('info'), BCAD=set$BCAD, age.lab=c(), age.lim=c
 Bacon.rng <- function(d, set=get('info'), BCAD=set$BCAD, prob=set$prob) {
   outfile <- paste(set$prefix, ".out", sep="")
   if(length(set$output) == 0 || length(set$Tr) == 0) {
-    set <- .Bacon.AnaOut(outfile, set)
-    .assign_to_global("set", set)
+    set <- Bacon.AnaOut(outfile, set)
+    assign_to_global("set", set)
   }
 
   if(length(d) > 1)
@@ -437,19 +423,14 @@ Bacon.rng <- function(d, set=get('info'), BCAD=set$BCAD, prob=set$prob) {
 #'   Bacon(run=FALSE, coredir=tempfile())
 #'   agedepth(age.res=50, d.res=50, d.by=10)
 #'   lines(agemodel.it(5), col="red")
-#' @seealso \url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
-#' @references
-#' Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive
-#' gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
-#' \url{https://projecteuclid.org/euclid.ba/1339616472}
 #' @export
 agemodel.it <- function(it, set=get('info'), BCAD=set$BCAD) {
   outfile <- paste(set$prefix, ".out", sep="")
   if(length(set$output) == 0 || length(set$Tr) == 0) {
-    set <- .Bacon.AnaOut(outfile, set)
-    .assign_to_global("set", set)
+    set <- Bacon.AnaOut(outfile, set)
+    assign_to_global("set", set)
   }
-  # does this function work in cores with slumps?
+  # does this function work in cores with slumps? also doesn't take into account hiatuses.
   if(length(set$hiatus.depths) > 0)
     age <- sort(c(set$d, set$hiatus.depths+.001, set$hiatus.depths))
   age <- c()

@@ -33,9 +33,6 @@ Assumes that Bacon .csv files with 4 columns indicate 14C dates. Please make sur
  }
 }
 }
-\seealso{
-\url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
-}
 \author{
 Maarten Blaauw, J. Andres Christen
 }

@@ -539,7 +539,6 @@ int simulation(unsigned long long Tr1, char *filename, const char *op="wt", int 
 	FILE *fptr;
     FILE *recacc = NULL; // JEV warning
 
-	//Seed(4321); // tmp MB&JAC Oct 2020
     long sec=time(NULL); //beginning of the twalk
     time_t temp = sec;
     if (silent == 0)
@@ -616,9 +615,7 @@ int simulation(unsigned long long Tr1, char *filename, const char *op="wt", int 
 
 		Rprintf("BUFSIZ is %d, optimal block size changed to %ld\n", BUFSIZ, st_blksize);
 #endif
-		//Rprintf("\nThe wee seed is now %lu, %lu, %lu, \n", Seed, GetSeed(), Seed); // tmp MB Oct 2020	
-
-
+        
 		fver_vector(fptr, x, n);
         fprintf(fptr, "\t %f", U); // was %lf MB
 
@@ -629,7 +626,6 @@ int simulation(unsigned long long Tr1, char *filename, const char *op="wt", int 
             else{
                 Rprintf("twalk: All %d iterations to be saved in file %s\n", save_every, filename);
             }
-		//Rprintf("\nOh, the seed is now %lu \n", GetSeed()); // tmp MB Oct 2020	
         }
 
 
@@ -732,8 +728,6 @@ int simulation(unsigned long long Tr1, char *filename, const char *op="wt", int 
 
             Rprintf("twalk: Finished, %4.1f%% of moved pars per iteration (ratio %f/%lu). Output in file %s,\n      %s\n",
                  100.0*(acc/(double) Tr1), acc, Tr1, filename, ctime(&temp));
-            //Rprintf("\nOh, la semilla sigue en %lu \n", GetSeed()); // tmp MB Oct 2020	
-            
         }
 
         return (int) rint(acc);

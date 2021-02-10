@@ -7,13 +7,12 @@
 accrate.age.ghost(
   set = get("info"),
   age.lim = c(),
-  yr.lim = age.lim,
   age.lab = c(),
-  yr.lab = age.lab,
-  age.res = 200,
-  yr.res = age.res,
+  age.res = 400,
+  acc.res = 200,
+  cutoff = 0.001,
   rgb.scale = c(0, 0, 0),
-  rgb.res = 50,
+  rgb.res = 100,
   prob = 0.95,
   plot.range = TRUE,
   range.col = grey(0.5),
@@ -23,13 +22,10 @@ accrate.age.ghost(
   mean.lty = 2,
   acc.lim = c(),
   acc.lab = c(),
-  upper = 0.99,
-  dark = 50,
   BCAD = set$BCAD,
   cmyr = FALSE,
   rotate.axes = FALSE,
   rev.age = FALSE,
-  rev.yr = rev.age,
   rev.acc = FALSE,
   xaxs = "i",
   yaxs = "i",
@@ -41,15 +37,13 @@ accrate.age.ghost(
 
 \item{age.lim}{Minimum and maximum calendar age ranges, calculated automatically by default (\code{age.lim=c()}).}
 
-\item{yr.lim}{Deprecated - use age.lim instead}
-
 \item{age.lab}{The labels for the calendar axis (default \code{age.lab="cal BP"} or \code{"BC/AD"} if \code{BCAD=TRUE}).}
 
-\item{yr.lab}{Deprecated - use age.lab instead}
+\item{age.res}{Resolution or amount of greyscale pixels to cover the age scale of the plot. Default \code{age.res=400}.}
 
-\item{age.res}{Resolution or amount of greyscale pixels to cover the age scale of the age-model plot. Default \code{age.res=200}.}
+\item{acc.res}{Resolution or amount of greyscale pixels to cover the accumulation rate scale plot. Default \code{age.res=400}.}
 
-\item{yr.res}{Deprecated - use age.res instead}
+\item{cutoff}{Point below which colours will no longer be printed. Default \code{cutoff=0.001}.}
 
 \item{rgb.scale}{The function to produce a coloured representation of all age-models. Needs 3 values for the intensity of red, green and blue. Defaults to grey-scales: \code{rgb.scale=c(0,0,0)}, but could also be, say, scales of red (\code{rgb.scale=c(1,0,0)}).}
 
@@ -73,10 +67,6 @@ accrate.age.ghost(
 
 \item{acc.lab}{Axis label for the accumulation rate.}
 
-\item{upper}{Maximum accumulation rates to plot. Defaults to the upper 99\%; \code{upper=0.99}.}
-
-\item{dark}{The darkest grey value is dark=1 by default; lower values will result in lighter grey but values >1 are not advised.}
-
 \item{BCAD}{The calendar scale of graphs and age output-files is in \code{cal BP} by default, but can be changed to BC/AD using \code{BCAD=TRUE}.}
 
 \item{cmyr}{Accumulation rates can be calculated in cm/year or year/cm. By default \code{cmyr=FALSE} and accumulation rates are calculated in year per cm. Axis limits are difficult to calculate when \code{cmyr=TRUE}, so a manual adaptation of \code{acc.lim} might be a good idea.}
@@ -84,8 +74,6 @@ accrate.age.ghost(
 \item{rotate.axes}{The default is to plot the calendar age horizontally and accumulation rates vertically. Change to \code{rotate.axes=TRUE} value to rotate axes.}
 
 \item{rev.age}{The direction of the age axis, which can be reversed using \code{rev.age=TRUE}.}
-
-\item{rev.yr}{Deprecated - use rev.age instead}
 
 \item{rev.acc}{The direction of the accumulation rate axis, which can be reversed (\code{rev.acc=TRUE}.}
 
@@ -112,18 +100,12 @@ This is due to only some MCMC iterations reaching those old ages, and these iter
 Currently does not deal well with hiatuses, so do not interpret accumulation rates close to depths with inferred hiatuses.
 }
 \examples{
+\donttest{
   Bacon(run=FALSE, coredir=tempfile())
-  agedepth(yr.res=50, d.res=50, d.by=10)
+  agedepth(age.res=20, d.res=20, d.by=10)
   layout(1)
-  accrate.age.ghost()
+  accrate.age.ghost(age.res=20, acc.res=10)
 }
-\references{
-Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive
-gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
-\url{https://projecteuclid.org/euclid.ba/1339616472}
-}
-\seealso{
-\url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
 }
 \author{
 Maarten Blaauw, J. Andres Christen

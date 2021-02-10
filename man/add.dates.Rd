@@ -9,25 +9,31 @@ add.dates(
   sdev,
   depth,
   cc = 1,
+  set = get("info"),
   above = 1e-06,
-  ex = 10,
+  postbomb = 0,
   normal = TRUE,
-  normalise = TRUE,
-  t.a = 3,
-  t.b = 4,
-  age.res = 100,
-  times = 20,
+  delta.R = set$delta.R,
+  delta.STD = set$delta.STD,
+  t.a = set$t.a,
+  t.b = set$t.b,
+  date.res = 100,
+  height = 1,
+  calheight = 1,
+  agesteps = 1,
+  cutoff = 0.005,
   col = rgb(1, 0, 0, 0.5),
   border = rgb(1, 0, 0, 0.5),
   rotate.axes = FALSE,
   mirror = TRUE,
   up = TRUE,
   BCAD = FALSE,
-  pch = 4
+  pch = 4,
+  ccdir = ""
 )
 }
 \arguments{
-\item{mn}{Reported mean of the date. Can be multiple dates.}
+\item{mn}{Reported mean of the date. Can be multiple dates. Negative numbers indicate postbomb dates (if cc > 0).}
 
 \item{sdev}{Reported error of the date. Can be multiple dates.}
 
@@ -35,13 +41,17 @@ add.dates(
 
 \item{cc}{The calibration curve to use: \code{cc=1} for IntCal20 (northern hemisphere terrestrial), \code{cc=2} for Marine20 (marine), \code{cc=0} for none (dates that are already on the cal BP scale).}
 
+\item{set}{Detailed information of the current run, stored within this session's memory as variable \code{info}.}
+
 \item{above}{Treshold for plotting of probability values. Defaults to \code{above=1e-3}.}
 
-\item{ex}{Exaggeration of probability distribution plots. Defaults to \code{ex=50}.}
+\item{postbomb}{Use a postbomb curve for negative (i.e. postbomb) 14C ages. \code{0 = none, 1 = NH1, 2 = NH2, 3 = NH3, 4 = SH1-2, 5 = SH3}}
 
 \item{normal}{By default, Bacon uses the student's t-distribution to treat the dates. Use \code{normal=TRUE} to use the normal/Gaussian distribution. This will generally give higher weight to the dates.}
 
-\item{normalise}{By default, the date is normalised to an area of 1 (\code{normalise=TRUE}).}
+\item{delta.R}{Mean of core-wide age offsets (e.g., regional marine offsets).}
+
+\item{delta.STD}{Error of core-wide age offsets (e.g., regional marine offsets).}
 
 \item{t.a}{The dates are treated using the student's t distribution by default (\code{normal=FALSE}).
 The student's t-distribution has two parameters, t.a and t.b, set at 3 and 4 by default (see Christen and Perez, 2010).
@@ -53,9 +63,15 @@ The student's t-distribution has two parameters, t.a and t.b, set at 3 and 4 by 
 If you want to assign narrower error distributions (more closely resembling the normal distribution), set t.a and t.b at for example 33 and 34 respectively (e.g., for specific dates in your .csv file).
 For symmetry reasons, t.a must always be equal to t.b-1.}
 
-\item{age.res}{Resolution of the date's distribution. Defaults to \code{date.res=100}.}
+\item{date.res}{Resolution of the date's distribution. Defaults to \code{date.res=100}.}
 
-\item{times}{The extent of the range to be calculated for each date. Defaults to \code{times=20}.}
+\item{height}{The heights of the distributions of the dates. See also \code{normalise.dists}.}
+
+\item{calheight}{Multiplier for the heights of the distributions of dates on the calendar scale. Defaults to \code{calheight=1}.}
+
+\item{agesteps}{Step size for age units of the distribution. Default \code{agesteps=1}.}
+
+\item{cutoff}{Avoid plotting very low probabilities of date distributions (default \code{cutoff=0.005}).}
 
 \item{col}{The colour of the ranges of the date. Default is semi-transparent red: \code{col=rgb(1,0,0,.5)}.}
 
@@ -70,6 +86,8 @@ For symmetry reasons, t.a must always be equal to t.b-1.}
 \item{BCAD}{The calendar scale of graphs is in \code{cal BP} by default, but can be changed to BC/AD using \code{BCAD=TRUE}.}
 
 \item{pch}{The shape of any marker to be added to the date. Defaults to a cross, \code{pch=4}. To leave empty, use \code{pch=NA}.}
+
+\item{ccdir}{Directory where the calibration curves for C14 dates \code{cc} are located. By default \code{ccdir=""}.}
 }
 \value{
 A date's distribution, added to an age-depth plot.
@@ -86,14 +104,6 @@ Sometimes it is useful to add additional dating information to age-depth plots, 
   agedepth()
   add.dates(5000, 100, 60)
 }
-}
-\references{
-Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive
-gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
-\url{https://projecteuclid.org/euclid.ba/1339616472}
-}
-\seealso{
-\url{http://www.qub.ac.uk/chrono/blaauw/manualBacon_2.3.pdf}
 }
 \author{
 Maarten Blaauw, J. Andres Christen

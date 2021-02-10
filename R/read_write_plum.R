@@ -508,8 +508,8 @@
 
   if(!is.na(hiatus.depths[1])) {
     if(is.null(boundary[1]))
-      message("\n  Hiatus set at depth(s) ", hiatus.depths) else
-        message("  Boundary set at depth(s) ", boundary)
+      message("\n  Hiatus set at depth(s) ", paste("", hiatus.depths)) else
+        message("  Boundary set at depth(s) ", paste("", boundary))
     if(length(set$acc.shape)==1)
       set$acc.shape <- rep(set$acc.shape, length(hiatus.depths)+1)
     if(length(set$acc.mean)==1)
@@ -518,7 +518,7 @@
       set$hiatus.max <- rep(set$hiatus.max, length(hiatus.depths))
 #      if(length(set$hiatus.shape)==1)
 #        set$hiatus.shape <- rep(set$hiatus.shape, length(set$hiatus.depths))
-    .assign_to_global("info", set)
+    assign_to_global("info", set)
     cat("\n\n### Depths and priors for fixed hiatuses, in descending order",
       "\n##### cm  alpha beta      ha     hb", file=fl)
     for(i in length(hiatus.depths):1)
