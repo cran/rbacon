@@ -175,7 +175,7 @@ PlotAccPost <- function(set=get('info'), s=set$acc.shape, mn=set$acc.mean, main=
 
 # plot the posterior (and prior) of the memory
 PlotMemPost <- function(set=get('info'), corenam, K, main="", s=set$mem.strength, mn=set$mem.mean, xlab=paste("Memory"), ylab="Density", ds=1, thick, xaxs="i", yaxs="i", yaxt="n", prior.size=.9, panel.size=.9) {
-  post <- density(set$output[,set$n]^(1/set$thick), from=0, to=1)
+  post <- density(set$output[,2+set$K]^(1/set$thick), from=0, to=1) # was output[,set$n] but not ok for rplum
   post <- cbind(c(min(post$x), post$x, max(post$x)), c(0, post$y, 0))
   maxprior <- max(dbeta((0:100)/100, s*mn, s*(1-mn)))
   if(is.infinite(max(maxprior))) max.y <- max(post[,2]) else

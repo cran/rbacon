@@ -2,7 +2,7 @@
 #' @title Output all ages for a single depth.
 #' @description Output all MCMC-derived age estimates for a given depth.
 #' @details Obtaining an age-depth model is often only a step towards a goal, e.g., plotting a core's
-#' fossil series ('proxies') against calendar time. Bacon.Age.d can be used to list all MCMC-derived age estimates for a given (single) depth, for example to calculate mean ages for a depth.
+#' fossil series ('proxies') against calendar time. Bacon.Age.d can be used to list all MCMC-derived age estimates for a given (single) depth, for example to calculate mean ages for a depth. See also Bacon.d.Age which calculates the depths of a single age estimate.
 #' @param d The depth of which Bacon age estimates are to be returned. Has to be a single depth.
 #' @param set Detailed information of the current run, stored within this session's memory as variable info.
 #' @param its The set of MCMC iterations to be used. Defaults to the entire MCMC output, \code{its=set$output}.
@@ -11,10 +11,12 @@
 #' @author Maarten Blaauw, J. Andres Christen
 #' @return Outputs all MCMC-derived ages for a given depth.
 #' @examples
+#' \dontrun{
 #'   Bacon(run=FALSE, coredir=tempfile())
 #'   agedepth(age.res=50, d.res=50, d.by=10)
 #'   ages.d20 = Bacon.Age.d(20)
 #'   mean(ages.d20)
+#' }
 #' @export
 Bacon.Age.d <- function(d, set=get('info'), its=set$output, BCAD=set$BCAD, na.rm=FALSE) {
   if(length(d) > 1)
@@ -61,11 +63,11 @@ Bacon.Age.d <- function(d, set=get('info'), its=set$output, BCAD=set$BCAD, na.rm
 
 
 #' @name Bacon.d.Age
-#' @title Output all ages for a single depth.
-#' @description Output all MCMC-derived age estimates for a given depth.
+#' @title Output all depths for a single age.
+#' @description Output all depths of a single given MCMC-derived age estimate.
 #' @details Obtaining an age-depth model is often only a step towards a goal, e.g., plotting a core's
 #' fossil series ('proxies') against calendar time. Bacon.d.Age can be used to list all MCMC-derived depths belonging to a given (single) age, for example to calculate mean depths belonging to a modelled depth. 
-#' This function was kindly written and provided by Timon Netzel (Bonn University).
+#' This function was kindly written and provided by Timon Netzel (Bonn University). See also Bacon.Age.d, which calculates the ages for a single depth.
 #' @param age The age estimate for which depths are to be returned. Has to be a single age.
 #' @param set Detailed information of the current run, stored within this session's memory as variable info.
 #' @param its The set of MCMC iterations to be used. Defaults to the entire MCMC output, \code{its=set$output}.
@@ -74,10 +76,12 @@ Bacon.Age.d <- function(d, set=get('info'), its=set$output, BCAD=set$BCAD, na.rm
 #' @author Maarten Blaauw, J. Andres Christen
 #' @return Outputs all MCMC-derived ages for a given depth.
 #' @examples
+#' \dontrun{
 #'   Bacon(run=FALSE, coredir=tempfile())
 #'   agedepth(age.res=50, d.res=50, d.by=10)
 #'   ages.d20 = Bacon.Age.d(20)
 #'   mean(ages.d20)
+#' }
 #' @export
 Bacon.d.Age <- function(age, set=get("info"), BCAD=set$BCAD, its=set$output, na.rm=FALSE ){
 
@@ -315,10 +319,12 @@ hiatus.slopes <- function(set=get('info'), hiatus.option=1) {
 #' @author Maarten Blaauw, J. Andres Christen
 #' @return A plot with the histogram and the age ranges, median and mean, or just the age ranges, medians and means if more than one depth \code{d} is given.
 #' @examples
+#' \dontrun{
 #'   Bacon(run=FALSE, coredir=tempfile())
 #'   agedepth(age.res=50, d.res=50, d.by=10)
 #'   Bacon.hist(20)
 #'   Bacon.hist(20:30)
+#' }
 #' @export
 Bacon.hist <- function(d, set=get('info'), BCAD=set$BCAD, age.lab=c(), age.lim=c(), hist.lab="Frequency", calc.range=TRUE, hist.lim=c(), draw=TRUE, prob=set$prob, hist.col=grey(0.5), hist.border=grey(.2), range.col="blue", med.col="green", mean.col="red", verbose=TRUE) {
   outfile <- paste(set$prefix, ".out", sep="")
@@ -420,9 +426,11 @@ Bacon.rng <- function(d, set=get('info'), BCAD=set$BCAD, prob=set$prob) {
 #' @author Maarten Blaauw, J. Andres Christen
 #' @return A variable with two columns - depth and the age-depth model of a single iteration.
 #' @examples
+#' \dontrun{
 #'   Bacon(run=FALSE, coredir=tempfile())
 #'   agedepth(age.res=50, d.res=50, d.by=10)
 #'   lines(agemodel.it(5), col="red")
+#' }
 #' @export
 agemodel.it <- function(it, set=get('info'), BCAD=set$BCAD) {
   outfile <- paste(set$prefix, ".out", sep="")
@@ -453,7 +461,7 @@ toslump <- function(d, slump, remove=FALSE) {
     inside <- which(d[inside] >= slump[i,1]) # step 2
     below <- which(d >= slump[i,2]) # adapt depths below slumps
 
-	if(length(below) > 0) # depths below slump
+    if(length(below) > 0) # depths below slump
       dfree[below] <- dfree[below] - slices[i+1]
 
     if(length(inside) > 0) # depths within slump

@@ -13,11 +13,11 @@ Bacon.cleanup(set = get("info"))
 A message stating that the files and settings of this run have been deleted.
 }
 \description{
-Remove files .bacon, .out, .pdf, _ages.txt, and _settings.txt of current core.
+Remove files ending in .bacon, .plum (if it exists), .out, .pdf, _ages.txt, and _settings.txt of current core.
 }
 \details{
 If cores behave badly, you can try cleaning up previous runs and settings, by
-removing files .bacon, .out, .pdf, _ages.txt, and _settings.txt of current core.
+removing files *.bacon, *.plum, *.out, *.pdf, *_ages.txt, and *_settings.txt of current core.
 }
 \examples{
   Bacon(run=FALSE, coredir=tempfile())

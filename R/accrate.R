@@ -16,12 +16,14 @@
 #' @author Maarten Blaauw, J. Andres Christen
 #' @return all MCMC estimates of accumulation rate of the chosen depth.
 #' @examples
+#' \dontrun{
 #'   Bacon(run=FALSE, coredir=tempfile())
 #'   agedepth(yr.res=50, d.res=50, d.by=10)
 #'   d20 <- accrate.depth(20)
 #'   hist(d20)
 #'   d20 <- accrate.depth(20, cmyr=TRUE) # to calculate accumulation rates in cm/yr
 #'   mean(d20)
+#' }
 #' @export
 accrate.depth <- function(d, set=get('info'), cmyr=FALSE) {
   accs.elbows <- set$output[,2:(set$K+1)]
@@ -46,26 +48,32 @@ accrate.depth <- function(d, set=get('info'), cmyr=FALSE) {
 #' @param age The age for which the accumulation rates need to be returned.
 #' @param set Detailed information of the current run, stored within this session's memory as variable \code{info}.
 #' @param cmyr Accumulation rates can be calculated in cm/year or year/cm. By default \code{cmyr=FALSE} and accumulation rates are calculated in year per cm.
+#' @param ages The ages of the age-depth model. Not provided by default, but can be provided to speed things up if the function is called repeatedly
 #' @param BCAD The calendar scale of graphs and age output-files is in \code{cal BP} by default, but can be changed to BC/AD using \code{BCAD=TRUE}.
 #' @param silent Warn when ages are outside the core's range. Default \code{silent=TRUE}.
 #' @author Maarten Blaauw, J. Andres Christen
 #' @return all MCMC estimates of accumulation rate of the chosen age.
 #' @examples
+#' \dontrun{
 #'   Bacon(run=FALSE, coredir=tempfile())
 #'   agedepth(yr.res=50, d.res=50, d.by=10)
 #'   accrate.a5000 = accrate.age(5000)
 #'   plot(accrate.a5000, pch='.')
 #'   hist(accrate.a5000)
+#' }
 #' @export
-accrate.age <- function(age, set=get('info'), cmyr=FALSE, BCAD=set$BCAD, silent=TRUE) {
-   ages <- array(0, dim=c(nrow(set$output), length(set$elbows)))
-   for(i in 1:ncol(ages))
-     ages[,i] <- Bacon.Age.d(set$elbows[i])
+accrate.age <- function(age, set=get('info'), cmyr=FALSE, ages=c(), BCAD=set$BCAD, silent=TRUE) {
+  if(length(ages) == 0) {
+    ages <- array(0, dim=c(nrow(set$output), length(set$elbows)))
+    for(i in 1:ncol(ages))
+      ages[,i] <- Bacon.Age.d(set$elbows[i], BCAD=BCAD)
+  }
 
   if(!silent)
     if(age < min(ages) || age > max(ages))
      stop(" Warning, age outside the core's age range!\n")
 
+  # can this be made faster, i.e. without the loop?
   accs <- c()
   for(i in 2:ncol(ages)) {
     these <- (ages[,i-1] < age) * (ages[,i] > age)
@@ -103,20 +111,26 @@ accrate.age <- function(age, set=get('info'), cmyr=FALSE, BCAD=set$BCAD, silent=
 #' @param plot.mean If \code{plot.mean=TRUE}, the means are plotted.
 #' @param mean.col Colour of the mean accumulation rates.
 #' @param mean.lty Type of the mean lines.
+#' @param plot.median If \code{plot.mean=TRUE}, the medians are plotted.
+#' @param median.col Colour of the median accumulation rates.
+#' @param median.lty Type of the median lines.
 #' @param rotate.axes The default is to plot the accumulation rates horizontally and the depth vertically (\code{rotate.axes=FALSE}). Change rotate.axes value to rotate axes.
 #' @param rev.d The direction of the depth axis can be reversed from the default (\code{rev.d=TRUE}.
 #' @param rev.acc The direction of the accumulation rate axis can be reversed from the default (\code{rev.acc=TRUE}).
+#' @param bty Type of box to be drawn around the plot (\code{"n"} for none, and \code{"l"} (default), \code{"7"}, \code{"c"}, \code{"u"}, or \code{"o"} for correspondingly shaped boxes).
 #' @author Maarten Blaauw, J. Andres Christen
 #' @return A grey-scale plot of accumulation rate against core depth.
 #' @examples
+#' \dontrun{
 #'   Bacon(run=FALSE, coredir=tempfile())
 #'   agedepth(yr.res=50, d.res=50, d.by=10)
 #'   layout(1)
 #'   accrate.depth.ghost()
+#' }
 #' @export
-accrate.depth.ghost <- function(set=get('info'), d=set$elbows, d.lim=c(), acc.lim=c(), d.lab=c(), cmyr=FALSE, acc.lab=c(), dark=1, rgb.scale=c(0,0,0), rgb.res=100, prob=0.95, plot.range=TRUE, range.col=grey(0.5), range.lty=2, plot.mean=TRUE, mean.col="red", mean.lty=2, rotate.axes=FALSE, rev.d=FALSE, rev.acc=FALSE) {
+accrate.depth.ghost <- function(set=get('info'), d=set$elbows, d.lim=c(), acc.lim=c(), d.lab=c(), cmyr=FALSE, acc.lab=c(), dark=1, rgb.scale=c(0,0,0), rgb.res=100, prob=0.95, plot.range=TRUE, range.col=grey(0.5), range.lty=2, plot.mean=TRUE, mean.col="red", mean.lty=2, plot.median=TRUE, median.col="blue", median.lty=2,  rotate.axes=FALSE, rev.d=FALSE, rev.acc=FALSE, bty="l") {
   max.acc <- 0; max.dens <- 0
-  acc <- list(); min.rng <- numeric(length(d)); max.rng <- numeric(length(d)); mn.rng <- numeric(length(d))
+  acc <- list(); min.rng <- numeric(length(d)); max.rng <- numeric(length(d)); mean.rng <- numeric(length(d)); median.rng <- numeric(length(d))
   for(i in 1:length(d))
     if(length(acc.lim) == 0)
       acc[[i]] <- density(accrate.depth(d[i], set, cmyr=cmyr), from=0) else
@@ -124,10 +138,12 @@ accrate.depth.ghost <- function(set=get('info'), d=set$elbows, d.lim=c(), acc.li
   for(i in 1:length(d)) {
     max.acc <- max(max.acc, acc[[i]]$x)
     max.dens <- max(max.dens, acc[[i]]$y)
-    quants <- quantile(accrate.depth(d[i], set, cmyr=cmyr), c((1-prob)/2, 1-((1-prob)/2)))
+    accs <- accrate.depth(d[i], set, cmyr=cmyr)
+    quants <- quantile(accs, c((1-prob)/2, 1-((1-prob)/2)))
     min.rng[i] <- quants[1]
     max.rng[i] <- quants[2]
-    mn.rng[i] <- mean(accrate.depth(d[i], set, cmyr=cmyr))
+    mean.rng[i] <- mean(accs)
+    median.rng[i] <- median(accs)
    }
 
   for(i in 1:length(d)) {
@@ -152,7 +168,7 @@ accrate.depth.ghost <- function(set=get('info'), d=set$elbows, d.lim=c(), acc.li
     acc.lim <- rev(acc.lim)
 
   if(rotate.axes) {
-    plot(0, type="n", xlab=acc.lab, ylab=d.lab, ylim=d.lim, xlim=acc.lim)
+    plot(0, type="n", xlab=acc.lab, ylab=d.lab, ylim=d.lim, xlim=acc.lim, bty="n")
     for(i in 2:length(d)) {
       col <- rgb(rgb.scale[1], rgb.scale[2], rgb.scale[3], seq(0, 1-max(acc[[i-1]]$y), length=rgb.res)) # was acc[[i]]
       image(acc[[i-1]]$x, d[c(i-1, i)], t(1-t(acc[[i-1]]$y)), add=TRUE, col=col) # was acc[[i]]
@@ -162,9 +178,11 @@ accrate.depth.ghost <- function(set=get('info'), d=set$elbows, d.lim=c(), acc.li
       lines(max.rng, d+(set$thick/2), col=range.col, lty=range.lty)
     }
     if(plot.mean)
-      lines(mn.rng, d+(set$thick/2), col=mean.col, lty=mean.lty)
+      lines(mean.rng, d+(set$thick/2), col=mean.col, lty=mean.lty)
+    if(plot.median)
+      lines(median.rng, d+(set$thick/2), col=median.col, lty=median.lty)
   } else {
-      plot(0, type="n", xlab=d.lab, ylab=acc.lab, xlim=d.lim, ylim=acc.lim)
+      plot(0, type="n", xlab=d.lab, ylab=acc.lab, xlim=d.lim, ylim=acc.lim, bty="n")
       for(i in 2:length(d)) {
         col <- rgb(rgb.scale[1], rgb.scale[2], rgb.scale[3], seq(max(acc[[i-1]]$y), 0, length=rgb.res)) # was acc[[i]]
         image(d[c(i-1, i)], acc[[i-1]]$x, 1-t(acc[[i-1]]$y), add=TRUE, col=col) # was acc[[i]]
@@ -174,8 +192,11 @@ accrate.depth.ghost <- function(set=get('info'), d=set$elbows, d.lim=c(), acc.li
         lines(d+(set$thick/2), max.rng, col=range.col, lty=range.lty)
         }
     if(plot.mean)
-      lines(d+(set$thick/2), mn.rng, col=mean.col, lty=mean.lty)
+      lines(d+(set$thick/2), mean.rng, col=mean.col, lty=mean.lty)
+    if(plot.median)
+      lines(d+(set$thick/2), median.rng, col=median.col, lty=median.lty)
     }
+  box(bty=bty)  
 }
 
 
@@ -206,6 +227,9 @@ accrate.depth.ghost <- function(set=get('info'), d=set$elbows, d.lim=c(), acc.li
 #' @param plot.mean If \code{plot.mean=TRUE}, the means are plotted.
 #' @param mean.col Colour of the mean accumulation rates.
 #' @param mean.lty Type of the mean lines.
+#' @param plot.median If \code{plot.mean=TRUE}, the medians are plotted.
+#' @param median.col Colour of the median accumulation rates.
+#' @param median.lty Type of the median lines.
 #' @param acc.lim Axis limits for the accumulation rates.
 #' @param acc.lab Axis label for the accumulation rate.
 #' @param BCAD The calendar scale of graphs and age output-files is in \code{cal BP} by default, but can be changed to BC/AD using \code{BCAD=TRUE}.
@@ -219,47 +243,55 @@ accrate.depth.ghost <- function(set=get('info'), d=set$elbows, d.lim=c(), acc.li
 #' @author Maarten Blaauw, J. Andres Christen
 #' @return A greyscale plot of accumulation rate against calendar age.
 #' @examples
-#' \donttest{
+#' \dontrun{
 #'   Bacon(run=FALSE, coredir=tempfile())
 #'   agedepth(age.res=20, d.res=20, d.by=10)
 #'   layout(1)
-#'   accrate.age.ghost(age.res=20, acc.res=10)
+#'   accrate.age.ghost(age.res=200, acc.res=100)
 #' }
 #' @export
-accrate.age.ghost <- function(set=get('info'), age.lim=c(), age.lab=c(), age.res=400, acc.res=200, cutoff=.001, rgb.scale=c(0,0,0), rgb.res=100, prob=.95, plot.range=TRUE, range.col=grey(0.5), range.lty=2, plot.mean=TRUE, mean.col="red", mean.lty=2, acc.lim=c(), acc.lab=c(), BCAD=set$BCAD, cmyr=FALSE, rotate.axes=FALSE, rev.age=FALSE, rev.acc=FALSE, xaxs="i", yaxs="i", bty="l") {
-
+accrate.age.ghost <- function(set=get('info'), age.lim=c(), age.lab=c(), age.res=400, acc.res=200, cutoff=.001, rgb.scale=c(0,0,0), rgb.res=100, prob=.95, plot.range=TRUE, range.col=grey(0.5), range.lty=2, plot.mean=TRUE, mean.col="red", mean.lty=2, plot.median=TRUE, median.col="blue", median.lty=2, acc.lim=c(), acc.lab=c(), BCAD=set$BCAD, cmyr=FALSE, rotate.axes=FALSE, rev.age=FALSE, rev.acc=FALSE, xaxs="i", yaxs="i", bty="l") {
   if(length(age.lim) == 0) 
      age.lim <- extendrange(set$ranges[,5]) # just the mean ages, not the extremes
-  if(BCAD)
-    age.lim <- 1950 - age.lim
+  if(set$BCAD)
+    age.lim <- 1950 - age.lim  # internally, work on the cal BP scale
   age.seq <- seq(min(age.lim), max(age.lim), length=age.res)
     
-  if(length(acc.lim) == 0)
+  if(length(acc.lim) == 0) {
     acc.lim <-  c(0, 1.05*max(set$output[,2:(1+set$K)])) # maximum accrate in the output
-  if(cmyr)
-    acc.lim <- 1/acc.lim
+    if(cmyr)
+      acc.lim <- 1/acc.lim
+    acc.lim[is.infinite(acc.lim)] <- 0  
+  }  
   acc.seq <- seq(min(acc.lim), max(acc.lim), length=acc.res)
-  breaks <- c(acc.seq, acc.seq[acc.res]+diff(acc.seq[1:2])) # bins of the histogram
-    
-  z <- array(0, dim=c(age.res, acc.res))
-  acc.rng <- array(0, dim=c(age.res, 2))
-  acc.mn <- 0
+  # breaks <- c(acc.seq, acc.seq[acc.res]+diff(acc.seq[1:2])) # bins of the histogram
   
+  z <- array(0, dim=c(age.res, acc.res))
+  acc.rng <- array(NA, dim=c(age.res, 2))
+  acc.mean <- NA; acc.median <- NA
+
+  # speed things up by not repeatedly calculating ages in accrate.age
+  ages <- array(0, dim=c(nrow(set$output), length(set$elbows)))
+  for(i in 1:ncol(ages))
+    ages[,i] <- Bacon.Age.d(set$elbows[i], BCAD=FALSE)
+ 
   pb <- txtProgressBar(min=0, max=max(1,length(age.seq)-1), style = 3)
   for(i in 1:age.res) {
     setTxtProgressBar(pb, i)
-    acc <- accrate.age(age.seq[i], cmyr=cmyr, BCAD=BCAD, silent=TRUE)
-    z[i,] <- hist(acc, breaks=breaks, plot=FALSE)$counts
-    acc.rng[i,] <- quantile(acc, c((1-prob)/2, 1-((1-prob)/2)))
-    acc.mn[i] <- mean(acc)
+    acc <- accrate.age(age.seq[i], cmyr=cmyr, ages=ages, silent=TRUE, BCAD=FALSE)
+    if(length(acc) > 0) {
+      #z[i,] <- hist(acc, breaks=breaks, plot=FALSE)$counts
+      z[i,] <- density(acc, from=min(acc.lim), to=max(acc.lim), n=acc.res)$y
+      acc.rng[i,] <- quantile(acc, c((1-prob)/2, 1-((1-prob)/2)))
+      acc.mean[i] <- mean(acc)
+      acc.median[i] <- median(acc)
+    }
   }
   message("\n")
-  
+
   z <- z/max(z) # normalise
-  z[z<cutoff] <- NA # do not plot very small values
+  z[z<cutoff] <- NA # do not plot very small/light greyscale values
   
-  if(BCAD)
-    age.lim <- rev(age.lim)
   if(rev.age)
     age.lim <- rev(age.lim)
   if(rev.acc)
@@ -274,29 +306,42 @@ accrate.age.ghost <- function(set=get('info'), age.lim=c(), age.lab=c(), age.res
         acc.lab <- paste0("accumulation rate (", set$age.unit, "/", set$depth.unit, ")")
 
   cols <- rgb(rgb.scale[1], rgb.scale[2], rgb.scale[3], seq(0, 1, length=rgb.res))
-
+  
   if(rotate.axes) {
-    plot(0, type="n", ylim=age.lim, ylab=age.lab, xlim=acc.lim, xlab=acc.lab, yaxs=xaxs, xaxs=yaxs)
+    yaxt <- ifelse(BCAD, "n", "s")
+    plot(0, type="n", ylim=age.lim, ylab=age.lab, xlim=acc.lim, xlab=acc.lab, yaxs=xaxs, xaxs=yaxs, yaxt=yaxt, bty="n")
+    if(BCAD) {
+      ticks <- pretty(age.lim)
+      axis(2, ticks, labels=1950-ticks) 
+    }
     image(acc.seq, age.seq, t(z), col=cols, add=TRUE)
-      if(plot.range) {
-        lines(acc.rng[,1], age.seq, pch=".", col=range.col, lty=range.lty)
-        lines(acc.rng[,2], age.seq, pch=".", col=range.col, lty=range.lty)
-      }
+    if(plot.range) {
+      lines(acc.rng[,1], age.seq, pch=".", col=range.col, lty=range.lty)
+      lines(acc.rng[,2], age.seq, pch=".", col=range.col, lty=range.lty)
+    }
     if(plot.mean) 
-      lines(acc.mn, age.seq, col=mean.col, lty=mean.lty)
+      lines(acc.mean, age.seq, col=mean.col, lty=mean.lty)
+    if(plot.median) 
+      lines(acc.median, age.seq, col=median.col, lty=median.lty)
   } else {
-       plot(0, type="n", xlim=age.lim, xlab=age.lab, ylim=acc.lim, ylab=acc.lab, xaxs=xaxs, yaxs=yaxs)
-       image(age.seq, acc.seq, t(t(z)), col=cols, add=TRUE)
+    xaxt <- ifelse(BCAD, "n", "s")
+    plot(0, type="n", xlim=age.lim, xlab=age.lab, ylim=acc.lim, xaxt=xaxt, ylab=acc.lab, xaxs=xaxs, yaxs=yaxs, bty="n")
+    if(BCAD) {
+      ticks <- pretty(age.lim)
+      axis(1, ticks, labels=1950-ticks) 
+    }
+    image(age.seq, acc.seq, t(t(z)), col=cols, add=TRUE)
        if(plot.range) {
           lines(age.seq, acc.rng[,1], pch=".", col=range.col, lty=range.lty)
           lines(age.seq, acc.rng[,2], pch=".", col=range.col, lty=range.lty)
         }
       if(plot.mean) 
-        lines(age.seq, acc.mn, col=mean.col, lty=mean.lty)
+        lines(age.seq, acc.mean, col=mean.col, lty=mean.lty)
+      if(plot.median) 
+        lines(age.seq, acc.median, col=median.col, lty=median.lty)
     }
 
-  if(length(bty) > 0)
-    box(bty=bty)
+  box(bty=bty)
 }
 
 
@@ -341,7 +386,7 @@ accrate.age.ghost <- function(set=get('info'), age.lim=c(), age.lab=c(), age.res
 #' @author Maarten Blaauw, J. Andres Christen
 #' @return A plot of flux rates.
 #' @examples
-#' \donttest{
+#' \dontrun{
 #'   Bacon(run=FALSE, coredir=tempfile())
 #'   agedepth(yr.res=50)
 #'   flux.age.ghost(1)

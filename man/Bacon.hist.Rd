@@ -67,10 +67,12 @@ Calculate the distribution of age estimates of single or multiple depths.
 Age estimates of specific depths can also be plotted.
 }
 \examples{
+\dontrun{
   Bacon(run=FALSE, coredir=tempfile())
   agedepth(age.res=50, d.res=50, d.by=10)
   Bacon.hist(20)
   Bacon.hist(20:30)
+}
 }
 \author{
 Maarten Blaauw, J. Andres Christen

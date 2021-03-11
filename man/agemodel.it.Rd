@@ -20,9 +20,11 @@ A variable with two columns - depth and the age-depth model of a single iteratio
 For one MCMC iteration (it), extract the corresponding age-depth model.
 }
 \examples{
+\dontrun{
   Bacon(run=FALSE, coredir=tempfile())
   agedepth(age.res=50, d.res=50, d.by=10)
   lines(agemodel.it(5), col="red")
+}
 }
 \author{
 Maarten Blaauw, J. Andres Christen

@@ -8,6 +8,7 @@ accrate.age(
   age,
   set = get("info"),
   cmyr = FALSE,
+  ages = c(),
   BCAD = set$BCAD,
   silent = TRUE
 )
@@ -18,6 +19,8 @@ accrate.age(
 \item{set}{Detailed information of the current run, stored within this session's memory as variable \code{info}.}
 
 \item{cmyr}{Accumulation rates can be calculated in cm/year or year/cm. By default \code{cmyr=FALSE} and accumulation rates are calculated in year per cm.}
+
+\item{ages}{The ages of the age-depth model. Not provided by default, but can be provided to speed things up if the function is called repeatedly}
 
 \item{BCAD}{The calendar scale of graphs and age output-files is in \code{cal BP} by default, but can be changed to BC/AD using \code{BCAD=TRUE}.}
 
@@ -37,11 +40,13 @@ This function obtains accumulation rates (in years per cm, so actually sedimenta
 by the MCMC iterations for any age of a core. Deals with only 1 age at a time. See also \code{accrate.depth}.
 }
 \examples{
+\dontrun{
   Bacon(run=FALSE, coredir=tempfile())
   agedepth(yr.res=50, d.res=50, d.by=10)
   accrate.a5000 = accrate.age(5000)
   plot(accrate.a5000, pch='.')
   hist(accrate.a5000)
+}
 }
 \author{
 Maarten Blaauw, J. Andres Christen

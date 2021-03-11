@@ -50,8 +50,15 @@ the files:
 //Every how many iterations we expect and acceptance: inverse of the acceptance rate
 #define ACCEP_EV 20
 
-
-
+/*
+//' the workhorse function that produces the actual bacon MCMC run
+//'
+//' @param intputfile1 the input file (.bacon)
+//' @param outtputfile1 the output file (.out)
+//' @param ssize length of the MCMC run
+//' @param dircc directory of the calibration curves 
+//' @export
+*/
 // [[Rcpp::export]]
 int bacon( std::string inputfile1, std::string outputfile1, int ssize, std::string dircc) {// Command line: bacon inputfile outputfile
 //

@@ -106,7 +106,7 @@ flux values for the first proxy in the .csv file. Instead of using a _flux.csv f
 See Bacon_runs/MSB2K/MSB2K_flux.csv for an example.
 }
 \examples{
-\donttest{
+\dontrun{
   Bacon(run=FALSE, coredir=tempfile())
   agedepth(yr.res=50)
   flux.age.ghost(1)

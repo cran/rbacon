@@ -558,7 +558,7 @@
 }
 
 # function to read output files into memory
-.Plum.AnaOut <- function(fnam, set=get('info')) {
+Plum.AnaOut <- function(fnam, set=get('info')) {
   out <- read.table(fnam)
   n <- ncol(out)-1
   set$nPs  <- n

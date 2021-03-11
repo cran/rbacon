@@ -43,7 +43,6 @@ agedepth(
   up = TRUE,
   cutoff = 0.1,
   plot.range = TRUE,
-  panels = layout(1),
   range.col = grey(0.5),
   range.lty = "12",
   mn.col = "red",
@@ -71,7 +70,10 @@ agedepth(
   title.size = 1.5,
   after = set$after,
   bty = "l",
-  mar = c(3, 3, 1, 1),
+  mar.left = c(3, 3, 1, 1),
+  mar.middle = c(3, 0, 1, 0.5),
+  mar.right = c(3, 3, 1, 1),
+  mar.main = c(3, 3, 1, 1),
   mgp = c(1.5, 0.7, 0),
   xaxs = "r",
   yaxs = "i",
@@ -167,8 +169,6 @@ and its name should start with the core's name and end with '_depths.txt'. Then 
 
 \item{plot.range}{Whether or not to plot the curves showing the confidence ranges of the age-model. Defaults to (\code{plot.range=TRUE}).}
 
-\item{panels}{Divide the graph panel. Defaults to 1 graph per panel, \code{panels=layout(1)}. To avoid dividing into panels, use \code{panels=c()}.}
-
 \item{range.col}{The colour of the curves showing the confidence ranges of the age-model. Defaults to medium grey (\code{range.col=grey(0.5)}).}
 
 \item{range.lty}{The line type of the curves showing the confidence ranges of the age-model. Defaults to \code{range.lty=12}.}
@@ -223,7 +223,13 @@ and its name should start with the core's name and end with '_depths.txt'. Then 
 
 \item{bty}{Type of box to be drawn around plots (\code{"n"} for none, and \code{"l"} (default), \code{"7"}, \code{"c"}, \code{"u"}, or \code{"o"} for correspondingly shaped boxes).}
 
-\item{mar}{Plot margins (amount of white space along edges of axes 1-4). Default \code{mar=c(3,3,1,1)}.}
+\item{mar.left}{Plot margins for the topleft panel (amount of white space along edges of axes 1-4). Default \code{mar.left=c(3,3,1,1)}.}
+
+\item{mar.middle}{Plot margins for the middle panel(s) at the top (amount of white space along edges of axes 1-4). Default \code{mar.middle=c(3,3,1,1)}.}
+
+\item{mar.right}{Plot margins for the topright panel (amount of white space along edges of axes 1-4). Default \code{mar.right=c(3,3,1,1)}.}
+
+\item{mar.main}{Plot margins for the main panel (amount of white space along edges of axes 1-4). Default \code{mar.main=c(3,3,1,1)}.}
 
 \item{mgp}{Axis text margins (where should titles, labels and tick marks be plotted). Defaults to \code{mgp=c(1.5, .7, .0)}.}
 

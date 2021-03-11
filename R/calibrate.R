@@ -55,7 +55,7 @@ add.dates <- function(mn, sdev, depth, cc=1, set=get('info'), above=1e-6, postbo
       stop("Negative C-14 age, please provide a postbomb curve, e.g. postbomb=1")
   
   dat <- cbind(mn, mn, sdev, depth, cc, delta.R, delta.STD, t.a, t.b)
-  probs <- .bacon.calib(dat, set, date.res, cutoff, postbomb, normal, t.a, t.b, delta.R, delta.STD, ccdir) 
+  probs <- bacon.calib(dat, set, date.res, cutoff, postbomb, normal, t.a, t.b, delta.R, delta.STD, ccdir) 
 
   for(i in 1:nrow(dat)) {
     d <- probs$d[[i]]
@@ -203,7 +203,7 @@ calib.plot <- function(set=get('info'), BCAD=set$BCAD, cc=set$cc, rotate.axes=FA
 
 
 # calibrate C14 dates and calculate distributions for any calendar dates
-.bacon.calib <- function(dat, set=get('info'), date.res=100, cutoff=0.005, postbomb=set$postbomb, normal=set$normal, t.a=set$t.a, t.b=set$t.b, delta.R=set$delta.R, delta.STD=set$delta.STD, ccdir="") {
+bacon.calib <- function(dat, set=get('info'), date.res=100, cutoff=0.005, postbomb=set$postbomb, normal=set$normal, t.a=set$t.a, t.b=set$t.b, delta.R=set$delta.R, delta.STD=set$delta.STD, ccdir="") {
   # read in the curves
   if(set$cc1=="IntCal20" || set$cc1=="\"IntCal20\"")
     cc1 <- read.table(paste0(ccdir, "3Col_intcal20.14C")) else
@@ -554,9 +554,8 @@ A.modelled <- function(d.top, d.bottom, dens, set=get('info'), phi=set$phi, sup=
     stop("\n d.top should be higher than d.bottom", call.=FALSE)
   t.top <- Bacon.Age.d(d.top, BCAD=F) - set$theta0
   t.bottom <- Bacon.Age.d(d.bottom, BCAD=F) - set$theta0
-  multiply <- 500
-  if(set$Bqkg)
-	multiply <- 10  
+  cat("\nhuh?", length(t.top), length(t.bottom), "\n") 
+  multiply <-  ifelse(set$Bqkg, 10, 500)
   return(sup + ((phi / (.03114*multiply*dens) ) * (exp( -.03114*t.top) - exp(-.03114*t.bottom)) ) )
 } 
 

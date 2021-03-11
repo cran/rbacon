@@ -22,9 +22,13 @@ accrate.depth.ghost(
   plot.mean = TRUE,
   mean.col = "red",
   mean.lty = 2,
+  plot.median = TRUE,
+  median.col = "blue",
+  median.lty = 2,
   rotate.axes = FALSE,
   rev.d = FALSE,
-  rev.acc = FALSE
+  rev.acc = FALSE,
+  bty = "l"
 )
 }
 \arguments{
@@ -62,11 +66,19 @@ accrate.depth.ghost(
 
 \item{mean.lty}{Type of the mean lines.}
 
+\item{plot.median}{If \code{plot.mean=TRUE}, the medians are plotted.}
+
+\item{median.col}{Colour of the median accumulation rates.}
+
+\item{median.lty}{Type of the median lines.}
+
 \item{rotate.axes}{The default is to plot the accumulation rates horizontally and the depth vertically (\code{rotate.axes=FALSE}). Change rotate.axes value to rotate axes.}
 
 \item{rev.d}{The direction of the depth axis can be reversed from the default (\code{rev.d=TRUE}.}
 
 \item{rev.acc}{The direction of the accumulation rate axis can be reversed from the default (\code{rev.acc=TRUE}).}
+
+\item{bty}{Type of box to be drawn around the plot (\code{"n"} for none, and \code{"l"} (default), \code{"7"}, \code{"c"}, \code{"u"}, or \code{"o"} for correspondingly shaped boxes).}
 }
 \value{
 A grey-scale plot of accumulation rate against core depth.
@@ -80,10 +92,12 @@ Axis limits for accumulation rates are estimated automatically, however upper li
 if calculated in cm/yr; therefore you might want to manually adapt the axis limits after plotting with default settings (e.g., \code{acc.lim=c(0,1)}). See also \code{accrate.age.ghost}, \code{accrate.depth} and \code{accrate.age}.
 }
 \examples{
+\dontrun{
   Bacon(run=FALSE, coredir=tempfile())
   agedepth(yr.res=50, d.res=50, d.by=10)
   layout(1)
   accrate.depth.ghost()
+}
 }
 \author{
 Maarten Blaauw, J. Andres Christen

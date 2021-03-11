@@ -19,11 +19,13 @@ NULL
 # to be able to directly use copyCalibrationCurve, mix.curves, pMC.age & age.pMC (without having to type IntCal:: first)
 library(IntCal)
 
-#if(!exists("info"))  info <- c() # a user reported that rbacon was looking for the variable info but not finding it. Not sure if the solution here is a good idea, so, commenting it
+#if(!exists("info"))  info <- c() # a user reported that rbacon was looking for the variable info but not finding it. Not sure if the solution here is a good idea, so, deactivating this
 
-# done: 
+# read https://cran.r-project.org/doc/manuals/r-release/R-exts.html#Registering-native-routines for linking between rbacon and rplum. I tried the recommendation to avoid the use of ::: and instead exporting the bacon and events functions within the .cpp code, but this threw errors.
 
-# for future versions: investigate the slowness of plotting after the Bacon run (not only dates, also the model's 95% ranges etc.), can ssize be predicted more accurately?, check fs::path(dir, data_name) as cross-platform alternative to specifying paths, why do we warn that "acc.shape cannot be equal to acc.mean"?, check flux, add vignette(s), produce greyscale proxy graph with proxy uncertainties?, smooth bacon, check/adapt behaviour of AgesOfEvents around hiatuses, add function to estimate best thickness, F14C, if hiatus or boundary plot acc.posts of the individual sections?, allow for asymmetric cal BP errors (e.g. read from files), make more consistent use of dark for all functions (incl. flux and accrate.age.ghost), remove darkest?, proxy.ghost very slow with long/detailed cores - optimization possible?, check again if/how/when Bacon gets confused by Windows usernames with non-ascii characters (works fine on Mac)
+# done:
+
+# for future versions: check all greyscale functions, investigate the slowness of plotting after the Bacon run (not only dates, also the model's 95% ranges etc.), can ssize be predicted more accurately?, check fs::path(dir, data_name) as cross-platform alternative to specifying paths, why do we warn that "acc.shape cannot be equal to acc.mean"?, check flux, add vignette(s), produce greyscale proxy graph with proxy uncertainties?, smooth bacon, check/adapt behaviour of AgesOfEvents around hiatuses, add function to estimate best thickness, F14C, if hiatus or boundary plot acc.posts of the individual sections?, allow for asymmetric cal BP errors (e.g. read from files), make more consistent use of dark for all functions (incl. flux and accrate.age.ghost), remove darkest?, proxy.ghost very slow with long/detailed cores - optimization possible?, check again if/how/when Bacon gets confused by Windows usernames with non-ascii characters (works fine on Mac)
 
 #' @name Bacon
 #' @title Main age-depth modelling function
@@ -77,7 +79,7 @@ library(IntCal)
 #' which can be changed to, e.g., 5, 10 or 50 for different kinds of deposits). Multiple values can be given in case of hiatuses or boundaries, e.g., Bacon(hiatus.depths=23, acc.mean=c(5,20))
 #' @param mem.strength The prior for the memory (dependence of accumulation rate between neighbouring depths) is a beta distribution, which looks much like the gamma distribution.
 #'  but its values are always between 0 (no assumed memory) and 1 (100\% memory). Its default settings of \code{mem.strength=10}
-#'  (higher values result in more peaked shapes) allow for a large range of posterior memory values. Please note that the default memory prior has been updated from rbacon version 2.5.1. on, to repair a bug. 
+#'  (higher values result in more peaked shapes) allow for a large range of posterior memory values. Please note that the default memory prior has been updated from rbacon version 2.5.1 on, to repair a bug. 
 #' @param mem.mean The prior for the memory is a beta distribution, which looks much like the gamma distribution but
 #' its values are always between 0 (no assumed memory) and 1 (100\% memory). Its default settings of \code{mem.mean=0.5}
 #' allow for a large range of posterior memory values. Please note that the default memory prior has been updated from rbacon version 2.5.1. on, to repair a bug. 
@@ -174,7 +176,7 @@ library(IntCal)
 #' @export
 Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=NA, add.bottom=TRUE, d.by=1, seed=NA, depths.file=FALSE, depths=c(), depth.unit="cm", age.unit="yr", unit=depth.unit, acc.shape=1.5, acc.mean=20, mem.strength=10, mem.mean=0.5, boundary=NA, hiatus.depths=NA, hiatus.max=10000, add=c(), after=.0001/thick, cc=1, cc1="IntCal20", cc2="Marine20", cc3="SHCal20", cc4="ConstCal", ccdir="", postbomb=0, delta.R=0, delta.STD=0, t.a=3, t.b=4, normal=FALSE, suggest=TRUE, accept.suggestions=FALSE, reswarn=c(10,200), remember=TRUE, ask=TRUE, run=TRUE, defaults="defaultBacon_settings.txt", sep=",", dec=".", runname="", slump=c(), remove=FALSE, BCAD=FALSE, ssize=2000, th0=c(), burnin=min(500, ssize), MinAge=c(), MaxAge=c(), MinYr=MinAge, MaxYr=MaxAge, cutoff=.01, plot.pdf=TRUE, dark=1, date.res=100, age.res=200, yr.res=age.res, close.connections=TRUE, verbose=TRUE, ...) {
   # Check coredir and if required, copy example file in core directory
-  coredir <- assign_coredir(coredir, core, ask)
+  coredir <- assign_coredir(coredir, core, ask, isPlum=FALSE)
   if(core == "MSB2K" || core == "RLGH3") {
     dir.create(paste(coredir, core, "/", sep=""), showWarnings = FALSE, recursive = TRUE)
     fileCopy <- system.file(paste0("extdata/Cores/", core), package="rbacon") # change to package rbacon
@@ -196,7 +198,7 @@ Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=
 	if(verbose) {
       if(length(cc.csv) == 1) {
         if(cc.csv != cc)
-          message(" Using calibration curve specified within the .csv file,", cc[cc.csv], "\n")
+          message(" Using calibration curve specified within the .csv file,", cc.csv, "\n")
       } else
         if(min(cc.csv) == 0)
           message(" Using a mix of cal BP and calibrated C-14 dates\n")
@@ -215,7 +217,7 @@ Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=
       if(accept.suggestions) { # new Oct '20
         acc.mean <- sugg
         message("Adapting acc.mean to ", sugg, " ", age.unit, "/", depth.unit)
-	  } else {
+    } else {
         ans <- readline(message(" Ballpark estimates suggest changing the prior for acc.mean to ", sugg, " ", age.unit, "/", depth.unit, ". OK? (y/N) "))
         if(tolower(substr(ans,1,1)) == "y")
           acc.mean <- sugg else
@@ -235,7 +237,7 @@ Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=
       acc.mean <- rep(acc.mean, length(hiatus.depths)+1)
   }
 
-  info <- .Bacon.settings(core=core, coredir=coredir, dets=dets, thick=thick, remember=remember, d.min=d.min, d.max=d.max, d.by=d.by, depths.file=depths.file, slump=slump, acc.mean=acc.mean, acc.shape=acc.shape, mem.mean=mem.mean, mem.strength=mem.strength, boundary=boundary, hiatus.depths=hiatus.depths, hiatus.max=hiatus.max, BCAD=BCAD, cc=cc, postbomb=postbomb, cc1=cc1, cc2=cc2, cc3=cc3, cc4=cc4, depth.unit=depth.unit, normal=normal, t.a=t.a, t.b=t.b, delta.R=delta.R, delta.STD=delta.STD, prob=prob, defaults=defaults, runname=runname, ssize=ssize, dark=dark, MinAge=MinAge, MaxAge=MaxAge, cutoff=cutoff, age.res=age.res, after=after, age.unit=age.unit)
+  info <- Bacon.settings(core=core, coredir=coredir, dets=dets, thick=thick, remember=remember, d.min=d.min, d.max=d.max, d.by=d.by, depths.file=depths.file, slump=slump, acc.mean=acc.mean, acc.shape=acc.shape, mem.mean=mem.mean, mem.strength=mem.strength, boundary=boundary, hiatus.depths=hiatus.depths, hiatus.max=hiatus.max, BCAD=BCAD, cc=cc, postbomb=postbomb, cc1=cc1, cc2=cc2, cc3=cc3, cc4=cc4, depth.unit=depth.unit, normal=normal, t.a=t.a, t.b=t.b, delta.R=delta.R, delta.STD=delta.STD, prob=prob, defaults=defaults, runname=runname, ssize=ssize, dark=dark, MinAge=MinAge, MaxAge=MaxAge, cutoff=cutoff, age.res=age.res, after=after, age.unit=age.unit)
   assign_to_global("info", info)
   info$coredir <- coredir
   if(is.na(seed))
@@ -257,7 +259,7 @@ Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=
     if(info$postbomb == 0 && ((ncol(info$dets) == 4 && min(info$dets[,2]) < 0) ||
       ncol(info$dets)>4 && max(info$dets[,5]) > 0 && min(info$dets[info$dets[,5] > 0,2]) < 0))
         stop("you have negative C14 ages so should select a postbomb curve", call.=FALSE)
-  info$calib <- .bacon.calib(dets, info, date.res, ccdir=ccdir, cutoff=cutoff)
+  info$calib <- bacon.calib(dets, info, date.res, ccdir=ccdir, cutoff=cutoff)
   
   ### find some relevant values
   info$rng <- c()
@@ -392,7 +394,7 @@ Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=
         pn <- c(1,2,3,4,4,4)
     layout(matrix(pn, nrow=2, byrow=TRUE), heights=c(.3,.7))
     oldpar <- par(mar=c(3,3,1,1), mgp=c(1.5,.7,.0), bty="l")
-	on.exit(par(oldpar))         	
+    on.exit(par(oldpar))	
     PlotAccPrior(info$acc.shape, info$acc.mean, depth.unit=depth.unit, age.unit=age.unit)
     PlotMemPrior(info$mem.strength, info$mem.mean, thick)
     if(!is.na(info$hiatus.depths)[1])

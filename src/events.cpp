@@ -144,7 +144,23 @@ public:
 
 };
 
-
+/*
+//' calculate the probabilities of event windows
+//'
+//' @param th1 the first age of the analysis
+//' @param th2 the last age of the analysis
+//' @param th_shift steps which which the window moves
+//' @param window size of the window
+//' @param outputfname1 where to store the results
+//' @param MCMCsamplesfname1 name of the MCMC file
+//' @param samplesize sample size of the MCMC run
+//' @param K amount of sections
+//' @param c0 upper depth
+//' @param Dc thickness of the sections
+//' @param eventprobsfname1 name of the file containing the probabilities for each depth
+//' @param depths_size length of the depths variable
+//' @export
+*/
 // [[Rcpp::export]]
 void events(double th1, double th2,double th_shift,double window, std::string outputfname1, std::string MCMCsamplesfname1, int  samplesize,int  K, double c0, double Dc, std::string eventprobsfname1, int  depths_size) {
 

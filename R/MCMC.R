@@ -21,7 +21,7 @@
 #'   scissors(100)
 #'   agedepth(d.res=50, age.res=50, d.by=10)
 #' }
-#' \donttest{
+#' \dontrun{
 #'   Bacon(ask=FALSE, coredir=tempfile())
 #'   scissors(100)
 #'   agedepth()
@@ -65,7 +65,7 @@ scissors <- function(burnin, set=get('info')) {
 #'   thinner(.1)
 #'   agedepth(d.res=50, age.res=50, d.by=10)
 #' }
-#' \donttest{
+#' \dontrun{
 #'   Bacon(ask=FALSE, coredir=tempfile())
 #'   thinner(.2)
 #'   agedepth()

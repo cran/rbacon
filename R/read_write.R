@@ -101,9 +101,9 @@ bacon2clam <- function(core, bacondir="Bacon_runs", clamdir="clam_runs", sep=","
 
 #' @name Bacon.cleanup
 #' @title Remove files made to produce the current core's age-depth model.
-#' @description Remove files .bacon, .out, .pdf, _ages.txt, and _settings.txt of current core.
+#' @description Remove files ending in .bacon, .plum (if it exists), .out, .pdf, _ages.txt, and _settings.txt of current core.
 #' @details If cores behave badly, you can try cleaning up previous runs and settings, by
-#' removing files .bacon, .out, .pdf, _ages.txt, and _settings.txt of current core.
+#' removing files *.bacon, *.plum, *.out, *.pdf, *_ages.txt, and *_settings.txt of current core.
 #' @return A message stating that the files and settings of this run have been deleted.
 #' @param set Detailed information of the current run, stored within this session's memory as variable \code{info}.
 #' @author Maarten Blaauw, J. Andres Christen
@@ -112,7 +112,7 @@ bacon2clam <- function(core, bacondir="Bacon_runs", clamdir="clam_runs", sep=","
 #'   Bacon.cleanup()
 #' @export
 Bacon.cleanup <- function(set=get('info')) {
-  files <- c(paste0(set$prefix, ".bacon"), paste0(set$prefix, ".out"),
+  files <- c(paste0(set$prefix, ".bacon"), paste0(set$prefix, ".plum"), paste0(set$prefix, ".out"),
     paste0(set$prefix, ".pdf"), paste0(set$prefix, "_ages.txt"),
     paste0(set$coredir,set$core, "/", set$core, "_settings.txt"))
   for(i in files)
@@ -122,20 +122,21 @@ Bacon.cleanup <- function(set=get('info')) {
     rm(tmp)
 #  if(exists('info')) # new Oct 2020
 #    rm(info)
-  message("Previous Bacon runs of core ", set$core, " with thick=", set$thick, " ", set$depth.unit, " deleted. Now try running the core again\n")
+  message("Previous runs of core ", set$core, " with thick=", set$thick, " ", set$depth.unit, " deleted. Now try running the core again\n")
 }
 
 
 
 # If coredir is left empty, check for a folder named Cores in the current working directory, and if this doesn't exist, for a folder called Bacon_runs (make this folder if it doesn't exist yet and if the user agrees).
 # Check if we have write access. If not, tell the user to provide a different, writeable location for coredir.
-assign_coredir <- function(coredir, core, ask=TRUE) {
+assign_coredir <- function(coredir, core, ask=TRUE, isPlum=FALSE) {
+  ifelse(isPlum, runs <- "Plum_runs", runs <- "Bacon_runs")
   if(coredir == "") {
     if(dir.exists("Cores"))
       coredir <- "Cores" else
-        if(dir.exists("Bacon_runs"))
-          coredir <- "Bacon_runs" else {
-            coredir <- "Bacon_runs"
+        if(dir.exists(runs))
+          coredir <- runs else {
+            coredir <- runs
             ans <- readline(paste0("I will create a folder called ", coredir, ", is that OK? (y/n)  "))
             if(ask)
               if(tolower(substr(ans,1,1)) == "y")
@@ -229,7 +230,7 @@ read.dets <- function(core, coredir, set=get('info'), sep=",", dec=".", cc=1) {
                   range(dets[,8] - dets[,7]) == c(1,1) && # check that these set expected student-t values
                     name[5] %in% dR.names && name[6] %in% dSTD.names && # column names as expected?
                       name[7] %in% ta.names && name[8] %in% tb.names) { # column names as expected?
-                        dets <- dets[,c(1:4,9,5:8)] # shuffle colums around
+                        dets <- dets[,c(1:4,9,5:8)] # shuffle columns around
                         message(" Assumed order of columns in dets file: lab ID, Age, error, depth, dR, dSTD, t.a, t.b, cc. \nAdapting column order and saving as", csv.file)
                         changed <- 1
                       } else
@@ -266,7 +267,7 @@ read.dets <- function(core, coredir, set=get('info'), sep=",", dec=".", cc=1) {
 
 
 # read in default values, values from previous run, any specified values, and report the desired one. Internal function.
-.Bacon.settings <- function(core, coredir, dets, thick, remember=TRUE, d.min, d.max, d.by, depths.file, slump, acc.mean, acc.shape, mem.mean, mem.strength, boundary, hiatus.depths, hiatus.max, hiatus.shape, BCAD, cc, postbomb, cc1, cc2, cc3, cc4, depth.unit, normal, t.a, t.b, delta.R, delta.STD, prob, defaults, runname, ssize, dark, MinAge, MaxAge, cutoff, age.res, after, age.unit) {
+Bacon.settings <- function(core, coredir, dets, thick, remember=TRUE, d.min, d.max, d.by, depths.file, slump, acc.mean, acc.shape, mem.mean, mem.strength, boundary, hiatus.depths, hiatus.max, hiatus.shape, BCAD, cc, postbomb, cc1, cc2, cc3, cc4, depth.unit, normal, t.a, t.b, delta.R, delta.STD, prob, defaults, runname, ssize, dark, MinAge, MaxAge, cutoff, age.res, after, age.unit) {
 
   vals <- list(d.min, d.max, d.by, depths.file, slump, acc.mean, acc.shape, mem.mean, mem.strength, boundary, hiatus.depths, hiatus.max, BCAD, cc, postbomb, cc1, cc2, cc3, cc4, depth.unit, normal, t.a, t.b, delta.R, delta.STD, prob, age.unit) # do these now need the length for each parameter where available?
   valnames <- c("d.min", "d.max", "d.by", "depths.file", "slump", "acc.mean", "acc.shape", "mem.mean", "mem.strength", "boundary", "hiatus.depths", "hiatus.max", "BCAD", "cc", "postbomb", "cc1", "cc2", "cc3", "cc4", "depth.unit", "normal", "t.a", "t.b", "delta.R", "delta.STD", "prob", "age.unit")

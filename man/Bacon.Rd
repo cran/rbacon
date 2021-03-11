@@ -115,7 +115,7 @@ which can be changed to, e.g., 5, 10 or 50 for different kinds of deposits). Mul
 
 \item{mem.strength}{The prior for the memory (dependence of accumulation rate between neighbouring depths) is a beta distribution, which looks much like the gamma distribution.
 but its values are always between 0 (no assumed memory) and 1 (100\% memory). Its default settings of \code{mem.strength=10}
-(higher values result in more peaked shapes) allow for a large range of posterior memory values. Please note that the default memory prior has been updated from rbacon version 2.5.1. on, to repair a bug.}
+(higher values result in more peaked shapes) allow for a large range of posterior memory values. Please note that the default memory prior has been updated from rbacon version 2.5.1 on, to repair a bug.}
 
 \item{mem.mean}{The prior for the memory is a beta distribution, which looks much like the gamma distribution but
 its values are always between 0 (no assumed memory) and 1 (100\% memory). Its default settings of \code{mem.mean=0.5}

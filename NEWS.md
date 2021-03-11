@@ -1,3 +1,10 @@
+# rbacon 2.5.2
+* optimised accrate.age.ghost()
+* added options to modify the margins of the individual panels in the agedepth plot: mar.left, mar.middle, mar.right, mar.main
+* added an option to plot the tickmarks and labels on the vertical axes of the prior panels: prior.ticks="s" (default "n")
+* removed the panels option in agedepth() as it didn't work as expected and is better done outside rbacon functions (e.g., layout(1); agedepth(model.only=T))
+* added median curves for accrate.age.ghost and accrate.depth.ghost (as means can be influenced by extreme values)
+
 # rbacon 2.5.1
 * Adapted the default prior for memory to 0.5 (mean) and 10 (strength), to repair a bug with the original bacon c++ code. This default should work with most cores and give similar results to the previous settings for the memory prior
 * Updated c/c++ code (as used in version 2.4.1 with some minor additional updates) 

@@ -20,6 +20,9 @@ accrate.age.ghost(
   plot.mean = TRUE,
   mean.col = "red",
   mean.lty = 2,
+  plot.median = TRUE,
+  median.col = "blue",
+  median.lty = 2,
   acc.lim = c(),
   acc.lab = c(),
   BCAD = set$BCAD,
@@ -63,6 +66,12 @@ accrate.age.ghost(
 
 \item{mean.lty}{Type of the mean lines.}
 
+\item{plot.median}{If \code{plot.mean=TRUE}, the medians are plotted.}
+
+\item{median.col}{Colour of the median accumulation rates.}
+
+\item{median.lty}{Type of the median lines.}
+
 \item{acc.lim}{Axis limits for the accumulation rates.}
 
 \item{acc.lab}{Axis label for the accumulation rate.}
@@ -100,11 +109,11 @@ This is due to only some MCMC iterations reaching those old ages, and these iter
 Currently does not deal well with hiatuses, so do not interpret accumulation rates close to depths with inferred hiatuses.
 }
 \examples{
-\donttest{
+\dontrun{
   Bacon(run=FALSE, coredir=tempfile())
   agedepth(age.res=20, d.res=20, d.by=10)
   layout(1)
-  accrate.age.ghost(age.res=20, acc.res=10)
+  accrate.age.ghost(age.res=200, acc.res=100)
 }
 }
 \author{

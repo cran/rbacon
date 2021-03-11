@@ -1,8 +1,8 @@
 Package: rbacon
 Type: Package
 Title: Age-Depth Modelling using Bayesian Statistics
-Version: 2.5.1
-Date: 2021-02-09
+Version: 2.5.2
+Date: 2021-03-10
 Authors@R: c(
     person("Maarten", "Blaauw", email = "maarten.blaauw@qub.ac.uk", role = c("aut", "cre")),
     person("J. Andres", "Christen", email = "jac@cimat.mx", role = c("aut", "ctb", "cph")),
@@ -13,7 +13,7 @@ Authors@R: c(
 	person("James", "Theiler", role = "cph"),
 	person("Brian", "Gough", role = "cph"),
 	person("Charles", "Karney", role = "cph"))
-Description: An approach to age-depth modelling that uses Bayesian statistics to reconstruct accumulation histories for deposits, through combining radiocarbon and other dates with prior information. See Blaauw & Christen (2011) <doi:10.1214/11-BA618>.
+Description: An approach to age-depth modelling that uses Bayesian statistics to reconstruct accumulation histories for deposits, through combining radiocarbon and other dates with prior information. See Blaauw & Christen (2011).
 Encoding: UTF-8
 Repository: CRAN
 License: GPL (>= 2)
@@ -33,5 +33,5 @@ Author: Maarten Blaauw [aut, cre],
   Brian Gough [cph],
   Charles Karney [cph]
 Maintainer: Maarten Blaauw <maarten.blaauw@qub.ac.uk>
-Date/Publication: 2021-02-10 05:10:03 UTC
-Packaged: 2021-02-09 19:47:49 UTC; maarten
+Date/Publication: 2021-03-11 17:30:03 UTC
+Packaged: 2021-03-11 12:46:55 UTC; maarten

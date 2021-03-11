@@ -2,7 +2,7 @@
 % Please edit documentation in R/calc.R
 \name{Bacon.d.Age}
 \alias{Bacon.d.Age}
-\title{Output all ages for a single depth.}
+\title{Output all depths for a single age.}
 \usage{
 Bacon.d.Age(
   age,
@@ -27,18 +27,20 @@ Bacon.d.Age(
 Outputs all MCMC-derived ages for a given depth.
 }
 \description{
-Output all MCMC-derived age estimates for a given depth.
+Output all depths of a single given MCMC-derived age estimate.
 }
 \details{
 Obtaining an age-depth model is often only a step towards a goal, e.g., plotting a core's
 fossil series ('proxies') against calendar time. Bacon.d.Age can be used to list all MCMC-derived depths belonging to a given (single) age, for example to calculate mean depths belonging to a modelled depth. 
-This function was kindly written and provided by Timon Netzel (Bonn University).
+This function was kindly written and provided by Timon Netzel (Bonn University). See also Bacon.Age.d, which calculates the ages for a single depth.
 }
 \examples{
+\dontrun{
   Bacon(run=FALSE, coredir=tempfile())
   agedepth(age.res=50, d.res=50, d.by=10)
   ages.d20 = Bacon.Age.d(20)
   mean(ages.d20)
+}
 }
 \author{
 Maarten Blaauw, J. Andres Christen

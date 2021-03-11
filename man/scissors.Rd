@@ -31,7 +31,7 @@ To remove, e.g., the first 300 iterations, type \code{scissors(300)}. To remove 
   scissors(100)
   agedepth(d.res=50, age.res=50, d.by=10)
 }
-\donttest{
+\dontrun{
   Bacon(ask=FALSE, coredir=tempfile())
   scissors(100)
   agedepth()
