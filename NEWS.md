@@ -1,3 +1,8 @@
+# rbacon 2.5.3
+* corrected a bug where postbomb dates could not be plotted owing to wrong by sign
+* further improvements to how agedepth deals with plot margins
+* corrected error when d.min was set
+
 # rbacon 2.5.2
 * optimised accrate.age.ghost()
 * added options to modify the margins of the individual panels in the agedepth plot: mar.left, mar.middle, mar.right, mar.main

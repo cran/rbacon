@@ -19,11 +19,22 @@ NULL
 # to be able to directly use copyCalibrationCurve, mix.curves, pMC.age & age.pMC (without having to type IntCal:: first)
 library(IntCal)
 
+# added line 133 to bacon.cpp, All.outputFiles(outputfile1); this line is present in rplum's bacon.cpp
+# added #include <vector> at line 14 of input.h. 
+# twalk.h, line 306, delete phi; was delete[] phi (as this is what it says on jac's site)
+# kernel 3 hop, in kernel.cpp, line 155, has  intProd += (h[j]-x[j])*(h[j]-x[j]);, but x is xp in rplum's version
+# vector.cpp, lines 28-34, fver_vector differs between rplum and rbacon
+
+# all src files between rbacon and rplum are exactly the same. But see above for dudas acerca de las diferencias
+
+# now place rplum's src code somewhere safe, and in the src folder place rbacon's src files. Then run rplum using rbacon:::bacon..
+
+
 #if(!exists("info"))  info <- c() # a user reported that rbacon was looking for the variable info but not finding it. Not sure if the solution here is a good idea, so, deactivating this
 
 # read https://cran.r-project.org/doc/manuals/r-release/R-exts.html#Registering-native-routines for linking between rbacon and rplum. I tried the recommendation to avoid the use of ::: and instead exporting the bacon and events functions within the .cpp code, but this threw errors.
 
-# done:
+# done: wrong by sign in postbomb dates corrected by calculating the absolute differences between calendar ages. 
 
 # for future versions: check all greyscale functions, investigate the slowness of plotting after the Bacon run (not only dates, also the model's 95% ranges etc.), can ssize be predicted more accurately?, check fs::path(dir, data_name) as cross-platform alternative to specifying paths, why do we warn that "acc.shape cannot be equal to acc.mean"?, check flux, add vignette(s), produce greyscale proxy graph with proxy uncertainties?, smooth bacon, check/adapt behaviour of AgesOfEvents around hiatuses, add function to estimate best thickness, F14C, if hiatus or boundary plot acc.posts of the individual sections?, allow for asymmetric cal BP errors (e.g. read from files), make more consistent use of dark for all functions (incl. flux and accrate.age.ghost), remove darkest?, proxy.ghost very slow with long/detailed cores - optimization possible?, check again if/how/when Bacon gets confused by Windows usernames with non-ascii characters (works fine on Mac)
 
@@ -330,7 +341,7 @@ Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=
     if(tolower(substr(ans, 1, 1)) == "y") {
       message(" Setting thick to ", sugg, "\n")
       thick <- sugg
-      info$thick = thick #CHANGED: if the answer is "yes", the global thick value is not updated
+      info$thick <- thick #CHANGED: if the answer is "yes", the global thick value is not updated
       info$elbows <- seq(floor(info$d.min), ceiling(info$d.max), by=thick)
 
       if(length(info$slump) > 0) # why here, and not a few lines later?
@@ -347,13 +358,13 @@ Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=
     info$slump <- slump
 
     slumpdmax <- toslump(ceiling(info$d.max), slump, remove=remove)
-	info$elbows <- seq(floor(info$d.min), slumpdmax, by=thick)
+    info$elbows <- seq(floor(info$d.min), slumpdmax, by=thick)
     info$K <- length(info$elbows)
     info$cK <- info$d.min+(info$thick*info$K) # the maximum depth to be used by the bacon model
 
-	info$slumpfree <- toslump(depths, slump, remove=remove)
+    info$slumpfree <- toslump(depths, slump, remove=remove)
     info$slumphiatus <- toslump(info$hiatus.depths, slump, remove=remove) # check
-	if(!is.na(info$boundary[1])) {
+    if(!is.na(info$boundary[1])) {
       info$slumpboundary <- toslump(info$boundary, slump, remove=remove) # check
       info$slumphiatus <- info$slumpboundary
     }
@@ -393,8 +404,8 @@ Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=
       if(is.na(info$boundary[1]))
         pn <- c(1,2,3,4,4,4)
     layout(matrix(pn, nrow=2, byrow=TRUE), heights=c(.3,.7))
-    oldpar <- par(mar=c(3,3,1,1), mgp=c(1.5,.7,.0), bty="l")
-    on.exit(par(oldpar))	
+    oldpar <- par(mar=c(3,3,1,1), mgp=c(1.5,.7,.0), bty="l", yaxs="i")
+    on.exit(par(oldpar))
     PlotAccPrior(info$acc.shape, info$acc.mean, depth.unit=depth.unit, age.unit=age.unit)
     PlotMemPrior(info$mem.strength, info$mem.mean, thick)
     if(!is.na(info$hiatus.depths)[1])

@@ -155,12 +155,16 @@ Baconvergence <- function(core="MSB2K", runs=5, suggest=FALSE, verbose=TRUE, ...
 # calculate the proportion of dates that are within the age-depth model's confidence ranges
 overlap <- function(set=get('info'), digits=0, verbose=TRUE) {
   d <- set$dets[,4]
+  if(length(set$d.min) > 0)
+    d <- d[which(d >= set$d.min)]
+  if(length(set$d.max) > 0)
+    d <- d[which(d <= set$d.max)]
   inside <- rep(1, length(d))
   for(i in 1:length(d)) {
     daterng <- set$calib$probs[[i]]
     daterng <- cbind(cumsum(daterng[,2])/sum(daterng[,2]), daterng[,1])
     daterng <- approx(daterng[,1], daterng[,2], c((1-set$prob)/2, 1-(1-set$prob)/2))$y
-    age <- quantile(Bacon.Age.d(d[i], BCAD=FALSE), c((1-set$prob)/2, 1-(1-set$prob)/2))
+    age <- quantile(Bacon.Age.d(d[i], BCAD=FALSE), c((1-set$prob)/2, 1-(1-set$prob)/2), na.rm=TRUE)
     daterng <- daterng[!is.na(daterng)]
     if(length(daterng) > 0)
       if(max(daterng) < min(age) || max(age) < min(daterng))

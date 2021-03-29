@@ -1,6 +1,5 @@
 /*
 
-
  BACON:
 
 Implements the semiparametric autoregressive model for
@@ -23,9 +22,6 @@ the files:
 //#include <string.h>
 #include <string>
 
-
-
-
 #include "bacon.h"
 #include "input.h"
 #include "cal.h"
@@ -37,10 +33,7 @@ the files:
 #define MAXNUMOFCURVES 100
 #define MAXNUMOFDETS  1000
 
-/* commented by MB Nov 2020
 #define BUFFSIZE 4000
-#define BUFSIZE 4000
-*/ 
 
 //the "every" thinning subsampling parameter is EVERY_MULT*All.Dim()
 #define EVERY_MULT 5
@@ -50,15 +43,6 @@ the files:
 //Every how many iterations we expect and acceptance: inverse of the acceptance rate
 #define ACCEP_EV 20
 
-/*
-//' the workhorse function that produces the actual bacon MCMC run
-//'
-//' @param intputfile1 the input file (.bacon)
-//' @param outtputfile1 the output file (.out)
-//' @param ssize length of the MCMC run
-//' @param dircc directory of the calibration curves 
-//' @export
-*/
 // [[Rcpp::export]]
 int bacon( std::string inputfile1, std::string outputfile1, int ssize, std::string dircc) {// Command line: bacon inputfile outputfile
 //
@@ -68,17 +52,14 @@ int bacon( std::string inputfile1, std::string outputfile1, int ssize, std::stri
   strcpy(inputfile, inputfile1.c_str());
   //JEV avoid warning int i=0; i<inputfile1.length() ; i++
 //  for (unsigned int i=0; i<inputfile1.length() ; i++){   // MB remove this Oct 2020 as it just repeats printing the name/location of the bacon file?
-
 //     printf("'%c' ", inputfile1.c_str()[i]);
- //     Rprintf("'%c' ", inputfile1.c_str()[i]);
+//     Rprintf("'%c' ", inputfile1.c_str()[i]);
 //    Rprintf("%c", inputfile1.c_str()[i]);
 //  }
 
   char *outputfile = new char[outputfile1.length() + 1];
   //  printf("%s\n", inputfile1.c_str());
   strcpy(outputfile, outputfile1.c_str());
-
-
 
   // do stuff
   // delete [] inputfile;
@@ -112,7 +93,6 @@ int bacon( std::string inputfile1, std::string outputfile1, int ssize, std::stri
   //Read everything from the program file
   Input All( inputfile, MAXNUMOFCURVES, MAXNUMOFDETS, dircc);
 
-
   //File to save the twalk output
   // sprintf( ax, "%s", argv[2]);
 
@@ -130,8 +110,9 @@ int bacon( std::string inputfile1, std::string outputfile1, int ssize, std::stri
   //Run the twalk
   All.RunTwalk( outputfile, it, every);
 
-
   All.PrintNumWarnings();
+
+  All.outputFiles(outputfile1); // this was not present in rbacon's bacon.cpp! March 2021
 
   /*
   char  ax2[BUFFSIZE];
@@ -192,11 +173,6 @@ int bacon( std::string inputfile1, std::string outputfile1, int ssize, std::stri
 //  printf("bacon: suggested burn in= %d\n", All.Dim() * EVERY_MULT * BURN_IN_MULT);
  // printf(FAREWELL);
 
-
   return All.Dim() * EVERY_MULT * BURN_IN_MULT;
 
-
 }
-
-
-

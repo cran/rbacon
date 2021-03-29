@@ -27,7 +27,7 @@ agedepth(
   hiatus.option = 1,
   dark = c(),
   prob = set$prob,
-  rounded = 0,
+  rounded = c(),
   d.res = 400,
   age.res = 400,
   yr.res = age.res,
@@ -74,7 +74,8 @@ agedepth(
   mar.middle = c(3, 0, 1, 0.5),
   mar.right = c(3, 3, 1, 1),
   mar.main = c(3, 3, 1, 1),
-  mgp = c(1.5, 0.7, 0),
+  righthand = 3,
+  mgp = c(1.7, 0.7, 0),
   xaxs = "r",
   yaxs = "i",
   prior.ticks = "n",
@@ -137,7 +138,7 @@ and its name should start with the core's name and end with '_depths.txt'. Then 
 
 \item{prob}{Confidence interval to report (between 0 and 1, default 0.95 or 95\%).}
 
-\item{rounded}{Rounding of years. Default is to round to single years.}
+\item{rounded}{Rounding of years. Default is to round to single years (1 digit for plum models).}
 
 \item{d.res}{Resolution or amount of greyscale pixels to cover the depth scale of the age-model plot. Default \code{d.res=200}.}
 
@@ -231,7 +232,9 @@ and its name should start with the core's name and end with '_depths.txt'. Then 
 
 \item{mar.main}{Plot margins for the main panel (amount of white space along edges of axes 1-4). Default \code{mar.main=c(3,3,1,1)}.}
 
-\item{mgp}{Axis text margins (where should titles, labels and tick marks be plotted). Defaults to \code{mgp=c(1.5, .7, .0)}.}
+\item{righthand}{Adapt the righthand margins by a certain amount (default 2) to allow a righthand axis to be plotted (for plum)}
+
+\item{mgp}{Axis text margins (where should titles, labels and tick marks be plotted). Defaults to \code{mgp=c(1.7, .7, .0)}.}
 
 \item{xaxs}{Extension of x-axis. By default, add some extra white-space at both extremes (\code{xaxs="r"}). See ?par for other options.}
 

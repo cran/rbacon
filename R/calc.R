@@ -404,9 +404,10 @@ Bacon.rng <- function(d, set=get('info'), BCAD=set$BCAD, prob=set$prob) {
 
   for(i in 1:length(d)) {
     ages <- Bacon.Age.d(d[i], set, BCAD=BCAD)
-	  if(length(!is.na(ages)) > 0) {
-      rng[i,1:3] <- quantile(ages[!is.na(ages)], c(((1-prob)/2), 1-((1-prob)/2), .5))
-      rng[i,4] <- mean(ages[!is.na(ages)])
+    ages <- ages[!is.na(ages)]
+    if(length(ages) > 0) {
+      rng[i,1:3] <- quantile(ages, c(((1-prob)/2), 1-((1-prob)/2), .5), na.rm=TRUE)
+      rng[i,4] <- mean(ages)
     }
 
   if(length(d) > 1)

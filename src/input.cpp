@@ -171,7 +171,6 @@ Input::Input(char *datafile, int emaxnumofcurves, int maxm, std::string ccdir) {
     //		exit(0);
 		}
 
-
 		if (strcmp( key, "Det") == 0){
 			sscanf( pars[0], " %s", line);
 					   //Det(char *enm, double ey, double estd, double x, double edeltaR, double edeltaSTD, double ea, double eb, Cal *ecc)
@@ -224,14 +223,14 @@ Input::Input(char *datafile, int emaxnumofcurves, int maxm, std::string ccdir) {
 			if (strcmp( line, "FixNor") == 0){
 					                //dets                K   H  hiatus_pars         a         b
 				bacon = new BaconFix( dets,  (int) rpars[1],  H, hiatus_pars, rpars[6], rpars[7],
-					rpars[2], rpars[3], rpars[4], rpars[5], rpars[10], rpars[11], 0,      seed, more_pars); // added more_pars for plum
+					rpars[2], rpars[3], rpars[4], rpars[5], rpars[10], rpars[11], 0,      seed, more_pars);
 					//MinYr     MaxYr       th0      thp0         c0       cm   useNor
 			}
 
 			if (strcmp( line, "FixT") == 0){
 					                //dets                K   H  hiatus_pars         a         b
 				bacon = new BaconFix( dets,  (int) rpars[1],  H, hiatus_pars, rpars[6], rpars[7],
-					rpars[2], rpars[3], rpars[4], rpars[5], rpars[10], rpars[11], 1,      seed, more_pars); // added more_pars for plum
+					rpars[2], rpars[3], rpars[4], rpars[5], rpars[10], rpars[11], 1,      seed, more_pars);
 					//MinYr     MaxYr       th0      thp0         c0       cm  useT
 			}
 
@@ -252,10 +251,8 @@ Input::Input(char *datafile, int emaxnumofcurves, int maxm, std::string ccdir) {
 }
 
 void Input::outputFiles(std::string outputfile1){
-	if(! isPlum() ) {
-        // Rprintf("Not using Plum, this is Bacon, just Bacon, moving on...\n"); // tmp MB Nov 2020
-        return; //the output file is correct
-    }
+	if(! isPlum() ) return; //the output file is correct
+
 	//printf("Plum is needed\n");
 	FILE *F, *F1, *F2/*, *F3*/;
 	char line[BUFFSZ];

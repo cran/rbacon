@@ -13,7 +13,7 @@ Bacon
 
  Use the alpha_j's as parameter and then transform to x_j ... this is the way Nico and Marco do it.
 
- The array X is is now used to communicate with the twalk.  This is then translated to x (and thetas) in
+ The array X is now used to communicate with the twalk.  This is then translated to x (and thetas) in
  the SetThetas function, which now uses the object's variable x.  Everything remains the same afterwards.
 
  **/
@@ -75,10 +75,10 @@ class BaconFix: public Bacon {
 
 			double w, w0, wp0;
 
-			double *x, *X0, *Xp0, *theta; // *X0 and *Xp0 were *x0 and *xp0, added *x
+			double *x, *X0, *Xp0, *theta;
 
 			double MinYr, MaxYr;
-			double MaxYrTheta0Plum; // added from rplum
+			double MaxYrTheta0Plum;
 
 			//Based on depth and increment between depths
 			double c0, Dc;
@@ -91,7 +91,6 @@ class BaconFix: public Bacon {
 			double *alpha, *beta; //prior pars for the acc gamma prior in each inter hiatus section
 			double prioracU(int i, const double al) { return (1.0-alpha[i])*log(al) + beta[i]*al; }
 
-			// new from rplum
 			double priorPhiU(double *x) {
 				double scale_fi = plumobj->GetMPhi()/plumobj->GetAlPhi();
 				double shapefi = plumobj->GetAlPhi();
@@ -115,14 +114,13 @@ class BaconFix: public Bacon {
 
 				return priorU;
 			}
-			// end new rplum section
 
 			double a, b; //a priori pars for the w beta prior
 			double ds;
 			double rsc, logrsc, logw;
 			// ds=1.0, rsc=ds/Dc and logrsc=log(ds/Dc) set in the creator, lines 177 and 178 after reading Dc
 			double priorwU(const double w) {
-				logw=log(w); 
+				logw=log(w);
 			  return rsc*(1.0-a)*logw + (1.0-b)*log(1.0-exp(rsc*logw) + .0001) + (1.0-rsc)*logw - logrsc; // +.0001 Marco y Maarten Dec 2020, to avoid memory bouncing to infinity
 
 				//rsc = ds/Dc = 1/[(cm-c0)/K]
@@ -141,19 +139,19 @@ class BaconFix: public Bacon {
 
 			int WarnBeyondLimits;
 			//Sets the thetas and verifies correct limits
-			int SetThetas(double *X) { // *X was *x Nov 2020
-				double S=X[0]; //th0, X was x Nov 2020
-				double w = X[K+1]; // new from rplum Nov 2020
-				int rt = 1; // Porque aqui es 1 y en la version anterior 0 // MB Nov 2020: que hace?
+			int SetThetas(double *X) {
+				double S=X[0]; //th0
+				double w = X[K+1];
+				int rt = 1; // Porque aqui es 1 y en la version anterior 0
 
-				for (int k=get_dim()-1; k>K; k--) // new rplum Nov 2020
+				for (int k=get_dim()-1; k>K; k--)
 					x[k] = X[k]; //Copy all (Plum) parameters and w = X[K]
-				x[0] = X[0]; //and th0 // new Nov 2020
-				theta[0] = x[0]; // new Nov 2020
+				x[0] = X[0]; //and th0
+				theta[0] = x[0];
 
 				x[K]  = X[K]; //= alpha[K]
 				if (H == 0) {  // no hiatus
-					for (int k=K-1; k>0; k--) { // goes backwards
+					for (int k=K-1; k>0; k--) {
 						x[k]  = w*x[k+1] + (1.0-w)*X[k]; //Create the x's
 					}
 				} else {
@@ -184,7 +182,7 @@ class BaconFix: public Bacon {
 					theta[k] = S;
 				}
 				//Last theta
-				theta[K] = theta[K-1] + x[K]*(c(K)-c(K-1)); // x, not X?
+				theta[K] = theta[K-1] + x[K]*(c(K)-c(K-1));
 				if (fcmp( theta[K], MaxYr) == 1)
 					WarnBeyondLimits++;
 					//beyond established limits
@@ -236,8 +234,8 @@ class BaconFix: public Bacon {
 				//Open memory for the two points in the parameter space
 				//IN THE NEW BACON:
 				//X[0] is theta[0], then alpha[1] ... alpha[K-], alpha[K]=x[K] and X[K+1]=w
-				X0  = new double[get_dim()]; // was x0
-				Xp0 = new double[get_dim()]; // was xp0
+				X0  = new double[get_dim()];
+				Xp0 = new double[get_dim()];
 
 				//AND FOR THE NEW BACON, x is now not passed to the twalk, but is a local variable:
 				x = new double[get_dim()];
@@ -279,17 +277,17 @@ class BaconFix: public Bacon {
 
 
 				//Initial values for x0
-				X0[0]  = th0; // was x0[0]
-				x[0] = X0[0]; // newly defined Nov 2020
-				Xp0[0] = thp0; // was xp0[0]
+				X0[0]  = th0;
+				x[0] = X0[0];
+				Xp0[0] = thp0;
 
 				Seed(seed); //Set the Seed for random number generation
 				//and for w, from its prior
-				X0[K+1]  = BetaSim( a, b); // was x, Nov 2020
+				X0[K+1]  = BetaSim( a, b);
 				x[K+1] = X0[K+1];
-				Xp0[K+1] = BetaSim( a, b); // was x, Nov 2020
-				w0 = X0[K+1]; // was x, Nov 2020
-				wp0 = Xp0[K+1]; //short names for the initial values // was x, Nov 2020
+				Xp0[K+1] = BetaSim( a, b);
+				w0 = X0[K+1];
+				wp0 = Xp0[K+1]; //short names for the initial values
 
 				//******************* NB ************************
 				//the prior is scale=1/beta[0] ... however, to avoid models growing out of bounds
@@ -297,14 +295,13 @@ class BaconFix: public Bacon {
 				double mult=1.0;
 
 				//initial values for the acc. rates
-				X0[K]  = GammaSim( alpha[H], 1.0/beta[H]); // was x, Nov 2020
-				Xp0[K] = GammaSim( alpha[H], 1.0/beta[H]); // was x, Nov 2020
+				X0[K]  = GammaSim( alpha[H], 1.0/beta[H]);
+				Xp0[K] = GammaSim( alpha[H], 1.0/beta[H]);
 				//x[K] = X0[K];
 				if (H == 0) {  //with no hiatus
 					for (int k=K-1; k>0; k--) {
-						X0[k] = GammaSim( alpha[0], mult/beta[0]); //alpha[k] // was x, Nov 2020
-						//x[k]  = w0*x[k+1] + (1.0-w0)*X0[k];
-						Xp0[k] = GammaSim( alpha[0], mult/beta[0]); // was x, Nov 2020
+						X0[k] = GammaSim( alpha[0], mult/beta[0]); //alpha[k]
+						Xp0[k] = GammaSim( alpha[0], mult/beta[0]);
 
 					}
 				} else {//initial values for the acc. rates, with hiatus
@@ -313,12 +310,12 @@ class BaconFix: public Bacon {
 					int l=0;
 					for (int k=K-1; k>0; k--) {
 						if ((fcmp( c(k-1), h[l]) == -1) && (fcmp( h[l], c(k)) != 1)) { //if c_{k-1} < h_l & h_l !> c_k, forgets
-							X0[k]  = GammaSim( ha[l], 1.0/(hb[l]*Dc) ); // was x, Nov 2020
+							X0[k]  = GammaSim( ha[l], 1.0/(hb[l]*Dc) );
 							//x0[k]  = GammaSim( alpha[l], mult/(beta[l]) ); // MB May 2019
 							//x[k] = X0[k];
 							l++; //jump to next hiatus, but max one hiatus in each section.
 						} else { //continue with the memory
-							X0[k]  = GammaSim( alpha[l], mult/beta[l]); // was w0*x0[k+1] + (1.0-w0)*GammaSim( alpha[l], mult/beta[l]);
+							X0[k]  = GammaSim( alpha[l], mult/beta[l]);
 							//x[k] = w0*x[k+1] + (1.0-w0)*X0[k];
 						}
 
@@ -331,13 +328,12 @@ class BaconFix: public Bacon {
 							//xp0[k]  = GammaSim( alpha[l], mult/(beta[l]) ); // MB Apr 2019
 							l++; //jump to next hiatus, but max one hiatus in each section.
 						} else{ //continue with the memory
-							Xp0[k]  = GammaSim( alpha[l], mult/beta[l]); // was w0*xp0[k+1] + (1.0-wp0)*GammaSim( alpha[l], mult/beta[l]);
+							Xp0[k]  = GammaSim( alpha[l], mult/beta[l]);
 						}
 					}
 
 				}
 
-				// new for plum Nov 2020
 				if (more_pars != 0) { //Plum needs to be used!!!!
  				 plumUsed = 1;
  				 for (int j=0; j<m; j++) // correct, not j<(m-1)?
@@ -352,7 +348,7 @@ class BaconFix: public Bacon {
  				 double limitPhi=0.0;
 
 				 for (int k=K; k>0; k--) {
-					 X0[k]  = X0[k]*0.3; 
+                    X0[k] = X0[k]*0.3;
 					 Xp0[k] = Xp0[k]*0.3;
 				 }
 
@@ -431,9 +427,7 @@ class BaconFix: public Bacon {
 					return 0;
 				}
 
-
-
-				if (fcmp( X[K], 0.0) != 1){ //acc. rate alpha_{K} <= 0, out of support // was x[K]
+				if (fcmp( X[K], 0.0) != 1){ //acc. rate alpha_{K} <= 0, out of support
 					//Rprintf("Bacon: acc. rate alpha_{K} <= 0, out of support\n");
 					return 0;
 				}
@@ -502,7 +496,7 @@ class BaconFix: public Bacon {
 					//printf("BACON %lf %lf\n",  G( dets->d(last210Pb), x)-theta[0], plumchronolim);
 
 				}
-                
+
 				return rt;
 			 }
 
@@ -533,8 +527,8 @@ class BaconFix: public Bacon {
 
 	         ~BaconFix(){
 				delete x;
-				delete X0; // was x0
-				delete Xp0; // was xp0
+				delete X0;
+				delete Xp0;
 				delete theta;
 				delete dets;
 			 }
@@ -559,7 +553,7 @@ class BaconFix: public Bacon {
 			 double *Getx0() { return X0; }
 			 double *Getxp0() { return Xp0; }
 
-			virtual double eval(double *X, int prime) { // X, not x
+			virtual double eval(double *X, int prime) {
 				//x has been created from X in insupport function with the SetThetas function
 				//The rest is the same!! X is ignored here.
 
@@ -574,8 +568,8 @@ class BaconFix: public Bacon {
 
                 // read in the dets
 				if (useT) { //uses t model
-                    // Rprintf("m:%d ", m); // tmp MB Nov 2020
-					for (int j=0; j<(m); j++) { // v2.5.0 goes to m-1!
+
+                    for (int j=0; j<(m); j++) {
 
 						if (dets->Is210Pb(j) == 1)
 							Uli += dets->Ut( j, G_Plum( dets->d(j), x, dets->Delta210Pb(j), dets->Rho210Pb(j)*GetPS(j, x), phi));
@@ -585,7 +579,7 @@ class BaconFix: public Bacon {
 					}
 					//Uli += dets->Ut( m-1, G( dets->d(m-1), x));
 				} else { //uses standard normal model
-					for (int j=0; j<(m); j++) { // v2.5.0 goes to m-1!
+					for (int j=0; j<(m); j++) {
 
 						if (dets->Is210Pb(j) == 1)
 							Uli += dets->U( j, G_Plum( dets->d(j), x, dets->Delta210Pb(j), dets->Rho210Pb(j)*GetPS(j, x), phi));
@@ -610,7 +604,6 @@ class BaconFix: public Bacon {
 					Uprior += priorPSU(x);
 
 				}
-
 
 
 				Uprior += priorwU(w); //prior for w

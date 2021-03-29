@@ -2,8 +2,7 @@
  *  Matrix.c
  *  
  *
- *  Created by jac on 17/04/2007.
- *  Copyright 2007 __MyCompanyName__. All rights reserved.
+ *  Created by and copyright of J. Andres Christen on 17/04/2007.
  *
  */
 

@@ -147,18 +147,18 @@ double *kernel3::Simh(double *x, double *xp, int n,double  beta, int *phi)  {
 }
 
 double kernel3::GU(double *h, double *x, double *xp, int n) const {
- //if(vector_cmp(x,xp,n) != 1) {  // should this if statement go?
+    //     if(vector_cmp(x,xp,n) != 1) { 
 
-	    double intProd = 0.0;
+            double intProd = 0.0;
 
-        for(int j=0; j<n; j++)
-                intProd += (h[j]-x[j])*(h[j]-x[j]);
+            for(int j=0; j<n; j++)
+                intProd += (h[j]-xp[j])*(h[j]-xp[j]); // this is what it says in rplum's kernel.cpp
+                //intProd += (h[j]-x[j])*(h[j]-x[j]); // and this in rbacon's
 
 	//it is assumed that Simh is just called and we have the correct sigma
         return ((n/2.0)*log(2.0*M_PI) + n*log(sigma) + 0.5*(1.0/(sigma*sigma))*intProd);
-            
- //      }
- //   else return -1.0;
+   //         }
+  //         else return -1.0;
 }
 
 

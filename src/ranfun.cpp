@@ -119,7 +119,6 @@ static Random RNG;
 void RandomSeed(Random *rng, unsigned long int s)
 {
    if (s == 0) s = (unsigned long int) time(NULL);      /* default seed is use a seed taken from the calendar */
-   //s = 99; // tmp MB Oct 2020    
    rng->s = s;
 #define LCG(n) ((69069 * n) & 0xffffffffUL)
    rng->s1 = LCG(s);
@@ -128,13 +127,12 @@ void RandomSeed(Random *rng, unsigned long int s)
    if (rng->s2 < 8) rng->s2 += 8UL;
    rng->s3 = LCG(rng->s2);
    if (rng->s3 < 16) rng->s3 += 16UL;
-   //Rprintf("Seed: %lu %lu %lu %lu\n", rng->s, rng->s1, rng->s2, rng->s3);
    /* "warm it up" */
-   //Random32(rng);
-   //Random32(rng);
-   //Random32(rng);
-   //Random32(rng);
-   //Random32(rng);
+   Random32(rng);
+   Random32(rng);
+   Random32(rng);
+   Random32(rng);
+   Random32(rng);
    Random32(rng);
    return;
 }
