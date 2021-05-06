@@ -339,7 +339,7 @@ Bacon.hist <- function(d, set=get('info'), BCAD=set$BCAD, age.lab=c(), age.lim=c
       if(length(d) > 1)
         setTxtProgressBar(pb, i)
       ages <- Bacon.Age.d(d[i], set, BCAD=BCAD)
-      if(length(ages) > 0) {
+      if(length(ages[!is.na(ages)]) > 0) { # added !is.na(ages) 21 April 21
         hst <- density(ages)
         th0 <- min(hst$x)
         th1 <- max(hst$x)
@@ -356,8 +356,7 @@ Bacon.hist <- function(d, set=get('info'), BCAD=set$BCAD, age.lab=c(), age.lim=c
   hists <- hist3(d, BCAD)
   assign_to_global("hists", hists)
 
-  # rng <- c()
-  rng <- array(NA, dim=c(length(d), 4)) # to deal with new R which does not like to fill c() using loops
+  rng <- array(NA, dim=c(length(d), 4)) # R > 4.0 does not like to fill c() using loops
   if(calc.range)
     rng <- Bacon.rng(d, set, BCAD, prob)
 

@@ -1,3 +1,11 @@
+# rbacon 2.5.5
+* removed revdep folder which caused issues when submitting to CRAN
+
+# rbacon 2.5.4
+* further separation of rplum and rbacon
+* the functions thinner and scissors now deal with Plum runs
+* repaired bugs in accrate.age and accrate.age.ghost related to the option BCAD
+
 # rbacon 2.5.3
 * corrected a bug where postbomb dates could not be plotted owing to wrong by sign
 * further improvements to how agedepth deals with plot margins

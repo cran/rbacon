@@ -1,4 +1,4 @@
-.validateDirectoryName <- function(dir) {
+validateDirectoryName <- function(dir) {
   if(!dir.exists(dir))
     dir.create(dir, recursive=TRUE)
   dir <- suppressWarnings(normalizePath(dir))
@@ -7,6 +7,7 @@
     dir <- paste(dir, "/", sep="") # does this work in Windows?
   return(dir)
 }
+
 
 
 #' @name clam2bacon
@@ -151,7 +152,7 @@ assign_coredir <- function(coredir, core, ask=TRUE, isPlum=FALSE) {
       if(!dir.exists(coredir)) # if it still doesn't exist, we probably don't have enough permissions
         stop("cannot write into the current directory.\nPlease set coredir to somewhere where you have writing access, e.g. Desktop or ~.", call.=FALSE)
   }
-  coredir <- .validateDirectoryName(coredir)
+  coredir <- validateDirectoryName(coredir)
   cat("The run's files will be put in this folder: ", coredir, core, "\n", sep="")
   return(coredir)
 }
@@ -159,10 +160,15 @@ assign_coredir <- function(coredir, core, ask=TRUE, isPlum=FALSE) {
 
 
 # read the dets file, converting old formats to new ones if so required
-read.dets <- function(core, coredir, set=get('info'), sep=",", dec=".", cc=1) {
+read.dets <- function(core, coredir, othername=c(), set=get('info'), sep=",", dec=".", cc=1) {
   # if a .csv file exists, read it (checking that it is more recent than any .dat file in the folder). Otherwise, read the .dat file, check the columns, report back if >4 (>5?) columns, and convert to .csv (report this also)
-  csv.file <- paste(coredir,  core, "/", core, ".csv", sep="")
-  dat.file <- paste(coredir,  core, "/", core, ".dat", sep="")
+  if(length(othername)> 0) {
+    csv.file <- paste0(coredir, core, "/", othername)
+    dat.file <- csv.file
+  } else {
+      csv.file <- paste0(coredir, core, "/", core, ".csv")
+      dat.file <- paste0(coredir, core, "/", core, ".dat")
+    }
 
   dR.names <- c("r", "d", "d.r", "dr", "deltar", "r.mn", "rm", "rmn", "res.mean", "res.mn", "delta.r")
   dSTD.names <- c("d.std", "std", "std.1", "dstd", "r.std", "rstd", "res.sd", "delta.std", "deltastd")
@@ -501,6 +507,19 @@ Bacon.AnaOut <- function(fnam, set=get('info')) {
   set$Tr <- nrow(out)
   set$Us <- out[,n+1]
   set$output <- out[,1:n]
+  set
+}
+
+
+
+# function to read plum output files into memory
+Plum.AnaOut <- function(fnam, set=get('info')) {
+  out <- read.table(fnam)
+  n <- ncol(out)-1
+  set$nPs  <- n
+  set$TrPs <- nrow(out)
+  set$phi  <- out[,1]
+  set$ps   <- out[,2:(n+1)]
   set
 }
 

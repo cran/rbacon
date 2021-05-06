@@ -54,9 +54,13 @@ agedepth(
   cal.col = rgb(0, 0.5, 0.5, 0.35),
   cal.border = rgb(0, 0.5, 0.5, 0.5),
   dates.col = c(),
+  pb.background = 0.5,
   pbmodelled.col = function(x) rgb(0, 0, 1, 0.5 * x),
   pbmeasured.col = "blue",
   pb.lim = c(),
+  supp.col = "purple",
+  plot.tail = TRUE,
+  remove.tail = TRUE,
   hiatus.col = grey(0.5),
   hiatus.lty = "12",
   rgb.scale = c(0, 0, 0),
@@ -84,6 +88,7 @@ agedepth(
   xaxt = "s",
   yaxt = "s",
   plot.pb = TRUE,
+  pb.lty = 1,
   plot.pdf = FALSE,
   dates.only = FALSE,
   model.only = FALSE,
@@ -192,11 +197,19 @@ and its name should start with the core's name and end with '_depths.txt'. Then 
 
 \item{dates.col}{As an alternative to colouring dates based on whether they are 14C or not, sets of dates can be coloured as, e.g., \code{dates.col=colours()[2:100]}.}
 
+\item{pb.background}{Probability at which total Pb values are considered to have reached background values, or in other words, that their modelled values are at or below supported + detection limit (Al)). Setting this at .5 means that any depth with a Pb measurement, where at least half of the iterations model Pb values reaching background values, is flagged as having reached background. The age-model is not extended to any Pb measurements that have reached background.}
+
 \item{pbmodelled.col}{Colour of the modelled 210Pb values. Defaults to shades of blue: \code{pbmodelled.col=function(x) rgb(0,0,1,x)}.}
 
 \item{pbmeasured.col}{Colour of the measured 210Pb values (default \code{pbmeasured.col="blue"}). Draws rectangles of the upper and lower depths as well as the Pb values with 95 percent error ranges.}
 
 \item{pb.lim}{Axis limits for the Pb-210 data. Calculated automatically by default (\code{pblim=c()}).}
+
+\item{supp.col}{Colour of supported Pb-210. Defaults to purple, because why not.}
+
+\item{plot.tail}{The depth axis can extend to all Pb measurements (\code{plot.tail=TRUE}), or leave out the ones where background has been reached.}
+
+\item{remove.tail}{Whether or not to remove the tail measurements when plotting. Sometimes automated removal might go wrong, so then this option can be used to avoid removing the tail measurements. Quite similar to plot.tail.}
 
 \item{hiatus.col}{The colour of the depths of any hiatuses. Default \code{hiatus.col=grey(0.5)}.}
 
@@ -250,7 +263,9 @@ and its name should start with the core's name and end with '_depths.txt'. Then 
 
 \item{yaxt}{Whether or not to plot the y-axis. Can be used to adapt axes after a plot. See ?par for other options.}
 
-\item{plot.pb}{Plot the 210Pb data. Defaults to \code{plot.pb=TRUE}.}
+\item{plot.pb}{Plot the 210Pb data (if present). Defaults to \code{plot.pb=TRUE}.}
+
+\item{pb.lty}{Line type of measured Pb-210 data.}
 
 \item{plot.pdf}{Produce a pdf file of the age-depth plot.}
 

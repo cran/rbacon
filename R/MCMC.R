@@ -29,24 +29,38 @@
 #'
 #' @export
 scissors <- function(burnin, set=get('info')) {
-  output <- read.table(paste(set$prefix, ".out", sep=""))
+  output <- read.table(paste0(set$prefix, ".out"))
+  if(set$isplum)
+    plumout <- read.table(paste0(set$prefix, "_plum.out"))
   if(length(burnin) > 1) {
     if(length(burnin) >= nrow(output))
       stop("cannot remove that many iterations, there would be none left!", call.=FALSE)
-	output <- output[-burnin,]
+    output <- output[-burnin,]
+    if(set$isplum)
+      plumout <- plumout[-burnin,]
   } else {
       if(abs(burnin) >= nrow(output))
         stop("cannot remove that many iterations, there would be none left!", call.=FALSE)
-	  if(burnin > 0)
-	    output <- output[-(1:burnin),] else
+      if(burnin > 0) {
+        output <- output[-(1:burnin),]
+        if(set$isplum)
+          plumout <- plumout[-(1:burnin),]
+      } else {
           output <- output[-((nrow(output)-abs(burnin)):nrow(output)),]
-	  }
+          if(set$isplum)
+            plumout <- plumout[-((nrow(plumout)-abs(burnin)):nrow(plumout)),]
+        }
+    }
 
-  write.table(output, paste(set$prefix, ".out", sep=""), col.names=FALSE, row.names=FALSE)
-
-  info <- get('info')
-  info$output <- output
-  assign_to_global ("info", info)
+  #info <- get('info')
+  write.table(output, paste0(set$prefix, ".out"), col.names=FALSE, row.names=FALSE)
+  if(set$isplum) {
+    write.table(plumout, paste0(set$prefix, "_plum.out"), col.names=FALSE, row.names=FALSE)
+    set$phi <- plumout[,1]
+    set$ps <- plumout[,-1] # can be >1 column
+  }
+  set$output <- output
+  assign_to_global ("info", set)
 }
 
 
@@ -73,15 +87,23 @@ scissors <- function(burnin, set=get('info')) {
 #'
 #' @export
 thinner <- function(proportion=0.1, set=get('info')) {
-  output <- read.table(paste(set$prefix, ".out", sep=""))
+  output <- read.table(paste0(set$prefix, ".out"))
+  if(set$isplum)
+    plumout <- read.table(paste0(set$prefix, "_plum.out"))
   if(proportion >= 1)
     stop("cannot remove that many iterations, there would be none left!", call.=FALSE)
   proportion <- sample(nrow(output), proportion*nrow(output))
   output <- output[-proportion,]
-  write.table(output, paste(set$prefix, ".out", sep=""), col.names=FALSE, row.names=FALSE)
+  write.table(output, paste0(set$prefix, ".out"), col.names=FALSE, row.names=FALSE)
 
   info <- get('info')
   info$output <- output
+  if(set$isplum) {
+    plumout <- plumout[-proportion,]
+    write.table(plumout, paste0(set$prefix, "_plum.out"), col.names=FALSE, row.names=FALSE)
+    set$phi <- plumout[,1]
+    set$ps <- plumout[,-1] # could be >1 columns
+  }
   assign_to_global ("info", info)
 }
 

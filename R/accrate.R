@@ -76,11 +76,12 @@ accrate.age <- function(age, set=get('info'), cmyr=FALSE, ages=c(), BCAD=set$BCA
   # can this be made faster, i.e. without the loop?
   accs <- c()
   for(i in 2:ncol(ages)) {
-    these <- (ages[,i-1] < age) * (ages[,i] > age)
+    if(BCAD)
+      these <- (ages[,i-1] > age) * (ages[,i] < age) else
+        these <- (ages[,i-1] < age) * (ages[,i] > age)
     if(sum(these) > 0) # age lies within these age-model iterations
       accs <- c(accs, set$output[which(these>0),i]) # was i+1
   }
-
   if(cmyr)
     accs <- 1/accs
   return(accs)
@@ -254,17 +255,16 @@ accrate.age.ghost <- function(set=get('info'), age.lim=c(), age.lab=c(), age.res
   if(length(age.lim) == 0) 
      age.lim <- extendrange(set$ranges[,5]) # just the mean ages, not the extremes
   if(set$BCAD)
-    age.lim <- 1950 - age.lim  # internally, work on the cal BP scale
+    age.lim <- 1950 - age.lim # work with cal BP internally
   age.seq <- seq(min(age.lim), max(age.lim), length=age.res)
     
   if(length(acc.lim) == 0) {
-    acc.lim <-  c(0, 1.05*max(set$output[,2:(1+set$K)])) # maximum accrate in the output
+    acc.lim <- c(0, 1.05*max(set$output[,2:(1+set$K)])) # maximum accrate in the output
     if(cmyr)
       acc.lim <- 1/acc.lim
     acc.lim[is.infinite(acc.lim)] <- 0  
   }  
   acc.seq <- seq(min(acc.lim), max(acc.lim), length=acc.res)
-  # breaks <- c(acc.seq, acc.seq[acc.res]+diff(acc.seq[1:2])) # bins of the histogram
   
   z <- array(0, dim=c(age.res, acc.res))
   acc.rng <- array(NA, dim=c(age.res, 2))
@@ -274,13 +274,12 @@ accrate.age.ghost <- function(set=get('info'), age.lim=c(), age.lab=c(), age.res
   ages <- array(0, dim=c(nrow(set$output), length(set$elbows)))
   for(i in 1:ncol(ages))
     ages[,i] <- Bacon.Age.d(set$elbows[i], BCAD=FALSE)
- 
+
   pb <- txtProgressBar(min=0, max=max(1,length(age.seq)-1), style = 3)
   for(i in 1:age.res) {
     setTxtProgressBar(pb, i)
     acc <- accrate.age(age.seq[i], cmyr=cmyr, ages=ages, silent=TRUE, BCAD=FALSE)
     if(length(acc) > 0) {
-      #z[i,] <- hist(acc, breaks=breaks, plot=FALSE)$counts
       z[i,] <- density(acc, from=min(acc.lim), to=max(acc.lim), n=acc.res)$y
       acc.rng[i,] <- quantile(acc, c((1-prob)/2, 1-((1-prob)/2)))
       acc.mean[i] <- mean(acc)
@@ -306,7 +305,7 @@ accrate.age.ghost <- function(set=get('info'), age.lim=c(), age.lab=c(), age.res
         acc.lab <- paste0("accumulation rate (", set$age.unit, "/", set$depth.unit, ")")
 
   cols <- rgb(rgb.scale[1], rgb.scale[2], rgb.scale[3], seq(0, 1, length=rgb.res))
-  
+
   if(rotate.axes) {
     yaxt <- ifelse(BCAD, "n", "s")
     plot(0, type="n", ylim=age.lim, ylab=age.lab, xlim=acc.lim, xlab=acc.lab, yaxs=xaxs, xaxs=yaxs, yaxt=yaxt, bty="n")
@@ -324,20 +323,21 @@ accrate.age.ghost <- function(set=get('info'), age.lim=c(), age.lab=c(), age.res
     if(plot.median) 
       lines(acc.median, age.seq, col=median.col, lty=median.lty)
   } else {
-    xaxt <- ifelse(BCAD, "n", "s")
-    plot(0, type="n", xlim=age.lim, xlab=age.lab, ylim=acc.lim, xaxt=xaxt, ylab=acc.lab, xaxs=xaxs, yaxs=yaxs, bty="n")
-    if(BCAD) {
-      ticks <- pretty(age.lim)
-      axis(1, ticks, labels=1950-ticks) 
-    }
-    image(age.seq, acc.seq, t(t(z)), col=cols, add=TRUE)
-       if(plot.range) {
-          lines(age.seq, acc.rng[,1], pch=".", col=range.col, lty=range.lty)
-          lines(age.seq, acc.rng[,2], pch=".", col=range.col, lty=range.lty)
-        }
-      if(plot.mean) 
+      xaxt <- ifelse(BCAD, "n", "s")
+      plot(0, type="n", xlim=age.lim, xlab=age.lab, ylim=acc.lim, xaxt=xaxt, ylab=acc.lab, xaxs=xaxs, yaxs=yaxs, bty="n")
+      if(BCAD) {
+        ticks <- pretty(age.lim)
+        axis(1, ticks, labels=1950-ticks)
+      }
+
+      image(age.seq, acc.seq, t(t(z)), col=cols, add=TRUE)
+      if(plot.range) {
+        lines(age.seq, acc.rng[,1], pch=".", col=range.col, lty=range.lty)
+        lines(age.seq, acc.rng[,2], pch=".", col=range.col, lty=range.lty)
+      }
+      if(plot.mean)
         lines(age.seq, acc.mean, col=mean.col, lty=mean.lty)
-      if(plot.median) 
+      if(plot.median)
         lines(age.seq, acc.median, col=median.col, lty=median.lty)
     }
 
