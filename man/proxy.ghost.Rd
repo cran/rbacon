@@ -13,6 +13,7 @@ proxy.ghost(
   rgb.scale = c(0, 0, 0),
   rgb.res = 100,
   set = get("info"),
+  cutoff = 0.001,
   dark = 1,
   darkest = 1,
   rotate.axes = FALSE,
@@ -53,6 +54,8 @@ proxy.ghost(
 \item{rgb.res}{Resolution of the colour spectrum depicting the age-depth model. Default \code{rgb.res=100}.}
 
 \item{set}{Detailed information of the current run, stored within this session's memory as variable info.}
+
+\item{cutoff}{Point below which colours will no longer be printed. Default \code{cutoff=0.001}.}
 
 \item{dark}{By default, the darkest grey value is assigned to the most likely value within the entire core (normalised to 1; \code{dark=1}). By setting dark to, e.g., \code{dark=.8}, all values of and above 0.8 will be darkest (and values below that threshold will be lighter grey the lower their probabilities).}
 

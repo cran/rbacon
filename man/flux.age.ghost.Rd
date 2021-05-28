@@ -19,12 +19,16 @@ flux.age.ghost(
   plot.mean = TRUE,
   mean.col = "red",
   mean.lty = 2,
+  plot.median = TRUE,
+  median.col = "blue",
+  median.lty = 2,
   flux.lim = c(),
-  flux.lab = "flux",
+  flux.lab = expression("flux (g cm"^-1 * " yr"^-1 * ")"),
   upper = 0.95,
   rgb.scale = c(0, 0, 0),
   rgb.res = 100,
   dark = set$dark,
+  cutoff = 0.001,
   BCAD = set$BCAD,
   age.lab = c(),
   yr.lab = age.lab,
@@ -64,6 +68,12 @@ flux.age.ghost(
 
 \item{mean.lty}{Line type of the means.}
 
+\item{plot.median}{Plot the median fluxes.}
+
+\item{median.col}{Blue seems nice.}
+
+\item{median.lty}{Line type of the medians.}
+
 \item{flux.lim}{Limits of the flux axes.}
 
 \item{flux.lab}{Axis labels. Defaults to \code{flux.lab="flux"}.}
@@ -75,6 +85,8 @@ flux.age.ghost(
 \item{rgb.res}{Resolution of the colour spectrum depicting the age-depth model. Default \code{rgb.res=100}.}
 
 \item{dark}{The darkest grey value is \code{dark=1} by default; lower values will result in lighter grey but \code{values >1} are not allowed.}
+
+\item{cutoff}{Point below which colours will no longer be printed. Default \code{cutoff=0.001}.}
 
 \item{BCAD}{The calendar scale of graphs and age output-files is in \code{cal BP} by default, but can be changed to BC/AD using \code{BCAD=TRUE}.}
 

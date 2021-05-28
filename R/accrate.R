@@ -103,6 +103,7 @@ accrate.age <- function(age, set=get('info'), cmyr=FALSE, ages=c(), BCAD=set$BCA
 #' @param cmyr Accumulation rates can be calculated in cm/year or year/cm. By default \code{cmyr=FALSE} and accumulation rates are calculated in year per cm. Axis limits are difficult to calculate when \code{cmyr=TRUE}, so a manual adaptation of \code{acc.lim} might be a good idea.
 #' @param acc.lab Axis label for the accumulation rate.
 #' @param dark The darkest grey value is dark=1 by default; lower values will result in lighter grey but values >1 are not advised.
+#' @param cutoff Point below which colours will no longer be printed. Default \code{cutoff=0.001}.
 #' @param rgb.scale The function to produce a coloured representation of all age-models. Needs 3 values for the intensity of red, green and blue. Defaults to grey-scales: \code{rgb.scale=c(0,0,0)}, but could also be, say, scales of red (\code{rgb.scale=c(1,0,0)}). 
 #' @param rgb.res Resolution of the colour spectrum depicting the age-depth model. Default \code{rgb.res=100}.
 #' @param prob Probability ranges. Defaults to \code{prob=0.95}.
@@ -129,7 +130,7 @@ accrate.age <- function(age, set=get('info'), cmyr=FALSE, ages=c(), BCAD=set$BCA
 #'   accrate.depth.ghost()
 #' }
 #' @export
-accrate.depth.ghost <- function(set=get('info'), d=set$elbows, d.lim=c(), acc.lim=c(), d.lab=c(), cmyr=FALSE, acc.lab=c(), dark=1, rgb.scale=c(0,0,0), rgb.res=100, prob=0.95, plot.range=TRUE, range.col=grey(0.5), range.lty=2, plot.mean=TRUE, mean.col="red", mean.lty=2, plot.median=TRUE, median.col="blue", median.lty=2,  rotate.axes=FALSE, rev.d=FALSE, rev.acc=FALSE, bty="l") {
+accrate.depth.ghost <- function(set=get('info'), d=set$elbows, d.lim=c(), acc.lim=c(), d.lab=c(), cmyr=FALSE, acc.lab=c(), dark=1, cutoff=0.001, rgb.scale=c(0,0,0), rgb.res=100, prob=0.95, plot.range=TRUE, range.col=grey(0.5), range.lty=2, plot.mean=TRUE, mean.col="red", mean.lty=2, plot.median=TRUE, median.col="blue", median.lty=2,  rotate.axes=FALSE, rev.d=FALSE, rev.acc=FALSE, bty="l") {
   max.acc <- 0; max.dens <- 0
   acc <- list(); min.rng <- numeric(length(d)); max.rng <- numeric(length(d)); mean.rng <- numeric(length(d)); median.rng <- numeric(length(d))
   for(i in 1:length(d))
@@ -148,8 +149,9 @@ accrate.depth.ghost <- function(set=get('info'), d=set$elbows, d.lim=c(), acc.li
    }
 
   for(i in 1:length(d)) {
-    acc[[i]]$y <- acc[[i]]$y/max.dens
-    acc[[i]]$y[acc[[i]]$y > dark] <- dark
+    acc[[i]]$y <- acc[[i]]$y/(dark*max.dens)
+    acc[[i]]$y[acc[[i]]$y > 1] <- 1 # set "dark" to black
+    acc[[i]]$y[acc[[i]]$y < cutoff] <- NA # do not plot too light/small values
   }
 
   if(length(d.lim) == 0)
@@ -171,8 +173,9 @@ accrate.depth.ghost <- function(set=get('info'), d=set$elbows, d.lim=c(), acc.li
   if(rotate.axes) {
     plot(0, type="n", xlab=acc.lab, ylab=d.lab, ylim=d.lim, xlim=acc.lim, bty="n")
     for(i in 2:length(d)) {
-      col <- rgb(rgb.scale[1], rgb.scale[2], rgb.scale[3], seq(0, 1-max(acc[[i-1]]$y), length=rgb.res)) # was acc[[i]]
-      image(acc[[i-1]]$x, d[c(i-1, i)], t(1-t(acc[[i-1]]$y)), add=TRUE, col=col) # was acc[[i]]
+      accs <- acc[[i-1]]
+      col <- rgb(rgb.scale[1], rgb.scale[2], rgb.scale[3], seq(max(accs$y[!is.na(accs$y)]), 0, length=rgb.res)) # was acc[[i]]
+      image(accs$x, d[c(i-1, i)], t(1-t(accs$y)), add=TRUE, col=col) # was acc[[i]]
     }
     if(plot.range) {
       lines(min.rng, d+(set$thick/2), col=range.col, lty=range.lty)
@@ -185,8 +188,9 @@ accrate.depth.ghost <- function(set=get('info'), d=set$elbows, d.lim=c(), acc.li
   } else {
       plot(0, type="n", xlab=d.lab, ylab=acc.lab, xlim=d.lim, ylim=acc.lim, bty="n")
       for(i in 2:length(d)) {
-        col <- rgb(rgb.scale[1], rgb.scale[2], rgb.scale[3], seq(max(acc[[i-1]]$y), 0, length=rgb.res)) # was acc[[i]]
-        image(d[c(i-1, i)], acc[[i-1]]$x, 1-t(acc[[i-1]]$y), add=TRUE, col=col) # was acc[[i]]
+        accs <- acc[[i-1]]
+        col <- rgb(rgb.scale[1], rgb.scale[2], rgb.scale[3], seq(max(accs$y[!is.na(accs$y)]), 0, length=rgb.res)) # was acc[[i]]
+        image(d[c(i-1, i)], accs$x, 1-t(accs$y), add=TRUE, col=col) # was acc[[i]]
         }
       if(plot.range) {
         lines(d+(set$thick/2), min.rng, col=range.col, lty=range.lty)
@@ -219,6 +223,7 @@ accrate.depth.ghost <- function(set=get('info'), d=set$elbows, d.lim=c(), acc.li
 #' @param age.res Resolution or amount of greyscale pixels to cover the age scale of the plot. Default \code{age.res=400}.
 #' @param acc.res Resolution or amount of greyscale pixels to cover the accumulation rate scale plot. Default \code{age.res=400}.
 #' @param cutoff Point below which colours will no longer be printed. Default \code{cutoff=0.001}.
+#' @param dark The darkest grey value is dark=1 by default; lower values will result in lighter grey but values >1 are not advised.
 #' @param rgb.scale The function to produce a coloured representation of all age-models. Needs 3 values for the intensity of red, green and blue. Defaults to grey-scales: \code{rgb.scale=c(0,0,0)}, but could also be, say, scales of red (\code{rgb.scale=c(1,0,0)}). 
 #' @param rgb.res Resolution of the colour spectrum depicting the age-depth model. Default \code{rgb.res=100}.
 #' @param prob Probability ranges. Defaults to \code{prob=0.95}.
@@ -251,7 +256,7 @@ accrate.depth.ghost <- function(set=get('info'), d=set$elbows, d.lim=c(), acc.li
 #'   accrate.age.ghost(age.res=200, acc.res=100)
 #' }
 #' @export
-accrate.age.ghost <- function(set=get('info'), age.lim=c(), age.lab=c(), age.res=400, acc.res=200, cutoff=.001, rgb.scale=c(0,0,0), rgb.res=100, prob=.95, plot.range=TRUE, range.col=grey(0.5), range.lty=2, plot.mean=TRUE, mean.col="red", mean.lty=2, plot.median=TRUE, median.col="blue", median.lty=2, acc.lim=c(), acc.lab=c(), BCAD=set$BCAD, cmyr=FALSE, rotate.axes=FALSE, rev.age=FALSE, rev.acc=FALSE, xaxs="i", yaxs="i", bty="l") {
+accrate.age.ghost <- function(set=get('info'), age.lim=c(), age.lab=c(), age.res=400, acc.res=200, cutoff=.001, dark=1, rgb.scale=c(0,0,0), rgb.res=100, prob=.95, plot.range=TRUE, range.col=grey(0.5), range.lty=2, plot.mean=TRUE, mean.col="red", mean.lty=2, plot.median=TRUE, median.col="blue", median.lty=2, acc.lim=c(), acc.lab=c(), BCAD=set$BCAD, cmyr=FALSE, rotate.axes=FALSE, rev.age=FALSE, rev.acc=FALSE, xaxs="i", yaxs="i", bty="l") {
   if(length(age.lim) == 0) 
      age.lim <- extendrange(set$ranges[,5]) # just the mean ages, not the extremes
   if(set$BCAD)
@@ -264,11 +269,11 @@ accrate.age.ghost <- function(set=get('info'), age.lim=c(), age.lab=c(), age.res
       acc.lim <- 1/acc.lim
     acc.lim[is.infinite(acc.lim)] <- 0  
   }  
-  acc.seq <- seq(min(acc.lim), max(acc.lim), length=acc.res)
+  acc.seq <- seq(min(acc.lim, na.rm=TRUE), max(acc.lim, na.rm=TRUE), length=acc.res)
   
   z <- array(0, dim=c(age.res, acc.res))
   acc.rng <- array(NA, dim=c(age.res, 2))
-  acc.mean <- NA; acc.median <- NA
+  acc.mean <- rep(NA, age.res); acc.median <- acc.mean
 
   # speed things up by not repeatedly calculating ages in accrate.age
   ages <- array(0, dim=c(nrow(set$output), length(set$elbows)))
@@ -279,8 +284,8 @@ accrate.age.ghost <- function(set=get('info'), age.lim=c(), age.lab=c(), age.res
   for(i in 1:age.res) {
     setTxtProgressBar(pb, i)
     acc <- accrate.age(age.seq[i], cmyr=cmyr, ages=ages, silent=TRUE, BCAD=FALSE)
-    if(length(acc) > 0) {
-      z[i,] <- density(acc, from=min(acc.lim), to=max(acc.lim), n=acc.res)$y
+    if(length(acc[!is.na(acc)]) > 1) {
+      z[i,] <- density(acc, from=min(acc.lim, na.rm=TRUE), to=max(acc.lim, na.rm=TRUE), n=acc.res)$y
       acc.rng[i,] <- quantile(acc, c((1-prob)/2, 1-((1-prob)/2)))
       acc.mean[i] <- mean(acc)
       acc.median[i] <- median(acc)
@@ -288,7 +293,8 @@ accrate.age.ghost <- function(set=get('info'), age.lim=c(), age.lab=c(), age.res
   }
   message("\n")
 
-  z <- z/max(z) # normalise
+  z <- z/(dark*max(z)) # normalise, set dark to black
+  z[z>1] <- 1 # avoid values > 1
   z[z<cutoff] <- NA # do not plot very small/light greyscale values
   
   if(rev.age)
@@ -329,7 +335,6 @@ accrate.age.ghost <- function(set=get('info'), age.lim=c(), age.lab=c(), age.res
         ticks <- pretty(age.lim)
         axis(1, ticks, labels=1950-ticks)
       }
-
       image(age.seq, acc.seq, t(t(z)), col=cols, add=TRUE)
       if(plot.range) {
         lines(age.seq, acc.rng[,1], pch=".", col=range.col, lty=range.lty)
@@ -372,10 +377,14 @@ accrate.age.ghost <- function(set=get('info'), age.lim=c(), age.lab=c(), age.res
 #' @param plot.mean Plot the mean fluxes.
 #' @param mean.col Red seems nice.
 #' @param mean.lty Line type of the means.
+#' @param plot.median Plot the median fluxes.
+#' @param median.col Blue seems nice.
+#' @param median.lty Line type of the medians.
 #' @param upper Maximum flux rates to plot. Defaults to the upper 99\%; \code{upper=0.99}.
 #' @param rgb.scale The function to produce a coloured representation of all age-models. Needs 3 values for the intensity of red, green and blue. Defaults to grey-scales: \code{rgb.scale=c(0,0,0)}, but could also be, say, scales of red (\code{rgb.scale=c(1,0,0)}). 
 #' @param rgb.res Resolution of the colour spectrum depicting the age-depth model. Default \code{rgb.res=100}.
 #' @param dark The darkest grey value is \code{dark=1} by default; lower values will result in lighter grey but \code{values >1} are not allowed.
+#' @param cutoff Point below which colours will no longer be printed. Default \code{cutoff=0.001}.
 #' @param BCAD The calendar scale of graphs and age output-files is in \code{cal BP} by default, but can be changed to BC/AD using \code{BCAD=TRUE}.
 #' @param age.lab The labels for the calendar axis (default \code{age.lab="cal BP"} or \code{"BC/AD"} if \code{BCAD=TRUE}).
 #' @param yr.lab Deprecated - use age.lab instead
@@ -392,7 +401,7 @@ accrate.age.ghost <- function(set=get('info'), age.lim=c(), age.lab=c(), age.res
 #'   flux.age.ghost(1)
 #' }
 #' @export
-flux.age.ghost <- function(proxy=1, age.lim=c(), yr.lim=age.lim, age.res=200, yr.res=age.res, set=get('info'), flux=c(), plot.range=TRUE, prob=.8, range.col=grey(0.5), range.lty=2, plot.mean=TRUE, mean.col="red", mean.lty=2, flux.lim=c(), flux.lab="flux", upper=.95, rgb.scale=c(0,0,0), rgb.res=100, dark=set$dark, BCAD=set$BCAD, age.lab=c(), yr.lab=age.lab, rotate.axes=FALSE, rev.flux=FALSE, rev.age=FALSE, rev.yr=rev.age) {
+flux.age.ghost <- function(proxy=1, age.lim=c(), yr.lim=age.lim, age.res=200, yr.res=age.res, set=get('info'), flux=c(), plot.range=TRUE, prob=.8, range.col=grey(0.5), range.lty=2, plot.mean=TRUE, mean.col="red", mean.lty=2, plot.median=TRUE, median.col="blue", median.lty=2, flux.lim=c(), flux.lab=expression("flux (g cm"^-1*" yr"^-1*")"), upper=.95, rgb.scale=c(0,0,0), rgb.res=100, dark=set$dark, cutoff=0.001, BCAD=set$BCAD, age.lab=c(), yr.lab=age.lab, rotate.axes=FALSE, rev.flux=FALSE, rev.age=FALSE, rev.yr=rev.age) {
   if(length(flux) == 0) { # then read a .csv file, expecting data in columns with headers
     flux <- read.csv(paste(set$coredir, set$core, "/", set$core, "_flux.csv", sep=""))
     flux <- cbind(flux[,1], flux[,1+proxy])
@@ -433,34 +442,51 @@ flux.age.ghost <- function(proxy=1, age.lim=c(), yr.lim=age.lim, age.res=200, yr
   if(length(age.lab) == 0)
     age.lab <- ifelse(BCAD, "BC/AD", "cal BP")
   if(rotate.axes)
-    plot(0, type="n", ylim=age.lim, ylab=age.lab, xlim=flux.lim, xlab=flux.lab) else
-      plot(0, type="n", xlim=age.lim, xlab=age.lab, ylim=flux.lim, ylab=flux.lab)
-  min.rng <- numeric(length(age.seq)); max.rng <- numeric(length(age.seq)); mn.rng <- numeric(length(age.seq))
+    plot(0, type="n", ylim=age.lim, ylab=age.lab, xlim=flux.lim, xlab=flux.lab, yaxt="n") else
+      plot(0, type="n", xlim=age.lim, xlab=age.lab, ylim=flux.lim, ylab=flux.lab, xaxt="n")
+  if(BCAD && !set$BCAD) {
+    if(rotate.axes)
+      axis(2, pretty(age.lim), labels=1950-pretty(age.lim)) else
+        axis(1, pretty(age.lim), labels=1950-pretty(age.lim))
+  } else
+      ifelse(rotate.axes, axis(2), axis(1))
+
+  min.rng <- numeric(length(age.seq)); max.rng <- numeric(length(age.seq)); mean.rng <- numeric(length(age.seq)); median.rng <- numeric(length(age.seq))
   for(i in 2:length(age.seq)) {
     tmp <- fluxes[!is.na(fluxes[,i]),i] # all fluxes that fall at the required age.seq age
     rng <- quantile(tmp, c((1-prob)/2, 1-((1-prob)/2)))
     min.rng[i] <- rng[1]
     max.rng[i] <- rng[2]
-    mn.rng[i] <- mean(tmp)
+    mean.rng[i] <- mean(tmp)
+    median.rng[i] <- median(tmp)
     if(length(tmp[tmp>=0]) > 2) {
       flux.hist <- density(tmp, from=0, to=max(flux.lim))
       flux.hist$y <- flux.hist$y - min(flux.hist$y) # no negative fluxes
-      col <- rgb(rgb.scale[1], rgb.scale[2], rgb.scale[3], seq(0, max(flux.hist$y)/max.dens, length=rgb.res))
+      flux.hist$y <- flux.hist$y / (dark*max.dens) # normalise
+      flux.hist$y[flux.hist$y > 1] <- 1 # na values > 1
+      flux.hist$y[flux.hist$y < cutoff] <- NA # do not plot very small/light greyscale values
+      col <- rgb(rgb.scale[1], rgb.scale[2], rgb.scale[3],
+        seq(0, max(flux.hist$y[!is.na(flux.hist$y)]), length=rgb.res))
       if(rotate.axes)
         image(flux.hist$x, age.seq[c(i-1,i)], matrix(flux.hist$y), add=TRUE, col=col) else
           image(age.seq[c(i-1,i)], flux.hist$x, t(matrix(flux.hist$y)), add=TRUE, col=col)
     }
   }
- if(plot.range)
-   if(rotate.axes) {
-     lines(min.rng, age.seq, col=range.col, lty=range.lty)
-     lines(max.rng, age.seq, col=range.col, lty=range.lty)
- } else {
-     lines(age.seq, min.rng, col=range.col, lty=range.lty)
-     lines(age.seq, max.rng, col=range.col, lty=range.lty)
-   }
+
+  if(plot.range)
+    if(rotate.axes) {
+      lines(min.rng, age.seq, col=range.col, lty=range.lty)
+      lines(max.rng, age.seq, col=range.col, lty=range.lty)
+  } else {
+      lines(age.seq, min.rng, col=range.col, lty=range.lty)
+      lines(age.seq, max.rng, col=range.col, lty=range.lty)
+    }
   if(plot.mean)
     if(rotate.axes)
-      lines(mn.rng, age.seq, col=mean.col, lty=mean.lty) else
-       lines(age.seq, mn.rng, col=mean.col, lty=mean.lty)
+      lines(mean.rng, age.seq, col=mean.col, lty=mean.lty) else
+       lines(age.seq, mean.rng, col=mean.col, lty=mean.lty)
+  if(plot.median)
+    if(rotate.axes)
+      lines(median.rng, age.seq, col=median.col, lty=median.lty) else
+       lines(age.seq, median.rng, col=median.col, lty=median.lty)
 }

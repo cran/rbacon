@@ -11,6 +11,7 @@ accrate.age.ghost(
   age.res = 400,
   acc.res = 200,
   cutoff = 0.001,
+  dark = 1,
   rgb.scale = c(0, 0, 0),
   rgb.res = 100,
   prob = 0.95,
@@ -47,6 +48,8 @@ accrate.age.ghost(
 \item{acc.res}{Resolution or amount of greyscale pixels to cover the accumulation rate scale plot. Default \code{age.res=400}.}
 
 \item{cutoff}{Point below which colours will no longer be printed. Default \code{cutoff=0.001}.}
+
+\item{dark}{The darkest grey value is dark=1 by default; lower values will result in lighter grey but values >1 are not advised.}
 
 \item{rgb.scale}{The function to produce a coloured representation of all age-models. Needs 3 values for the intensity of red, green and blue. Defaults to grey-scales: \code{rgb.scale=c(0,0,0)}, but could also be, say, scales of red (\code{rgb.scale=c(1,0,0)}).}
 

@@ -19,17 +19,19 @@ NULL
 # to enable direct use of copyCalibrationCurve, mix.curves, pMC.age & age.pMC
 library(IntCal)
 
+# do:
+
+# done:
+
+# for future versions: check if a less ugly solution can be found to internal_plots.R at line 26 (hists length < 7). This happens when there are some very precise dates causing non-creation of th0/th1, investigate the slowness of plotting after the Bacon run (not only dates, also the model's 95% ranges etc.), can ssize be predicted more accurately?, add vignette(s), produce proxy.ghost graph with proxy uncertainties?, smooth bacon, check/adapt behaviour of AgesOfEvents around hiatuses, add function to estimate best thickness, F14C, if hiatus or boundary plot acc.posts of the individual sections?, allow for asymmetric cal BP errors (e.g. read from files), proxy.ghost very slow with long/detailed cores - optimization possible?, check again if/how/when Bacon gets confused by Windows usernames with non-ascii characters (works fine on Mac)
+
 # added line 133 to bacon.cpp, All.outputFiles(outputfile1); this line is present in rplum's bacon.cpp
 # added #include <vector> at line 14 of input.h. 
 # twalk.h, line 306, delete phi; was delete[] phi (as this is what it says on jac's site)
 # kernel 3 hop, in kernel.cpp, line 155, has  intProd += (h[j]-x[j])*(h[j]-x[j]);, but x is xp in rplum's version
 # vector.cpp, lines 28-34, fver_vector differs between rplum and rbacon
 
-# do: check if a less ugly solution can be found to internal_plots.R, line 26 (hists length < 7). This happens when there are some very precise dates, causing non-creation of th0/th1.
-
 # read https://cran.r-project.org/doc/manuals/r-release/R-exts.html#Registering-native-routines for linking between rbacon and rplum. Currently done using utils::getFromNamespace which is basically a hidden way to allow :::
-
-# for future versions: check functionality darkness, check all greyscale functions, investigate the slowness of plotting after the Bacon run (not only dates, also the model's 95% ranges etc.), can ssize be predicted more accurately?, check fs::path(dir, data_name) as cross-platform alternative to specifying paths, why do we warn that "acc.shape cannot be equal to acc.mean"?, check flux, add vignette(s), produce greyscale proxy graph with proxy uncertainties?, smooth bacon, check/adapt behaviour of AgesOfEvents around hiatuses, add function to estimate best thickness, F14C, if hiatus or boundary plot acc.posts of the individual sections?, allow for asymmetric cal BP errors (e.g. read from files), make more consistent use of dark for all functions (incl. flux and accrate.age.ghost), remove darkest?, proxy.ghost very slow with long/detailed cores - optimization possible?, check again if/how/when Bacon gets confused by Windows usernames with non-ascii characters (works fine on Mac)
 
 #' @name Bacon
 #' @title Main age-depth modelling function
@@ -231,7 +233,11 @@ Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=
 
   # check values for the prior's mean, Jan 2021
   if(mem.mean < 0 || mem.mean >1)
-    stop("The prior for the mean of the memory should be between 0 and 1", FALSE)
+    stop("The prior for the mean of the memory should be between 0 and 1", call.=FALSE)
+  if(length(mem.mean) > 1)
+    stop("Can only use one value for mem.mean across a core", call.=FALSE)
+  if(length(mem.strength) > 1)
+    stop("Can only use one value for mem.strength across a core", call.=FALSE)
     
   if(!is.na(boundary[1]))
     boundary <- sort(unique(boundary))
@@ -251,8 +257,8 @@ Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=
   info$isplum <- FALSE
 
   ### check for initial mistakes
-  if(any(info$acc.shape == info$acc.mean))
-    stop("acc.shape cannot be equal to acc.mean", call.=FALSE)
+  #if(any(info$acc.shape == info$acc.mean))
+  #  stop("acc.shape cannot be equal to acc.mean", call.=FALSE)
   if(info$t.b - info$t.a != 1)
     warning("t.b - t.a should always be 1, check the manual", call.=FALSE)
   if(min(acc.shape) < 1)
@@ -438,7 +444,6 @@ Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=
             cook() else
               message("  OK. Please adapt settings")
         }
-  if(close.connections)
-    closeAllConnections()
-    
+ # if(close.connections)
+ #   close(outfile)
 }

@@ -237,7 +237,6 @@ bacon.calib <- function(dat, set=get('info'), date.res=100, cutoff=0.01, postbom
               stop("cannot find postbomb curve #", postbomb, " (use values of 1 to 5 only)", call.=FALSE)
       # bomb.x <- seq(max(bomb[,1]), min(bomb[,1]), by=-.1) # interpolate
       bomb <- bomb[order(bomb[,1], decreasing=FALSE),]
-     # bomb <<- bomb
       bomb.x <- seq(min(bomb[,1]), max(bomb[,1]), by=.1) # interpolate
       bomb.y <- approx(bomb[,1], bomb[,2], bomb.x)$y
       bomb.z <- approx(bomb[,1], bomb[,3], bomb.x)$y
@@ -576,7 +575,7 @@ background <- function(set=get('info'), Al=set$Al) {
     ps <- cbind(set$ps)
     for(i in 1:nrow(dets)) {
       As <- A.modelled(dets[i,1]-dets[i,2], dets[i,1], dets[i,3])
-      if(set$radon.case == 2)
+      if(set$ra.case == 2)
         ps <- set$ps[,i] else
           ps <- set$ps
       bg <- which((As - ps) <= Al) # which modelled data are at or below the detection limit?

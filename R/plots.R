@@ -12,6 +12,7 @@
 #' @param rgb.scale The function to produce a coloured representation of all age-models. Needs 3 values for the intensity of red, green and blue. Defaults to grey-scales: \code{rgb.scale=c(0,0,0)}, but could also be, say, scales of red (\code{rgb.scale=c(1,0,0)}). 
 #' @param rgb.res Resolution of the colour spectrum depicting the age-depth model. Default \code{rgb.res=100}.
 #' @param set Detailed information of the current run, stored within this session's memory as variable info.
+#' @param cutoff Point below which colours will no longer be printed. Default \code{cutoff=0.001}.
 #' @param dark By default, the darkest grey value is assigned to the most likely value within the entire core (normalised to 1; \code{dark=1}). By setting dark to, e.g., \code{dark=.8}, all values of and above 0.8 will be darkest (and values below that threshold will be lighter grey the lower their probabilities).
 #' @param darkest Darkness of the most likely value. Is black by default (\code{darkest=1}); lower values will result in lighter grey.
 #' @param rotate.axes The default is to plot the calendar horizontally, however the plot can be rotated (\code{rotate.axes=TRUE}).
@@ -43,7 +44,7 @@
 #'   proxy.ghost()
 #' }
 #' @export
-proxy.ghost <- function(proxy=1, proxy.lab=NULL, proxy.res=250, age.res=200, yr.res=age.res, rgb.scale=c(0,0,0), rgb.res=100, set=get('info'), dark=1, darkest=1, rotate.axes=FALSE, proxy.rev=FALSE, age.rev=FALSE, yr.rev=age.rev, plot.mean=FALSE, mean.col="red", age.lim=NULL, yr.lim=age.lim, proxy.lim=NULL, sep=",", xaxs="i", yaxs="i", xaxt="s", yaxt="s", bty="l", BCAD=set$BCAD, age.lab=ifelse(BCAD, "BC/AD", "cal yr BP"), yr.lab=age.lab, verbose=TRUE, add=FALSE) {
+proxy.ghost <- function(proxy=1, proxy.lab=NULL, proxy.res=250, age.res=200, yr.res=age.res, rgb.scale=c(0,0,0), rgb.res=100, set=get('info'), cutoff=0.001, dark=1, darkest=1, rotate.axes=FALSE, proxy.rev=FALSE, age.rev=FALSE, yr.rev=age.rev, plot.mean=FALSE, mean.col="red", age.lim=NULL, yr.lim=age.lim, proxy.lim=NULL, sep=",", xaxs="i", yaxs="i", xaxt="s", yaxt="s", bty="l", BCAD=set$BCAD, age.lab=ifelse(BCAD, "BC/AD", "cal yr BP"), yr.lab=age.lab, verbose=TRUE, add=FALSE) {
   if(length(set$Tr)==0)
     stop("please first run agedepth()", call.=FALSE)
   proxies <- read.csv(paste(set$coredir, set$core, "/", set$core, "_proxies.csv", sep=""), header=TRUE, sep=sep)
@@ -72,7 +73,7 @@ proxy.ghost <- function(proxy=1, proxy.lab=NULL, proxy.res=250, age.res=200, yr.
   }
   if(verbose)
     message("Calculating histograms")
-  Bacon.hist(ds, set, calc.range=FALSE)
+  Bacon.hist(ds, set, calc.range=FALSE) # BCAD always FALSE
   hists <- get('hists')
   message("\n")
 
@@ -97,9 +98,10 @@ proxy.ghost <- function(proxy=1, proxy.lab=NULL, proxy.res=250, age.res=200, yr.
   if(dark>1)
     stop("dark values larger than 1 are not allowed\n", call.=FALSE) else
       max.counts[max.counts > dark] <- dark
+  max.counts[max.counts < cutoff] <- NA # don't plot too small/light values
   if(length(age.lim)==0)
     if(xaxs=="r")
-      age.lim <- range(pretty(c(1.04*max(age.seq), .96*min(age.seq)))) else
+      age.lim <- extendrange(pretty(age.seq), f=.04) else
         age.lim <- range(age.seq)[2:1]
   if(age.rev)
     age.lim <- age.lim[2:1]
@@ -226,6 +228,7 @@ AgesOfEvents <- function(window, move, set=get('info'), plot.steps=FALSE, BCAD=s
     o <- order(probs[,1])
     probs <- probs[o,]
   }
+  #close(outfile) # May 2021
 
   if(plot.steps) {
     d.sort <- sort(rep(1:nrow(probs),2))

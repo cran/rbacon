@@ -512,11 +512,11 @@ Bacon.AnaOut <- function(fnam, set=get('info')) {
 
 
 
-# function to read plum output files into memory
+# function to read plum output files into memory, updated May 2021
 Plum.AnaOut <- function(fnam, set=get('info')) {
   out <- read.table(fnam)
   n <- ncol(out)-1
-  set$nPs  <- n
+  set$nPs <- n
   set$TrPs <- nrow(out)
   set$phi  <- out[,1]
   set$ps   <- out[,2:(n+1)]

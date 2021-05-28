@@ -106,7 +106,7 @@
 #'   agedepth()
 #' }
 #' @export
-agedepth <- function(set=get('info'), BCAD=set$BCAD, depth.unit=set$depth.unit, age.unit="yr", unit=depth.unit, d.lab=c(), age.lab=c(), yr.lab=age.lab, kcal=FALSE, acc.lab=c(), d.min=c(), d.max=c(), d.by=c(), depths=set$depths, depths.file=FALSE, age.min=c(), yr.min=age.min, age.max=c(), yr.max=age.max, hiatus.option=1, dark=c(), prob=set$prob, rounded=c(), d.res=400, age.res=400, yr.res=age.res, date.res=100, rotate.axes=FALSE, rev.age=FALSE, rev.yr=rev.age, rev.d=FALSE, maxcalc=500, height=1, calheight=1, mirror=TRUE, up=TRUE, cutoff=.1, plot.range=TRUE,  range.col=grey(.5), range.lty="12", mn.col="red", mn.lty="12", med.col=NA, med.lty="12", C14.col=rgb(0,0,1,.35), C14.border=rgb(0,0,1,.5), cal.col=rgb(0,.5,.5,.35), cal.border=rgb(0,.5,.5,.5), dates.col=c(), pb.background=.5, pbmodelled.col=function(x) rgb(0,0,1,.5*x), pbmeasured.col="blue", pb.lim=c(), supp.col="purple", plot.tail=TRUE, remove.tail=TRUE, hiatus.col=grey(0.5), hiatus.lty="12", rgb.scale=c(0,0,0), rgb.res=100, slump.col=grey(0.8), normalise.dists=TRUE, same.heights=FALSE, cc=set$cc, title=set$core, title.location="topleft", title.size=1.5, after=set$after, bty="l", mar.left=c(3,3,1,1), mar.middle=c(3,0,1,.5), mar.right=c(3,3,1,1), mar.main=c(3,3,1,1), righthand=3, mgp=c(1.7,.7,.0), xaxs="r", yaxs="i", prior.ticks="n", prior.fontsize=0.9, toppanel.fontsize=0.9, xaxt="s", yaxt="s", plot.pb=TRUE, pb.lty=1, plot.pdf=FALSE, dates.only=FALSE, model.only=FALSE, verbose=TRUE) {
+agedepth <- function(set=get('info'), BCAD=set$BCAD, depth.unit=set$depth.unit, age.unit="yr", unit=depth.unit, d.lab=c(), age.lab=c(), yr.lab=age.lab, kcal=FALSE, acc.lab=c(), d.min=c(), d.max=c(), d.by=c(), depths=set$depths, depths.file=FALSE, age.min=c(), yr.min=age.min, age.max=c(), yr.max=age.max, hiatus.option=1, dark=c(), prob=set$prob, rounded=c(), d.res=400, age.res=400, yr.res=age.res, date.res=100, rotate.axes=FALSE, rev.age=FALSE, rev.yr=rev.age, rev.d=FALSE, maxcalc=500, height=1, calheight=1, mirror=TRUE, up=TRUE, cutoff=.1, plot.range=TRUE,  range.col=grey(.5), range.lty="12", mn.col="red", mn.lty="12", med.col=NA, med.lty="12", C14.col=rgb(0,0,1,.35), C14.border=rgb(0,0,1,.5), cal.col=rgb(0,.5,.5,.35), cal.border=rgb(0,.5,.5,.5), dates.col=c(), pb.background=.5, pbmodelled.col=function(x) rgb(0,0,1,.5*x), pbmeasured.col="blue", pb.lim=c(), supp.col="purple", plot.tail=TRUE, remove.tail=TRUE, hiatus.col=grey(0.5), hiatus.lty="12", rgb.scale=c(0,0,0), rgb.res=100, slump.col=grey(0.8), normalise.dists=TRUE, same.heights=FALSE, cc=set$cc, title=set$core, title.location="topleft", title.size=1.5, after=set$after, bty="l", mar.left=c(3,3,1,.5), mar.middle=c(3,0,1,.5), mar.right=c(3,0,1,.5), mar.main=c(3,3,1,1), righthand=3, mgp=c(1.7,.7,.0), xaxs="r", yaxs="i", prior.ticks="n", prior.fontsize=0.9, toppanel.fontsize=0.9, xaxt="s", yaxt="s", plot.pb=TRUE, pb.lty=1, plot.pdf=FALSE, dates.only=FALSE, model.only=FALSE, verbose=TRUE) {
 # Load the output, if it exists
   outp <- paste0(set$prefix, ".out")
   if(file.exists(outp))
@@ -191,13 +191,14 @@ agedepth <- function(set=get('info'), BCAD=set$BCAD, depth.unit=set$depth.unit, 
     d <- sort(unique(c(i+after, i, d)))
 
   if(set$isplum) # new May 2021
-    if(set$radon.case == 0)
-      d <- d[which(d <= max(set$detsOrig[,2]))]
+    if(set$ra.case == 0) # renamed from incorrectly named radon.case
+      if(!set$hasBaconData) # new May 2021
+        d <- d[which(d <= max(set$detsOrig[,2]))]
 
   if(verbose)
     message("Calculating age ranges...\n")
   modelranges <- c()
-  ranges <-  Bacon.rng(d, set, BCAD=BCAD, prob=prob)
+  ranges <- Bacon.rng(d, set, BCAD=BCAD, prob=prob)
   d.rng <- d
   # calculate calendar axis limits
   modelranges <- range(ranges[!is.na(ranges)])
@@ -215,9 +216,7 @@ agedepth <- function(set=get('info'), BCAD=set$BCAD, depth.unit=set$depth.unit, 
     age.min <- min(modelranges, dateranges)
   if(length(age.max) == 0)
     age.max <- max(modelranges, dateranges)
-  if(set$isplum) 
-    age.lim <- extendrange(c(min(ranges), max(ranges)), f=0.01) else
-      age.lim <- extendrange(c(age.min, age.max), f=0.01)
+  age.lim <- extendrange(c(age.min, age.max), f=0.01)
 
   if(BCAD)
     age.lim <- rev(age.lim)
@@ -232,16 +231,8 @@ agedepth <- function(set=get('info'), BCAD=set$BCAD, depth.unit=set$depth.unit, 
   if(length(age.lab) == 0)
     age.lab <- ifelse(BCAD, "BC/AD", ifelse(kcal, "kcal BP", paste("cal", age.unit, "BP")))
 
-#  if(set$isplum) # removed May 2021 because this is already done further up
-#    mar.main[4] <- mar.main[4] + righthand # to enable space for righthand axis
-#  par(mar=mar.main)
-  #on.exit(par(oldpar))
-    
   if(kcal)
     ifelse(rotate.axes, xaxt <- "n", yaxt <- "n")
-#  if(set$isplum)
-#     oldpar <- par(mar=c(3,3,1,3)) else {
-#      oldpar <- par(mar=c(3,3,1,1)) # no need for righthand axis; should be mar.right?
 
   if(set$isplum)
     if(remove.tail)
@@ -274,8 +265,8 @@ agedepth <- function(set=get('info'), BCAD=set$BCAD, depth.unit=set$depth.unit, 
 
   if(!dates.only) {
     if(verbose)
-      message("Preparing ghost graph... ")
-     agedepth.ghost(set, rotate.axes=rotate.axes, d.min=d.min, d.max=d.max, BCAD=BCAD, d.res=d.res, age.res=age.res, rgb.res=rgb.res, dark=dark, rgb.scale=rgb.scale, age.lim=age.lim)
+      message("\nPreparing ghost graph... ")
+    agedepth.ghost(set, rotate.axes=rotate.axes, d.min=d.min, d.max=d.max, BCAD=BCAD, d.res=d.res, age.res=age.res, rgb.res=rgb.res, dark=dark, rgb.scale=rgb.scale, age.lim=age.lim)
   }
 
   if(length(set$slump) > 0 )
