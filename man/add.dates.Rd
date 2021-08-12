@@ -43,7 +43,7 @@ add.dates(
 
 \item{set}{Detailed information of the current run, stored within this session's memory as variable \code{info}.}
 
-\item{above}{Treshold for plotting of probability values. Defaults to \code{above=1e-3}.}
+\item{above}{Threshold for plotting of probability values. Defaults to \code{above=1e-3}.}
 
 \item{postbomb}{Use a postbomb curve for negative (i.e. postbomb) 14C ages. \code{0 = none, 1 = NH1, 2 = NH2, 3 = NH3, 4 = SH1-2, 5 = SH3}}
 

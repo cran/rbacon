@@ -1,0 +1,88 @@
+---
+title: "Locations of Bacon folders and files"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{"foldersfiles"}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+
+It is important to understand where rbacon goes to look for files and will place new files. The first time `rbacon` is running in a new working directory, it will look for an 'umbrella' folder called `Bacon_runs` (or `Cores`), and if it doesn't find this, it will ask if it may make one. Either accept the suggestion, or provide an alternative folder by specifying `coredir`:
+
+```{r, eval=FALSE}
+mydir <- tempdir()
+Bacon(coredir=mydir)
+```
+
+Within this umbrella folder are folders for each individual core. For example, if you've run the default core, there will be a folder `MSB2K`, and similarly for `RLGH3`. Within each core folder there will be the file with the dates, starting with the core name and ending with the .csv extension, e.g., `MSB2K.csv`. So, if your core is named `MyLakeCore`, then Bacon will look for a folder called `MyLakeCore`, and then within that folder looks for a file `MyLakeCore.csv`. Take care with capitalisation, and it's also best not to use spaces in the names.
+
+Your file should contain headers as below, and the fields should be separated by commas. In a spreadsheet program such as MS-Excel or Libreoffice's Calc, you can save your file as .csv. It's often a good idea to then open your .csv file in a plain-text editor such as Wordpad or Notepad, to check that everything looks clean (e.g., no lines filled with just commas, or lots of quotation marks).
+
+What it looks like in a spreadsheet program:
+
+| lab ID      | Age         | Error |  Depth   |  cc  |
+| ----------- | ----------- | ----- | -------- | ---- |
+| UBA-28881   | 2200        | 20    | 5        |  1   |
+| UBA-28882   | 2400        | 20    | 10       |  1   |
+| UBA-28883   | 3550        | 30    | 20       |  1   |
+| UBA-28884   | 4200        | 35    | 25       |  1   |
+
+And in a plain-text editor (with spaces added for enhanced readability):
+
+lab ID, Age, Error, Depth, cc<br>
+UBA-28881, 2200, 20, 5,  0<br>
+UBA-28882, 2400, 20, 10, 0<br>
+UBA-28883, 3550, 30, 20, 0<br>
+UBA-28884, 4200, 35, 25, 0<br>
+
+Some users have reported problems with writing access to some of their folders, owing to permission limitations set by the computer's administrator. Perhaps you might have access to an external disk drive, e.g., `D:\`. Then run Bacon as `Bacon("MyCore", coredir="D:\")`. Then Bacon will look for a folder `MyCore` in `D:\`.
+
+If you have dates with age offsets, such as marine dates from a region with a known delta.R and delta.STD, then this can be specified, either as option (e.g., `Bacon(delta.R=130, delta.STD=30)`), or, recommended, as extra columns in your core's csv file. Add them as columns 6 and 7 (in this example, the second date is terrestrial and has no assumed age offset):
+
+| lab ID      | Age         | Error |  Depth   |  cc  | delta.R | delta.STD |
+| ----------- | ----------- | ----- | -------- | ---- | ------- | --------- |
+| UBA-28881   | 2200        | 20    | 5        |  2   | 130     |   30      |
+| UBA-34567   | 1850        | 20    | 12       |  1   | 0       |   0       |
+| UBA-28882   | 2400        | 20    | 10       |  2   | 130     |   30      |
+| UBA-28883   | 3550        | 30    | 20       |  2   | 130     |   30      |
+| UBA-28884   | 4200        | 35    | 25       |  2   | 130     |   30      |
+
+By default, Bacon uses the student-t distribution[^1] to model the dates, rather than the more usual normal distribution (default: `Bacon(normal=FALSE)`). With the default parameters `t.a=3` and `t.b=4`, this distribution looks very much like the normal distribution, but it has wider tails. This makes for a very robust model, because it handles scatter and outliers very well. In many cases, Bacon will be able to find its way through most dates while bypassing outlying dates.
+
+In some cases, some dates could be more reliable than others (e.g., some would consist of very reliable charcoal particles, while others would be based on bulk sediment). Then such dates can be given student-t values which resemble the normal distribution (e.g., `t.a=33`, `t.b=34`), either as option in the Bacon command or within the .csv file:
+
+| lab ID      | Age         | Error |  Depth   |  cc  | delta.R | delta.STD | t.a   |   t.b    |
+| ----------- | ----------- | ----- | -------- | ---- | ------- | --------- | ----  |   -----  |
+| UBA-28881   | 2200        | 20    | 5        |  2   | 130     |   30      | 3     |   4      |
+| UBA-34567   | 1850        | 20    | 12       |  1   | 0       |   0       | 33    |   34     |
+| UBA-28882   | 2400        | 20    | 10       |  2   | 130     |   30      | 3     |   4      |
+| UBA-28883   | 3550        | 30    | 20       |  2   | 130     |   30      | 3     |   4      |
+| UBA-28884   | 4200        | 35    | 25       |  2   | 130     |   30      | 3     |   4      |
+
+If you want to provide t.a and t.b values in your .csv file, they should always be in columns 8 and 9 (and similarly, cc should be in column 5, delta.R in column 6 and delta.STD in column 7). Just provide 0s for delta.R and delta.STD if they don't need to be adapted.
+
+### User interaction
+
+By default, Bacon will tell where it will place files and suggest values where appropriate. You can also tell Bacon to stop suggesting alternative values, or instead accept all suggestions and run the cores without user interaction:
+
+```{r, eval=FALSE}
+Bacon(suggest=FALSE)
+Bacon(accept.suggestions=TRUE)
+```
+
+This can be used to run all cores in a directory while you make yourself some breakfast:
+
+```{r, eval=FALSE}
+allcores <- list.files("Bacon_runs")
+for(i in allcores)
+  try(Bacon(i, accept.suggestions=TRUE))
+```
+
+***
+
+[contents](./contents.html)
+<br>
+[<- previous [priors and settings]](./priorssettings.html)
+<br>
+[next [post-run analysis] ->](./postrun.html)
+
+[^1]: Christen, J.A., Perez E., S., 2010. A new robust statistical model for radiocarbon data. *Radiocarbon* 51, 1047-1059.

@@ -138,8 +138,10 @@ assign_coredir <- function(coredir, core, ask=TRUE, isPlum=FALSE) {
         if(dir.exists(runs))
           coredir <- runs else {
             coredir <- runs
-            ans <- readline(paste0("I will create a folder called ", coredir, ", is that OK? (y/n)  "))
-            if(ask)
+            if(!ask)
+              ans <- "y" else
+                ans <- readline(paste0("I will create a folder called ", coredir, ", is that OK? (y/n)  "))
+
               if(tolower(substr(ans,1,1)) == "y")
                 wdir <- dir.create(coredir, FALSE) else
                   stop("No problem. Please provide an alternative folder location using coredir\n", call.=FALSE)
@@ -258,7 +260,7 @@ read.dets <- function(core, coredir, othername=c(), set=get('info'), sep=",", de
     dets[dets[,3] <= 0,3] <- 1
     changed <- 1
   }
-  if(min(diff(dets[,4])) < 0) { #CHANGED: posible bug, error en los parentesis
+  if(min(0, diff(dets[,4])) < 0) { # added 0 (for if just 1 row of dates)
     message("Warning, the depths are not in ascending order, I will correct this")
     dets <- dets[ order(dets[,4]), ] #CHANGED: se elimina "set" antes de dets, por un error en uso del objeto
     changed <- 1

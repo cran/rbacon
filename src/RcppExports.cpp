@@ -5,6 +5,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // bacon
 int bacon(std::string inputfile1, std::string outputfile1, int ssize, std::string dircc);
 RcppExport SEXP _rbacon_bacon(SEXP inputfile1SEXP, SEXP outputfile1SEXP, SEXP ssizeSEXP, SEXP dirccSEXP) {

@@ -1,0 +1,205 @@
+---
+title: "FAQ"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{"FAQ"}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+
+### What does Bacon stand for?
+
+Bayesian accumulation model. It also stands for a breakfast item which can be cooked floppy/thick or crunchy/thin, much like the prior settings for Bacon.
+
+Moreover, Francis Bacon (1561–1626) once said that "if we begin with certainties, we shall end in doubts; but if we begin with doubts, and are patient in them, we shall end in certainties". This quote is quite appropriate for Bayesian age-models, which aim to express and robustly quantify chronological uncertainties (and do a better job at this than classical approaches[^1]).
+
+### I don't like Bacon
+
+Try `tofu()`, which does exactly the same but without the meat.
+
+### How do I cite Bacon?
+
+Please cite Blaauw and Christen 2011[^2], as well as the rbacon version you are using (check this with `sessionInfo()`), any calibration curve(s)[^3] used and also any non-default settings.
+
+It is also a good idea to use the latest version of rbacon and to periodically check if new versions have come out. Either run `update.packages()`, `install.packages('rbacon')`, or check the current version number at CRAN[^4]. It is also a good idea to regularly check for and install updates to R itself[^5].
+
+### Can you help me?
+
+After reading the FAQ, you can contact Maarten Blaauw <maarten.blaauw@qub.ac.uk> for help with using rbacon, or Andres Christen <jac@cimat.mx> for more detailed statistical/Bayesian questions. Please provide any necessary .csv files and the *exact* list of R commands and output.
+
+### I've found a bug or have an idea for a new feature
+
+Please contact Maarten Blaauw <maarten.blaauw@qub.ac.uk> for rbacon-specific bugs/features, and/or Andres Christen <jac@cimat.mx> if your question contains much statistical detail. Thank you.
+
+### Where do I put my files?
+
+By default, Bacon looks for a folder within the `Bacon_runs` folder (sometimes called `Cores`), with the same name as your core. So, if your core is named `MyLakeCore`, then Bacon will look for a folder called `MyLakeCore`, and then within that folder looks for a file `MyLakeCore.csv`. Take care with capitalisation, and it's also best not to use spaces in the names.
+
+Your file should contain headers as below, and the fields should be separated by commas. In a spreadsheet program such as MS-Excel or Libreoffice's Calc, you can save your file as .csv. It's often a good idea to then open your .csv file in a plain-text editor such as Wordpad or Notepad, to check that everything looks clean (e.g., no lines filled with just commas, or lots of quotation marks).
+
+What it looks like in a spreadsheet program:
+
+| lab ID      | Age         | Error |  Depth   |  cc  |
+| ----------- | ----------- | ----- | -------- | ---- |
+| UBA-28881   | 2200        | 20    | 5        |  1   |
+| UBA-28882   | 2400        | 20    | 10       |  1   |
+| UBA-28883   | 3550        | 30    | 20       |  1   |
+| UBA-28884   | 4200        | 35    | 25       |  1   |
+
+And in a plain-text editor (with spaces added for enhanced readability):
+
+lab ID, Age, Error, Depth, cc<br>
+UBA-28881, 2200, 20, 5,  0<br>
+UBA-28882, 2400, 20, 10, 0<br>
+UBA-28883, 3550, 30, 20, 0<br>
+UBA-28884, 4200, 35, 25, 0<br>
+
+### How can I set a different calibration curve?
+
+By default, rbacon uses the IntCal20 Northern Hemisphere calibration curve[^6], or `cc=1`. This can be set to the Marine20[^7] calibration curve (`cc=2`), the Southern Hemisphere SHCal20[^8] curve (`cc=3`), or even a custom-built one (`cc=4`). The `cc` option can be provided within the Bacon command (e.g., `Bacon("MyCore", cc=3)`), but for reasons of transparency and consistency we recommend instead to add `cc` as a fifth column to your core's .csv file:
+
+| lab ID      | Age         | Error |  Depth   |  cc  |
+| ----------- | ----------- | ----- | -------- | ---- |
+| UBA-28881   | 2200        | 20    | 5        |  3   |
+| UBA-28882   | 2400        | 20    | 10       |  3   |
+| UBA-28883   | 3550        | 30    | 20       |  3   |
+| UBA-28884   | 4200        | 35    | 25       |  3   |
+
+Note that Bacon requires the raw, *uncalibrated* radiocarbon dates as input, and these dates are calibrated during the modelling process.
+
+### How do I include non-14C dates?
+
+Here again `cc` is your friend. Dates that are already on the cal BP scale, such as independently-dated tephras, pollen events or the known surface age of your core should get `cc=0`. Please translate any AD dates into cal BP (`cal BP = 1950 - AD`). Radiocarbon dates that should be calibrated with IntCal20 Northern Hemisphere calibration curve receive a `cc=1`, those with Marine20 `cc=2`, those with SHCal20 curve `cc=3`, and those with a custom-built one `cc=4`:
+
+| lab ID      | Age         | Error |  Depth   |  cc  |
+| ----------- | ----------- | ----- | -------- | ---- |
+| surface     | -65         | 10    | 0        |  0   |
+| UBA-28881   | 2200        | 20    | 5        |  3   |
+| UBA-28882   | 2400        | 20    | 10       |  3   |
+| UBA-28883   | 3550        | 30    | 20       |  3   |
+| UBA-28884   | 4200        | 35    | 25       |  3   |
+
+For Pb-210 data, please consider using the `rplum` R package rather than inputting CRS model output as cal BP dates into Bacon.
+
+Note that Bacon expects >0 errors for all its dates.
+
+### Can I extrapolate beyond the dated levels?
+
+Yes, using the options `d.min` and/or `d.max`, which by default are set to be the upper and lower dated depths.
+
+### Can Bacon calculate age estimates for specific depths?
+
+By default, Bacon calculates age estimates for each cm from the upper to the lowest dated depth. This can be changed by specifying a different value for `d.by`. The default depth units are `depth.unit="cm"` and this can also be adapted. You can also provide a list of depths, e.g., `Bacon("MyCore", depths=1:50)`, or put these in a file `MyCore_depths.csv` in the core's folder and then run as `Bacon("MyCore", depths.file=TRUE)`.
+
+You can also request the age estimate of any core depth after the run, for example for 23.45cm:
+
+```{r, eval=FALSE}
+Bacon.hist(23.45)
+depth23.45 <- Bacon.Age.d(23.45)
+hist(depth23.45)
+mean(depth23.45)
+```
+
+### Can Bacon take into account a hiatus or a slump?
+
+Yes. If your core's stratigraphy indicates a hiatus at say 30 cm core depth, put this as `Bacon(hiatus.depths=30)`. With multiple hiatuses, concatenate the values as, e.g., `Bacon(hiatus.depths=c(30,52))`. Going across a hiatus or boundary, Bacon will lose its memory of the accumulation rate.
+
+If you expect a boundary instead of a hiatus, so just an abrupt change in sedimentation regime without an accompanying gap in time, then use `boundary`, as in `Bacon(boundary=30)` or `Bacon(boundary=c(30,52))`.
+
+If you found events of abrupt sedimentation such as visible tephra layers, these can be modelled as well by providing their top and bottom depths, e.g. `Bacon(slump=c(20,30, 50,55))` for slumps at 55-50 and 30-20 cm depth.
+
+### How can I reload a previous run?
+
+First load the old run (making sure you re-enter any non-default prior settings), telling Bacon not to run it again, then produce a graph to load all the data into R's memory. After this, you should be able to proceed as before:
+
+```{r, eval=FALSE}
+Bacon("MyCore", run=FALSE)
+agedepth()
+# or if you've set the accumulation rate prior to something different than the default:
+Bacon("MyCore", run=FALSE, acc.mean=c(20,5))
+agedepth()
+```
+
+### What value should I use for `thick`?
+
+In most cases, Bacon should be able to find an appropriate value for thick. The default is 5 cm, but if your core is very short or very long, an alternative value for thick is suggested. Too thick sections will look very 'elbowy', and too thin sections could result in too many parameters and a 'lost' model. It is always recommended to try several values for settings, in order to ensure your results are robust and not overly sensitive to minor changes in the settings. Different values for `thick` can be set as follows:
+
+```{r, eval=FALSE}
+Bacon("MyCore", thick=1)
+Bacon("MyCore", 1)
+```
+
+### Why does my age-model look like a trumpet?
+
+Perhaps the model got lost as too many parameters had to be estimated. Does the model follow some of the dated depths, but then it diverges and runs away from the rest of the dates? Try running it with fewer sections (larger value of `thick`).
+
+### Should I adapt the priors to exactly match my core's accumulation rate?
+
+No. In most cases, the default or suggested values for acc.mean should work fine. The default shape parameter `acc.shape=1.5` is set such that a large range of accumulation rates is allowed and the data will allow Bacon to update our information about the most likely accumulation rate values. The same holds for memory's strength parameter `mem.strength=10`. It is thus quite allright for the prior distribution sto be much wider than the posterior distributions - we have learned more about the values of the parameters that make up the age-depth model.
+
+If however you have additional information about a site's accumulation history, this can be included by setting 'stronger', more informative priors. For example, a site might be known to have accumulated without major swings in accumulation rates, and then the memory prior can be set to be close to 1 (e.g., `mem.strength=50, mem.mean=0.9`). On the other hand, sites which are assumed to have experienced wide fluctuations in sedimentations could be modelled by setting the memory prior to very low values (`mem.strength=50, mem.mean=0.1`).
+
+The idea of prior information is just that; it is information you had about the site *before* you started looking at the new data. Bacon will then combine the prior information with the data to update our information.
+
+### Can I set different accumulation rates for different parts of my core?
+
+Yes, by defining a boundary or hiatus at the depths where accumulation rates change, and giving distinct accumulation rate priors for each section. For example, if the stratigraphy of your core changes from lake to a marsh at 80 cm depth, and the prior information for marsh accumulation rates is `acc.mean=10` and for the lake `acc.mean=50`, then you'd model this as:
+
+```{r, eval=FALSE}
+Bacon("MyCore", boundary=80, acc.mean=c(10,50))
+```
+
+Going across a boundary or hiatus, Bacon will lose its memory so the accumulation rates above the boundary/hiatus will not be informed by accumulation rates below it.
+
+### Should I use the mean ages or the median ages?
+
+Bacon provides age estimates for each and any core depth, and this can be reduced to a 95% range, or a mean or median value. However, just using the mean or median ignores the often considerable chronological uncertainties of the age estimates. Why not use all age-model information instead and plot your data using the `proxy.ghost` function?
+
+As outlined above, you can also assess age estimates of any core depth after the run, for example for 23.45cm:
+
+```{r, eval=FALSE}
+Bacon.hist(23.45)
+depth23.45 <- Bacon.Age.d(23.45)
+hist(depth23.45)
+mean(depth23.45)
+quantile(depth23.45, probs=c(.025, .975))
+```
+
+### Should I use Bayesian age-models only for cores with many dates?
+
+Bayesian age-models can deal with an impressive range of dating density and quality[^9], and work very well also for cores dated with only few dates. In fact, with few dates, the model choice becomes even more important, so a Bayesian age-model would be preferable also for low-resolution dated cores.
+
+### What are those blue blobs and what are they doing on the depth scale?
+
+Those are the age distributions of the dated depths. They lie on the calendar axis, and their probabilities for each year are expressed on the depth scale (imagine an invisible additional axis for each individual date). Each date has the same plotted area by default, so very precise dates will peak much higher (on the depth axis) than less precise dates.
+
+### What indicates a good age-depth model?
+
+First of all, check that the MCMC run (top-left panel) looks stable, like white noise with no major structure where iterations seem 'stuck'. Ensure that there is no burn-in remaining. If the MCMC looks bad, try a longer run by specifying a different value for `ssize` (default 2000). You can always run the `scissors` or `thinner` commands to trim the MCMC run to something nice and manageable after the run.
+
+Second, check that the posteriors (grey distributions) for the accumulation rate and memory (and if inferred, the hiatus) either overlap with the priors (green curves; then not much new has been learned), or whether the posterior has learned from marrying the priors with the data.
+
+Finally, check that the age-depth model itself looks reasonable given the information you have about the site. Is the fit with the dates OK, do any bends make sense, do any outlying dates make sense, does the greyscale uncertainty estimate look OK? Here some degree of user expertise is required.
+
+***
+
+[contents](./contents.html)
+<br>
+[<- previous [post-run analysis]](./postrun.html)
+
+[^1]: Blaauw, M., Christen, J.A., Bennett, K.D., Reimer, P.J., 2018. Double the dates and go for Bayes – impacts of model choice, dating density and quality on chronologies. *Quaternary Science Reviews* 188, 58-66
+
+[^2]: Blaauw, M., Christen, J.A., 2011. Flexible paleoclimate age-depth models using an autoregressive gamma process. *Bayesian Analysis* 6, 457-474
+
+[^3]: Reimer, P. et al., 2020. The IntCal20 northern hemisphere radiocarbon age calibration curve (0–55 cal kBP). *Radiocarbon* 62, 725-757
+
+[^4]: [cran.r-project.org/package=rbacon](https://cran.r-project.org/package=rbacon)
+
+[^5]: [www.r-project.org/](https://www.r-project.org/)
+
+[^6]: Reimer, P. et al., 2020. The IntCal20 northern hemisphere radiocarbon age calibration curve (0–55 cal kBP). *Radiocarbon* 62, 725-757
+
+[^7]: Heaton, T. et al. 2020. Marine20 — the marine radiocarbon age calibration curve (0–55,000 cal BP). *Radiocarbon* 62, 779-820
+
+[^8]: Hogg, A. et al. 2020. SHCal20 southern hemisphere calibration, 0–55,000 years cal BP. *Radiocarbon* 62 759-778
+
+[^9]: Blaauw, M., Christen, J.A., Bennett, K.D., Reimer, P.J., 2018. Double the dates and go for Bayes – impacts of model choice, dating density and quality on chronologies. *Quaternary Science Reviews* 188, 58-66

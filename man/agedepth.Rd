@@ -72,6 +72,14 @@ agedepth(
   title = set$core,
   title.location = "topleft",
   title.size = 1.5,
+  plot.labels = FALSE,
+  labels = c(),
+  label.age = 1,
+  label.size = 0.8,
+  label.col = "black",
+  label.offset = c(0, 0),
+  label.adj = c(0.5, 0),
+  label.rot = 0,
   after = set$after,
   bty = "l",
   mar.left = c(3, 3, 1, 0.5),
@@ -232,6 +240,22 @@ and its name should start with the core's name and end with '_depths.txt'. Then 
 \item{title.location}{Location of the title. Default \code{title.location='topleft'}.}
 
 \item{title.size}{Size of the title font. Defaults to \code{title.size=1.5}.}
+
+\item{plot.labels}{Whether or not to plot labels next to the dated depths. Defaults to \code{FALSE}.}
+
+\item{labels}{Add labels to the dates (as given by the first column of the .csv file). \code{FALSE} by default.}
+
+\item{label.age}{Position on the age axis of the date labels. By default draws them before the youngest age (1), but can also draw them after the oldest age (2), or above its mean (3).}
+
+\item{label.size}{Size of labels.}
+
+\item{label.col}{Colour of the labels. Defaults to the colour given to the borders of the dates.}
+
+\item{label.offset}{Offsets of the positions of the labels, giving the x and y offsets. Defaults to c(0,0).}
+
+\item{label.adj}{Justification of the labels. Follows R's adj option: A value of ‘0’ produces left-justified text, ‘0.5’ (the default) centered text and ‘1’ right-justified text.}
+
+\item{label.rot}{Rotation of the label. 0 by default (horizontal).}
 
 \item{after}{Sets a short section above and below hiatus.depths within which to calculate ages. For internal calculations - do not change.}
 

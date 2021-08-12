@@ -1,3 +1,14 @@
+# estimate how many MCMC iterations will be ran and returned
+bacon.its <- function(ssize=2e3, set=get('info'), ACCEP_EV=20, EVERY_MULT=5, BURN_IN_MULT=20) {
+  dims <- set$K + 2 # accrates, start age, accumulation rate, memory
+  store.every <- dims * EVERY_MULT # depends on the amount of parameters
+  MCMC.size <- ACCEP_EV * store.every * (ssize + BURN_IN_MULT) # all iterations
+  MCMC.kept <- MCMC.size - (store.every * BURN_IN_MULT) # removing burnin
+  MCMC.stored <- (MCMC.kept / store.every / ACCEP_EV) # just an estimate
+  message(" Will run ", MCMC.size, " iterations and store around ", MCMC.stored)
+}
+
+
 
 #################### functions for post-run checks and adaptations ####################
 

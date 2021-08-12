@@ -1,0 +1,17 @@
+---
+title: "Contents"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{"contents"}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+
+[Getting started with rbacon](./intro.html)
+<br>
+[Priors and other settings](./priorssettings.html)
+<br>
+[Files and folders](./foldersfiles.html)
+<br>
+[Post-run analysis](./postrun.html)
+<br>
+[FAQ](./FAQ.html)
