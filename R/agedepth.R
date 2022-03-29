@@ -12,7 +12,7 @@
 #' @param acc.lab The labels for the accumulation rate plot (top middle). Default \code{d.lab="Acc. rate (yr/cm)"} (or whatever units you're using).
 #' @param d.min Minimum depth of age-depth model (use this to extrapolate to depths higher than the top dated depth).
 #' @param d.max Maximum depth of age-depth model (use this to extrapolate to depths below the bottom dated depth).
-#' @param d.by Depth intervals at which ages are calculated. Default 1. Alternative depth intervals can be provided using, e.g., d.\code{by=0.5}.
+#' @param d.by Depth intervals at which ages are calculated. Default 1. Alternative depth intervals can be provided using, e.g., d.\code{d.by=0.5}.
 #' @param depths By default, Bacon will calculate the ages for the depths \code{d.min} to \code{d.max} in steps of \code{d.by}. Alternative depths can be provided as, e.g., \code{depths=seq(0, 100, length=500)} or as a file, e.g., \code{depths=read.table("CoreDepths.txt"}. See also \code{depths.file}.
 #' @param depths.file By default, Bacon will calculate the ages for the depths \code{d.min} to \code{d.max} in steps of \code{d.by}.
 #' If \code{depths.file=TRUE}, Bacon will read a file containing the depths for which you require ages.

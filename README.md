@@ -2,4 +2,4 @@
 
 Software for Bayesian age-depth modelling.
 
-This page is work in progress...
+For tutorials, check out the vignettes at the [CRAN](https://cran.r-project.org/package=rbacon) version.

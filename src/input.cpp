@@ -341,7 +341,8 @@ void Input::outputFiles(std::string outputfile1){
 		fprintf(F3, " %13.6g\n", vd[ vd.size()-1 ]); //and adds the energy to _PyPlum*/
 
 
-		delete x;
+		// delete x; MB commented this March 25 2022 to get rid of gcc debian warning
+		delete[] x;
 
 	}
 

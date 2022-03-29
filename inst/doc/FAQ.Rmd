@@ -1,8 +1,8 @@
 ---
-title: "FAQ"
+title: FAQ
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{"FAQ"}
+  %\VignetteIndexEntry{FAQ}
   %\VignetteEngine{knitr::rmarkdown}
 ---
 
@@ -20,11 +20,11 @@ Try `tofu()`, which does exactly the same but without the meat.
 
 Please cite Blaauw and Christen 2011[^2], as well as the rbacon version you are using (check this with `sessionInfo()`), any calibration curve(s)[^3] used and also any non-default settings.
 
-It is also a good idea to use the latest version of rbacon and to periodically check if new versions have come out. Either run `update.packages()`, `install.packages('rbacon')`, or check the current version number at CRAN[^4]. It is also a good idea to regularly check for and install updates to R itself[^5].
+It is also a good idea to use the latest version of rbacon and to periodically check if new versions have come out. Either run `update.packages()`, `install.packages('rbacon')`, or check the current version number at CRAN[^4]. Please regularly check for and install updates to R itself[^5].
 
 ### Can you help me?
 
-After reading the FAQ, you can contact Maarten Blaauw <maarten.blaauw@qub.ac.uk> for help with using rbacon, or Andres Christen <jac@cimat.mx> for more detailed statistical/Bayesian questions. Please provide any necessary .csv files and the *exact* list of R commands and output.
+After reading the FAQ, you can contact Maarten Blaauw <maarten.blaauw@qub.ac.uk> for help with using `rbacon', or Andres Christen <jac@cimat.mx> for more detailed statistical/Bayesian questions. Please provide any necessary .csv files and the *exact* list of R commands and output.
 
 ### I've found a bug or have an idea for a new feature
 
@@ -48,10 +48,10 @@ What it looks like in a spreadsheet program:
 And in a plain-text editor (with spaces added for enhanced readability):
 
 lab ID, Age, Error, Depth, cc<br>
-UBA-28881, 2200, 20, 5,  0<br>
-UBA-28882, 2400, 20, 10, 0<br>
-UBA-28883, 3550, 30, 20, 0<br>
-UBA-28884, 4200, 35, 25, 0<br>
+UBA-28881, 2200, 20, 5,  1<br>
+UBA-28882, 2400, 20, 10, 1<br>
+UBA-28883, 3550, 30, 20, 1<br>
+UBA-28884, 4200, 35, 25, 1<br>
 
 ### How can I set a different calibration curve?
 

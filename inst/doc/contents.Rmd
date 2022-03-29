@@ -1,8 +1,8 @@
 ---
-title: "Contents"
+title: Contents
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{"contents"}
+  %\VignetteIndexEntry{contents}
   %\VignetteEngine{knitr::rmarkdown}
 ---
 

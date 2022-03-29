@@ -1,8 +1,8 @@
 ---
-title: "Locations of Bacon folders and files"
+title: Locations of folders and files
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{"foldersfiles"}
+  %\VignetteIndexEntry{foldersfiles}
   %\VignetteEngine{knitr::rmarkdown}
 ---
 
@@ -29,10 +29,10 @@ What it looks like in a spreadsheet program:
 And in a plain-text editor (with spaces added for enhanced readability):
 
 lab ID, Age, Error, Depth, cc<br>
-UBA-28881, 2200, 20, 5,  0<br>
-UBA-28882, 2400, 20, 10, 0<br>
-UBA-28883, 3550, 30, 20, 0<br>
-UBA-28884, 4200, 35, 25, 0<br>
+UBA-28881, 2200, 20, 5,  1<br>
+UBA-28882, 2400, 20, 10, 1<br>
+UBA-28883, 3550, 30, 20, 1<br>
+UBA-28884, 4200, 35, 25, 1<br>
 
 Some users have reported problems with writing access to some of their folders, owing to permission limitations set by the computer's administrator. Perhaps you might have access to an external disk drive, e.g., `D:\`. Then run Bacon as `Bacon("MyCore", coredir="D:\")`. Then Bacon will look for a folder `MyCore` in `D:\`.
 

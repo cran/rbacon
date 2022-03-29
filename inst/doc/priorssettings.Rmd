@@ -1,8 +1,8 @@
 ---
-title: "Priors and other settings"
+title: Priors and other settings
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{"priorssettings"}
+  %\VignetteIndexEntry{priorssettings}
   %\VignetteEngine{knitr::rmarkdown}
 ---
 
@@ -26,7 +26,7 @@ With the adapted prior for the accumulation rate, now the lowermost date *is* ta
 
 ```{R, eval=FALSE}
 Bacon('RLGH3', acc.mean=50, acc.shape=100)
-````
+```
 
 ![age-depth model of RLGH3 using a much stronger accumulation rate prior](./images/RLGH3_50yrcm_strong.png)
 

@@ -1,8 +1,11 @@
+# rbacon 2.5.8
+* some minor updates to the vignettes
+* corrected a bug in input.cpp which caused a gcc warning in debian
+
 # rbacon 2.5.7
 * added an option to agedepth to plot date labels (plot.labels)
 * added vignettes
 * If ask=FALSE, Bacon now does not ask before writing a new folder (if required)
-
 
 # rbacon 2.5.6
 * removed closeAllConnections() as requested by Kurt Hornik (CRAN)

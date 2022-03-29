@@ -1,17 +1,40 @@
 Package: rbacon
 Type: Package
 Title: Age-Depth Modelling using Bayesian Statistics
-Version: 2.5.7
-Authors@R: c(
-    person("Maarten", "Blaauw", email = "maarten.blaauw@qub.ac.uk", role = c("aut", "cre")),
-    person("J. Andres", "Christen", email = "jac@cimat.mx", role = c("aut", "ctb", "cph")),
-    person("Marco A.", "Aquino Lopez", email = "aquino@cimat.mx", role="aut"),
-	person("Judith", "Esquivel Vazquez", email = "", role = "ctb"),
-  person("Oscar M.", "Gonzalez V.", email = "", role = "ctb"),
-	person("Ted", "Belding", role = "cph"),
-	person("James", "Theiler", role = "cph"),
-	person("Brian", "Gough", role = "cph"),
-	person("Charles", "Karney", role = "cph"))
+Version: 2.5.8
+Authors@R: 
+    c(person(given = "Maarten",
+             family = "Blaauw",
+             role = c("aut", "cre"),
+             email = "maarten.blaauw@qub.ac.uk",
+             comment = c(ORCID = "0000-0002-5680-1515")),
+      person(given = "J. Andres",
+             family = "Christen",
+             role = c("aut", "ctb", "cph"),
+             email = "jac@cimat.mx",
+             comment = c(ORCID = "0000-0002-5795-4345")),
+      person(given = "Marco A.",
+             family = "Aquino Lopez",
+             role = "aut",
+             email = "aquino@cimat.mx"),
+      person(given = "Judith",
+             family = "Esquivel Vazquez",
+             role = "ctb"),
+      person(given = "Oscar M.",
+             family = "Gonzalez V.",
+             role = "ctb"),
+      person(given = "Ted",
+             family = "Belding",
+             role = "cph"),
+      person(given = "James",
+             family = "Theiler",
+             role = "cph"),
+      person(given = "Brian",
+             family = "Gough",
+             role = "cph"),
+      person(given = "Charles",
+             family = "Karney",
+             role = "cph"))
 Description: An approach to age-depth modelling that uses Bayesian statistics to reconstruct accumulation histories for deposits, through combining radiocarbon and other dates with prior information. See Blaauw & Christen (2011).
 Encoding: UTF-8
 Repository: CRAN
@@ -19,13 +42,16 @@ License: GPL (>= 2)
 NeedsCompilation: yes
 Imports: coda (>= 0.19-1), graphics, grDevices, Rcpp (>= 0.12.12),
         stats, utils
-Depends: IntCal (>= 0.2.2), R (>= 3.5.0)
+Depends: IntCal (>= 0.3.0), R (>= 3.5.0)
 LinkingTo: Rcpp
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Suggests: knitr, rmarkdown, utf8
 VignetteBuilder: knitr
-Author: Maarten Blaauw [aut, cre],
-  J. Andres Christen [aut, ctb, cph],
+Maintainer: Maarten Blaauw <maarten.blaauw@qub.ac.uk>
+Packaged: 2022-03-29 14:48:27 UTC; maarten
+Author: Maarten Blaauw [aut, cre] (<https://orcid.org/0000-0002-5680-1515>),
+  J. Andres Christen [aut, ctb, cph]
+    (<https://orcid.org/0000-0002-5795-4345>),
   Marco A. Aquino Lopez [aut],
   Judith Esquivel Vazquez [ctb],
   Oscar M. Gonzalez V. [ctb],
@@ -33,6 +59,4 @@ Author: Maarten Blaauw [aut, cre],
   James Theiler [cph],
   Brian Gough [cph],
   Charles Karney [cph]
-Maintainer: Maarten Blaauw <maarten.blaauw@qub.ac.uk>
-Packaged: 2021-08-12 08:14:03 UTC; maarten
-Date/Publication: 2021-08-12 08:40:02 UTC
+Date/Publication: 2022-03-29 15:20:02 UTC

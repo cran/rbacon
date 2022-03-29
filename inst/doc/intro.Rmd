@@ -1,8 +1,8 @@
 ---
-title: "Getting started with rbacon"
+title: Getting started with rbacon
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{"gettingstarted"}
+  %\VignetteIndexEntry{gettingstarted}
   %\VignetteEngine{knitr::rmarkdown}
     \usepackage[utf8]{inputenc}
 ---

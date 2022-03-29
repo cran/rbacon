@@ -1,8 +1,8 @@
 ---
-title: "Post-run analysis"
+title: Post-run analysis
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{"postrun"}
+  %\VignetteIndexEntry{postrun}
   %\VignetteEngine{knitr::rmarkdown}
 ---
 

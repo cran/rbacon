@@ -24,8 +24,10 @@ agedepth.ghost <- function(set=get('info'), d.min=set$d.min, d.max=set$d.max, BC
   for(i in 1:length(hists)) { # was length(dseq)
   if(length(hists[[i]]) < 7)
       ages <- sort(unlist(hists[[i]])) else {
-       ages <- seq(hists[[i]]$th0, hists[[i]]$th1, length=hists[[i]]$n)
-       if(length(!is.na(ages)) > 0)
+       if(length(hists[[i]]$th0) == 0) # can't calculate ages beyond upper depths
+         ages <- NA else
+           ages <- seq(hists[[i]]$th0, hists[[i]]$th1, length=hists[[i]]$n)
+       if(length(ages[!is.na(ages)]) > 0)
         scales[i,] <- approx(ages, hists[[i]]$counts, ageseq, rule=2)$y
      }
   }

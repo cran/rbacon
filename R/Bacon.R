@@ -19,9 +19,14 @@ NULL
 # to enable direct use of ccurve, mix.curves, pMC.age & age.pMC
 library(IntCal)
 
-# do:
+# todo: check why there is an error with postbomb dates even if cc=0, DCH_Oct21 causes error in approx owing to NAs (in calibrate.R line 189 when very small errors?)
 
-# done: added tofu wrapper for Bacon function, added Vignettes, added option to print date labels to the age-depth model plot, if ask was FALSE, Bacon still asked about producing a Bacon_runs folder (if not present)
+
+# explore usage of data.table (R package)'s fread function, which reads large tables much faster than read.table (e.g., Bacon.AnaOut, Plum.AnaOut). Is a bit iffy though, might need [,2][[1]] or so. Do same for writing output file, using fwrite (scissors, thinner)?
+
+# do: is the value of 'thick' saved anywhere in the files? Perhaps in the .bacon file? Not really. Produce a file core_nsec.txt with thick, d.min and d.max in it? Not add as row to _settings.txt?
+
+# done:
 
 # for future versions: add function to estimate best thick value, Why is hiatus.max listed twice in _settings.txt? check if a less ugly solution can be found to internal_plots.R at line 26 (hists length < 7). This happens when there are some very precise dates causing non-creation of th0/th1, investigate the slowness of plotting after the Bacon run (not only dates, also the model's 95% ranges etc.), can ssize be predicted more accurately?, produce proxy.ghost graph with proxy uncertainties?, smooth bacon, check/adapt behaviour of AgesOfEvents around hiatuses, add function to estimate best thickness, F14C, if hiatus or boundary plot acc.posts of the individual sections?, allow for asymmetric cal BP errors (e.g. read from files), proxy.ghost very slow with long/detailed cores - optimization possible?, check again if/how/when Bacon gets confused by Windows usernames with non-ascii characters (works fine on Mac)
 
