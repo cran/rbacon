@@ -2,10 +2,10 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 bacon <- function(inputfile1, outputfile1, ssize, dircc) {
-    .Call('_rbacon_bacon', PACKAGE = 'rbacon', inputfile1, outputfile1, ssize, dircc)
+    .Call(`_rbacon_bacon`, inputfile1, outputfile1, ssize, dircc)
 }
 
 events <- function(th1, th2, th_shift, window, outputfname1, MCMCsamplesfname1, samplesize, K, c0, Dc, eventprobsfname1, depths_size) {
-    invisible(.Call('_rbacon_events', PACKAGE = 'rbacon', th1, th2, th_shift, window, outputfname1, MCMCsamplesfname1, samplesize, K, c0, Dc, eventprobsfname1, depths_size))
+    invisible(.Call(`_rbacon_events`, th1, th2, th_shift, window, outputfname1, MCMCsamplesfname1, samplesize, K, c0, Dc, eventprobsfname1, depths_size))
 }
 

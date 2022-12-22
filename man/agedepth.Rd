@@ -61,6 +61,7 @@ agedepth(
   supp.col = "purple",
   plot.tail = TRUE,
   remove.tail = TRUE,
+  MCMC.resample = TRUE,
   hiatus.col = grey(0.5),
   hiatus.lty = "12",
   rgb.scale = c(0, 0, 0),
@@ -128,7 +129,7 @@ agedepth(
 
 \item{d.max}{Maximum depth of age-depth model (use this to extrapolate to depths below the bottom dated depth).}
 
-\item{d.by}{Depth intervals at which ages are calculated. Default 1. Alternative depth intervals can be provided using, e.g., d.\code{by=0.5}.}
+\item{d.by}{Depth intervals at which ages are calculated. Default 1. Alternative depth intervals can be provided using, e.g., d.\code{d.by=0.5}.}
 
 \item{depths}{By default, Bacon will calculate the ages for the depths \code{d.min} to \code{d.max} in steps of \code{d.by}. Alternative depths can be provided as, e.g., \code{depths=seq(0, 100, length=500)} or as a file, e.g., \code{depths=read.table("CoreDepths.txt"}. See also \code{depths.file}.}
 
@@ -205,7 +206,7 @@ and its name should start with the core's name and end with '_depths.txt'. Then 
 
 \item{dates.col}{As an alternative to colouring dates based on whether they are 14C or not, sets of dates can be coloured as, e.g., \code{dates.col=colours()[2:100]}.}
 
-\item{pb.background}{Probability at which total Pb values are considered to have reached background values, or in other words, that their modelled values are at or below supported + detection limit (Al)). Setting this at .5 means that any depth with a Pb measurement, where at least half of the iterations model Pb values reaching background values, is flagged as having reached background. The age-model is not extended to any Pb measurements that have reached background.}
+\item{pb.background}{Probability at which total Pb values are considered to have reached background values, or in other words, that their modelled values are at or below supported + detection limit (Al)). Setting this at 0.5 means that any depth with a Pb measurement, where at least half of the iterations model Pb values reaching background values, is flagged as having reached background. The age-model is not extended to any Pb measurements that have reached background.}
 
 \item{pbmodelled.col}{Colour of the modelled 210Pb values. Defaults to shades of blue: \code{pbmodelled.col=function(x) rgb(0,0,1,x)}.}
 
@@ -218,6 +219,8 @@ and its name should start with the core's name and end with '_depths.txt'. Then 
 \item{plot.tail}{The depth axis can extend to all Pb measurements (\code{plot.tail=TRUE}), or leave out the ones where background has been reached.}
 
 \item{remove.tail}{Whether or not to remove the tail measurements when plotting. Sometimes automated removal might go wrong, so then this option can be used to avoid removing the tail measurements. Quite similar to plot.tail.}
+
+\item{MCMC.resample}{After the MCMC run, if there are more MCMC iterations than requested, only the last 'ssize' iterations will be retained. Defaults to TRUE.}
 
 \item{hiatus.col}{The colour of the depths of any hiatuses. Default \code{hiatus.col=grey(0.5)}.}
 

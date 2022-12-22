@@ -74,7 +74,8 @@ accrate.age <- function(age, set=get('info'), cmyr=FALSE, ages=c(), BCAD=set$BCA
      stop(" Warning, age outside the core's age range!\n")
 
   # can this be made faster, i.e. without the loop?
-  accs <- c()
+  # accs <- c()
+  accs <- rep(NA_real_, nrow(ages)) # suggested by henningte on github
   for(i in 2:ncol(ages)) {
     if(BCAD)
       these <- (ages[,i-1] > age) * (ages[,i] < age) else
@@ -119,18 +120,22 @@ accrate.age <- function(age, set=get('info'), cmyr=FALSE, ages=c(), BCAD=set$BCA
 #' @param rotate.axes The default is to plot the accumulation rates horizontally and the depth vertically (\code{rotate.axes=FALSE}). Change rotate.axes value to rotate axes.
 #' @param rev.d The direction of the depth axis can be reversed from the default (\code{rev.d=TRUE}.
 #' @param rev.acc The direction of the accumulation rate axis can be reversed from the default (\code{rev.acc=TRUE}).
+#' @param xaxs Extension of x-axis. By default, add some extra white-space at both extremes (\code{xaxs="r"}). See ?par for other options.
+#' @param yaxs Extension of y-axis. By default, add no extra white-space at both extremes (\code{yaxs="i"}). See ?par for other options.
 #' @param bty Type of box to be drawn around the plot (\code{"n"} for none, and \code{"l"} (default), \code{"7"}, \code{"c"}, \code{"u"}, or \code{"o"} for correspondingly shaped boxes).
+#' @param remove.laststep Add a white line to remove spurious lines at the extreme of the graph. Defaults to TRUE.
 #' @author Maarten Blaauw, J. Andres Christen
-#' @return A grey-scale plot of accumulation rate against core depth.
+#' @return A grey-scale plot of accumulation rate against core depth, and (invisibly) the list of depths and their accumulation rates (ranges, medians, means).
 #' @examples
 #' \dontrun{
 #'   Bacon(run=FALSE, coredir=tempfile())
 #'   agedepth(yr.res=50, d.res=50, d.by=10)
 #'   layout(1)
-#'   accrate.depth.ghost()
+#'   tmp <- accrate.depth.ghost()
+#'   head(tmp)
 #' }
 #' @export
-accrate.depth.ghost <- function(set=get('info'), d=set$elbows, d.lim=c(), acc.lim=c(), d.lab=c(), cmyr=FALSE, acc.lab=c(), dark=1, cutoff=0.001, rgb.scale=c(0,0,0), rgb.res=100, prob=0.95, plot.range=TRUE, range.col=grey(0.5), range.lty=2, plot.mean=TRUE, mean.col="red", mean.lty=2, plot.median=TRUE, median.col="blue", median.lty=2,  rotate.axes=FALSE, rev.d=FALSE, rev.acc=FALSE, bty="l") {
+accrate.depth.ghost <- function(set=get('info'), d=set$elbows, d.lim=c(), acc.lim=c(), d.lab=c(), cmyr=FALSE, acc.lab=c(), dark=1, cutoff=0.001, rgb.scale=c(0,0,0), rgb.res=100, prob=0.95, plot.range=TRUE, range.col=grey(0.5), range.lty=2, plot.mean=TRUE, mean.col="red", mean.lty=2, plot.median=TRUE, median.col="blue", median.lty=2,  rotate.axes=FALSE, rev.d=FALSE, rev.acc=FALSE, xaxs="r", yaxs="r", bty="l", remove.laststep=TRUE) {
   max.acc <- 0; max.dens <- 0
   acc <- list(); min.rng <- numeric(length(d)); max.rng <- numeric(length(d)); mean.rng <- numeric(length(d)); median.rng <- numeric(length(d))
   for(i in 1:length(d))
@@ -147,6 +152,8 @@ accrate.depth.ghost <- function(set=get('info'), d=set$elbows, d.lim=c(), acc.li
     mean.rng[i] <- mean(accs)
     median.rng[i] <- median(accs)
    }
+  stored <- cbind(d, min.rng, max.rng, median.rng, mean.rng)
+  colnames(stored) <- c("depth", "min.rng", "max.rng", "median", "mean")
 
   for(i in 1:length(d)) {
     acc[[i]]$y <- acc[[i]]$y/(dark*max.dens)
@@ -157,7 +164,7 @@ accrate.depth.ghost <- function(set=get('info'), d=set$elbows, d.lim=c(), acc.li
   if(length(d.lim) == 0)
     d.lim <- range(d)
   if(length(d.lab) == 0)
-    d.lab <- paste("depth (", set$depth.unit, ")", sep="")
+    d.lab <- paste0("depth (", set$depth.unit, ")")
   if(length(acc.lab) == 0)
     if(cmyr)
       acc.lab <- paste0("accumulation rate (", set$depth.unit, "/", set$age.unit, ")") else
@@ -171,37 +178,43 @@ accrate.depth.ghost <- function(set=get('info'), d=set$elbows, d.lim=c(), acc.li
     acc.lim <- rev(acc.lim)
 
   if(rotate.axes) {
-    plot(0, type="n", xlab=acc.lab, ylab=d.lab, ylim=d.lim, xlim=acc.lim, bty="n")
+    plot(0, type="n", xlab=acc.lab, ylab=d.lab, ylim=d.lim, xlim=acc.lim, bty="n", xaxs=xaxs, yaxs=yaxs)
     for(i in 2:length(d)) {
       accs <- acc[[i-1]]
       col <- rgb(rgb.scale[1], rgb.scale[2], rgb.scale[3], seq(max(accs$y[!is.na(accs$y)]), 0, length=rgb.res)) # was acc[[i]]
       image(accs$x, d[c(i-1, i)], t(1-t(accs$y)), add=TRUE, col=col) # was acc[[i]]
     }
     if(plot.range) {
-      lines(min.rng, d+(set$thick/2), col=range.col, lty=range.lty)
-      lines(max.rng, d+(set$thick/2), col=range.col, lty=range.lty)
+      lines(min.rng, d, type="s", col=range.col, lty=range.lty)
+      lines(max.rng, d, type="s", col=range.col, lty=range.lty)
     }
     if(plot.mean)
-      lines(mean.rng, d+(set$thick/2), col=mean.col, lty=mean.lty)
+      lines(mean.rng, d, type="s", col=mean.col, lty=mean.lty)
     if(plot.median)
-      lines(median.rng, d+(set$thick/2), col=median.col, lty=median.lty)
+      lines(median.rng, d, type="s", col=median.col, lty=median.lty)
+    if(remove.laststep)
+      abline(h=min(set$elbows), col="white", lwd=2)
   } else {
-      plot(0, type="n", xlab=d.lab, ylab=acc.lab, xlim=d.lim, ylim=acc.lim, bty="n")
+      plot(0, type="n", xlab=d.lab, ylab=acc.lab, xlim=d.lim, ylim=acc.lim, bty="n", xaxs=xaxs, yaxs=yaxs)
       for(i in 2:length(d)) {
         accs <- acc[[i-1]]
         col <- rgb(rgb.scale[1], rgb.scale[2], rgb.scale[3], seq(max(accs$y[!is.na(accs$y)]), 0, length=rgb.res)) # was acc[[i]]
         image(d[c(i-1, i)], accs$x, 1-t(accs$y), add=TRUE, col=col) # was acc[[i]]
-        }
+      }
       if(plot.range) {
-        lines(d+(set$thick/2), min.rng, col=range.col, lty=range.lty)
-        lines(d+(set$thick/2), max.rng, col=range.col, lty=range.lty)
+        lines(d, min.rng, type="s", col=range.col, lty=range.lty, pch=NA)
+        lines(d, max.rng, type="s", col=range.col, lty=range.lty, pch=NA)
         }
     if(plot.mean)
-      lines(d+(set$thick/2), mean.rng, col=mean.col, lty=mean.lty)
+      lines(d, mean.rng, type="s", col=mean.col, lty=mean.lty)
     if(plot.median)
-      lines(d+(set$thick/2), median.rng, col=median.col, lty=median.lty)
+      lines(d, median.rng, type="s", col=median.col, lty=median.lty)
+    if(remove.laststep)
+      abline(v=max(set$elbows), col="white", lwd=1.5)
     }
+
   box(bty=bty)  
+  invisible(stored)
 }
 
 
@@ -220,6 +233,7 @@ accrate.depth.ghost <- function(set=get('info'), d=set$elbows, d.lim=c(), acc.li
 #' @param set Detailed information of the current run, stored within this session's memory as variable info.
 #' @param age.lim Minimum and maximum calendar age ranges, calculated automatically by default (\code{age.lim=c()}).
 #' @param age.lab The labels for the calendar axis (default \code{age.lab="cal BP"} or \code{"BC/AD"} if \code{BCAD=TRUE}).
+#' @param kcal Use kcal BP. Default is \code{kcal=FALSE}.
 #' @param age.res Resolution or amount of greyscale pixels to cover the age scale of the plot. Default \code{age.res=400}.
 #' @param acc.res Resolution or amount of greyscale pixels to cover the accumulation rate scale plot. Default \code{age.res=400}.
 #' @param cutoff Point below which colours will no longer be printed. Default \code{cutoff=0.001}.
@@ -247,19 +261,20 @@ accrate.depth.ghost <- function(set=get('info'), d=set$elbows, d.lim=c(), acc.li
 #' @param yaxs Extension of the y-axis. White space can be added to the vertical axis using \code{yaxs="r"}.
 #' @param bty Type of box to be drawn around the plot (\code{"n"} for none, and \code{"l"} (default), \code{"7"}, \code{"c"}, \code{"u"}, or \code{"o"} for correspondingly shaped boxes).
 #' @author Maarten Blaauw, J. Andres Christen
-#' @return A greyscale plot of accumulation rate against calendar age.
+#' @return A greyscale plot of accumulation rate against calendar age, and (invisibly) the list of ages and their accumulation rates (ranges, medians, means).
 #' @examples
 #' \dontrun{
 #'   Bacon(run=FALSE, coredir=tempfile())
 #'   agedepth(age.res=20, d.res=20, d.by=10)
 #'   layout(1)
-#'   accrate.age.ghost(age.res=200, acc.res=100)
+#'   tmp <- accrate.age.ghost(age.res=200, acc.res=100)
+#'   head(tmp)
 #' }
 #' @export
-accrate.age.ghost <- function(set=get('info'), age.lim=c(), age.lab=c(), age.res=400, acc.res=200, cutoff=.001, dark=1, rgb.scale=c(0,0,0), rgb.res=100, prob=.95, plot.range=TRUE, range.col=grey(0.5), range.lty=2, plot.mean=TRUE, mean.col="red", mean.lty=2, plot.median=TRUE, median.col="blue", median.lty=2, acc.lim=c(), acc.lab=c(), BCAD=set$BCAD, cmyr=FALSE, rotate.axes=FALSE, rev.age=FALSE, rev.acc=FALSE, xaxs="i", yaxs="i", bty="l") {
+accrate.age.ghost <- function(set=get('info'), age.lim=c(), age.lab=c(), kcal=FALSE, age.res=400, acc.res=200, cutoff=.001, dark=1, rgb.scale=c(0,0,0), rgb.res=100, prob=.95, plot.range=TRUE, range.col=grey(0.5), range.lty=2, plot.mean=TRUE, mean.col="red", mean.lty=2, plot.median=TRUE, median.col="blue", median.lty=2, acc.lim=c(), acc.lab=c(), BCAD=set$BCAD, cmyr=FALSE, rotate.axes=FALSE, rev.age=FALSE, rev.acc=FALSE, xaxs="i", yaxs="i", bty="l") {
   if(length(age.lim) == 0) 
      age.lim <- extendrange(set$ranges[,5]) # just the mean ages, not the extremes
-  if(set$BCAD)
+  if(set$BCAD) # was set$BCAD
     age.lim <- 1950 - age.lim # work with cal BP internally
   age.seq <- seq(min(age.lim), max(age.lim), length=age.res)
     
@@ -284,6 +299,7 @@ accrate.age.ghost <- function(set=get('info'), age.lim=c(), age.lab=c(), age.res
   for(i in 1:age.res) {
     setTxtProgressBar(pb, i)
     acc <- accrate.age(age.seq[i], cmyr=cmyr, ages=ages, silent=TRUE, BCAD=FALSE)
+    acc <- acc[!is.na(acc)]
     if(length(acc[!is.na(acc)]) > 1) {
       z[i,] <- density(acc, from=min(acc.lim, na.rm=TRUE), to=max(acc.lim, na.rm=TRUE), n=acc.res)$y
       acc.rng[i,] <- quantile(acc, c((1-prob)/2, 1-((1-prob)/2)))
@@ -292,6 +308,8 @@ accrate.age.ghost <- function(set=get('info'), age.lim=c(), age.lab=c(), age.res
     }
   }
   message("\n")
+  stored <- cbind(age.seq, acc.rng[,1], acc.rng[,2], acc.median, acc.mean)
+  colnames(stored) <- c("ages", "min.rng", "max.rng", "median", "mean")
 
   z <- z/(dark*max(z)) # normalise, set dark to black
   z[z>1] <- 1 # avoid values > 1
@@ -304,7 +322,7 @@ accrate.age.ghost <- function(set=get('info'), age.lim=c(), age.lab=c(), age.res
   if(length(age.lab) == 0)
     if(BCAD)
       age.lab <- "BC/AD" else
-        age.lab <- "cal BP"
+        age.lab <- ifelse(kcal, "kcal BP", "cal BP")
   if(length(acc.lab) == 0)
     if(cmyr)
       acc.lab <- paste0("accumulation rate (", set$depth.unit, "/", set$age.unit, ")") else
@@ -313,12 +331,12 @@ accrate.age.ghost <- function(set=get('info'), age.lim=c(), age.lab=c(), age.res
   cols <- rgb(rgb.scale[1], rgb.scale[2], rgb.scale[3], seq(0, 1, length=rgb.res))
 
   if(rotate.axes) {
-    yaxt <- ifelse(BCAD, "n", "s")
+    yaxt <- ifelse(kcal || BCAD, "n", "s")
     plot(0, type="n", ylim=age.lim, ylab=age.lab, xlim=acc.lim, xlab=acc.lab, yaxs=xaxs, xaxs=yaxs, yaxt=yaxt, bty="n")
-    if(BCAD) {
-      ticks <- pretty(age.lim)
-      axis(2, ticks, labels=1950-ticks) 
-    }
+    if(BCAD)
+      axis(2, pretty(age.lim), labels=1950-pretty(age.lim)) else
+        if(kcal)
+          axis(2, pretty(age.lim), labels=pretty(age.lim)/1e3)
     image(acc.seq, age.seq, t(z), col=cols, add=TRUE)
     if(plot.range) {
       lines(acc.rng[,1], age.seq, pch=".", col=range.col, lty=range.lty)
@@ -329,12 +347,12 @@ accrate.age.ghost <- function(set=get('info'), age.lim=c(), age.lab=c(), age.res
     if(plot.median) 
       lines(acc.median, age.seq, col=median.col, lty=median.lty)
   } else {
-      xaxt <- ifelse(BCAD, "n", "s")
+      xaxt <- ifelse(kcal || BCAD, "n", "s")
       plot(0, type="n", xlim=age.lim, xlab=age.lab, ylim=acc.lim, xaxt=xaxt, ylab=acc.lab, xaxs=xaxs, yaxs=yaxs, bty="n")
-      if(BCAD) {
-        ticks <- pretty(age.lim)
-        axis(1, ticks, labels=1950-ticks)
-      }
+      if(BCAD)
+        axis(1, pretty(age.lim), labels=1950-pretty(age.lim)) else
+        if(kcal)
+          axis(1, pretty(age.lim), labels=pretty(age.lim)/1e3)
       image(age.seq, acc.seq, t(t(z)), col=cols, add=TRUE)
       if(plot.range) {
         lines(age.seq, acc.rng[,1], pch=".", col=range.col, lty=range.lty)
@@ -347,6 +365,7 @@ accrate.age.ghost <- function(set=get('info'), age.lim=c(), age.lab=c(), age.res
     }
 
   box(bty=bty)
+  invisible(stored)
 }
 
 
@@ -403,7 +422,7 @@ accrate.age.ghost <- function(set=get('info'), age.lim=c(), age.lab=c(), age.res
 #' @export
 flux.age.ghost <- function(proxy=1, age.lim=c(), yr.lim=age.lim, age.res=200, yr.res=age.res, set=get('info'), flux=c(), plot.range=TRUE, prob=.8, range.col=grey(0.5), range.lty=2, plot.mean=TRUE, mean.col="red", mean.lty=2, plot.median=TRUE, median.col="blue", median.lty=2, flux.lim=c(), flux.lab=expression("flux (g cm"^-1*" yr"^-1*")"), upper=.95, rgb.scale=c(0,0,0), rgb.res=100, dark=set$dark, cutoff=0.001, BCAD=set$BCAD, age.lab=c(), yr.lab=age.lab, rotate.axes=FALSE, rev.flux=FALSE, rev.age=FALSE, rev.yr=rev.age) {
   if(length(flux) == 0) { # then read a .csv file, expecting data in columns with headers
-    flux <- read.csv(paste(set$coredir, set$core, "/", set$core, "_flux.csv", sep=""))
+    flux <- read.csv(paste0(set$coredir, set$core, "/", set$core, "_flux.csv"))
     flux <- cbind(flux[,1], flux[,1+proxy])
       isNA <- is.na(flux[,2])
       flux <- flux[!isNA,]
@@ -420,17 +439,20 @@ flux.age.ghost <- function(proxy=1, age.lim=c(), yr.lim=age.lim, age.res=200, yr
   age.seq <- seq(min(min.age, max.age), max(min.age, max.age), length=age.res)
   fluxes <- array(NA, dim=c(nrow(set$output), length(age.seq)))
   for(i in 1:nrow(set$output)) {
+    #setTxtProgressBar(pb, i)
     ages <- as.numeric(set$output[i,1:(ncol(set$output)-1)]) # 1st step to calculate ages for each set$elbows
     ages <- c(ages[1], ages[1]+set$thick * cumsum(ages[2:length(ages)])) # now calculate the ages for each set$elbows
     ages.d <- approx(ages, c(set$elbows, max(set$elbows)+set$thick), age.seq, rule=1)$y # find the depth belonging to each age.seq, NA if none
     ages.i <- floor(approx(ages, (length(set$elbows):0)+1, age.seq, rule=2)$y) # find the column belonging to each age.seq
-    flux.d <- approx(flux[,1], flux[,2], ages.d)$y # interpolate flux (in depth) to depths belonging to each age.seq
+    flux.d <- approx(flux[,1], flux[,2], ages.d, rule=1)$y # interpolate flux (in depth) to depths belonging to each age.seq
     fluxes[i,] <- flux.d / as.numeric(set$output[i,(1+ages.i)]) # (amount / cm^3) / (yr/cm) = amount * cm-2 * yr-1
+    fluxes[is.na(fluxes)] <- 0
   }
   message("\n")
   if(length(flux.lim) == 0)
     flux.lim <- c(0, quantile(fluxes[!is.na(fluxes)], upper))
   max.dens <- 0
+
   for(i in 1:length(age.seq)) {
     tmp <- fluxes[!is.na(fluxes[,i]),i] # all fluxes that fall at the required age.seq age
     if(length(tmp) > 0)
@@ -463,7 +485,7 @@ flux.age.ghost <- function(proxy=1, age.lim=c(), yr.lim=age.lim, age.res=200, yr
       flux.hist <- density(tmp, from=0, to=max(flux.lim))
       flux.hist$y <- flux.hist$y - min(flux.hist$y) # no negative fluxes
       flux.hist$y <- flux.hist$y / (dark*max.dens) # normalise
-      flux.hist$y[flux.hist$y > 1] <- 1 # na values > 1
+      flux.hist$y[flux.hist$y > 1] <- 1 # no values > 1
       flux.hist$y[flux.hist$y < cutoff] <- NA # do not plot very small/light greyscale values
       col <- rgb(rgb.scale[1], rgb.scale[2], rgb.scale[3],
         seq(0, max(flux.hist$y[!is.na(flux.hist$y)]), length=rgb.res))

@@ -1,7 +1,17 @@
 Package: rbacon
 Type: Package
 Title: Age-Depth Modelling using Bayesian Statistics
-Version: 2.5.8
+Version: 3.0.0
+Author: Maarten Blaauw [aut, cre] (<https://orcid.org/0000-0002-5680-1515>),
+  J. Andres Christen [aut, ctb, cph]
+    (<https://orcid.org/0000-0002-5795-4345>),
+  Marco A. Aquino Lopez [aut] (<https://orcid.org/0000-0002-5076-7205>),
+  Judith Esquivel Vazquez [ctb],
+  Oscar M. Gonzalez V. [ctb],
+  Ted Belding [cph],
+  James Theiler [cph],
+  Brian Gough [cph],
+  Charles Karney [cph]
 Authors@R: 
     c(person(given = "Maarten",
              family = "Blaauw",
@@ -16,7 +26,8 @@ Authors@R:
       person(given = "Marco A.",
              family = "Aquino Lopez",
              role = "aut",
-             email = "aquino@cimat.mx"),
+             email = "aquino@cimat.mx",
+             comment = c(ORCID = "0000-0002-5076-7205")),
       person(given = "Judith",
              family = "Esquivel Vazquez",
              role = "ctb"),
@@ -41,22 +52,12 @@ Repository: CRAN
 License: GPL (>= 2)
 NeedsCompilation: yes
 Imports: coda (>= 0.19-1), graphics, grDevices, Rcpp (>= 0.12.12),
-        stats, utils
-Depends: IntCal (>= 0.3.0), R (>= 3.5.0)
+        stats, utils, data.table
+Depends: rintcal (>= 0.5.2), R (>= 3.5.0)
 LinkingTo: Rcpp
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.3
 Suggests: knitr, rmarkdown, utf8
 VignetteBuilder: knitr
 Maintainer: Maarten Blaauw <maarten.blaauw@qub.ac.uk>
-Packaged: 2022-03-29 14:48:27 UTC; maarten
-Author: Maarten Blaauw [aut, cre] (<https://orcid.org/0000-0002-5680-1515>),
-  J. Andres Christen [aut, ctb, cph]
-    (<https://orcid.org/0000-0002-5795-4345>),
-  Marco A. Aquino Lopez [aut],
-  Judith Esquivel Vazquez [ctb],
-  Oscar M. Gonzalez V. [ctb],
-  Ted Belding [cph],
-  James Theiler [cph],
-  Brian Gough [cph],
-  Charles Karney [cph]
-Date/Publication: 2022-03-29 15:20:02 UTC
+Packaged: 2022-12-21 20:53:34 UTC; maarten
+Date/Publication: 2022-12-22 09:50:07 UTC

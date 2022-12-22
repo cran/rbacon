@@ -201,7 +201,7 @@ class BaconFix: public Bacon {
 				: Bacon((KK+1) + 1 + more_pars) {
 
 
-				//Use the student t model, 1, or the traditional normal model, 0
+				//Use the t model (Christen and Perez 2009), 1, or the traditional normal model, 0
 				useT = uuseT;
 
 				dets = detsdets;

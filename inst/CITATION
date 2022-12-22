@@ -1,0 +1,13 @@
+bibentry("Article",
+author = "Maarten Blaauw and J. Andr{\'e}s Christen",
+title = "Flexible paleoclimate age-depth models using an autoregressive gamma process",
+journal = "Bayesian Analysis",
+volume = "6",
+number = "3",
+publisher = "International Society for Bayesian Analysis",
+pages = "457 -- 474",
+keywords = "Age-Depth models, AR Gamma process, Paleoecology, Radiocarbon",
+year = "2011",
+doi = "10.1214/11-BA618",
+URL = "https://doi.org/10.1214/11-BA618"
+)

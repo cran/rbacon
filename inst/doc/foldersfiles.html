@@ -108,13 +108,20 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   for (var i = 0; i < sheets.length; i++) {
     if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
     try { var rules = sheets[i].cssRules; } catch (e) { continue; }
-    for (var j = 0; j < rules.length; j++) {
+    var j = 0;
+    while (j < rules.length) {
       var rule = rules[j];
       // check if there is a div.sourceCode rule
-      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
       var style = rule.style.cssText;
       // check if color or background-color is set
-      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
       // replace div.sourceCode by a pre.sourceCode rule
       sheets[i].deleteRule(j);
       sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
@@ -253,8 +260,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </tr>
 </tbody>
 </table>
-<p>By default, Bacon uses the student-t distribution<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> to model the dates, rather than the more usual normal distribution (default: <code>Bacon(normal=FALSE)</code>). With the default parameters <code>t.a=3</code> and <code>t.b=4</code>, this distribution looks very much like the normal distribution, but it has wider tails. This makes for a very robust model, because it handles scatter and outliers very well. In many cases, Bacon will be able to find its way through most dates while bypassing outlying dates.</p>
-<p>In some cases, some dates could be more reliable than others (e.g., some would consist of very reliable charcoal particles, while others would be based on bulk sediment). Then such dates can be given student-t values which resemble the normal distribution (e.g., <code>t.a=33</code>, <code>t.b=34</code>), either as option in the Bacon command or within the .csv file:</p>
+<p>By default, Bacon uses the t distribution<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> to model the dates, rather than the more usual normal distribution (default: <code>Bacon(normal=FALSE)</code>). With the default parameters <code>t.a=3</code> and <code>t.b=4</code>, this distribution looks very much like the normal distribution, but it has wider tails. This makes for a very robust model, because it handles scatter and outliers very well. In many cases, Bacon will be able to find its way through most dates while bypassing outlying dates.</p>
+<p>In some cases, some dates could be more reliable than others (e.g., some would consist of very reliable charcoal particles, while others would be based on bulk sediment). Then such dates can be given t values which resemble the normal distribution (e.g., <code>t.a=33</code>, <code>t.b=34</code>), either as option in the Bacon command or within the .csv file:</p>
 <table>
 <thead>
 <tr class="header">

@@ -2,7 +2,7 @@
 title: Locations of folders and files
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{foldersfiles}
+  %\VignetteIndexEntry{Locations of folders and files}
   %\VignetteEngine{knitr::rmarkdown}
 ---
 
@@ -46,9 +46,9 @@ If you have dates with age offsets, such as marine dates from a region with a kn
 | UBA-28883   | 3550        | 30    | 20       |  2   | 130     |   30      |
 | UBA-28884   | 4200        | 35    | 25       |  2   | 130     |   30      |
 
-By default, Bacon uses the student-t distribution[^1] to model the dates, rather than the more usual normal distribution (default: `Bacon(normal=FALSE)`). With the default parameters `t.a=3` and `t.b=4`, this distribution looks very much like the normal distribution, but it has wider tails. This makes for a very robust model, because it handles scatter and outliers very well. In many cases, Bacon will be able to find its way through most dates while bypassing outlying dates.
+By default, Bacon uses the t distribution[^1] to model the dates, rather than the more usual normal distribution (default: `Bacon(normal=FALSE)`). With the default parameters `t.a=3` and `t.b=4`, this distribution looks very much like the normal distribution, but it has wider tails. This makes for a very robust model, because it handles scatter and outliers very well. In many cases, Bacon will be able to find its way through most dates while bypassing outlying dates.
 
-In some cases, some dates could be more reliable than others (e.g., some would consist of very reliable charcoal particles, while others would be based on bulk sediment). Then such dates can be given student-t values which resemble the normal distribution (e.g., `t.a=33`, `t.b=34`), either as option in the Bacon command or within the .csv file:
+In some cases, some dates could be more reliable than others (e.g., some would consist of very reliable charcoal particles, while others would be based on bulk sediment). Then such dates can be given t values which resemble the normal distribution (e.g., `t.a=33`, `t.b=34`), either as option in the Bacon command or within the .csv file:
 
 | lab ID      | Age         | Error |  Depth   |  cc  | delta.R | delta.STD | t.a   |   t.b    |
 | ----------- | ----------- | ----- | -------- | ---- | ------- | --------- | ----  |   -----  |

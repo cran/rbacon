@@ -36,9 +36,10 @@ the files:
 #define BUFFSIZE 4000
 
 //the "every" thinning subsampling parameter is EVERY_MULT*All.Dim()
-#define EVERY_MULT 5
-//The burn in is BURN_IN_MULT*All.Dim()
-#define BURN_IN_MULT 200
+//when we were saving only accepted iterations EVERY_MULT was 5
+#define EVERY_MULT 25
+//The burn in is BURN_IN_MULT*All.Dim(), this was 200
+#define BURN_IN_MULT 3000
 
 //Every how many iterations we expect and acceptance: inverse of the acceptance rate
 #define ACCEP_EV 20
@@ -68,17 +69,6 @@ int bacon( std::string inputfile1, std::string outputfile1, int ssize, std::stri
 //  char outputfile[]="test.out";
   //printf("%s %s %d \n",inputfile,outputfile,ssize);
 
-  /*
-
-  - Falta hacer Mov, no funciona por el momento:  May 2009.
-
-  - Hacer hist, command line para un solo rango de profundidades:
-  hist 10 10.5 1 MSB2K.out
-  d1  d2  bin size
-
-  -
-  */
-
   //	if (argc < 4) {
   // 	printf("Usage: bacon inputfile outputfile ssize\n");
   //
@@ -103,9 +93,12 @@ int bacon( std::string inputfile1, std::string outputfile1, int ssize, std::stri
   //ssize = it/(ACCEP_EV * All.Dim() * EVERY_MULT) - BURN_IN_MULT
   //Then we let
 
-  int it = ACCEP_EV * All.Dim() * EVERY_MULT * (ssize + BURN_IN_MULT);
+  //this was the previous definition of number of iterations, when we were saving accepted iterations only
+  //int it = ACCEP_EV * All.Dim() * EVERY_MULT * (ssize + BURN_IN_MULT);
+  int it = EVERY_MULT * All.Dim() * (BURN_IN_MULT + ssize);
 
-  int every=  -1*EVERY_MULT*All.Dim(); // only accepted iterations
+  //int every=  -1*EVERY_MULT*All.Dim(); // only accepted iterations
+  int every =  EVERY_MULT*All.Dim();
 
   //Run the twalk
   All.RunTwalk( outputfile, it, every);

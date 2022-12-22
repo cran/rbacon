@@ -1,3 +1,17 @@
+# rbacon 3.0.0
+* accrates.depth.ghost() and accrate.age.ghost() now invisibly return the ranges, medians and means for each depth resp. age for subsequent use, e.g., tmp <- accrates.depth.ghost(); head(tmp)
+* MCMC iterations are now stored in the .out files irrespective of whether they were accepted or rejected
+* ssize is now much more predictable (if there are more rows in the output file than set by ssize, rbacon keeps only the last n=ssize rows)
+* files are read and written faster (assuming that the data.table R package is installed and loaded, which can be a problem on Macs)
+* corrected the help description for Bacon.d.Age() with thanks to Henningte
+* the length of the ages output of accrate.age() is now the same even if there are NAs in the output (with thanks to Henningte)
+* corrected (hopefully) a bug in read.dets related to logical comparisons with variable lengths causing errors in R>=4.2 (with thanks to Nick McKay for reporting)
+* accrate.age.ghost gains a kcal option
+* repaired warning message about lengths of logical tests
+* now links to rintcal package (renamed from IntCal)
+* better Plum plots
+* runs can now be interrupted by pressing ctrl+c (experimental)
+
 # rbacon 2.5.8
 * some minor updates to the vignettes
 * corrected a bug in input.cpp which caused a gcc warning in debian
@@ -5,7 +19,7 @@
 # rbacon 2.5.7
 * added an option to agedepth to plot date labels (plot.labels)
 * added vignettes
-* If ask=FALSE, Bacon now does not ask before writing a new folder (if required)
+* if ask=FALSE, Bacon now does not ask before writing a new folder (if so required)
 
 # rbacon 2.5.6
 * removed closeAllConnections() as requested by Kurt Hornik (CRAN)

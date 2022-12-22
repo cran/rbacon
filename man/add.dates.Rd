@@ -18,7 +18,7 @@ add.dates(
   t.a = set$t.a,
   t.b = set$t.b,
   date.res = 100,
-  height = 1,
+  height = 0.1,
   calheight = 1,
   agesteps = 1,
   cutoff = 0.005,
@@ -29,7 +29,7 @@ add.dates(
   up = TRUE,
   BCAD = FALSE,
   pch = 4,
-  ccdir = ""
+  cc.dir = c()
 )
 }
 \arguments{
@@ -47,19 +47,19 @@ add.dates(
 
 \item{postbomb}{Use a postbomb curve for negative (i.e. postbomb) 14C ages. \code{0 = none, 1 = NH1, 2 = NH2, 3 = NH3, 4 = SH1-2, 5 = SH3}}
 
-\item{normal}{By default, Bacon uses the student's t-distribution to treat the dates. Use \code{normal=TRUE} to use the normal/Gaussian distribution. This will generally give higher weight to the dates.}
+\item{normal}{By default, Bacon uses the t-distribution (Christen and Perez 2009) to treat the dates. Use \code{normal=TRUE} to use the normal/Gaussian distribution. This will generally give higher weight to the dates.}
 
 \item{delta.R}{Mean of core-wide age offsets (e.g., regional marine offsets).}
 
 \item{delta.STD}{Error of core-wide age offsets (e.g., regional marine offsets).}
 
-\item{t.a}{The dates are treated using the student's t distribution by default (\code{normal=FALSE}).
-The student's t-distribution has two parameters, t.a and t.b, set at 3 and 4 by default (see Christen and Perez, 2010).
+\item{t.a}{The dates are treated using the t distribution by default (\code{normal=FALSE}).
+The t model has two parameters, t.a and t.b, set at 3 and 4 by default (see Christen and Perez, 2010).
 If you want to assign narrower error distributions (more closely resembling the normal distribution), set t.a and t.b at for example 33 and 34 respectively (e.g., for specific dates in your .csv file).
 For symmetry reasons, t.a must always be equal to t.b-1.}
 
-\item{t.b}{The dates are treated using the student's t distribution by default (\code{normal=FALSE}).
-The student's t-distribution has two parameters, t.a and t.b, set at 3 and 4 by default (see Christen and Perez, 2010).
+\item{t.b}{The dates are treated using the t distribution by default (\code{normal=FALSE}).
+The t-distribution has two parameters, t.a and t.b, set at 3 and 4 by default (see Christen and Perez, 2010).
 If you want to assign narrower error distributions (more closely resembling the normal distribution), set t.a and t.b at for example 33 and 34 respectively (e.g., for specific dates in your .csv file).
 For symmetry reasons, t.a must always be equal to t.b-1.}
 
@@ -87,7 +87,7 @@ For symmetry reasons, t.a must always be equal to t.b-1.}
 
 \item{pch}{The shape of any marker to be added to the date. Defaults to a cross, \code{pch=4}. To leave empty, use \code{pch=NA}.}
 
-\item{ccdir}{Directory where the calibration curves for C14 dates \code{cc} are located. By default \code{ccdir=""}.}
+\item{cc.dir}{Directory where the calibration curves for C14 dates \code{cc} are located. By default \code{ccdir=c()}.}
 }
 \value{
 A date's distribution, added to an age-depth plot.
@@ -96,7 +96,7 @@ A date's distribution, added to an age-depth plot.
 Add dated depths to plots, e.g. to show dates that weren't used in the age-depth model
 }
 \details{
-Sometimes it is useful to add additional dating information to age-depth plots, e.g., to show outliers or how dates calibrate with different estimated offsets.
+Sometimes it is useful to add additional dating information to age-depth plots, e.g., to show outliers or how dates calibrate with different estimated offsets. Calls rintcal's draw.dates function.
 }
 \examples{
 \donttest{

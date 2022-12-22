@@ -2,7 +2,7 @@
 title: Getting started with rbacon
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{gettingstarted}
+  %\VignetteIndexEntry{Getting started with rbacon}
   %\VignetteEngine{knitr::rmarkdown}
     \usepackage[utf8]{inputenc}
 ---
@@ -15,7 +15,7 @@ Bacon works through R (or Rstudio), and requires a recent version of R (at least
 install.packages('rbacon')
 ``` 
 
-To use rbacon, first the package has to be loaded (this will also load its companion package IntCal):
+To use rbacon, first the package has to be loaded (this will also load its companion package rintcal):
 
 ```{r}
 library(rbacon)
@@ -42,6 +42,10 @@ Bacon will calibrate any C-14 dates, do the MCMC run, calculate age ranges, prod
 ![Bacon output plot](./images/Bacon_output.png)
 
 Besides the graph, Bacon also produces files containing age estimates (95% ranges and the mean) for each depth (by default every cm from the top to the bottom core depth). This file can be found in the core's folder (see [here](./foldersfiles.html)).
+
+rbacon is open-source software; you are free to use, copy, distribute and modify it, but please do read this tutorial, the help functions and accompanying paper before using the program. This software is distributed under the terms of the GNU General Public Licence. rbacon does not come with any warranty and the authors do not assume any responsibility for the usefulness of any portion of this program. *Do cite this program when modifying or using it, including its version, applied settings and calibration curves used.*
+
+Parts of this software remain under construction. Details such as the default settings and behaviour could change between versions, so please check this manual for the latest information. You are most welcome to report bugs, ideas and missing features to Maarten <maarten.blaauw@qub.ac.uk>, Marco <aquino@cimat.mx> or Andrés <jac@cimat.mx>.
 
 ***
 

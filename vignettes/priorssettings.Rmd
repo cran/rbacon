@@ -2,7 +2,7 @@
 title: Priors and other settings
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{priorssettings}
+  %\VignetteIndexEntry{Priors and other settings}
   %\VignetteEngine{knitr::rmarkdown}
 ---
 

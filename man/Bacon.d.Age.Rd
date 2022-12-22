@@ -24,10 +24,10 @@ Bacon.d.Age(
 \item{na.rm}{Whether or not to remove NA values (ages within slumps)}
 }
 \value{
-Outputs all MCMC-derived ages for a given depth.
+Outputs all MCMC-derived depths for a given age.
 }
 \description{
-Output all depths of a single given MCMC-derived age estimate.
+Output all MCMC-derived depth estimates for a single given age.
 }
 \details{
 Obtaining an age-depth model is often only a step towards a goal, e.g., plotting a core's

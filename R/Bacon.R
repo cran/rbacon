@@ -8,27 +8,25 @@
 #' @importFrom grDevices dev.copy2pdf dev.cur dev.list dev.off extendrange grey pdf rgb
 #' @importFrom graphics abline axis box curve hist image layout legend lines mtext par plot points polygon rect segments text
 #' @importFrom stats approx coef dbeta density dgamma dnorm dunif lm median quantile rnorm weighted.mean  
-#' @importFrom utils packageName read.csv read.table setTxtProgressBar txtProgressBar write.table 
+#' @importFrom utils packageName read.csv read.table setTxtProgressBar txtProgressBar write.table
 #' @importFrom Rcpp evalCpp
 #' @importFrom coda as.mcmc gelman.diag mcmc.list
-#' @import IntCal
-#' @useDynLib rbacon
+#' @importFrom data.table fread fwrite
+#' @importFrom rintcal ccurve draw.dates
+#' @useDynLib rbacon, .registration=TRUE
 #' @name rbacon
 NULL
 
-# to enable direct use of ccurve, mix.curves, pMC.age & age.pMC
-library(IntCal)
+# to enable direct use of ccurve, mix.curves, calibration functions, pMC.age & age.pMC
+library(rintcal)
 
-# todo: check why there is an error with postbomb dates even if cc=0, DCH_Oct21 causes error in approx owing to NAs (in calibrate.R line 189 when very small errors?)
-
-
-# explore usage of data.table (R package)'s fread function, which reads large tables much faster than read.table (e.g., Bacon.AnaOut, Plum.AnaOut). Is a bit iffy though, might need [,2][[1]] or so. Do same for writing output file, using fwrite (scissors, thinner)?
-
-# do: is the value of 'thick' saved anywhere in the files? Perhaps in the .bacon file? Not really. Produce a file core_nsec.txt with thick, d.min and d.max in it? Not add as row to _settings.txt?
+# todo:
 
 # done:
 
-# for future versions: add function to estimate best thick value, Why is hiatus.max listed twice in _settings.txt? check if a less ugly solution can be found to internal_plots.R at line 26 (hists length < 7). This happens when there are some very precise dates causing non-creation of th0/th1, investigate the slowness of plotting after the Bacon run (not only dates, also the model's 95% ranges etc.), can ssize be predicted more accurately?, produce proxy.ghost graph with proxy uncertainties?, smooth bacon, check/adapt behaviour of AgesOfEvents around hiatuses, add function to estimate best thickness, F14C, if hiatus or boundary plot acc.posts of the individual sections?, allow for asymmetric cal BP errors (e.g. read from files), proxy.ghost very slow with long/detailed cores - optimization possible?, check again if/how/when Bacon gets confused by Windows usernames with non-ascii characters (works fine on Mac)
+# replacing the plotting of the calibrated distributions by rintcal's functions doesn't seem to speed up anything, so keeping the original method in place for now.
+
+# for future versions: add function to estimate best thick value, check if a less ugly solution can be found to internal_plots.R at line 26 (hists length < 7). This happens when there are some very precise dates causing non-creation of th0/th1, investigate the slowness of plotting after the Bacon run (not only dates, also the model's 95% ranges etc.), produce proxy.ghost graph with proxy uncertainties?, smooth bacon, check/adapt behaviour of AgesOfEvents around hiatuses, F14C, if hiatus or boundary plot acc.posts of the individual sections?, allow for asymmetric cal BP errors (e.g. read from files), proxy.ghost very slow with long/detailed cores - optimization possible?, check again if/how/when Bacon gets confused by Windows usernames with non-ascii characters (works fine on Mac; use normalizePath or other R-based solutions)
 
 # added line 133 to bacon.cpp, All.outputFiles(outputfile1); this line is present in rplum's bacon.cpp
 # added #include <vector> at line 14 of input.h. 
@@ -73,7 +71,7 @@ library(IntCal)
 #' @param d.min Minimum depth of age-depth model (use this to extrapolate to depths higher than the top dated depth).
 #' @param d.max Maximum depth of age-depth model (use this to extrapolate to depths below the bottom dated depth).
 #' @param add.bottom Add a model section at the bottom of the core, in order to ensure the bottommost date is taken into account. Default \code{add.bottom=TRUE}. This is a new option and can cause age-models to differ from previous version. Please re-run the model if in doubt.
-#' @param d.by Depth intervals at which ages are calculated. Defaults to \code{d.by=1}.
+#' @param d.by Depth intervals at which ages are calculated. Defaults to \code{d.by=1}. Please ensure that the value of d.by is smaller than that of 'thick', otherwise plots might turn out wrong.
 #' @param seed Seed used for C++ executions. If it is not assigned (\code{seed=NA}; default) then the seed is set by system.
 #' @param depth.unit Units of the depths. Defaults to \code{depth.unit="cm"}.
 #' @param age.unit Units of the ages. Defaults to \code{age.unit="yr"}.
@@ -106,21 +104,19 @@ library(IntCal)
 #' @param cc2 For marine 14C dates (Marine20).
 #' @param cc3 For southern hemisphere 14C dates (SHCal20).
 #' @param cc4 Use an alternative curve (3 columns: cal BP, 14C age, error, separated by white spaces and saved as a plain-text file). See \code{ccdir}.
-#' @param ccdir Directory where the calibration curves for C14 dates \code{cc} are located. By default \code{ccdir=""}.
-#' For example, use \code{ccdir="."} to choose current working directory, or \code{ccdir="Curves/"} to choose sub-folder \code{Curves/}. Note that all calibration curves should reside in the same directory. If you want to add a custom-built curve, put it in the directory where the default calibration curves are (probably \code{list.files(paste0(.libPaths(), "/IntCal/extdata"))}).
-#' Alternatively produce a new folder, and add your curve as well as the default calibration curves there (cc1, cc2 and cc3; e.g., \code{write.table(ccurve(1), "./3Col_intcal20.14C", sep="\t")}.)
+#' @param ccdir Directory where the calibration curves for C14 dates \code{cc} are located. By default uses the location of the rintcal package which provides the calibration curves. If you want to use custom-made calibration curves, first set up a new folder using the function new.ccdir() in the rintcal package, e.g., \code{new.ccdir="MyCurves"}, the place the custom curve in that folder.
 #' @param postbomb Use a postbomb curve for negative (i.e. postbomb) 14C ages. \code{0 = none, 1 = NH1, 2 = NH2, 3 = NH3, 4 = SH1-2, 5 = SH3}
 #' @param delta.R Mean of core-wide age offsets (e.g., regional marine offsets).
 #' @param delta.STD Error of core-wide age offsets (e.g., regional marine offsets).
-#' @param t.a The dates are treated using the student's t distribution by default (\code{normal=FALSE}).
-#' The student's t-distribution has two parameters, t.a and t.b, set at 3 and 4 by default (see Christen and Perez, 2010).
+#' @param t.a The dates are treated using the t distribution (Christen and Perez 2009) by default (\code{normal=FALSE}).
+#' This t-distribution has two parameters, t.a and t.b, set at 3 and 4 by default (see Christen and Perez, 2010).
 #' If you want to assign narrower error distributions (more closely resembling the normal distribution), set t.a and t.b at for example 33 and 34 respectively (e.g., for specific dates in your .csv file).
 #' For symmetry reasons, t.a must always be equal to t.b-1.
-#' @param t.b The dates are treated using the student's t distribution by default (\code{normal=FALSE}).
-#' The student's t-distribution has two parameters, t.a and t.b, set at 3 and 4 by default (see Christen and Perez, 2010).
+#' @param t.b The dates are treated using t distribution by default (\code{normal=FALSE}).
+#' The t-distribution has two parameters, t.a and t.b, set at 3 and 4 by default (see Christen and Perez, 2009).
 #' If you want to assign narrower error distributions (more closely resembling the normal distribution), set t.a and t.b at for example 33 and 34 respectively (e.g., for specific dates in your .csv file).
 #' For symmetry reasons, t.a must always be equal to t.b-1.
-#' @param normal By default, Bacon uses the student's t-distribution to treat the dates. Use \code{normal=TRUE} to use the normal/Gaussian distribution. This will generally give higher weight to the dates.
+#' @param normal By default, Bacon uses the t-distribution to treat the dates. Use \code{normal=TRUE} to use the normal/Gaussian distribution. This will generally give higher weight to the dates.
 #' @param suggest If initial analysis of the data indicates abnormally slow or fast accumulation rates, Bacon will suggest to change the prior.
 #' @param accept.suggestions Automatically accept the suggested values. Use with care. Default \code{accept.suggestions=FALSE}.
 #'  Also, if the length of the core would cause too few or too many sections with the default settings, Bacon will suggest an alternative section thickness \code{thick}.
@@ -185,18 +181,20 @@ library(IntCal)
 #' Journal of Ecology 77: 1-23.
 #'
 #' @export
-Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=NA, add.bottom=TRUE, d.by=1, seed=NA, depths.file=FALSE, depths=c(), depth.unit="cm", age.unit="yr", unit=depth.unit, acc.shape=1.5, acc.mean=20, mem.strength=10, mem.mean=0.5, boundary=NA, hiatus.depths=NA, hiatus.max=10000, add=c(), after=.0001/thick, cc=1, cc1="IntCal20", cc2="Marine20", cc3="SHCal20", cc4="ConstCal", ccdir="", postbomb=0, delta.R=0, delta.STD=0, t.a=3, t.b=4, normal=FALSE, suggest=TRUE, accept.suggestions=FALSE, reswarn=c(10,200), remember=TRUE, ask=TRUE, run=TRUE, defaults="defaultBacon_settings.txt", sep=",", dec=".", runname="", slump=c(), remove=FALSE, BCAD=FALSE, ssize=2000, th0=c(), burnin=min(500, ssize), MinAge=c(), MaxAge=c(), MinYr=MinAge, MaxYr=MaxAge, cutoff=.01, plot.pdf=TRUE, dark=1, date.res=100, age.res=200, yr.res=age.res, close.connections=TRUE, verbose=TRUE, ...) {
+Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=NA, add.bottom=TRUE, d.by=1, seed=NA, depths.file=FALSE, depths=c(), depth.unit="cm", age.unit="yr", unit=depth.unit, acc.shape=1.5, acc.mean=20, mem.strength=10, mem.mean=0.5, boundary=NA, hiatus.depths=NA, hiatus.max=10000, add=c(), after=.0001/thick, cc=1, cc1="IntCal20", cc2="Marine20", cc3="SHCal20", cc4="ConstCal", ccdir="", postbomb=0, delta.R=0, delta.STD=0, t.a=3, t.b=4, normal=FALSE, suggest=TRUE, accept.suggestions=FALSE, reswarn=c(10,200), remember=TRUE, ask=TRUE, run=TRUE, defaults="defaultBacon_settings.txt", sep=",", dec=".", runname="", slump=c(), remove=FALSE, BCAD=FALSE, ssize=4000, th0=c(), burnin=min(500, ssize), MinAge=c(), MaxAge=c(), MinYr=MinAge, MaxYr=MaxAge, cutoff=.01, plot.pdf=TRUE, dark=1, date.res=100, age.res=200, yr.res=age.res, close.connections=TRUE, verbose=TRUE, ...) {
   # Check coredir and if required, copy example file in core directory
   coredir <- assign_coredir(coredir, core, ask, isPlum=FALSE)
   if(core == "MSB2K" || core == "RLGH3") {
-    dir.create(paste(coredir, core, "/", sep=""), showWarnings = FALSE, recursive = TRUE)
-    fileCopy <- system.file(paste0("extdata/Cores/", core), package="rbacon") # change to package rbacon
-    file.copy(fileCopy, coredir, recursive = TRUE, overwrite=FALSE)
+    if(!dir.exists(file.path(coredir, core))) {
+      dir.create(file.path(coredir, core), showWarnings = FALSE, recursive = TRUE)
+      fileCopy <- system.file(paste0("extdata/Cores/", core), package="rbacon")
+      file.copy(fileCopy, coredir, recursive = TRUE, overwrite=FALSE)
+    }
   }
   
   # set the calibration curve
   if(ccdir == "")
-    ccdir <- system.file("extdata", package="IntCal")
+    ccdir <- system.file("extdata", package="rintcal")
   ccdir <- validateDirectoryName(ccdir)
 
   # default_settings.txt is located within system.file
@@ -236,6 +234,9 @@ Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=
       }
     }
 
+  if(thick < d.by)
+    warning("Please set d.by to a value smaller than that of thick", .call=TRUE)
+
   # check values for the prior's mean, Jan 2021
   if(mem.mean < 0 || mem.mean >1)
     stop("The prior for the mean of the memory should be between 0 and 1", call.=FALSE)
@@ -274,7 +275,9 @@ Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=
     if(info$postbomb == 0 && ((ncol(info$dets) == 4 && min(info$dets[,2]) < 0) ||
       ncol(info$dets)>4 && max(info$dets[,5]) > 0 && min(info$dets[info$dets[,5] > 0,2]) < 0))
         stop("you have negative C14 ages so should select a postbomb curve", call.=FALSE)
+  # info$calib <- bacon.calib(dets, info, date.res, ccdir=ccdir, cutoff=cutoff)
   info$calib <- bacon.calib(dets, info, date.res, ccdir=ccdir, cutoff=cutoff)
+
   
   ### find some relevant values
   info$rng <- c()
@@ -294,7 +297,7 @@ Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=
     dfile <- paste0(info$coredir, info$core, "/", info$core, "_depths.txt")
     if(!file.exists(dfile))
       stop("I cannot find the file ", paste0(info$coredir, info$core, "/", info$core, "_depths.txt"), call.=FALSE)
-    depths <- read.table(dfile, header=FALSE)[,1]
+    depths <- fastread(dfile, header=FALSE)[,1]
     if(!is.numeric(depths[1]))
       stop("File should contain numbers only, no headers", call.=FALSE)
   }
@@ -420,9 +423,9 @@ Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=
   }
 
   cook <- function() {
-    bacon.its(ssize, info) # information on amounts of iterations
-    txt <- paste(info$prefix, ".bacon", sep="")
-    bacon(txt, outfile, ssize, ccdir)
+    bacon.its(ssize, burnin, info) # information on amounts of iterations
+    txt <- paste0(info$prefix, ".bacon")
+    bacon(txt, outfile, ssize+burnin, ccdir)
     scissors(burnin, info)
     agedepth(info, BCAD=BCAD, depths.file=depths.file, depths=depths, verbose=TRUE, age.unit=age.unit, depth.unit=depth.unit, ...)
     if(plot.pdf)

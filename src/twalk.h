@@ -624,11 +624,10 @@ int simulation(unsigned long long Tr1, char *filename, const char *op="wt", int 
                 Rprintf("twalk thinning: 1 out of every %d accepted iterations will be saved in file %s\n", abs(save_every), filename);
             }
             else{
-                Rprintf("twalk: All %d iterations to be saved in file %s\n", save_every, filename);
+                //Rprintf("twalk: All %d iterations to be saved in file %s\n", Tr1, filename);
+				Rprintf("twalk: All stored iterations to be saved in file %s\n", filename);
             }
         }
-
-
 
 
 		int j1=1, j=0, rt;
@@ -637,6 +636,12 @@ int simulation(unsigned long long Tr1, char *filename, const char *op="wt", int 
 
 
         for(unsigned long long it=1; it<=Tr1; it++) {
+
+			// MB Dec 2022, to try enabling user interrupt, inspired by:
+			// https://teuder.github.io/rcpp4everyone_en/270_miscellaneous.html
+			// every 10k its, check if user has pressed ctrl+c
+			if(it %10000 == 0)
+				{Rcpp::checkUserInterrupt();}
 
 				rt = one_move();
 

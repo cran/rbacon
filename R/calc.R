@@ -64,7 +64,7 @@ Bacon.Age.d <- function(d, set=get('info'), its=set$output, BCAD=set$BCAD, na.rm
 
 #' @name Bacon.d.Age
 #' @title Output all depths for a single age.
-#' @description Output all depths of a single given MCMC-derived age estimate.
+#' @description Output all MCMC-derived depth estimates for a single given age.
 #' @details Obtaining an age-depth model is often only a step towards a goal, e.g., plotting a core's
 #' fossil series ('proxies') against calendar time. Bacon.d.Age can be used to list all MCMC-derived depths belonging to a given (single) age, for example to calculate mean depths belonging to a modelled depth. 
 #' This function was kindly written and provided by Timon Netzel (Bonn University). See also Bacon.Age.d, which calculates the ages for a single depth.
@@ -74,7 +74,7 @@ Bacon.Age.d <- function(d, set=get('info'), its=set$output, BCAD=set$BCAD, na.rm
 #' @param BCAD The calendar scale of graphs and age output-files is in \code{cal BP} by default, but can be changed to BC/AD using \code{BCAD=TRUE}.
 #' @param na.rm Whether or not to remove NA values (ages within slumps)
 #' @author Maarten Blaauw, J. Andres Christen
-#' @return Outputs all MCMC-derived ages for a given depth.
+#' @return Outputs all MCMC-derived depths for a given age.
 #' @examples
 #' \dontrun{
 #'   Bacon(run=FALSE, coredir=tempfile())
@@ -327,9 +327,9 @@ hiatus.slopes <- function(set=get('info'), hiatus.option=1) {
 #' }
 #' @export
 Bacon.hist <- function(d, set=get('info'), BCAD=set$BCAD, age.lab=c(), age.lim=c(), hist.lab="Frequency", calc.range=TRUE, hist.lim=c(), draw=TRUE, prob=set$prob, hist.col=grey(0.5), hist.border=grey(.2), range.col="blue", med.col="green", mean.col="red", verbose=TRUE) {
-  outfile <- paste(set$prefix, ".out", sep="")
+  outfile <- paste0(set$prefix, ".out")
   if(length(set$output) == 0 || length(set$Tr) == 0) {
-    set <- Bacon.AnaOut(outfile, set)
+    set <- Bacon.AnaOut(outfile, set, MCMC.resample=FALSE)
     assign_to_global("set", set)
   }
   hist3 <- function(d, BCAD) {
@@ -391,9 +391,9 @@ Bacon.hist <- function(d, set=get('info'), BCAD=set$BCAD, age.lab=c(), age.lim=c
 
 # to calculate age ranges
 Bacon.rng <- function(d, set=get('info'), BCAD=set$BCAD, prob=set$prob) {
-  outfile <- paste(set$prefix, ".out", sep="")
+  outfile <- paste0(set$prefix, ".out")
   if(length(set$output) == 0 || length(set$Tr) == 0) {
-    set <- Bacon.AnaOut(outfile, set)
+    set <- Bacon.AnaOut(outfile, set, MCMC.resample=FALSE)
     assign_to_global("set", set)
   }
 
@@ -433,9 +433,9 @@ Bacon.rng <- function(d, set=get('info'), BCAD=set$BCAD, prob=set$prob) {
 #' }
 #' @export
 agemodel.it <- function(it, set=get('info'), BCAD=set$BCAD) {
-  outfile <- paste(set$prefix, ".out", sep="")
+  outfile <- paste0(set$prefix, ".out")
   if(length(set$output) == 0 || length(set$Tr) == 0) {
-    set <- Bacon.AnaOut(outfile, set)
+    set <- Bacon.AnaOut(outfile, set, MCMC.resample=FALSE)
     assign_to_global("set", set)
   }
   # does this function work in cores with slumps? also doesn't take into account hiatuses.

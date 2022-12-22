@@ -4,10 +4,9 @@ validateDirectoryName <- function(dir) {
   dir <- suppressWarnings(normalizePath(dir))
   lastchar <- substr(dir, nchar(dir), nchar(dir))
   if(lastchar != "/" & lastchar != "\\" & lastchar != "" & lastchar != "." )
-    dir <- paste(dir, "/", sep="") # does this work in Windows?
+    dir <- paste0(dir, "/") # does this work in Windows?
   return(dir)
 }
-
 
 
 #' @name clam2bacon
@@ -43,7 +42,7 @@ clam2bacon <- function(core, clamdir="clam_runs", bacondir="Bacon_runs", sep=","
   bacondir <- paste0(bacondir, "/", core)
   if(!dir.exists(bacondir))
     dir.create(bacondir)
-  write.table(baconfl, paste0(bacondir, "/", core, ".csv"), sep=sep, row.names=FALSE, quote=FALSE)
+  fastwrite(baconfl, paste0(bacondir, "/", core, ".csv"), sep=sep, row.names=FALSE, quote=FALSE)
 }
 
 
@@ -95,7 +94,7 @@ bacon2clam <- function(core, bacondir="Bacon_runs", clamdir="clam_runs", sep=","
   clamdir <- paste0(clamdir, "/", core)
   if(!dir.exists(clamdir))
     dir.create(clamdir)
-  write.table(clamfl, paste0(clamdir, "/", core, ".csv"), sep=sep, row.names=FALSE, quote=FALSE)
+  fastwrite(clamfl, paste0(clamdir, "/", core, ".csv"), sep=sep, row.names=FALSE, quote=FALSE)
 }
 
 
@@ -181,7 +180,7 @@ read.dets <- function(core, coredir, othername=c(), set=get('info'), sep=",", de
   changed <- 0
 
   if(file.exists(csv.file)) {
-    dets <- read.table(csv.file, header=TRUE, sep=sep)
+    dets <- fastread(csv.file, header=TRUE, sep=sep)
     if(file.exists(dat.file)) # deal with old .dat files
       if(file.mtime(csv.file) < file.mtime(dat.file))
         message("Warning, the .dat file is newer than the .csv file! I will read the .csv file. From now on please modify ", csv.file, ", not ", dat.file) else
@@ -192,7 +191,7 @@ read.dets <- function(core, coredir, othername=c(), set=get('info'), sep=",", de
         message("Removing .txt extension from .csv file")
       } else {
         message("No .csv file found, reading", dat.file, " and converting it to .csv")
-        dets <- read.table(dat.file, header=TRUE)
+        dets <- fastread(dat.file, header=TRUE)
         changed <- 1
         }
     }
@@ -204,28 +203,43 @@ read.dets <- function(core, coredir, othername=c(), set=get('info'), sep=",", de
   # check if 'classic' dets file, which has a different column order from the current default
   if(ncol(dets) > 4)
     if(ncol(dets) == 5) { # then probably a 'new' dets file
-      if((name[5] %in% cc.names) && min(dets[,5]) >= 0 && max(dets[,5]) <= 4) {} else # extra check for correct values
+      ok <- 0
+      # if((name[5] %in% cc.names) && (min(dets[,5])[1] >= 0) && (max(dets[,5])[1] <= 4)) {} else
+      if(name[5] %in% cc.names) ok <- ok+1
+      if(min(dets[,5])[1] >= 0) ok <- ok+1
+      if(max(dets[,5])[1] <= 4) ok <- ok+1
+      if(ok < 3)
         stop("unexpected name or values in fifth column (cc, should be between 0 and 4). Please check the manual for guidelines in producing a correct .csv file.\n", call.=FALSE)
     } else
       if(ncol(dets) == 6) { # probably an 'old' file: dR, dSTD, but could also be cc and delta.R (so no column for delta.STD)
-        if(name[5] %in% dR.names && name[6] %in% dSTD.names) {
-			message("\nHELP!!! 6!!!")
+        ok <- 0
+        if(name[5] %in% dR.names) ok <- ok+1
+        if(name[6] %in% dSTD.names) ok <- ok+1
+        if(ok == 2) {
           dets <- cbind(dets[,1:4], rep(cc, nrow(dets)), dets[,5:6]) # some shuffling
           message(" Assumed order of columns in dets file: lab ID, Age, error, depth, dR, dSTD. \nAdding calibration curve column (fifth column, before dR and dSTD) and saving as", csv.file)
           changed <- 1
         } else
-	      stop("unexpected names for columns 5/6. If you want to include delta.R, also add a column for delta.STD. Check the manual for guidelines to producing a correct .csv file.\n", call.=FALSE)
+          stop("unexpected names for columns 5/6. If you want to include delta.R, also add a column for delta.STD. Check the manual for guidelines to producing a correct .csv file.\n", call.=FALSE)
       } else
         if(ncol(dets) == 7) { # probably a 'new' file: cc, dR, dSTD
-          if(name[5] %in% cc.names && min(dets[,5]) >= 0 && max(dets[,5]) <= 4 &&
-            name[6] %in% dR.names && name[7] %in% dSTD.names)
-              {} else
-                 stop("unexpected column names, order or values in dets file. \nPlease check the manual for correct dets file formats.\n", call.=FALSE)
+          ok <- 0
+          if(name[5] %in% cc.names) ok <- ok+1
+          if(min(dets[,5])[1] >= 0) ok <- ok+1
+          if(max(dets[,5])[1] <= 4) ok <- ok+1
+          if(name[6] %in% dR.names) ok <- ok+1
+          if(name[7] %in% dSTD.names) ok <- ok+1
+          if(ok < 5)
+            stop("unexpected column names, order or values in dets file. \nPlease check the manual for correct dets file formats.\n", call.=FALSE)
         } else
           if(ncol(dets) == 8) { # probably an 'old' file: dR, dSTD, ta, tb
-            if(name[5] %in% dR.names && name[6] %in% dSTD.names)
-            if(name[7] %in% ta.names && name[8] %in% tb.names)
-            if(range(dets[,8] - dets[,7]) == c(1,1)) { # check that these set expected student-t values
+            ok <- 0
+            if(name[5] %in% dR.names) ok <- ok+1
+            if(name[6] %in% dSTD.names) ok <- ok+1
+            if(name[7] %in% ta.names) ok <- ok+1
+            if(name[8] %in% tb.names) ok <- ok+1
+            if(range(dets[,8] - dets[,7]) == c(1,1)) ok <- ok+1
+            if(ok == 5) { # check that these set expected t distribution values
               dets <- cbind(dets[,1:4], rep(cc, nrow(dets)), dets[,5:6]) # some shuffling
               message(" Assumed order of columns in dets file: lab ID, Age, error, depth, dR, dSTD. \nAdding calibration curve column (fifth column, before dR and dSTD) and saving as", csv.file)
               changed <- 1
@@ -233,27 +247,45 @@ read.dets <- function(core, coredir, othername=c(), set=get('info'), sep=",", de
               stop("unexpected column names, order or values in dets file. \nPlease check the manual for how to produce a correct .csv file", call.=FALSE)
           } else
             if(ncol(dets) == 9) { # most complex case, many checks needed
-              if(name[9] %in% cc.names && # we're almost sure that this is a 'classic' dets file
-                min(dets[,9]) >= 0 && max(dets[,9]) <= 4 && # check that this sets calibration curves
-                  range(dets[,8] - dets[,7]) == c(1,1) && # check that these set expected student-t values
-                    name[5] %in% dR.names && name[6] %in% dSTD.names && # column names as expected?
-                      name[7] %in% ta.names && name[8] %in% tb.names) { # column names as expected?
-                        dets <- dets[,c(1:4,9,5:8)] # shuffle columns around
-                        message(" Assumed order of columns in dets file: lab ID, Age, error, depth, dR, dSTD, t.a, t.b, cc. \nAdapting column order and saving as", csv.file)
-                        changed <- 1
-                      } else
-                        if(name[5] %in% cc.names && # oh, probably a 'new' file from more recent Bacon
-                          min(dets[,5]) >= 0 && max(dets[,5]) <= 4 && # check that this sets cal.curves
-                            range(dets[,9] - dets[,8]) == c(1,1) && # columns 8-9 set student-t correctly
-                              name[8] %in% ta.names && name[9] %in% tb.names && # and are correctly named
-                                name[6] %in% dR.names && name[7] %in% dSTD.names) # all lights are green
-                                  {} else
-                                     stop("unexpected column names, order or values in dets file. \nPlease check the manual for how to produce a correct .csv file", call.=FALSE)
+              ok <- 0
+              if(name[9] %in% cc.names) ok <- ok+1 # almost sure this is a 'classic' dets file
+              if(min(dets[,9])[1] >= 0) ok <- ok+1
+              if(max(dets[,9])[1] <= 4) ok <- ok+1
+              tab <- range(dets[,8] - dets[,7])
+              if(tab[1] == 1) ok <- ok+1
+              if(tab[2] == 1) ok <- ok+1
+              if(name[5] %in% dR.names) ok <- ok+1
+              if(name[6] %in% dSTD.names) ok <- ok+1
+              if(name[7] %in% ta.names) ok <- ok+1
+              if(name[8] %in% tb.names) ok <- ok+1
+              if(ok == 9) { # column names as expected?
+                dets <- dets[,c(1:4,9,5:8)] # shuffle columns around
+                message(" Assumed order of columns in dets file: lab ID, Age, error, depth, dR, dSTD, t.a, t.b, cc. \nAdapting column order and saving as", csv.file)
+                changed <- 1
+              } else { # probably a 'new' file from more recent Bacon
+                ok <- 0
+                if(name[5] %in% cc.names) ok <- ok+1
+                if(min(dets[,5])[1] >= 0) ok <- ok+1
+                if(max(dets[,5])[1] <= 4) ok <- ok+1
+                tab <- range(dets[,9] - dets[,8])
+                if(tab[1] == 1) ok <- ok+1
+                if(tab[2] == 1) ok <- ok+1
+                if(name[8] %in% ta.names) ok <- ok+1
+                if(name[9] %in% tb.names) ok <- ok+1
+                if(name[6] %in% dR.names) ok <- ok+1
+                if(name[7] %in% dSTD.names) ok <- ok+1
+                if(ok < 9)
+                  stop("unexpected column names, order or values in dets file. \nPlease check the manual for how to produce a correct .csv file", call.=FALSE)
+               }
             } else
               stop("unexpected column names, order or values in dets file. \nPlease check the manual for how to produce a correct dets file.\n", call.=FALSE)
 
   # more sanity checks
-  if(!is.numeric(dets[,2]) || !is.numeric(dets[,3]) || !is.numeric(dets[,4]))
+  ok <- 0
+  if(is.numeric(dets[,2])) ok <- ok+1
+  if(is.numeric(dets[,3])) ok <- ok+1
+  if(is.numeric(dets[,4])) ok <- ok+1
+  if(ok < 3)
     stop("unexpected values in dets file, I expected numbers. Check the manual.\n", call.=FALSE)
   if(min(dets[,3]) <= 0) {
     message("Warning, zero year errors don't exist in Bacon's world. I will increase them to 1 ", set$age.unit, " yr")
@@ -262,13 +294,14 @@ read.dets <- function(core, coredir, othername=c(), set=get('info'), sep=",", de
   }
   if(min(0, diff(dets[,4])) < 0) { # added 0 (for if just 1 row of dates)
     message("Warning, the depths are not in ascending order, I will correct this")
-    dets <- dets[ order(dets[,4]), ] #CHANGED: se elimina "set" antes de dets, por un error en uso del objeto
+    message("Actually, never mind, I'm not changing the order of the dates according to their depth")
+#    dets <- dets[ order(dets[,4]), ] #CHANGED: se elimina "set" antes de dets, por un error en uso del objeto
     changed <- 1
   }
 
   # if current dets differ from original .csv file, rewrite it
   if(changed > 0)
-    write.table(dets, csv.file, sep=paste(sep, "\t", sep=""), dec=dec, row.names=FALSE, col.names=suggested.names[1:ncol(dets)], quote=FALSE)
+    fwrite(as.data.frame(dets), csv.file, sep=paste0(sep, "\t"), dec=dec, row.names=FALSE, col.names=suggested.names[1:ncol(dets)], quote=FALSE)
   dets
 }
 
@@ -309,7 +342,7 @@ Bacon.settings <- function(core, coredir, dets, thick, remember=TRUE, d.min, d.m
 
   # read in default values and those of previous run if available
   deffile <- readLines(defaults, n=-1)
-  prevfile <- paste(coredir, core, "/", core, "_settings.txt", sep="")
+  prevfile <- paste0(coredir, core, "/", core, "_settings.txt")
   prevf <- FALSE
   if(file.exists(prevfile)) {
     prevfile <- readLines(prevfile, n=-1)
@@ -344,7 +377,7 @@ Bacon.settings <- function(core, coredir, dets, thick, remember=TRUE, d.min, d.m
         mem.mean <- rep(mem.mean, length(mem.strength))
 
   ### produce/update settings file, and return the values
-  prevfile <- file(paste(coredir, core, "/", core, "_settings.txt", sep=""), "w")
+  prevfile <- file(paste0(coredir, core, "/", core, "_settings.txt"), "w")
   scat <- function(m, n="") cat(m, n, sep="", file=prevfile)
   cat(d.min, " #d.min\n", d.max, " #d.max\n", d.by, " #d.by\n",
     depths.file, " #depths.file\n", slump, " #slump\n", sep="", file=prevfile)
@@ -418,7 +451,7 @@ write.Bacon.file <- function(set=get('info')) {
     else noquote(set$cc3), ", ", set$postbomb, ";",
   if(set$cc4=="ConstCal" || set$cc4=="\"ConstCal\"") set$cc4 <- c()
     else
-      paste("\nCal 4 : GenericCal, ", set$cc4, ";", sep=""), sep="", file=fl)
+      paste0("\nCal 4 : GenericCal, ", set$cc4, ";", sep=""), file=fl)
   cat("\n\n##   id.   age    std   depth  delta.R  delta.STD     t.a   t.b   cc", file=fl)
 
   if(ncol(dets) == 4) { # then we need to provide some constants once only
@@ -501,9 +534,30 @@ write.Bacon.file <- function(set=get('info')) {
 
 
 
+# internal functions to speed up reading and writing files, using the data.table R package if present
+fastread <- function(fnam, ...)
+  if("data.table" %in% (.packages()))
+    as.data.frame(fread(fnam, ...)) else
+      read.table(fnam, ...)
+
+
+
+fastwrite <- function(out, fnam, ...)
+  if("data.table" %in% (.packages()))
+    fwrite(as.data.frame(out), fnam, ...) else
+      write.table(out, fnam, ...)
+
+
+
 # function to read output files into memory
-Bacon.AnaOut <- function(fnam, set=get('info')) {
-  out <- read.table(fnam)
+Bacon.AnaOut <- function(fnam, set=get('info'), MCMC.resample=TRUE) {
+  out <- fastread(fnam) # was read.table
+  if(MCMC.resample)
+    if(set$ssize < nrow(out)) { # MB Aug 2022
+      ss <- (nrow(out) - set$ssize + 1):nrow(out) # select the last ssize its only
+      out <- out[ss,] # MB Aug 2022
+      fastwrite(out, fnam, col.names=FALSE, row.names=FALSE) # MB Dec 2022
+    }
   n <- ncol(out)-1
   set$n <- n
   set$Tr <- nrow(out)
@@ -515,8 +569,14 @@ Bacon.AnaOut <- function(fnam, set=get('info')) {
 
 
 # function to read plum output files into memory, updated May 2021
-Plum.AnaOut <- function(fnam, set=get('info')) {
-  out <- read.table(fnam)
+Plum.AnaOut <- function(fnam, set=get('info'), MCMC.resample=TRUE) {
+  out <- fastread(fnam) # was read.table
+  if(MCMC.resample)
+    if(set$ssize < nrow(out)) { # MB Aug 2022
+      ss <- (nrow(out) - set$ssize + 1):nrow(out) # select the last ssize its only
+      out <- out[ss,] # MB Aug 2022
+      fastwrite(out, fnam, col.names=FALSE, row.names=FALSE) # MB Dec 2022
+    }
   n <- ncol(out)-1
   set$nPs <- n
   set$TrPs <- nrow(out)

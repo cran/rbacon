@@ -47,7 +47,7 @@
 proxy.ghost <- function(proxy=1, proxy.lab=NULL, proxy.res=250, age.res=200, yr.res=age.res, rgb.scale=c(0,0,0), rgb.res=100, set=get('info'), cutoff=0.001, dark=1, darkest=1, rotate.axes=FALSE, proxy.rev=FALSE, age.rev=FALSE, yr.rev=age.rev, plot.mean=FALSE, mean.col="red", age.lim=NULL, yr.lim=age.lim, proxy.lim=NULL, sep=",", xaxs="i", yaxs="i", xaxt="s", yaxt="s", bty="l", BCAD=set$BCAD, age.lab=ifelse(BCAD, "BC/AD", "cal yr BP"), yr.lab=age.lab, verbose=TRUE, add=FALSE) {
   if(length(set$Tr)==0)
     stop("please first run agedepth()", call.=FALSE)
-  proxies <- read.csv(paste(set$coredir, set$core, "/", set$core, "_proxies.csv", sep=""), header=TRUE, sep=sep)
+  proxies <- read.csv(paste0(set$coredir, set$core, "/", set$core, "_proxies.csv"), header=TRUE, sep=sep)
   if(length(proxy.lab)==0)
     proxy.lab <- names(proxies)[proxy+1]
   proxy <- cbind(as.numeric(proxies[,1]), as.numeric(proxies[,proxy+1]))
@@ -195,21 +195,21 @@ proxy.ghost <- function(proxy=1, proxy.lab=NULL, proxy.res=250, age.res=200, yr.
 AgesOfEvents <- function(window, move, set=get('info'), plot.steps=FALSE, BCAD=set$BCAD, age.lab=c(), yr.lab=age.lab, age.lim=c(), yr.lim=age.lim, prob.lab="probability", prob.lim=c(), rotate.axes=FALSE, rev.age=TRUE, rev.yr=rev.age, yaxs="i", bty="l") {
   if(move == 0)
     stop("I cannot move anywhere if move = 0", call.=FALSE)
-  outfile <- paste(set$prefix, "_", window, "_probs.txt", sep="")
+  outfile <- paste0(set$prefix, "_", window, "_probs.txt")
   file.create(outfile)
-  MCMCname <- paste(set$prefix, ".out", sep="")
-  probfile <- paste(set$coredir, set$core, "/", set$core, "_events.txt", sep="")
+  MCMCname <- paste0(set$prefix, ".out")
+  probfile <- paste0(set$coredir, set$core, "/", set$core, "_events.txt")
   if(!file.exists(probfile))
     stop("file with probabilities for events per depth not found! Check the manual", call.=FALSE)
-  probs <- read.table(probfile)
+  probs <- fastread(probfile)
   if(!is.numeric(probs[1,1]))
     stop("first line of the _events.txt file should NOT contain titles; please remove them", call.=FALSE)
   if(min(probs[,1]) < min(set$elbows) || max(probs[,1]) > max(set$elbows)) {
     message("some depths in the _events.txt file go beyond the age-model; I will remove them")
-    file.rename(probfile, paste(probfile, "_backup", sep=""))
+    file.rename(probfile, paste0(probfile, "_backup"))
     probs <- probs[which(probs[,1] >= min(set$elbows)),]
     probs <- probs[which(probs[,1] <= max(set$elbows)),]
-    write.table(probs, probfile, col.names=FALSE, row.names=FALSE, quote=FALSE)
+    fastwrite(probs, probfile, col.names=FALSE, row.names=FALSE, quote=FALSE)
   }
 
   if(length(age.lim) == 0) {
@@ -222,7 +222,7 @@ AgesOfEvents <- function(window, move, set=get('info'), plot.steps=FALSE, BCAD=s
     }
 
   events(min.age, max.age, move, window, outfile, MCMCname, nrow(set$output), set$K, set$elbows[1], set$thick, probfile, nrow(probs))
-  probs <- read.table(outfile)
+  probs <- fastread(outfile)
   if(BCAD) {
     probs[,1] <- 1950 - probs[,1]
     o <- order(probs[,1])

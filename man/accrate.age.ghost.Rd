@@ -8,6 +8,7 @@ accrate.age.ghost(
   set = get("info"),
   age.lim = c(),
   age.lab = c(),
+  kcal = FALSE,
   age.res = 400,
   acc.res = 200,
   cutoff = 0.001,
@@ -42,6 +43,8 @@ accrate.age.ghost(
 \item{age.lim}{Minimum and maximum calendar age ranges, calculated automatically by default (\code{age.lim=c()}).}
 
 \item{age.lab}{The labels for the calendar axis (default \code{age.lab="cal BP"} or \code{"BC/AD"} if \code{BCAD=TRUE}).}
+
+\item{kcal}{Use kcal BP. Default is \code{kcal=FALSE}.}
 
 \item{age.res}{Resolution or amount of greyscale pixels to cover the age scale of the plot. Default \code{age.res=400}.}
 
@@ -96,7 +99,7 @@ accrate.age.ghost(
 \item{bty}{Type of box to be drawn around the plot (\code{"n"} for none, and \code{"l"} (default), \code{"7"}, \code{"c"}, \code{"u"}, or \code{"o"} for correspondingly shaped boxes).}
 }
 \value{
-A greyscale plot of accumulation rate against calendar age.
+A greyscale plot of accumulation rate against calendar age, and (invisibly) the list of ages and their accumulation rates (ranges, medians, means).
 }
 \description{
 Plot a grey-scale representation of a core's estimated accumulation rates against time.
@@ -116,7 +119,8 @@ Currently does not deal well with hiatuses, so do not interpret accumulation rat
   Bacon(run=FALSE, coredir=tempfile())
   agedepth(age.res=20, d.res=20, d.by=10)
   layout(1)
-  accrate.age.ghost(age.res=200, acc.res=100)
+  tmp <- accrate.age.ghost(age.res=200, acc.res=100)
+  head(tmp)
 }
 }
 \author{

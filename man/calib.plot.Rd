@@ -6,6 +6,7 @@
 \usage{
 calib.plot(
   set = get("info"),
+  dets = set$dets,
   BCAD = set$BCAD,
   cc = set$cc,
   rotate.axes = FALSE,
@@ -36,6 +37,8 @@ calib.plot(
 }
 \arguments{
 \item{set}{Detailed information of the current run, stored within this session's memory as variable \code{info}.}
+
+\item{dets}{The set of determinations to be plotted.}
 
 \item{BCAD}{The calendar scale of graphs is in \code{cal BP} by default, but can be changed to BC/AD using \code{BCAD=TRUE}.}
 

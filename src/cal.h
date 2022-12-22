@@ -161,7 +161,8 @@ public:
 
 		const2 = 0.5*log(2.0 * M_PI); //M_PI defined in gsl library
 
-        sprintf( name, "Generic cal. curve %s", filename.c_str());
+		// sprintf( name, "Generic cal. curve %s", filename.c_str());
+		snprintf( name, sizeof(name), "Generic cal. curve %s", filename.c_str());  // MB Dec 2022
 	}
 
 	~GenericCal() {
@@ -279,14 +280,16 @@ public:
 		Bomb = bomb;
 		if (Bomb == 0) {
 			mincal = 0.0; // no bomb; 17 Dec 2018 changed -5.0 to 0.0
-			sprintf( name, "IntCal20");
+			//sprintf( name, "IntCal20");
+			snprintf( name, sizeof(name), "IntCal20");
 		}
 		else
 			if (Bomb < 6) { // curve number, not cal BP yr. 26 March 2019: Was Bomb < 5 but now there are 5 postbomb curves
 
 			bombcc = new GenericCal(postbombfnam[Bomb], ccdir);
 			mincal = bombcc->MinCal();
-			sprintf( name, "IntCal20+%s", postbombfnam[Bomb]);
+			//sprintf( name, "IntCal20+%s", postbombfnam[Bomb]);
+			snprintf( name, sizeof(name), "IntCal20+%s", postbombfnam[Bomb]);
 			}
 			else {
 				REprintf("Bacon: ERROR: Post bomb curve: 0 None, 1 NH1, 2 NH2, 3 NH3, 4 SH1-2, 5 SH3\n");
@@ -542,14 +545,16 @@ public:
 		Bomb = bomb;
 		if (Bomb == 0) {
 			mincal = 0.0; // no bomb; 17 Dec 2018 changed -5.0 to 0.0
-			sprintf( name, "SHCal20");
+			//sprintf( name, "SHCal20");
+			snprintf( name, sizeof(name), "SHCal20");
 		}
 		else
 			if (Bomb < 6) { // curve number, not cal BP yr. 26 March 2019: Was Bomb < 5 but now there are 5 postbomb curves
 
 			bombcc = new GenericCal(postbombfnam[Bomb], ccdir);
 			mincal = bombcc->MinCal();
-			sprintf( name, "SHCal20+%s", postbombfnam[Bomb]);
+			//sprintf( name, "SHCal20+%s", postbombfnam[Bomb]);
+			snprintf( name, sizeof(name), "SHCal20+%s", postbombfnam[Bomb]);
 			}
 			else {
 				REprintf("Bacon: ERROR: Post bomb curve: 0 None, 1 NH1, 2 NH2, 3 NH3, 4 SH1-2, 5 SH3\n");
@@ -690,14 +695,16 @@ public:
 		Bomb = bomb;
 		if (Bomb == 0) {
 			mincal = 0.0; // no bomb; 17 Dec 2018 changed -5.0 to 0.0
-			sprintf( name, "IntCal13");
+			//sprintf( name, "IntCal13");
+			snprintf( name, sizeof(name), "IntCal13");
 		}
 		else
 			if (Bomb < 6) { // curve number, not cal BP yr. 26 March 2019: Was Bomb < 5 but now there are 5 postbomb curves
 
             bombcc = new GenericCal(postbombfnam[Bomb], ccdir);
 			mincal = bombcc->MinCal();
-			sprintf( name, "IntCal13+%s", postbombfnam[Bomb]);
+			//sprintf( name, "IntCal13+%s", postbombfnam[Bomb]);
+			snprintf( name, sizeof(name), "IntCal13+%s", postbombfnam[Bomb]);
 			}
 			else {
                 REprintf("Bacon: ERROR: Post bomb curve: 0 None, 1 NH1, 2 NH2, 3 NH3, 4 SH1-2, 5 SH3\n");
@@ -954,14 +961,16 @@ public:
 		Bomb = bomb;
 		if (Bomb == 0) {
 			mincal = -0.0; // no bomb, was -5.0 changed 17 Dec 2018
-			sprintf( name, "SHCal13");
+			//sprintf( name, "SHCal13");
+			snprintf( name, sizeof(name), "SHCal13");
 		}
 		else
 			if (Bomb < 6) { /// was Bomb < 5 but now there are 5 postbomb curves (March 2019)
 
             bombcc = new GenericCal(postbombfnam[Bomb],(char*)ccdir.c_str());
 			mincal = bombcc->MinCal();
-			sprintf( name, "SHCal13+%s", postbombfnam[Bomb]);
+			//sprintf( name, "SHCal13+%s", postbombfnam[Bomb]);
+			snprintf( name, sizeof(name), "SHCal13+%s", postbombfnam[Bomb]);
 			}
 			else {
                 REprintf("Bacon: ERROR: Post bomb curve: 0 None, 1 NH1, 2 NH2, 3 NH3, 4 SH1-2, 5 SH3\n");

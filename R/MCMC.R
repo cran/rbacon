@@ -1,11 +1,14 @@
 # estimate how many MCMC iterations will be ran and returned
-bacon.its <- function(ssize=2e3, set=get('info'), ACCEP_EV=20, EVERY_MULT=5, BURN_IN_MULT=20) {
+bacon.its <- function(ssize, burnin, set=get('info'), ACCEP_EV=20, EVERY_MULT=25, BURN_IN_MULT=3000) {
+#   int it = EVERY_MULT * All.Dim() * (BURN_IN_MULT + ssize); bacon.cpp line 109
+#   int every=  EVERY_MULT*All.Dim(); line 112
+#  Rprintf("bacon: burn in (initial iterations which will be removed): %d\n", All.Dim() * EVERY_MULT * BURN_IN_MULT);  line 174
+
   dims <- set$K + 2 # accrates, start age, accumulation rate, memory
   store.every <- dims * EVERY_MULT # depends on the amount of parameters
-  MCMC.size <- ACCEP_EV * store.every * (ssize + BURN_IN_MULT) # all iterations
+  MCMC.size <- store.every * (ssize + burnin + BURN_IN_MULT) # all iterations
   MCMC.kept <- MCMC.size - (store.every * BURN_IN_MULT) # removing burnin
-  MCMC.stored <- (MCMC.kept / store.every / ACCEP_EV) # just an estimate
-  message(" Will run ", MCMC.size, " iterations and store around ", MCMC.stored)
+  message(" Will run ", prettyNum(MCMC.size, big.mark=","), " iterations and store ", prettyNum(ssize, big.mark=","))
 }
 
 
@@ -40,9 +43,9 @@ bacon.its <- function(ssize=2e3, set=get('info'), ACCEP_EV=20, EVERY_MULT=5, BUR
 #'
 #' @export
 scissors <- function(burnin, set=get('info')) {
-  output <- read.table(paste0(set$prefix, ".out"))
+  output <- fastread(paste0(set$prefix, ".out"))
   if(set$isplum)
-    plumout <- read.table(paste0(set$prefix, "_plum.out"))
+    plumout <- fastread(paste0(set$prefix, "_plum.out"))
   if(length(burnin) > 1) {
     if(length(burnin) >= nrow(output))
       stop("cannot remove that many iterations, there would be none left!", call.=FALSE)
@@ -63,10 +66,9 @@ scissors <- function(burnin, set=get('info')) {
         }
     }
 
-  #info <- get('info')
-  write.table(output, paste0(set$prefix, ".out"), col.names=FALSE, row.names=FALSE)
+  fastwrite(output, paste0(set$prefix, ".out"), col.names=FALSE, row.names=FALSE)
   if(set$isplum) {
-    write.table(plumout, paste0(set$prefix, "_plum.out"), col.names=FALSE, row.names=FALSE)
+    fastwrite(plumout, paste0(set$prefix, "_plum.out"), col.names=FALSE, row.names=FALSE)
     set$phi <- plumout[,1]
     set$ps <- plumout[,-1] # can be >1 column
   }
@@ -98,20 +100,20 @@ scissors <- function(burnin, set=get('info')) {
 #'
 #' @export
 thinner <- function(proportion=0.1, set=get('info')) {
-  output <- read.table(paste0(set$prefix, ".out"))
+  output <- fastread(paste0(set$prefix, ".out"))
   if(set$isplum)
-    plumout <- read.table(paste0(set$prefix, "_plum.out"))
+    plumout <- fastread(paste0(set$prefix, "_plum.out"))
   if(proportion >= 1)
     stop("cannot remove that many iterations, there would be none left!", call.=FALSE)
   proportion <- sample(nrow(output), proportion*nrow(output))
   output <- output[-proportion,]
-  write.table(output, paste0(set$prefix, ".out"), col.names=FALSE, row.names=FALSE)
+  fastwrite(output, paste0(set$prefix, ".out"), col.names=FALSE, row.names=FALSE)
 
   info <- get('info')
   info$output <- output
   if(set$isplum) {
     plumout <- plumout[-proportion,]
-    write.table(plumout, paste0(set$prefix, "_plum.out"), col.names=FALSE, row.names=FALSE)
+    fastwrite(plumout, paste0(set$prefix, "_plum.out"), col.names=FALSE, row.names=FALSE)
     set$phi <- plumout[,1]
     set$ps <- plumout[,-1] # could be >1 columns
   }
@@ -154,7 +156,7 @@ Baconvergence <- function(core="MSB2K", runs=5, suggest=FALSE, verbose=TRUE, ...
     set <- get('info')
     if(i == 1)
       nm <- set$prefix
-    MCMC[[i]] <- read.table(paste0(nm, ".out"))
+    MCMC[[i]] <- fastread(paste0(nm, ".out"))
     Bacon.cleanup()
   }
 
