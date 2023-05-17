@@ -100,6 +100,7 @@ int bacon( std::string inputfile1, std::string outputfile1, int ssize, std::stri
   //int every=  -1*EVERY_MULT*All.Dim(); // only accepted iterations
   int every =  EVERY_MULT*All.Dim();
 
+  
   //Run the twalk
   All.RunTwalk( outputfile, it, every);
 

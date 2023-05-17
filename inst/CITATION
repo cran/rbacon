@@ -9,5 +9,8 @@ pages = "457 -- 474",
 keywords = "Age-Depth models, AR Gamma process, Paleoecology, Radiocarbon",
 year = "2011",
 doi = "10.1214/11-BA618",
-URL = "https://doi.org/10.1214/11-BA618"
+URL = "https://doi.org/10.1214/11-BA618",
+
+textVersion =
+    "Blaauw, M., Christen, J.A., 2011. Flexible paleoclimate age-depth models using an autoregressive gamma process. Bayesian Analysis 6(3), 457-474. doi:10.1214/11-BA618"
 )

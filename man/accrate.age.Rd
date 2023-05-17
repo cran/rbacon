@@ -10,7 +10,8 @@ accrate.age(
   cmyr = FALSE,
   ages = c(),
   BCAD = set$BCAD,
-  silent = TRUE
+  silent = TRUE,
+  na.rm = FALSE
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ accrate.age(
 \item{BCAD}{The calendar scale of graphs and age output-files is in \code{cal BP} by default, but can be changed to BC/AD using \code{BCAD=TRUE}.}
 
 \item{silent}{Warn when ages are outside the core's range. Default \code{silent=TRUE}.}
+
+\item{na.rm}{Remove NA entries. These are NOT removed by default, so that always the same amount of iterations is returned.}
 }
 \value{
 all MCMC estimates of accumulation rate of the chosen age.

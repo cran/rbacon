@@ -9,6 +9,53 @@ validateDirectoryName <- function(dir) {
 }
 
 
+
+#' @name set.initvals
+#' @title Set initial values for the Bacon MCMC run.
+#' @description Select initial values th0 and th1 for a Bacon MCMC run and write them into a file that can be read by Bacon.
+#' @details By default, the initial MCMC values th0 and th1 of the Bacon age-depth model (upper ages and accumulation rate
+#' for each model section) are estimated randomly. Since version 3.1.0, these starting values can
+#' also be provided in a file with extension _bacon.init, placed
+#' within the core's folder. This file will need to have two rows,
+#' each for one of the two initial sets of parameters required (the
+#' t-walk requires two starting estimates for all MCMC parameters).
+#' If such a file is found (and correctly formatted), Bacon will use
+#' the values within this file as starting points for the MCMC run.
+#' @author Maarten Blaauw, J. Andres Christen
+#' @return A .bacon.init file
+#' @param set Detailed information of the current run, stored within this session's memory as variable \code{info}.
+#' @param core The name of the core for which a bacon.init file needs to be made
+#' @param values use this if you wish to provide the values (2 rows with starting age, accumulation rates for each model section, and memory parameter w).
+#' @param click use this if you wish to use the cursor to manually select age-depth points from the current graphic device. This is the default option. Right click once you have selected all datapoints, or provide the number of expected datapoints as a value (e.g., \code{click=5}).
+#' @export
+set.initvals <- function(set=get('info'), core=set$core, values=c(), click=1) {
+  elbows <- set$elbows
+
+  if(length(values) == 0) { # then the user will click on an existing graph to select age-depth points
+    if(click == 1) # user right-clicks once done
+      draft.agedepth <- locator() else
+        draft.agedepth <- locator(click)
+    ages <- approx(draft.agedepth$x, draft.agedepth$y, elbows, rule=2)$y
+    agedepth <- cbind(elbows, ages)
+    accs <- diff(ages) / diff(elbows)
+    accs <- c(accs[1], accs)
+    accs1 <- abs(jitter(accs)) # add some scatter to ensure that th
+    accs2 <- abs(jitter(accs))
+    ages1 <- jitter(ages[1])
+    ages2 <- jitter(ages[2])
+    w1 <- jitter(0.5) # memory
+    w2 <- jitter(0.5)
+    init1 <- c(ages1, accs1, w1)
+    init2 <- c(ages2, accs2, w2)
+    } else { # user provides 2 sets of starting points
+      init1 <- values[1,]
+      init2 <- values[2,]
+    }
+  write.table(rbind(init1, init2), paste0(set$bacon.file, ".init"), sep="\t", col.names=FALSE, row.names=FALSE)
+}
+
+
+
 #' @name clam2bacon
 #' @title Translate clam .csv files to Bacon .csv files.
 #' @description Reads a clam .csv file containing the dates, and transforms it into a Bacon .csv file.
@@ -179,6 +226,9 @@ read.dets <- function(core, coredir, othername=c(), set=get('info'), sep=",", de
   suggested.names <- c("labID", "age", "error", "depth", "cc", "dR", "dSTD", "ta", "tb")
   changed <- 0
 
+  if(nchar(sep) != 1L) # fwrite wants sep to be of 1 character length only
+    message("Warning, sep should be 1 character only, please adapt")
+
   if(file.exists(csv.file)) {
     dets <- fastread(csv.file, header=TRUE, sep=sep)
     if(file.exists(dat.file)) # deal with old .dat files
@@ -301,14 +351,14 @@ read.dets <- function(core, coredir, othername=c(), set=get('info'), sep=",", de
 
   # if current dets differ from original .csv file, rewrite it
   if(changed > 0)
-    fwrite(as.data.frame(dets), csv.file, sep=paste0(sep, "\t"), dec=dec, row.names=FALSE, col.names=suggested.names[1:ncol(dets)], quote=FALSE)
+    fwrite(as.data.frame(dets), csv.file, sep=sep, dec=dec, row.names=FALSE, col.names=suggested.names[1:ncol(dets)], quote=FALSE) # sep was paste0(sep, "\t") but fwrite needs sep to be exactly 1 char
   dets
 }
 
 
 
 # read in default values, values from previous run, any specified values, and report the desired one. Internal function.
-Bacon.settings <- function(core, coredir, dets, thick, remember=TRUE, d.min, d.max, d.by, depths.file, slump, acc.mean, acc.shape, mem.mean, mem.strength, boundary, hiatus.depths, hiatus.max, hiatus.shape, BCAD, cc, postbomb, cc1, cc2, cc3, cc4, depth.unit, normal, t.a, t.b, delta.R, delta.STD, prob, defaults, runname, ssize, dark, MinAge, MaxAge, cutoff, age.res, after, age.unit) {
+Bacon.settings <- function(core, coredir, dets, thick, remember=TRUE, d.min, d.max, d.by, depths.file, slump, acc.mean, acc.shape, mem.mean, mem.strength, boundary, hiatus.depths, hiatus.max, hiatus.shape, BCAD, cc, postbomb, cc1, cc2, cc3, cc4, depth.unit, normal, t.a, t.b, delta.R, delta.STD, prob, defaults, runname, ssize, dark, youngest.age, oldest.age, cutoff, age.res, after, age.unit) {
 
   vals <- list(d.min, d.max, d.by, depths.file, slump, acc.mean, acc.shape, mem.mean, mem.strength, boundary, hiatus.depths, hiatus.max, BCAD, cc, postbomb, cc1, cc2, cc3, cc4, depth.unit, normal, t.a, t.b, delta.R, delta.STD, prob, age.unit) # do these now need the length for each parameter where available?
   valnames <- c("d.min", "d.max", "d.by", "depths.file", "slump", "acc.mean", "acc.shape", "mem.mean", "mem.strength", "boundary", "hiatus.depths", "hiatus.max", "BCAD", "cc", "postbomb", "cc1", "cc2", "cc3", "cc4", "depth.unit", "normal", "t.a", "t.b", "delta.R", "delta.STD", "prob", "age.unit")
@@ -395,10 +445,10 @@ Bacon.settings <- function(core, coredir, dets, thick, remember=TRUE, d.min, d.m
     delta.R, " #delta.R\n", delta.STD, " #d.STD\n", prob, " #prob\n", age.unit, "#age.unit\n", sep="", file=prevfile)
   close(prevfile)
 
-  if(length(MinAge) == 0)
-    MinAge <- min(1950 - as.integer(format(Sys.time(), "%Y")), round(dets[,2] - (5*dets[,3])))
-  if(length(MaxAge) == 0)
-    MaxAge <- max(1e6, round(dets[,2] + (5*dets[,3])))
+  if(length(youngest.age) == 0)
+    youngest.age <- min(1950 - as.integer(format(Sys.time(), "%Y")))#, round(dets[,2] - (5*dets[,3])))
+  if(length(oldest.age) == 0)
+    oldest.age <- max(1e6, round(dets[,2] + (5*dets[,3])))
 
   list(core=core, thick=thick, dets=dets, d.min=d.min, d.max=d.max,
     d.by=d.by, depths.file=depths.file, slump=slump,
@@ -408,14 +458,14 @@ Bacon.settings <- function(core, coredir, dets, thick, remember=TRUE, d.min, d.m
     BCAD=BCAD, cc=cc, postbomb=postbomb,
     cc1=cc1, cc2=cc2, cc3=cc3, cc4=cc4, depth.unit=noquote(depth.unit), unit=depth.unit, age.unit=noquote(age.unit), normal=normal,
     t.a=t.a, t.b=t.b, delta.R=delta.R, delta.STD=delta.STD, prob=prob, date=date(),
-    runname=runname, ssize=ssize, dark=dark, MinAge=MinAge, MaxAge=MaxAge,
+    runname=runname, ssize=ssize, dark=dark, youngest.age=youngest.age, oldest.age=oldest.age,
     cutoff=cutoff, age.res=age.res, after=after)
 }
 
 
 
 # write files to be read by the main Bacon age-depth modelling function
-write.Bacon.file <- function(set=get('info')) {
+write.Bacon.file <- function(set=get('info'), younger.than=c(), older.than=c()) {
   if(length(set$slump) > 0) {
     dets <- set$slumpdets
     hiatus.depths <- set$slumphiatus
@@ -459,10 +509,19 @@ write.Bacon.file <- function(set=get('info')) {
       dets[1,3], ",  ", dets[1,4], ",  ", set$delta.R, ",  ", set$delta.STD,
       ",  ", set$t.a, ",  ", set$t.b, ",  ", set$cc, ";", sep="", file=fl)
       if(nrow(dets)>1)
-        for(i in 2:nrow(dets))
-          cat("\nDet ", i-1, " : ",  as.character(dets[i,1]),
-          " , ", dets[i,2], ", ", dets[i,3], ", ", dets[i,4],
-          ";", sep="", file=fl)
+        for(i in 2:nrow(dets)) {
+          if(i %in% older.than) # is an "older-than" date
+            cat("\nDetCensor ", i-1, " : ",  as.character(dets[i,1]),
+            " , ", dets[i,2], ", ", dets[i,3], ", ", dets[i,4],
+            ";", sep="", file=fl) else
+              if(i %in% younger.than)
+                cat("\nDetCensorE ", i-1, " : ",  as.character(dets[i,1]),
+                " , ", dets[i,2], ", ", dets[i,3], ", ", dets[i,4],
+                ";", sep="", file=fl) else
+                cat("\nDet ", i-1, " : ",  as.character(dets[i,1]),
+                " , ", dets[i,2], ", ", dets[i,3], ", ", dets[i,4],
+                ";", sep="", file=fl)
+        }
   } else { # use additional columns provided within the dates file
       cc <- dets[,5]
       delta.R <- rep(set$delta.R, nrow(dets))
@@ -481,22 +540,33 @@ write.Bacon.file <- function(set=get('info')) {
         t.b <- dets[,9]
       }
 
-      for(i in 1:nrow(dets))
-        cat("\nDet ", i-1, " : ",  as.character(dets[i,1]), " , ",
-          dets[i,2], ", ", dets[i,3], ", ", dets[i,4],  ",  ",
-          delta.R[i], ",  ", delta.STD[i], ",  ", t.a[i], ",  ", t.b[i], ",  ",
-          cc[i], ";", sep="", file=fl)
+      for(i in 1:nrow(dets)) {
+        if(i %in% older.than)
+          cat("\nDetCensor ", i-1, " : ",  as.character(dets[i,1]), " , ",
+            dets[i,2], ", ", dets[i,3], ", ", dets[i,4],  ",  ",
+            delta.R[i], ",  ", delta.STD[i], ",  ", t.a[i], ",  ", t.b[i], ",  ",
+            cc[i], ";", sep="", file=fl) else
+              if(i %in% younger.than)
+                cat("\nDetCensorE ", i-1, " : ",  as.character(dets[i,1]), " , ",
+                dets[i,2], ", ", dets[i,3], ", ", dets[i,4],  ",  ",
+                delta.R[i], ",  ", delta.STD[i], ",  ", t.a[i], ",  ", t.b[i], ",  ",
+                cc[i], ";", sep="", file=fl) else
+                  cat("\nDet ", i-1, " : ",  as.character(dets[i,1]), " , ",
+                  dets[i,2], ", ", dets[i,3], ", ", dets[i,4],  ",  ",
+                  delta.R[i], ",  ", delta.STD[i], ",  ", t.a[i], ",  ", t.b[i], ",  ",
+                  cc[i], ";", sep="", file=fl)
+      }
     }
 
   if(!is.na(hiatus.depths[1])) {
     if(is.null(boundary[1]))
       message("  Hiatus set at depth(s)", paste("", hiatus.depths)) else
         message("  Boundary set at depth(s) ",  paste("", boundary))
-    if(length(set$acc.shape)==1)
+    if(length(set$acc.shape) == 1)
       set$acc.shape <- rep(set$acc.shape, length(hiatus.depths)+1)
-    if(length(set$acc.mean)==1)
+    if(length(set$acc.mean) == 1)
       set$acc.mean <- rep(set$acc.mean, length(hiatus.depths)+1)
-    if(length(set$hiatus.max)==1)
+    if(length(set$hiatus.max) == 1)
       set$hiatus.max <- rep(set$hiatus.max, length(hiatus.depths))
 #      if(length(set$hiatus.shape)==1)
 #        set$hiatus.shape <- rep(set$hiatus.shape, length(set$hiatus.depths))
@@ -506,7 +576,7 @@ write.Bacon.file <- function(set=get('info')) {
       "\n##### cm  alpha beta      ha     hb", file=fl)
     for(i in length(hiatus.depths):1)
       cat("\nHiatus ", i-1, ":  ", hiatus.depths[i], ",  ", set$acc.shape[i+1],
-        ",  ", set$acc.shape[i+1]/set$acc.mean[i+1], ",  ", .1, # last value (h.a) was NA but this conflicts with setting initial values for hiatus length
+        ",  ", set$acc.shape[i+1]/set$acc.mean[i+1], ",  ", .9, # last value (h.a) was NA but this conflicts with setting initial values for hiatus length # .9 was 0.1, should be <1
         ",  ", set$hiatus.max[i], ";", sep="", file=fl)
   }
 
@@ -515,7 +585,7 @@ write.Bacon.file <- function(set=get('info')) {
   if(is.na(set$seed)) {
     wrapup <- paste("\n\n##\t\t K   MinAge   MaxAge   th0   th0p   w.a   w.b   alpha  beta  dmin  dmax",
       "\nBacon 0: ", ifelse(set$normal, "FixNor", "FixT"), ", ", set$K,
-      ",  ", set$MinAge, ",  ", set$MaxAge, ",  ", set$th0[1], ",  ", set$th0[2],
+      ",  ", set$youngest.age, ",  ", set$oldest.age, ",  ", set$th0[1], ",  ", set$th0[2],
       ",  ", set$mem.strength*set$mem.mean, ",  ", set$mem.strength*(1-set$mem.mean),
       ",  ", set$acc.shape[1], ",  ", set$acc.shape[1]/set$acc.mean[1], ", ", set$d.min,
       ", ", cK, ";\n", sep="")
@@ -523,7 +593,7 @@ write.Bacon.file <- function(set=get('info')) {
   } else {
     wrapup <- paste("\n\n##\t\t K   MinAge   MaxAge   th0   th0p   w.a   w.b   alpha  beta  dmin  dmax seed",
       "\nBacon 0: ", ifelse(set$normal, "FixNor", "FixT"), ", ", set$K,
-      ",  ", set$MinAge, ",  ", set$MaxAge, ",  ", set$th0[1], ",  ", set$th0[2],
+      ",  ", set$youngest.age, ",  ", set$oldest.age, ",  ", set$th0[1], ",  ", set$th0[2],
       ",  ", set$mem.strength*set$mem.mean, ",  ", set$mem.strength*(1-set$mem.mean),
       ",  ", set$acc.shape[1], ",  ", set$acc.shape[1]/set$acc.mean[1], ", ", set$d.min,
       ", ", cK, ", ", as.integer(set$seed), ";\n", sep="")

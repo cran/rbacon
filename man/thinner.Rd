@@ -4,12 +4,14 @@
 \alias{thinner}
 \title{Thin iterations.}
 \usage{
-thinner(proportion = 0.1, set = get("info"))
+thinner(proportion = 0.1, set = get("info"), write = TRUE)
 }
 \arguments{
 \item{proportion}{Proportion of iterations to remove. Should be between 0 and 1. Default \code{proportion=0.1}.}
 
 \item{set}{Detailed information of the current run, stored within this session's memory as variable \code{info}.}
+
+\item{write}{Whether or not to write the changes to the output file. Defaults to TRUE.}
 }
 \value{
 NA
@@ -21,15 +23,11 @@ Randomly thin iterations by a given proportion, for example if autocorrelation i
 From all iterations, a proportion is removed with to-be-removed iterations sampled randomly among all iterations.
 }
 \examples{
-\dontshow{
-  Bacon(run=FALSE, coredir=tempfile())
-  thinner(.1)
-  agedepth(d.res=50, age.res=50, d.by=10)
-}
-\dontrun{
+\donttest{
   Bacon(ask=FALSE, coredir=tempfile())
+  nrow(info$output)
   thinner(.2)
-  agedepth()
+  nrow(info$output)
 }
 
 }

@@ -4,7 +4,7 @@
 \alias{accrate.depth}
 \title{Obtain estimated accumulation rates as for any depth of a core.}
 \usage{
-accrate.depth(d, set = get("info"), cmyr = FALSE)
+accrate.depth(d, set = get("info"), cmyr = FALSE, na.rm = FALSE)
 }
 \arguments{
 \item{d}{The depth for which accumulation rates need to be returned.}
@@ -12,6 +12,8 @@ accrate.depth(d, set = get("info"), cmyr = FALSE)
 \item{set}{Detailed information of the current run, stored within this session's memory as variable \code{info}.}
 
 \item{cmyr}{Accumulation rates can be calculated in cm/year or year/cm. By default \code{cmyr=FALSE} and accumulation rates are calculated in year per cm.}
+
+\item{na.rm}{Remove NA entries. These are NOT removed by default, so that always the same amount of iterations is returned.}
 }
 \value{
 all MCMC estimates of accumulation rate of the chosen depth.

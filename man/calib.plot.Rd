@@ -7,6 +7,7 @@
 calib.plot(
   set = get("info"),
   dets = set$dets,
+  accordion = c(),
   BCAD = set$BCAD,
   cc = set$cc,
   rotate.axes = FALSE,
@@ -39,6 +40,8 @@ calib.plot(
 \item{set}{Detailed information of the current run, stored within this session's memory as variable \code{info}.}
 
 \item{dets}{The set of determinations to be plotted.}
+
+\item{accordion}{If depths have to be squeezed/stretched, the parameters can be set here. Defaults to being empty, but requires 2 parameters if active, e.g., \code{accordion=c(10,20)}.}
 
 \item{BCAD}{The calendar scale of graphs is in \code{cal BP} by default, but can be changed to BC/AD using \code{BCAD=TRUE}.}
 

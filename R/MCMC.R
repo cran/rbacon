@@ -27,22 +27,19 @@ bacon.its <- function(ssize, burnin, set=get('info'), ACCEP_EV=20, EVERY_MULT=25
 #' @param burnin Number of iterations to remove  of the iterative time series. If this value is higher than the amount of remaining iterations,
 #' a warning is given and the iterations are not removed. If the provided number is negative, the iterations will be removed from the end of the run, not from the start. If a range is given, this range of iterations is removed.
 #' @param set Detailed information of the current run, stored within this session's memory as variable \code{info}.
+#' @param write Whether or not to write the changes to the output file. Defaults to TRUE.
 #' @author Maarten Blaauw, J. Andres Christen
 #' @return NA
 #' @examples
-#' \dontshow{
-#'   Bacon(run=FALSE, coredir=tempfile())
-#'   scissors(100)
-#'   agedepth(d.res=50, age.res=50, d.by=10)
-#' }
-#' \dontrun{
+#' \donttest{
 #'   Bacon(ask=FALSE, coredir=tempfile())
+#'   nrow(info$output)
 #'   scissors(100)
-#'   agedepth()
+#'   nrow(info$output)
 #' }
 #'
 #' @export
-scissors <- function(burnin, set=get('info')) {
+scissors <- function(burnin, set=get('info'), write=TRUE) {
   output <- fastread(paste0(set$prefix, ".out"))
   if(set$isplum)
     plumout <- fastread(paste0(set$prefix, "_plum.out"))
@@ -66,13 +63,17 @@ scissors <- function(burnin, set=get('info')) {
         }
     }
 
-  fastwrite(output, paste0(set$prefix, ".out"), col.names=FALSE, row.names=FALSE)
+  if(write)
+    fastwrite(output, paste0(set$prefix, ".out"), col.names=FALSE, row.names=FALSE)
   if(set$isplum) {
-    fastwrite(plumout, paste0(set$prefix, "_plum.out"), col.names=FALSE, row.names=FALSE)
+    if(write)
+      fastwrite(plumout, paste0(set$prefix, "_plum.out"), col.names=FALSE, row.names=FALSE)
     set$phi <- plumout[,1]
     set$ps <- plumout[,-1] # can be >1 column
   }
   set$output <- output
+  set$Tr <- nrow(output)
+  set$Us <- output[,ncol(output)] # is this the correct column?
   assign_to_global ("info", set)
 }
 
@@ -84,22 +85,19 @@ scissors <- function(burnin, set=get('info')) {
 #' @details From all iterations, a proportion is removed with to-be-removed iterations sampled randomly among all iterations.
 #' @param proportion Proportion of iterations to remove. Should be between 0 and 1. Default \code{proportion=0.1}.
 #' @param set Detailed information of the current run, stored within this session's memory as variable \code{info}.
+#' @param write Whether or not to write the changes to the output file. Defaults to TRUE.
 #' @author Maarten Blaauw, J. Andres Christen
 #' @return NA
 #' @examples
-#' \dontshow{
-#'   Bacon(run=FALSE, coredir=tempfile())
-#'   thinner(.1)
-#'   agedepth(d.res=50, age.res=50, d.by=10)
-#' }
-#' \dontrun{
+#' \donttest{
 #'   Bacon(ask=FALSE, coredir=tempfile())
+#'   nrow(info$output)
 #'   thinner(.2)
-#'   agedepth()
+#'   nrow(info$output)
 #' }
 #'
 #' @export
-thinner <- function(proportion=0.1, set=get('info')) {
+thinner <- function(proportion=0.1, set=get('info'), write=TRUE) {
   output <- fastread(paste0(set$prefix, ".out"))
   if(set$isplum)
     plumout <- fastread(paste0(set$prefix, "_plum.out"))
@@ -107,13 +105,15 @@ thinner <- function(proportion=0.1, set=get('info')) {
     stop("cannot remove that many iterations, there would be none left!", call.=FALSE)
   proportion <- sample(nrow(output), proportion*nrow(output))
   output <- output[-proportion,]
-  fastwrite(output, paste0(set$prefix, ".out"), col.names=FALSE, row.names=FALSE)
+  if(write)
+    fastwrite(output, paste0(set$prefix, ".out"), col.names=FALSE, row.names=FALSE)
 
   info <- get('info')
   info$output <- output
   if(set$isplum) {
     plumout <- plumout[-proportion,]
-    fastwrite(plumout, paste0(set$prefix, "_plum.out"), col.names=FALSE, row.names=FALSE)
+    if(write)
+      fastwrite(plumout, paste0(set$prefix, "_plum.out"), col.names=FALSE, row.names=FALSE)
     set$phi <- plumout[,1]
     set$ps <- plumout[,-1] # could be >1 columns
   }

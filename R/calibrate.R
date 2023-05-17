@@ -47,7 +47,7 @@
 #' @export
 add.dates <- function(mn, sdev, depth, cc=1, set=get('info'), above=1e-6, postbomb=0, normal=TRUE, delta.R=set$delta.R, delta.STD=set$delta.STD, t.a=set$t.a, t.b=set$t.b, date.res=100, height=.1, calheight=1, agesteps=1, cutoff=0.005, col=rgb(1,0,0,.5), border=rgb(1,0,0,.5), rotate.axes=FALSE, mirror=TRUE, up=TRUE, BCAD=FALSE, pch=4, cc.dir=c()) {
 
-  dists <- draw.dates(mn-delta.R, sqrt(sdev^2+delta.STD^2), depth, cc=cc, postbomb=postbomb, normal=normal, t.a=t.a, t.b=t.b, dist.res=date.res, ex=height, threshold=cutoff, col=col, border=border, draw.hpd=FALSE, rotate.axes=!rotate.axes, mirror=mirror, up=up, cc.dir=cc.dir, add=TRUE)
+  dists <- draw.dates(mn-delta.R, sqrt(sdev^2+delta.STD^2), depth, cc=cc, postbomb=postbomb, normal=normal, t.a=t.a, t.b=t.b, dist.res=date.res, ex=height, threshold=cutoff, col=col, border=border, draw.hpd=FALSE, rotate.axes=!rotate.axes, mirror=mirror, up=up, cc.dir=cc.dir, add=TRUE, BCAD=BCAD)
   
   if(length(pch) > 0) {
     best <- c()
@@ -55,7 +55,7 @@ add.dates <- function(mn, sdev, depth, cc=1, set=get('info'), above=1e-6, postbo
       best[i] <- dists[[1]][,i][which(dists[[2]][,i] == max(dists[[2]][,i]))][1] 
     if(rotate.axes)
       points(best, depth, pch=pch, col=col) else
-        points(depth, best, pch=pch, col=col)	
+        points(depth, best, pch=pch, col=col)
   }  
 }
 
@@ -68,6 +68,7 @@ add.dates <- function(mn, sdev, depth, cc=1, set=get('info'), above=1e-6, postbo
 #' It can be used to produce custom-built graphs.
 #' @param set Detailed information of the current run, stored within this session's memory as variable \code{info}.
 #' @param dets The set of determinations to be plotted.
+#' @param accordion If depths have to be squeezed/stretched, the parameters can be set here. Defaults to being empty, but requires 2 parameters if active, e.g., \code{accordion=c(10,20)}.
 #' @param BCAD The calendar scale of graphs is in \code{cal BP} by default, but can be changed to BC/AD using \code{BCAD=TRUE}.
 #' @param cc Calibration curve to be used (defaults to info$cc)
 #' @param rotate.axes The default of plotting age on the horizontal axis and event probability on the vertical one can be changed with \code{rotate.axes=TRUE}.
@@ -101,7 +102,7 @@ add.dates <- function(mn, sdev, depth, cc=1, set=get('info'), above=1e-6, postbo
 #'   calib.plot()
 #' @export
 ### produce plots of the calibrated distributions
-calib.plot <- function(set=get('info'), dets=set$dets, BCAD=set$BCAD, cc=set$cc, rotate.axes=FALSE, rev.d=FALSE, rev.age=FALSE, rev.yr=rev.age, age.lim=c(), yr.lim=age.lim, date.res=100, d.lab=c(), age.lab=c(), yr.lab=age.lab, height=1, calheight=1, mirror=TRUE, up=TRUE, cutoff=.1, C14.col=rgb(0,0,1,.5), C14.border=rgb(0,0,1,.75), cal.col=rgb(0,.5,.5,.5), cal.border=rgb(0,.5,.5,.75), dates.col=c(), slump.col=grey(0.8), new.plot=TRUE, plot.dists=TRUE, same.heights=FALSE) {
+calib.plot <- function(set=get('info'), dets=set$dets, accordion=c(), BCAD=set$BCAD, cc=set$cc, rotate.axes=FALSE, rev.d=FALSE, rev.age=FALSE, rev.yr=rev.age, age.lim=c(), yr.lim=age.lim, date.res=100, d.lab=c(), age.lab=c(), yr.lab=age.lab, height=1, calheight=1, mirror=TRUE, up=TRUE, cutoff=.1, C14.col=rgb(0,0,1,.5), C14.border=rgb(0,0,1,.75), cal.col=rgb(0,.5,.5,.5), cal.border=rgb(0,.5,.5,.75), dates.col=c(), slump.col=grey(0.8), new.plot=TRUE, plot.dists=TRUE, same.heights=FALSE) {
 	
   # agedepth calls as follows:
   #calib.plot(set, BCAD=BCAD, cc=cc, rotate.axes=rotate.axes, height=height, calheight=calheight, mirror=mirror, up=up, date.res=date.res, cutoff=cutoff, C14.col=C14.col, C14.border=C14.border, cal.col=cal.col, cal.border=cal.border, dates.col=dates.col, new.plot=FALSE, same.heights=same.heights)
@@ -169,6 +170,8 @@ calib.plot <- function(set=get('info'), dets=set$dets, BCAD=set$BCAD, cc=set$cc,
       if(length(dupl) > 0) # avoid warning of collapsing to unique values
         cal <- cal[-dupl,]
       d <- set$calib$d[[i]]
+      if(length(accordion) == 2)
+        d <- stretch(d, accordion[1], accordion[2])
       if(BCAD)
         cal[,1] <- 1950-cal[,1]
       if((max(cal[,1]) - min(cal[,1])) > 4*agesteps)

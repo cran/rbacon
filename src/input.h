@@ -11,6 +11,7 @@
 #include <string.h>
 #include <math.h>
 #include <vector>
+#include <time.h>
 
 #include "cal.h"
 #include "bacon.h"
@@ -55,7 +56,15 @@ private:
 	Dets *dets; //these are the determinations
 
 	BaconFix *bacon;
+    int bacon_dim; 
+    double *X0;
+    double *Xp0;
+    FILE *IV;
+    FILE *LV;
+    char init_v_fnam[CHARBUFFER];
+    char last_v_fnam[CHARBUFFER];
 
+    
 	twalk *BaconTwalk;
 
 public:
@@ -71,6 +80,18 @@ public:
     //	BaconTwalk->simulation( it, outputfnam, mode, save_every, bacon->Getx0(), bacon->Getxp0(), silent=silent); JEV WARNING
         BaconTwalk->simulation( it, outputfnam, mode, save_every, bacon->Getx0(), bacon->Getxp0(), silent);
 
+        Rprintf("Writing two last points of the twalk in %s.\n", last_v_fnam);
+        long sec=time(NULL);  //Current time
+        time_t temp = sec;
+        fprintf( LV, "### Run finished: %s", ctime(&temp));
+        for(int k=0; k<bacon_dim; k++) 
+         	fprintf( LV, "%13.6g\t", X0[k]);
+        fprintf( LV, "\n");
+        for(int k=0; k<bacon_dim; k++) 
+         	fprintf( LV, "%13.6g\t", Xp0[k]);
+        fprintf( LV, "\n");
+
+        fclose(LV);
 	}
 
 	const char *GetLabNum(int j) { return dets->labnm(j); }
@@ -98,7 +119,7 @@ public:
 	int GetnPs(){ return bacon->GetnPs(); }
 
 	void outputFiles(std::string outputfile1);
-
+       
 	/*void PrintCal( FILE *F, double c0, double cK, double by, const double *x) {
 
 		bacon->SetThetas(x);

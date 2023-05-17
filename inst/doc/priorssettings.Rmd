@@ -14,7 +14,7 @@ Bacon('RLGH3')
 
 ![age-depth model of RLGH3 using the default settings](./images/RLGH3_default.png)
 
-Note that with the default settings, the age-model bypasses some of the younger dates between 130 and 60 cm core depth, since the older dates seem to fit better with the model and the dates further downcore and higher up the core. On top of this, the model bypasses the bottom date, because if the age-model were to go through this date, it would require large-scale changes in sedimentation times which seem to be prohibited by the default settings for the prior information. So let's run the model again, this time accepting the suggested value of 50 yr/cm for the accumulation rate `acc.mean` (type `y` and press `Enter`):
+Note that with the default settings, the age-model bypasses some of the younger dates between 130 and 60 cm core depth, since the older dates within that core section seem to fit better with the model and the dates further downcore and higher up the core. On top of this, the model bypasses the bottom date, because if the age-model were to go through this date, it would require large-scale changes in sedimentation times which seem to be prohibited by the default settings for the prior information. So let's run the model again, this time accepting the suggested value of 50 yr/cm for the accumulation rate `acc.mean` (type `y` and press `Enter`):
 
 ```{R, eval=FALSE}
 Bacon('RLGH3')
@@ -22,7 +22,7 @@ Bacon('RLGH3')
 
 ![age-depth model of RLGH3 using suggested settings](./images/RLGH3_50yrcm.png)
 
-With the adapted prior for the accumulation rate, now the lowermost date *is* taken into account. Now, what if someone you trusted told you that they had some very strong information from other nearby lakes that sedimentation times are very likely to be 50 yr/cm? Then we can set the prior to be much more restrictive than the default - we let the green curve peak higher so that the accumulation rates are 'forced' to values around 50 yr/cm:
+With the adapted prior for the accumulation rate, now the lowermost date *is* taken into account. Now, what if someone you trusted told you that they had some very strong information from other nearby lakes that sedimentation times are very likely to be 50 yr/cm? Then we can set the prior to be much more restrictive/stronger than the default - we let the green curve peak higher so that the accumulation rates are 'forced' to values around 50 yr/cm:
 
 ```{R, eval=FALSE}
 Bacon('RLGH3', acc.mean=50, acc.shape=100)
@@ -36,7 +36,7 @@ When comparing the prior (green) and posterior (grey) distributions of the accum
 
 ## memory
 
-Besides the prior for accumulation rates, the other prior is that of the memory, and this defines how much accumulation rate can change from one core depth to another. To take an example, in the previous run the memory (rightmost top panel) is all the way at 1 or 100%. In other words, the accumulation rate at one depth is highly correlated with those at neighbouring depths. If you have a site where you have information about how constant the accumulation rate must have been (e.g., a riverine site could have had very episodical and varying accumulation), this can thus be included using the memory prior.
+Besides the prior for accumulation rates, the other prior is that of the memory, and this defines how much accumulation rate can change from one core depth to another. To take an example, in the previous run the memory (rightmost top panel) is all the way at 1 or 100%. In other words, the accumulation rate at one depth is highly correlated with those at neighbouring depths, i.e. it's a nearly straight line. If you have a site where you have information about how constant the accumulation rate must have been (e.g., a riverine site could have had very episodical and varying accumulation), this can thus be included using the memory prior.
 
 ## hiatuses and slumps
 

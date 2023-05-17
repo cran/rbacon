@@ -56,10 +56,10 @@ Bacon(
   ssize = 4000,
   th0 = c(),
   burnin = min(500, ssize),
+  youngest.age = c(),
+  oldest.age = c(),
   MinAge = c(),
   MaxAge = c(),
-  MinYr = MinAge,
-  MaxYr = MaxAge,
   cutoff = 0.01,
   plot.pdf = TRUE,
   dark = 1,
@@ -67,6 +67,9 @@ Bacon(
   age.res = 200,
   yr.res = age.res,
   close.connections = TRUE,
+  older.than = c(),
+  younger.than = c(),
+  save.ages = FALSE,
   verbose = TRUE,
   ...
 )
@@ -194,19 +197,19 @@ try running your core again with \code{remember=FALSE}, or, start cleanly by typ
 
 \item{BCAD}{The calendar scale of graphs and age output-files is in cal BP (calendar or calibrated years before the present, where the present is AD 1950) by default, but can be changed to BC/AD using \code{BCAD=TRUE}.}
 
-\item{ssize}{The approximate amount of iterations to store at the end of the MCMC run. Default 2000; decrease for faster (but less reliable) runs or increase for cores where the MCMC mixing (panel at upper-left corner of age-model graph) appears problematic.}
+\item{ssize}{The amount of iterations to store at the end of the MCMC run. Default 4000; decrease for faster (but less reliable) runs or increase for cores where the MCMC mixing (panel at upper-left corner of age-model graph) appears problematic.}
 
-\item{th0}{Starting years for the MCMC iterations.}
+\item{th0}{Starting years for the MCMC iterations. These are randomly chosen by default.}
 
 \item{burnin}{Amount of initial, likely sub-optimal MCMC iterations that will be removed.}
 
-\item{MinAge}{Minimum age limit for Bacon runs, default at current year in cal BP. To set plot limits, use \code{yr.min} instead.}
+\item{youngest.age}{Minimum age limit for Bacon runs, default at current year in cal BP. To set plot limits, use \code{age.min} instead.}
 
-\item{MaxAge}{Maximum age limit for Bacon runs, default at 1,000,000 cal BP. To set plot limits, use \code{yr.max} instead.}
+\item{oldest.age}{Maximum age limit for Bacon runs, default at 1,000,000 cal BP. To set plot limits, use \code{age.max} instead.}
 
-\item{MinYr}{Deprecated - use MinAge instead.}
+\item{MinAge}{Deprecated - use youngest.age instead.}
 
-\item{MaxYr}{Deprecated - use MaxAge instead.}
+\item{MaxAge}{Deprecated - use oldest.age instead.}
 
 \item{cutoff}{Avoid plotting very low probabilities of date distributions (default \code{cutoff=0.001}).}
 
@@ -222,6 +225,12 @@ Lower values will result in lighter grey but values >1 are not allowed.}
 \item{yr.res}{Deprecated - use age.res instead}
 
 \item{close.connections}{Internal option to close connections after a run. Default \code{close.connections=TRUE}.}
+
+\item{older.than}{an option to enable dates at the limit of C-14 dating. If there are older.than dates, they tell us that the core should be older than a certain age at that depth. For example, if the 7th and 8th dates in the core's .csv file are older-than dates, use as \code{older.than=c(7,8)}. The MCMC run could be problematic if the older-than ages do not fit with the other information.}
+
+\item{younger.than}{an option to provide younger-than ages, for example a historical pollen marker. If there are younger-than dates, they tell us that the core should be younger than a certain age at that depth. For example, if the 7th and 8th dates in the core's .csv file are younger.than dates, use as \code{younger.than=c(7,8)}. The MCMC run could be problematic if the younger.than ages do not fit with the other information.}
+
+\item{save.ages}{If you want to have a file with the MCMC-derived ages for all the age-depth model's elbows, set \code{save.ages=TRUE} and a file with the ages will be saved in the core's folder, ending in "_elbowages.txt".}
 
 \item{verbose}{Provide feedback on what is happening (default \code{verbose=TRUE}).}
 
@@ -254,7 +263,24 @@ postbomb curve you need. If Bacon finds postbomb dates (negative 14C ages) and y
 you will be prompted. Provide postbomb curves as, e.g., \code{postbomb=1} for the NH1 postbomb curve (2 for NH2, 3 for NH3, 4 for SH1-2, 5 for SH3).
 For calendar dates, i.e. dates that are already on the calendar scale and thus should not be calibrated, set\code{cc=0}.
 
-From version 2.5.1 on (i.e., since February 2021), the default memory prior has changed to \code{mem.mean=0.5} and \code{mem.strength=10}. Previously used c++ code contained a bug which caused the prior information for the memory not to be taken into account correctly. Now that this bug has been repaired, the default memory prior has been updated such that it should work for most types of cores, and should result in similar output to previous versions of Bacon. There is no need to re-do previous runs. However, it is considered good practice to test the impact of different settings on a site's age-depth model (e.g., thick, acc.mean, acc.shape, mem.mean, acc.strength).
+Since version 3.1.0, Bacon can also handle younger-than and older-than ages, with the model aiming to either go 'above'
+or 'below' such dates as requested. If the resulting combination of parameters becomes problematic (e.g., no initial
+combination of parameters can be found that obeys the priors or is in chronological order), then the output will often be wrong.
+If so, using the function \link{set.initvals} could help.
+
+By default, the initial MCMC values of the Bacon age-depth model (upper ages and accumulation rate for each model section)
+are estimated randomly. Since version 3.1.0, these starting values can also be provided in a file with extension _bacon.init,
+placed within the core's folder. This file will need to have two rows, each for one of the two initial sets of parameters required
+(the t-walk requires two starting estimates for all MCMC parameters).
+If such a file is found (and correctly formatted), Bacon will use the values within this file
+as starting points for the MCMC run. See function \link{set.initvals} for more information.
+
+From version 2.5.1 on (i.e., since February 2021), the default memory prior has changed to \code{mem.mean=0.5}
+and \code{mem.strength=10}. Previously used c++ code contained a bug which caused the prior information for the memory not to be
+taken into account correctly. Now that this bug has been repaired, the default memory prior has been updated such that it should work
+for most types of cores, and should result in similar output to previous versions of Bacon. There is no need to re-do previous runs.
+However, it is considered good practice to test the impact of different settings on a site's age-depth model
+(e.g., thick, acc.mean, acc.shape, mem.mean, acc.strength).
 }
 \examples{
 \dontshow{
@@ -266,18 +292,18 @@ From version 2.5.1 on (i.e., since February 2021), the default memory prior has 
 }
 }
 \references{
-Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
+Blaauw, M. and Christen, J.A., 2011. Flexible paleoclimate age-depth models using an autoregressive gamma process. Bayesian Anal. 6(3): 457-474.
 
-Christen, J.A., Perez E., S., 2010. A new robust statistical model for radiocarbon data. Radiocarbon 51, 1047-1059. 
+Christen, J.A., Perez E., S., 2010. A new robust statistical model for radiocarbon data. Radiocarbon 51: 1047-1059.
 
-Reimer et al., 2020. The IntCal20 Northern Hemisphere radiocarbon age calibration curve (0–55 cal kBP). Radiocarbon 62. \doi{10.1017/RDC.2020.41}
+Reimer et al., 2020. The IntCal20 Northern Hemisphere radiocarbon age calibration curve (0–55 cal kBP). Radiocarbon 62(4): 725-757. \doi{10.1017/RDC.2020.41}
 
-Hogg et al. 2020 SHCal20 Southern Hemisphere calibration, 0-55,000 years cal BP. Radiocarbon 62. \doi{10.1017/RDC.2020.59}
+Hogg et al. 2020 SHCal20 Southern Hemisphere calibration, 0-55,000 years cal BP. Radiocarbon 62(4): 759-778. \doi{10.1017/RDC.2020.59}
 
-Hughen et al. 2020 Marine20-the marine radiocarbon age calibration curve (0-55,000 cal BP). Radiocarbon 62. \doi{10.1017/RDC.2020.68}
+Hughen et al. 2020 Marine20-the marine radiocarbon age calibration curve (0-55,000 cal BP). Radiocarbon 62(4): 779-820.  \doi{10.1017/RDC.2020.68}
 
 Hua, Q., Barbetti, M., Rakowski, A.Z., 2013. Atmospheric radiocarbon for the period 1950-2010.
-Radiocarbon 55(4), \doi{10.2458/azu_js_rc.v55i2.16177}
+Radiocarbon 55(4): 2059-2072. \doi{10.2458/azu_js_rc.v55i2.16177}
 
 Jones, V.J., Stevenson, A.C., Battarbee, R.W., 1989. Acidification of lakes in Galloway, south west Scotland
 - a diatom and pollen study of the post-glacial history of the Round Loch of Glenhead.

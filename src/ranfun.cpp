@@ -17,6 +17,8 @@
 #include <time.h>
 #include <Rcpp.h>
 
+#include "ranfun.h"
+
 #define New(objects, have, TYPE)                                            \
    (objects) = (TYPE *)malloc((have) * sizeof(*(objects)));                 \
    if ((objects) == NULL)                                                   \
@@ -36,7 +38,7 @@
    you can redistribute and modify it under the terms of the GNU Library
    General Public License (LGPL), version 2 or later.
 */
-int fcmp(double x1, double x2, double epsilon = 0.00000000001)
+int fcmp(double x1, double x2, double epsilon) /* epsilon = 0.00000000001) */
 {
    int exponent;
    double delta;
@@ -311,8 +313,16 @@ double BetaSim( double a, double b) { /*Beta: p(x) dx = K x^{a-1} (1-x)^{b-1} dx
 
 
 
+/* Wraper for the GSL implementation of the standard Gaussian cdf */
+double NorF(const double x) {
+    return gsl_cdf_ugaussian_P(x);
+}
 
-
+/* Wraper for the GSL implementation of the standard t dist cdf 
+double StTF(const double x) {
+    return gsl_cdf_utdist_P(x);
+}
+*/
 
 
 

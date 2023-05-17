@@ -192,7 +192,7 @@ draw.pbmodelled <- function(set=get('info'), BCAD=set$BCAD, rotate.axes=FALSE, r
         }
 
       if(rotate.axes)
-        image(ages, c(depths[i]-thickness[i], depths[i]), z, col=pbmodelled.col(seq(0, 1-max(z),  length=50)), add=TRUE) else
+        image(ages, c(depths[i]-thickness[i], depths[i]), t(z), col=pbmodelled.col(seq(0, 1-max(z),  length=50)), add=TRUE) else
           image(c(depths[i]-thickness[i], depths[i]), ages, z, col=pbmodelled.col(seq(0, 1-max(z), length=50)), add=TRUE)
     }
   }
@@ -235,8 +235,8 @@ A.modelled <- function(d.top, d.bottom, dens, set=get('info'), phi=set$phi, sup=
     sup <- sup[,dd]
   }
 
-  t.top <- Bacon.Age.d(d.top, BCAD=F) - set$theta0
-  t.bottom <- Bacon.Age.d(d.bottom, BCAD=F) - set$theta0
+  t.top <- Bacon.Age.d(d.top, BCAD=FALSE) - set$theta0
+  t.bottom <- Bacon.Age.d(d.bottom, BCAD=FALSE) - set$theta0
   #  multiply <- ifelse(set$Bqkg, 10, 500)
   multiply <- 1 # since Bqkg or dpmg is already set earlier (for set$dets and set$detsPlum)
   return(sup + ((phi / (.03114*multiply*dens) ) * (exp( -.03114*t.top) - exp(-.03114*t.bottom)) ) )

@@ -25,3 +25,11 @@
 #  mean(depth23.45)
 #  quantile(depth23.45, probs=c(.025, .975))
 
+## ---- eval=FALSE--------------------------------------------------------------
+#  depth23.45 <- Bacon.Age.d(23.45)
+#  depth12.34 <- Bacon.Age.d(12.34)
+#  passed <- depth23.45 - depth12.34
+#  hist(passed)
+#  mean(passed)
+#  quantile(passed, probs=c(.025, .975))
+

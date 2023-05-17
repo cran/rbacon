@@ -40,6 +40,7 @@ void fver_vector(FILE *fptr, double *u, int m) { // these lines are from plum's 
          fprintf(fptr, "%13.6g", u[m-1]); // plum has this line, but bacon not
 }
 
+
 /*Returns 1 if v = u, component to component*/
 int vector_cmp(double *v, double *u, int n) {
         int i = 0;

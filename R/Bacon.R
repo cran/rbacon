@@ -5,8 +5,8 @@
 #'
 #' @docType package
 #' @author Maarten Blaauw <maarten.blaauw@qub.ac.uk> J. Andres Christen <jac@cimat.mx> 
-#' @importFrom grDevices dev.copy2pdf dev.cur dev.list dev.off extendrange grey pdf rgb
-#' @importFrom graphics abline axis box curve hist image layout legend lines mtext par plot points polygon rect segments text
+#' @importFrom grDevices dev.copy2pdf dev.cur dev.interactive dev.list dev.off extendrange grey pdf rgb
+#' @importFrom graphics abline axis box curve hist image layout legend lines mtext par plot points polygon rect segments text locator
 #' @importFrom stats approx coef dbeta density dgamma dnorm dunif lm median quantile rnorm weighted.mean  
 #' @importFrom utils packageName read.csv read.table setTxtProgressBar txtProgressBar write.table
 #' @importFrom Rcpp evalCpp
@@ -20,9 +20,9 @@ NULL
 # to enable direct use of ccurve, mix.curves, calibration functions, pMC.age & age.pMC
 library(rintcal)
 
-# todo:
+# Bacon(ask=F, boundary=25) doesn't run (but hiatus.depths=25 works fine). It also works with option add=40 (but not add=30. Currently adapted so that hiatus.max is quite large, but this is not optimal). Check if we can return to using a gamma distribution instead of a uniform one
 
-# done:
+# done: older.than and younger.than ages now work, initial t-walk points can be set with new function set.initvals, renamed MinAge and Maxage to youngest.age resp. oldest.age, added an option SaveAges=TRUE to write a file *_elbowages.txt with the ages for all elbows, repaired postbomb bug, added initial MCMC points, replaced sep=paste0(sep, "\t") in read_write.R line 304 with sep=sep, new compress function, added an option to agedepth called plotatthesedepths to enable plotting alternative depths (e.g., after using the compress function; use with great care. Example: agedepth(depths=1:100, plotatthesedepths=1.5*(1:100), d.max=200), any NAs are now kept by default in accrate.age and accrate.depth
 
 # replacing the plotting of the calibrated distributions by rintcal's functions doesn't seem to speed up anything, so keeping the original method in place for now.
 
@@ -59,7 +59,24 @@ library(rintcal)
 #' you will be prompted. Provide postbomb curves as, e.g., \code{postbomb=1} for the NH1 postbomb curve (2 for NH2, 3 for NH3, 4 for SH1-2, 5 for SH3).
 #' For calendar dates, i.e. dates that are already on the calendar scale and thus should not be calibrated, set\code{cc=0}.
 #'
-#' From version 2.5.1 on (i.e., since February 2021), the default memory prior has changed to \code{mem.mean=0.5} and \code{mem.strength=10}. Previously used c++ code contained a bug which caused the prior information for the memory not to be taken into account correctly. Now that this bug has been repaired, the default memory prior has been updated such that it should work for most types of cores, and should result in similar output to previous versions of Bacon. There is no need to re-do previous runs. However, it is considered good practice to test the impact of different settings on a site's age-depth model (e.g., thick, acc.mean, acc.shape, mem.mean, acc.strength).
+#' Since version 3.1.0, Bacon can also handle younger-than and older-than ages, with the model aiming to either go 'above'
+#' or 'below' such dates as requested. If the resulting combination of parameters becomes problematic (e.g., no initial
+#' combination of parameters can be found that obeys the priors or is in chronological order), then the output will often be wrong.
+#' If so, using the function \link{set.initvals} could help.
+#'
+#' By default, the initial MCMC values of the Bacon age-depth model (upper ages and accumulation rate for each model section)
+#' are estimated randomly. Since version 3.1.0, these starting values can also be provided in a file with extension _bacon.init,
+#' placed within the core's folder. This file will need to have two rows, each for one of the two initial sets of parameters required
+#' (the t-walk requires two starting estimates for all MCMC parameters).
+#' If such a file is found (and correctly formatted), Bacon will use the values within this file
+#' as starting points for the MCMC run. See function \link{set.initvals} for more information.
+#'
+#' From version 2.5.1 on (i.e., since February 2021), the default memory prior has changed to \code{mem.mean=0.5}
+#' and \code{mem.strength=10}. Previously used c++ code contained a bug which caused the prior information for the memory not to be
+#' taken into account correctly. Now that this bug has been repaired, the default memory prior has been updated such that it should work
+#' for most types of cores, and should result in similar output to previous versions of Bacon. There is no need to re-do previous runs.
+#' However, it is considered good practice to test the impact of different settings on a site's age-depth model
+#' (e.g., thick, acc.mean, acc.shape, mem.mean, acc.strength).
 
 #' @param core Name of the core, given using quotes. Defaults to one of the cores provided with rbacon, \code{core="MSB2K"}.
 #' An alternative core provided with this package is RLGH3 (Jones et al., 1989).
@@ -135,13 +152,13 @@ library(rintcal)
 #' @param slump Upper and lower depths of any sections of assumed abrupt accumulation, that require excising before age-modelling (and adding after age-modelling). Requires pairs of depths, e.g., \code{slump=c(10,15,60,67)} for slumps at 67-60 and 15-10 cm core depth.
 #' @param remove Whether or not to remove depths within slumps. Defaults to \code{remove=FALSE}.
 #' @param BCAD The calendar scale of graphs and age output-files is in cal BP (calendar or calibrated years before the present, where the present is AD 1950) by default, but can be changed to BC/AD using \code{BCAD=TRUE}.
-#' @param ssize The approximate amount of iterations to store at the end of the MCMC run. Default 2000; decrease for faster (but less reliable) runs or increase for cores where the MCMC mixing (panel at upper-left corner of age-model graph) appears problematic.
-#' @param th0 Starting years for the MCMC iterations.
+#' @param ssize The amount of iterations to store at the end of the MCMC run. Default 4000; decrease for faster (but less reliable) runs or increase for cores where the MCMC mixing (panel at upper-left corner of age-model graph) appears problematic.
+#' @param th0 Starting years for the MCMC iterations. These are randomly chosen by default.
 #' @param burnin Amount of initial, likely sub-optimal MCMC iterations that will be removed.
-#' @param MinAge Minimum age limit for Bacon runs, default at current year in cal BP. To set plot limits, use \code{yr.min} instead.
-#' @param MaxAge Maximum age limit for Bacon runs, default at 1,000,000 cal BP. To set plot limits, use \code{yr.max} instead.
-#' @param MinYr Deprecated - use MinAge instead.
-#' @param MaxYr Deprecated - use MaxAge instead.
+#' @param MinAge Deprecated - use youngest.age instead.
+#' @param youngest.age Minimum age limit for Bacon runs, default at current year in cal BP. To set plot limits, use \code{age.min} instead.
+#' @param MaxAge Deprecated - use oldest.age instead.
+#' @param oldest.age Maximum age limit for Bacon runs, default at 1,000,000 cal BP. To set plot limits, use \code{age.max} instead.
 #' @param cutoff Avoid plotting very low probabilities of date distributions (default \code{cutoff=0.001}).
 #' @param plot.pdf Produce a pdf file of the age-depth plot. Defaults to \code{plot.pdf=TRUE} after a Bacon run.
 #' @param dark Darkness of the greyscale age-depth model. The darkest grey value is \code{dark=1} by default.
@@ -150,6 +167,9 @@ library(rintcal)
 #' @param age.res Resolution or amount of greyscale pixels to cover the age scale of the age-model plot. Default \code{yr.res=200}.
 #' @param yr.res Deprecated - use age.res instead
 #' @param close.connections Internal option to close connections after a run. Default \code{close.connections=TRUE}.
+#' @param older.than an option to enable dates at the limit of C-14 dating. If there are older.than dates, they tell us that the core should be older than a certain age at that depth. For example, if the 7th and 8th dates in the core's .csv file are older-than dates, use as \code{older.than=c(7,8)}. The MCMC run could be problematic if the older-than ages do not fit with the other information.
+#' @param younger.than an option to provide younger-than ages, for example a historical pollen marker. If there are younger-than dates, they tell us that the core should be younger than a certain age at that depth. For example, if the 7th and 8th dates in the core's .csv file are younger.than dates, use as \code{younger.than=c(7,8)}. The MCMC run could be problematic if the younger.than ages do not fit with the other information.
+#' @param save.ages If you want to have a file with the MCMC-derived ages for all the age-depth model's elbows, set \code{save.ages=TRUE} and a file with the ages will be saved in the core's folder, ending in "_elbowages.txt".
 #' @param verbose Provide feedback on what is happening (default \code{verbose=TRUE}).
 #' @param ... options for the age-depth graph. See \link{agedepth} and \link{calib.plot}
 #' @author Maarten Blaauw, J. Andres Christen
@@ -163,34 +183,34 @@ library(rintcal)
 #'   Bacon(cc=2, delta.R=80, delta.STD=40, coredir=tempfile())
 #' }
 #' @references
-#' Blaauw, M. and Christen, J.A., Flexible paleoclimate age-depth models using an autoregressive gamma process. Bayesian Anal. 6 (2011), no. 3, 457--474.
+#' Blaauw, M. and Christen, J.A., 2011. Flexible paleoclimate age-depth models using an autoregressive gamma process. Bayesian Anal. 6(3): 457-474.
 #'
-#' Christen, J.A., Perez E., S., 2010. A new robust statistical model for radiocarbon data. Radiocarbon 51, 1047-1059. 
+#' Christen, J.A., Perez E., S., 2010. A new robust statistical model for radiocarbon data. Radiocarbon 51: 1047-1059.
 #'
-#' Reimer et al., 2020. The IntCal20 Northern Hemisphere radiocarbon age calibration curve (0–55 cal kBP). Radiocarbon 62. \doi{10.1017/RDC.2020.41}
+#' Reimer et al., 2020. The IntCal20 Northern Hemisphere radiocarbon age calibration curve (0–55 cal kBP). Radiocarbon 62(4): 725-757. \doi{10.1017/RDC.2020.41}
 #'
-#' Hogg et al. 2020 SHCal20 Southern Hemisphere calibration, 0-55,000 years cal BP. Radiocarbon 62. \doi{10.1017/RDC.2020.59}
+#' Hogg et al. 2020 SHCal20 Southern Hemisphere calibration, 0-55,000 years cal BP. Radiocarbon 62(4): 759-778. \doi{10.1017/RDC.2020.59}
 #'
-#' Hughen et al. 2020 Marine20-the marine radiocarbon age calibration curve (0-55,000 cal BP). Radiocarbon 62. \doi{10.1017/RDC.2020.68}
+#' Hughen et al. 2020 Marine20-the marine radiocarbon age calibration curve (0-55,000 cal BP). Radiocarbon 62(4): 779-820.  \doi{10.1017/RDC.2020.68}
 #'
 #' Hua, Q., Barbetti, M., Rakowski, A.Z., 2013. Atmospheric radiocarbon for the period 1950-2010.
-#' Radiocarbon 55(4), \doi{10.2458/azu_js_rc.v55i2.16177}
+#' Radiocarbon 55(4): 2059-2072. \doi{10.2458/azu_js_rc.v55i2.16177}
 #'
 #' Jones, V.J., Stevenson, A.C., Battarbee, R.W., 1989. Acidification of lakes in Galloway, south west Scotland
 #' - a diatom and pollen study of the post-glacial history of the Round Loch of Glenhead.
 #' Journal of Ecology 77: 1-23.
 #'
 #' @export
-Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=NA, add.bottom=TRUE, d.by=1, seed=NA, depths.file=FALSE, depths=c(), depth.unit="cm", age.unit="yr", unit=depth.unit, acc.shape=1.5, acc.mean=20, mem.strength=10, mem.mean=0.5, boundary=NA, hiatus.depths=NA, hiatus.max=10000, add=c(), after=.0001/thick, cc=1, cc1="IntCal20", cc2="Marine20", cc3="SHCal20", cc4="ConstCal", ccdir="", postbomb=0, delta.R=0, delta.STD=0, t.a=3, t.b=4, normal=FALSE, suggest=TRUE, accept.suggestions=FALSE, reswarn=c(10,200), remember=TRUE, ask=TRUE, run=TRUE, defaults="defaultBacon_settings.txt", sep=",", dec=".", runname="", slump=c(), remove=FALSE, BCAD=FALSE, ssize=4000, th0=c(), burnin=min(500, ssize), MinAge=c(), MaxAge=c(), MinYr=MinAge, MaxYr=MaxAge, cutoff=.01, plot.pdf=TRUE, dark=1, date.res=100, age.res=200, yr.res=age.res, close.connections=TRUE, verbose=TRUE, ...) {
-  # Check coredir and if required, copy example file in core directory
+Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=NA, add.bottom=TRUE, d.by=1, seed=NA, depths.file=FALSE, depths=c(), depth.unit="cm", age.unit="yr", unit=depth.unit, acc.shape=1.5, acc.mean=20, mem.strength=10, mem.mean=0.5, boundary=NA, hiatus.depths=NA, hiatus.max=10000, add=c(), after=.0001/thick, cc=1, cc1="IntCal20", cc2="Marine20", cc3="SHCal20", cc4="ConstCal", ccdir="", postbomb=0, delta.R=0, delta.STD=0, t.a=3, t.b=4, normal=FALSE, suggest=TRUE, accept.suggestions=FALSE, reswarn=c(10,200), remember=TRUE, ask=TRUE, run=TRUE, defaults="defaultBacon_settings.txt", sep=",", dec=".", runname="", slump=c(), remove=FALSE, BCAD=FALSE, ssize=4000, th0=c(), burnin=min(500, ssize), youngest.age=c(), oldest.age=c(), MinAge=c(), MaxAge=c(), cutoff=.01, plot.pdf=TRUE, dark=1, date.res=100, age.res=200, yr.res=age.res, close.connections=TRUE, older.than=c(), younger.than=c(), save.ages=FALSE, verbose=TRUE, ...) {
+  # Check coredir and if required, copy example files into core directory
   coredir <- assign_coredir(coredir, core, ask, isPlum=FALSE)
   if(core == "MSB2K" || core == "RLGH3") {
     if(!dir.exists(file.path(coredir, core))) {
       dir.create(file.path(coredir, core), showWarnings = FALSE, recursive = TRUE)
       fileCopy <- system.file(paste0("extdata/Cores/", core), package="rbacon")
       file.copy(fileCopy, coredir, recursive = TRUE, overwrite=FALSE)
+      }
     }
-  }
   
   # set the calibration curve
   if(ccdir == "")
@@ -253,7 +273,13 @@ Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=
       acc.mean <- rep(acc.mean, length(hiatus.depths)+1)
   }
 
-  info <- Bacon.settings(core=core, coredir=coredir, dets=dets, thick=thick, remember=remember, d.min=d.min, d.max=d.max, d.by=d.by, depths.file=depths.file, slump=slump, acc.mean=acc.mean, acc.shape=acc.shape, mem.mean=mem.mean, mem.strength=mem.strength, boundary=boundary, hiatus.depths=hiatus.depths, hiatus.max=hiatus.max, BCAD=BCAD, cc=cc, postbomb=postbomb, cc1=cc1, cc2=cc2, cc3=cc3, cc4=cc4, depth.unit=depth.unit, normal=normal, t.a=t.a, t.b=t.b, delta.R=delta.R, delta.STD=delta.STD, prob=prob, defaults=defaults, runname=runname, ssize=ssize, dark=dark, MinAge=MinAge, MaxAge=MaxAge, cutoff=cutoff, age.res=age.res, after=after, age.unit=age.unit)
+  # set reasonable boundaries for the ages
+#  if(length(MinAge) == 0)
+#    MinAge <- min(1950 - as.integer(format(Sys.time(), "%Y")))#, round(dets[,2] - (5*dets[,3])))
+#  if(length(MaxAge) == 0)
+#    MaxAge <- max(1e6, round(dets[,2] + (5*dets[,3])))
+
+  info <- Bacon.settings(core=core, coredir=coredir, dets=dets, thick=thick, remember=remember, d.min=d.min, d.max=d.max, d.by=d.by, depths.file=depths.file, slump=slump, acc.mean=acc.mean, acc.shape=acc.shape, mem.mean=mem.mean, mem.strength=mem.strength, boundary=boundary, hiatus.depths=hiatus.depths, hiatus.max=hiatus.max, BCAD=BCAD, cc=cc, postbomb=postbomb, cc1=cc1, cc2=cc2, cc3=cc3, cc4=cc4, depth.unit=depth.unit, normal=normal, t.a=t.a, t.b=t.b, delta.R=delta.R, delta.STD=delta.STD, prob=prob, defaults=defaults, runname=runname, ssize=ssize, dark=dark, youngest.age=youngest.age, oldest.age=oldest.age, cutoff=cutoff, age.res=age.res, after=after, age.unit=age.unit)
   assign_to_global("info", info)
   info$coredir <- coredir
   if(is.na(seed))
@@ -263,6 +289,10 @@ Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=
   info$isplum <- FALSE
 
   ### check for initial mistakes
+  if(length(MinAge) > 0)
+    warning("please do not use MinAge, instead use the option youngest.age", call.=FALSE)
+  if(length(MaxAge) > 0)
+    warning("please do not use MaxAge, instead use the option oldest.age", call.=FALSE)
   #if(any(info$acc.shape == info$acc.mean))
   #  stop("acc.shape cannot be equal to acc.mean", call.=FALSE)
   if(info$t.b - info$t.a != 1)
@@ -271,13 +301,19 @@ Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=
     warning("\nWarning, using values <1 for acc.shape might cause unexpected results\n", call.=TRUE)
 
   ### calibrate dates
-  if(info$cc > 0) # confirm we are using radiocarbon dates
-    if(info$postbomb == 0 && ((ncol(info$dets) == 4 && min(info$dets[,2]) < 0) ||
-      ncol(info$dets)>4 && max(info$dets[,5]) > 0 && min(info$dets[info$dets[,5] > 0,2]) < 0))
-        stop("you have negative C14 ages so should select a postbomb curve", call.=FALSE)
-  # info$calib <- bacon.calib(dets, info, date.res, ccdir=ccdir, cutoff=cutoff)
+  negativeages <- FALSE
+  if(info$postbomb == 0) # no postbomb curve selected
+    if(ncol(info$dets) == 4) { # not much info on which calcurve to use
+      if(info$cc > 0) # we are using C-14 dates
+        if(min(info$dets[,2]) < 0) # negative C-14 ages
+          negativeages <- TRUE
+    } else # then we have a cc column, which is helpful
+        if(max(info$dets[,5]) > 0) # using radiocarbon dates
+          if(min(info$dets[which(info$dets[,5] > 0),2]) < 0) # negative C14 ages
+            negativeages <- TRUE
+  if(negativeages)
+    stop("you have negative C14 ages so should select a postbomb curve", call.=FALSE)
   info$calib <- bacon.calib(dets, info, date.res, ccdir=ccdir, cutoff=cutoff)
-
   
   ### find some relevant values
   info$rng <- c()
@@ -286,9 +322,9 @@ Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=
     info$rng <- range(info$rng, tmp[,1]) # removed cutoff selection from tmp
   }
   
-  if(length(th0)==0) # provide two ball-park/initial age estimates
-    info$th0 <- round(rnorm(2, max(MinAge, dets[1,2]), dets[1,3]))
-  info$th0[info$th0 < info$MinAge] <- info$MinAge # otherwise twalk will not start
+  if(length(th0) == 0) # provide two ball-park/initial age estimates
+    info$th0 <- round(rnorm(2, max(youngest.age, dets[1,2]), dets[1,3]))
+  info$th0[info$th0 < info$youngest.age] <- info$youngest.age # otherwise twalk will not start
 
   ### assign depths
   if(length(depths) == 0)
@@ -399,7 +435,7 @@ Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=
       boundary <- info$slumpboundary
     info$hiatus.depths <- boundary
     if(length(add) == 0)
-      add <- info$acc.mean # then add a short (max)hiatus, large enough not to crash Bacon but not affect the chronology much. Needs more work
+      add <- min(1, 1.1*info$acc.mean) # then add a short (max)hiatus, large enough not to crash Bacon but not affect the chronology much. Needs more work
     info$hiatus.max <- add
   }
   assign_to_global("info", info)
@@ -429,17 +465,18 @@ Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=
     scissors(burnin, info)
     agedepth(info, BCAD=BCAD, depths.file=depths.file, depths=depths, verbose=TRUE, age.unit=age.unit, depth.unit=depth.unit, ...)
     if(plot.pdf)
-      if(interactive())
-        if(length(dev.list()) > 0)
-          dev.copy2pdf(file=paste0(info$prefix, ".pdf")) else {
-            pdf(file=paste0(info$prefix, ".pdf"))
-            agedepth(info, BCAD=BCAD, depths.file=depths.file, depths=depths, verbose=FALSE, age.unit=age.unit, depth.unit=depth.unit, ...)
-            dev.off()
-          }
+    #  if(interactive())
+    #    if(length(dev.list()) > 0)
+    if(dev.interactive()) # 
+      dev.copy2pdf(file=paste0(info$prefix, ".pdf")) else {
+        pdf(file=paste0(info$prefix, ".pdf"))
+        agedepth(info, BCAD=BCAD, depths.file=depths.file, depths=depths, verbose=FALSE, age.unit=age.unit, depth.unit=depth.unit, ...)
+        dev.off()
+      }
   }
 
 ### run bacon if initial graphs seem OK; run automatically, not at all, or only plot the age-depth model
-  write.Bacon.file(info)
+  write.Bacon.file(info, younger.than=younger.than, older.than=older.than)
   if(!run)
     prepare() else
       if(!ask)
@@ -455,6 +492,10 @@ Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=
         }
  # if(close.connections)
  #   close(outfile)
+  if(save.ages) {
+    saved <- sapply(info$elbows, Bacon.Age.d)
+    write.table(saved, paste0(info$prefix, "_elbowages.txt"), row.names=FALSE, col.names=FALSE)
+  }
 }
 
 

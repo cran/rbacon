@@ -4,13 +4,15 @@
 \alias{scissors}
 \title{Remove the first n iterations.}
 \usage{
-scissors(burnin, set = get("info"))
+scissors(burnin, set = get("info"), write = TRUE)
 }
 \arguments{
 \item{burnin}{Number of iterations to remove  of the iterative time series. If this value is higher than the amount of remaining iterations,
 a warning is given and the iterations are not removed. If the provided number is negative, the iterations will be removed from the end of the run, not from the start. If a range is given, this range of iterations is removed.}
 
 \item{set}{Detailed information of the current run, stored within this session's memory as variable \code{info}.}
+
+\item{write}{Whether or not to write the changes to the output file. Defaults to TRUE.}
 }
 \value{
 NA
@@ -26,15 +28,11 @@ If the run has a visible remaining burn-in, scissors can be used to remove them.
 To remove, e.g., the first 300 iterations, type \code{scissors(300)}. To remove the last 300 iterations, type \code{scissors(-300)}. To remove iterations 300 to 600, type \code{scissors(300:600)}.
 }
 \examples{
-\dontshow{
-  Bacon(run=FALSE, coredir=tempfile())
-  scissors(100)
-  agedepth(d.res=50, age.res=50, d.by=10)
-}
-\dontrun{
+\donttest{
   Bacon(ask=FALSE, coredir=tempfile())
+  nrow(info$output)
   scissors(100)
-  agedepth()
+  nrow(info$output)
 }
 
 }
