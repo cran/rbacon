@@ -1,4 +1,4 @@
-/* cdf/gauss.c FROM GNU SCITIFIC LIBRARY.  Downloaded 20 APR 2023 
+/* cdf/gauss.c FROM GNU SCIENTIFIC LIBRARY.  Downloaded 20 APR 2023
  *
  * Copyright (C) 2002, 2004 Jason H. Stover.
  *

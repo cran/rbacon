@@ -231,7 +231,7 @@ bacon.calib <- function(dat, set=get('info'), date.res=100, cutoff=0.01, postbom
      cc4 <- fastread(paste0(ccdir, set$cc4))[,1:3]
 
   if(postbomb != 0) {
-    bomb <- ccurve(postbomb, postbomb=TRUE)
+    bomb <- ccurve(postbomb, postbomb=TRUE, glue=FALSE) # glue=FALSE added July 2023
     # bomb.x <- seq(max(bomb[,1]), min(bomb[,1]), by=-.1) # interpolate
     bomb <- bomb[order(bomb[,1], decreasing=FALSE),]
     bomb.x <- seq(min(bomb[,1]), max(bomb[,1]), by=.1) # interpolate

@@ -346,8 +346,8 @@ new working directory, it will look for an ‘umbrella’ folder called
 <code>Bacon_runs</code> (or <code>Cores</code>), and if it doesn’t find
 this, it will ask if it may make one. Either accept the suggestion, or
 provide an alternative folder by specifying <code>coredir</code>:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>mydir <span class="ot">&lt;-</span> <span class="fu">tempdir</span>()</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">Bacon</span>(<span class="at">coredir=</span>mydir)</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>mydir <span class="ot">&lt;-</span> <span class="fu">tempdir</span>()</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">Bacon</span>(<span class="at">coredir=</span>mydir)</span></code></pre></div>
 <p>Within this umbrella folder are folders for each individual core. For
 example, if you’ve run the default core, there will be a folder
 <code>MSB2K</code>, and similarly for <code>RLGH3</code>. Within each
@@ -599,13 +599,13 @@ column 5, delta.R in column 6 and delta.STD in column 7). Just provide
 values where appropriate. You can also tell Bacon to stop suggesting
 alternative values, or instead accept all suggestions and run the cores
 without user interaction:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">Bacon</span>(<span class="at">suggest=</span><span class="cn">FALSE</span>)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">Bacon</span>(<span class="at">accept.suggestions=</span><span class="cn">TRUE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">Bacon</span>(<span class="at">suggest=</span><span class="cn">FALSE</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="fu">Bacon</span>(<span class="at">accept.suggestions=</span><span class="cn">TRUE</span>)</span></code></pre></div>
 <p>This can be used to run all cores in a directory while you make
 yourself some breakfast:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>allcores <span class="ot">&lt;-</span> <span class="fu">list.files</span>(<span class="st">&quot;Bacon_runs&quot;</span>)</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> allcores)</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">try</span>(<span class="fu">Bacon</span>(i, <span class="at">accept.suggestions=</span><span class="cn">TRUE</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>allcores <span class="ot">&lt;-</span> <span class="fu">list.files</span>(<span class="st">&quot;Bacon_runs&quot;</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> allcores)</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>  <span class="fu">try</span>(<span class="fu">Bacon</span>(i, <span class="at">accept.suggestions=</span><span class="cn">TRUE</span>))</span></code></pre></div>
 <hr />
 <p><a href="./contents.html">contents</a> <br> <a href="./priorssettings.html">&lt;- previous [priors and settings]</a>
 <br> <a href="./postrun.html">next [post-run analysis] -&gt;</a></p>

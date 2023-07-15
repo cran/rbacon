@@ -581,10 +581,10 @@ provide a list of depths, e.g.,
 <code>Bacon(&quot;MyCore&quot;, depths.file=TRUE)</code>.</p>
 <p>You can also request the age estimate of any core depth after the
 run, for example for 23.45cm:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">Bacon.hist</span>(<span class="fl">23.45</span>)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>depth23<span class="fl">.45</span> <span class="ot">&lt;-</span> <span class="fu">Bacon.Age.d</span>(<span class="fl">23.45</span>)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(depth23<span class="fl">.45</span>)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(depth23<span class="fl">.45</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">Bacon.hist</span>(<span class="fl">23.45</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>depth23<span class="fl">.45</span> <span class="ot">&lt;-</span> <span class="fu">Bacon.Age.d</span>(<span class="fl">23.45</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">hist</span>(depth23<span class="fl">.45</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="fu">mean</span>(depth23<span class="fl">.45</span>)</span></code></pre></div>
 </div>
 <div id="can-bacon-take-into-account-a-hiatus-or-a-slump" class="section level3">
 <h3>Can Bacon take into account a hiatus or a slump?</h3>
@@ -608,11 +608,11 @@ depths, e.g. <code>Bacon(slump=c(20,30, 50,55))</code> for slumps at
 prior settings as options within the Bacon command), telling Bacon not
 to run it again, then produce a graph to load all the data into R’s
 memory. After this, you should be able to proceed as before:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">Bacon</span>(<span class="st">&quot;MyCore&quot;</span>, <span class="at">run=</span><span class="cn">FALSE</span>)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">agedepth</span>()</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># or if you&#39;ve set the accumulation rate prior to something different than the default:</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">Bacon</span>(<span class="st">&quot;MyCore&quot;</span>, <span class="at">run=</span><span class="cn">FALSE</span>, <span class="at">acc.mean=</span><span class="fu">c</span>(<span class="dv">20</span>,<span class="dv">5</span>))</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">agedepth</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">Bacon</span>(<span class="st">&quot;MyCore&quot;</span>, <span class="at">run=</span><span class="cn">FALSE</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="fu">agedepth</span>()</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co"># or if you&#39;ve set the accumulation rate prior to something different than the default:</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="fu">Bacon</span>(<span class="st">&quot;MyCore&quot;</span>, <span class="at">run=</span><span class="cn">FALSE</span>, <span class="at">acc.mean=</span><span class="fu">c</span>(<span class="dv">20</span>,<span class="dv">5</span>))</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="fu">agedepth</span>()</span></code></pre></div>
 </div>
 <div id="what-value-should-i-use-for-thick" class="section level3">
 <h3>What value should I use for <code>thick</code>?</h3>
@@ -624,8 +624,8 @@ parameters and a ‘lost’ model. It is always recommended to try several
 values for settings, in order to ensure your results are robust and not
 overly sensitive to minor changes in the settings. Different values for
 <code>thick</code> can be set as follows:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">Bacon</span>(<span class="st">&quot;MyCore&quot;</span>, <span class="at">thick=</span><span class="dv">1</span>)</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">Bacon</span>(<span class="st">&quot;MyCore&quot;</span>, <span class="dv">1</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">Bacon</span>(<span class="st">&quot;MyCore&quot;</span>, <span class="at">thick=</span><span class="dv">1</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">Bacon</span>(<span class="st">&quot;MyCore&quot;</span>, <span class="dv">1</span>)</span></code></pre></div>
 </div>
 <div id="why-does-my-age-model-look-like-a-trumpet" class="section level3">
 <h3>Why does my age-model look like a trumpet?</h3>
@@ -669,7 +669,7 @@ for each section. For example, if the stratigraphy of your core changes
 from lake to a marsh at 80 cm depth, and the prior information for marsh
 accumulation rates is <code>acc.mean=10</code> and for the lake
 <code>acc.mean=50</code>, then you’d model this as:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">Bacon</span>(<span class="st">&quot;MyCore&quot;</span>, <span class="at">boundary=</span><span class="dv">80</span>, <span class="at">acc.mean=</span><span class="fu">c</span>(<span class="dv">10</span>,<span class="dv">50</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">Bacon</span>(<span class="st">&quot;MyCore&quot;</span>, <span class="at">boundary=</span><span class="dv">80</span>, <span class="at">acc.mean=</span><span class="fu">c</span>(<span class="dv">10</span>,<span class="dv">50</span>))</span></code></pre></div>
 <p>Going across a boundary or hiatus, Bacon will lose its memory so the
 accumulation rates above the boundary/hiatus will not be informed by
 accumulation rates below it.</p>
@@ -684,19 +684,19 @@ information instead and plot your data using the
 <code>proxy.ghost</code> function?</p>
 <p>As outlined above, you can also assess age estimates of any core
 depth after the run, for example for 23.45cm:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">Bacon.hist</span>(<span class="fl">23.45</span>)</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>depth23<span class="fl">.45</span> <span class="ot">&lt;-</span> <span class="fu">Bacon.Age.d</span>(<span class="fl">23.45</span>)</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(depth23<span class="fl">.45</span>)</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(depth23<span class="fl">.45</span>)</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="fu">quantile</span>(depth23<span class="fl">.45</span>, <span class="at">probs=</span><span class="fu">c</span>(.<span class="dv">025</span>, .<span class="dv">975</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">Bacon.hist</span>(<span class="fl">23.45</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>depth23<span class="fl">.45</span> <span class="ot">&lt;-</span> <span class="fu">Bacon.Age.d</span>(<span class="fl">23.45</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="fu">hist</span>(depth23<span class="fl">.45</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="fu">mean</span>(depth23<span class="fl">.45</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="fu">quantile</span>(depth23<span class="fl">.45</span>, <span class="at">probs=</span><span class="fu">c</span>(.<span class="dv">025</span>, .<span class="dv">975</span>))</span></code></pre></div>
 <p>You can also calculate how much time has passed between two or more
 depths:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>depth23<span class="fl">.45</span> <span class="ot">&lt;-</span> <span class="fu">Bacon.Age.d</span>(<span class="fl">23.45</span>)</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>depth12<span class="fl">.34</span> <span class="ot">&lt;-</span> <span class="fu">Bacon.Age.d</span>(<span class="fl">12.34</span>)</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>passed <span class="ot">&lt;-</span> depth23<span class="fl">.45</span> <span class="sc">-</span> depth12<span class="fl">.34</span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(passed)</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(passed)</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="fu">quantile</span>(passed, <span class="at">probs=</span><span class="fu">c</span>(.<span class="dv">025</span>, .<span class="dv">975</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>depth23<span class="fl">.45</span> <span class="ot">&lt;-</span> <span class="fu">Bacon.Age.d</span>(<span class="fl">23.45</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>depth12<span class="fl">.34</span> <span class="ot">&lt;-</span> <span class="fu">Bacon.Age.d</span>(<span class="fl">12.34</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>passed <span class="ot">&lt;-</span> depth23<span class="fl">.45</span> <span class="sc">-</span> depth12<span class="fl">.34</span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="fu">hist</span>(passed)</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="fu">mean</span>(passed)</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="fu">quantile</span>(passed, <span class="at">probs=</span><span class="fu">c</span>(.<span class="dv">025</span>, .<span class="dv">975</span>))</span></code></pre></div>
 </div>
 <div id="should-i-use-bayesian-age-models-only-for-cores-with-many-dates" class="section level3">
 <h3>Should I use Bayesian age-models only for cores with many

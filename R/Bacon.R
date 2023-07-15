@@ -20,9 +20,9 @@ NULL
 # to enable direct use of ccurve, mix.curves, calibration functions, pMC.age & age.pMC
 library(rintcal)
 
-# Bacon(ask=F, boundary=25) doesn't run (but hiatus.depths=25 works fine). It also works with option add=40 (but not add=30. Currently adapted so that hiatus.max is quite large, but this is not optimal). Check if we can return to using a gamma distribution instead of a uniform one
+# Check if we can/should return to using a gamma distribution instead of a uniform one for the hiatus
 
-# done: older.than and younger.than ages now work, initial t-walk points can be set with new function set.initvals, renamed MinAge and Maxage to youngest.age resp. oldest.age, added an option SaveAges=TRUE to write a file *_elbowages.txt with the ages for all elbows, repaired postbomb bug, added initial MCMC points, replaced sep=paste0(sep, "\t") in read_write.R line 304 with sep=sep, new compress function, added an option to agedepth called plotatthesedepths to enable plotting alternative depths (e.g., after using the compress function; use with great care. Example: agedepth(depths=1:100, plotatthesedepths=1.5*(1:100), d.max=200), any NAs are now kept by default in accrate.age and accrate.depth
+# done: removed references to IntCal13 in src/cal.h as not relevant any more
 
 # replacing the plotting of the calibrated distributions by rintcal's functions doesn't seem to speed up anything, so keeping the original method in place for now.
 
