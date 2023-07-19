@@ -346,7 +346,7 @@ read.dets <- function(core, coredir, othername=c(), set=get('info'), sep=",", de
     message("Warning, the depths are not in ascending order, I will correct this")
     message("Actually, never mind, I'm not changing the order of the dates according to their depth")
 #    dets <- dets[ order(dets[,4]), ] #CHANGED: se elimina "set" antes de dets, por un error en uso del objeto
-    changed <- 1
+  #  changed <- 1
   }
 
   # if current dets differ from original .csv file, rewrite it
