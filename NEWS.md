@@ -1,3 +1,11 @@
+# rbacon 3.2.0
+* the overlap function now works better if d.min and/or d.max are set
+* as per CRAN (Kurt Hornik)'s e-mail, added a sentinel "_PACKAGE" file to the documentation
+* changed occurrences of %lu in twalk.h to %llu per CRAN (Prof. Brian Ripley) request
+* added run puns
+* elbowages are now saved with more relevant information in the file name
+* now links to rintcal 0.6.4
+
 # rbacon 3.1.1
 * repaired a bug related to an upgrade in the rintcal package, which caused problems with plotting young radiocarbon dates
 * cleaned up cal.h to remove obsolete references to IntCal13

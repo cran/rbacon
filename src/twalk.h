@@ -542,7 +542,7 @@ int simulation(unsigned long long Tr1, char *filename, const char *op="wt", int 
     long sec=time(NULL); //beginning of the twalk
     time_t temp = sec;
     if (silent == 0)
-        Rprintf("twalk: %12lu iterations to run, %s", Tr1, ctime(&temp));
+        Rprintf("twalk: %12llu iterations to run, %s", Tr1, ctime(&temp));
 
     // ----- --- Initialization --- -----
 
@@ -679,7 +679,7 @@ int simulation(unsigned long long Tr1, char *filename, const char *op="wt", int 
 					if (((ax=time(NULL)) - sec2) > (1 << j)*WAIT)
 					{
 						if (silent == 0) {
-                            Rprintf("twalk: %lu iterations so far\n", it);
+                            Rprintf("twalk: %llu iterations so far\n", it);
 							Remain( Tr1, it, sec, ax);
 						}
 						sec2 = ax;
@@ -729,7 +729,7 @@ int simulation(unsigned long long Tr1, char *filename, const char *op="wt", int 
 		sec = time(NULL);
         temp = sec;
 		if (silent == 0) {
-            Rprintf("twalk: Finished, %4.1f%% of moved pars per iteration (ratio %f/%lu). Output in file %s,\n      %s\n",
+            Rprintf("twalk: Finished, %4.1f%% of moved pars per iteration (ratio %f/%llu). Output in file %s,\n      %s\n",
                  100.0*(acc/(double) Tr1), acc, Tr1, filename, ctime(&temp));
         }
 

@@ -87,7 +87,7 @@ For symmetry reasons, t.a must always be equal to t.b-1.}
 
 \item{pch}{The shape of any marker to be added to the date. Defaults to a cross, \code{pch=4}. To leave empty, use \code{pch=NA}.}
 
-\item{cc.dir}{Directory where the calibration curves for C14 dates \code{cc} are located. By default \code{ccdir=c()}.}
+\item{cc.dir}{Directory where the calibration curves for C14 dates \code{cc} are located. By default \code{cc.dir=c()}.}
 }
 \value{
 A date's distribution, added to an age-depth plot.

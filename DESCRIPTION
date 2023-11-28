@@ -1,7 +1,7 @@
 Package: rbacon
 Type: Package
 Title: Age-Depth Modelling using Bayesian Statistics
-Version: 3.1.1
+Version: 3.2.0
 Author: Maarten Blaauw [aut, cre] (<https://orcid.org/0000-0002-5680-1515>),
   J. Andres Christen [aut, ctb, cph]
     (<https://orcid.org/0000-0002-5795-4345>),
@@ -53,11 +53,11 @@ License: GPL (>= 2)
 NeedsCompilation: yes
 Imports: coda (>= 0.19-1), graphics, grDevices, Rcpp (>= 0.12.12),
         stats, utils, data.table
-Depends: rintcal (>= 0.6.1), R (>= 3.5.0)
+Depends: rintcal (>= 0.6.4), R (>= 3.5.0)
 LinkingTo: Rcpp
 RoxygenNote: 7.2.3
 Suggests: knitr, rmarkdown, utf8
 VignetteBuilder: knitr
 Maintainer: Maarten Blaauw <maarten.blaauw@qub.ac.uk>
-Packaged: 2023-07-15 09:50:53 UTC; maarten
-Date/Publication: 2023-07-15 10:30:06 UTC
+Packaged: 2023-11-27 17:38:00 UTC; maarten
+Date/Publication: 2023-11-28 01:00:02 UTC

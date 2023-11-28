@@ -47,7 +47,7 @@ the files:
 // [[Rcpp::export]]
 int bacon( std::string inputfile1, std::string outputfile1, int ssize, std::string dircc) {// Command line: bacon inputfile outputfile
 //
-
+  //Rprintf("inputfile is: %s,\n outputfile: %s,\n ssize %d,\n dircc %s", inputfile1, outputfile1, ssize, dircc);
   char *inputfile = new char[inputfile1.length() + 1];
 //  printf("%s\n", inputfile1.c_str());
   strcpy(inputfile, inputfile1.c_str());
@@ -76,12 +76,14 @@ int bacon( std::string inputfile1, std::string outputfile1, int ssize, std::stri
   // }
 
   // char  ax[BUFFSIZE];
+  //Rprintf("antes!\n");
 
   //Program file
   //sprintf( ax, "Cores/%s/%s.bacon", argv[1], argv[2]);
   // sprintf( ax, "%s", argv[1]);
   //Read everything from the program file
   Input All( inputfile, MAXNUMOFCURVES, MAXNUMOFDETS, dircc);
+  //Rprintf("despues!\n");
 
   //File to save the twalk output
   // sprintf( ax, "%s", argv[2]);
@@ -103,7 +105,6 @@ int bacon( std::string inputfile1, std::string outputfile1, int ssize, std::stri
   
   //Run the twalk
   All.RunTwalk( outputfile, it, every);
-
   All.PrintNumWarnings();
 
   All.outputFiles(outputfile1); // this was not present in rbacon's bacon.cpp! March 2021
@@ -162,7 +163,18 @@ int bacon( std::string inputfile1, std::string outputfile1, int ssize, std::stri
   */
 
  Rprintf("bacon: burn in (initial iterations which will be removed): %d\n", All.Dim() * EVERY_MULT * BURN_IN_MULT);
- Rprintf(FAREWELL);
+
+if (Un01() < 0.5) {
+	Rprintf(FAREWELL);} else
+		if(Un01() < 0.5) {
+			Rprintf("Ats us nai!\n");} else
+				if(Un01() < 0.2) {
+					Rprintf("... sizzle spatter sizzle...\n");} else
+						if(Un01() < 0.2) {
+							Rprintf("... adding maple...\n");} else
+								if(Un01() < 0.5) {
+						 			Rprintf("Looking good, turning off the fire\n\n");} else
+										{Rprintf("Remember, never pour grease down the drain!\n");};
 
 //  printf("bacon: suggested burn in= %d\n", All.Dim() * EVERY_MULT * BURN_IN_MULT);
  // printf(FAREWELL);

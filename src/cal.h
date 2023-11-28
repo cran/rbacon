@@ -714,6 +714,8 @@ public:
       Rprintf("Plum: Reading supported data from file: %s, %d rows, 2 cols.\n", filename.c_str(), numrows);
       //printf("Plum: Reading supported data from file: %s, %d rows, 2 cols.\n", filename.c_str(), numrows);
 
+	  //Rprintf("Reading Plum file %s ", filename.c_str());
+
       if (S.filescan((char*)filename.c_str()) == 0) {
         REprintf("Plum: ERROR: Could not find supported data, file not found: %s\n", filename.c_str());
         //printf("Plum: ERROR: Could not find supported data, file not found: %s\n", filename.c_str());
@@ -721,14 +723,11 @@ public:
         //exit(0);
 		  }
 
-
-
 		  nS = S.nRow();
 		  for (int j=0; j < nS; j++) {
         //printf("S(%d, %d) = %lf\n", j, 1, S(j,1));
         S( j, 1) = S( j, 1)*S( j, 1); //store the variances
 		  }
-
 
 
 	}
@@ -764,6 +763,7 @@ public:
   double GetAlS() { return alS; }
   double GetMS() { return mS; }
 };
+
 
 
 /******* Class Det *******/
@@ -876,7 +876,7 @@ public:
         return -log(1.0-NorF((y - cc->GetMu())/sigma));
     }
 	double Ut(double theta) { 
-        /* Not yet implemented, the stydent-t cdf:
+        /* Not yet implemented, the student-t cdf:
         return -log(1.0-StTF((y - cc->GetMu())/cc->GetSig())); }
         we will use a Gaussian as above */
         return U(theta);
@@ -932,6 +932,7 @@ public:
 		det = new Det * [max_m];
 	}
 
+
 	void AddDet(Det *de) {
 
 		if (m == max_m) {
@@ -948,6 +949,8 @@ public:
         Rprintf("Added det: ");
 		ShortOut(m-1);
 	}
+
+
 
 	int Size() { return m; }
 

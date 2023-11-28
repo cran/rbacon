@@ -267,7 +267,7 @@ Input::Input(char *datafile, int emaxnumofcurves, int maxm, std::string ccdir) {
                 Rprintf("Since no file %s was provided with initial values for the twalk, I will be using simulated values.\n", init_v_fnam);
                 X0 = bacon->Getx0();
                 Xp0 = bacon->Getxp0(); }
-            else { //Read initail values into X0 and Xp0
+            else { //Read initial values into X0 and Xp0
                 Rprintf("Initial values for the twalk taken from %s.\n", init_v_fnam);
                 X0 = bacon->Getx0();
                 Xp0 = bacon->Getxp0();
@@ -292,12 +292,13 @@ Input::Input(char *datafile, int emaxnumofcurves, int maxm, std::string ccdir) {
             //Now open .last for writing, append
             if ((LV = fopen( last_v_fnam, "a+")) == NULL){
                 Rprintf("Could not open %s for writing.\n", last_v_fnam);
-                Rcpp::stop("Could not open %s for reading\n", last_v_fnam); 
+                Rcpp::stop("Could not open %s for reading\n", last_v_fnam);
             }
             //Here, leave the pointer at the end of the file
             //fseek( LV, 0, SEEK_END);
-            //Then open the twalk object
-			BaconTwalk = new twalk( *bacon, X0, Xp0, bacon->get_dim());
+            // //Then open the twalk object
+
+            BaconTwalk = new twalk( *bacon, X0, Xp0, bacon->get_dim());
 
 			break;  //this should be the last key in the program
 		}
@@ -311,10 +312,11 @@ Input::Input(char *datafile, int emaxnumofcurves, int maxm, std::string ccdir) {
   Rprintf("\n");
 }
 
+
 void Input::outputFiles(std::string outputfile1){
 	if(! isPlum() ) return; //the output file is correct
 
-	//printf("Plum is needed\n");
+    //printf("Plum is needed\n");
 	FILE *F, *F1, *F2/*, *F3*/;
 	char line[BUFFSZ];
 	const char delim[3] = "\t ";

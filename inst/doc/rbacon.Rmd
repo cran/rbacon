@@ -1,0 +1,499 @@
+---
+title: rbacon
+output:
+  html_vignette:
+    toc: true
+    toc_depth: 2
+    number_sections: true
+vignette: >
+  %\VignetteIndexEntry{rbacon}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+
+# Introduction
+
+Bacon is an age-depth modelling tool which divides a sediment core up into equally-sized sections of (by default) 5 cm thickness, and assumes a linear accumulation within each section. Accumulation rates can change between the sections, and this variability is constrained by prior information (see below). Bacon can use radiocarbon dates (calibrating them as it runs) or dates that are already on the calendar scale. 
+
+# Installation and loading
+
+Bacon works through R (or Rstudio), and requires a recent version of R (at least 4.0.1). The first time you are using Bacon on your computer, you will have to install its R package, by typing within the terminal of R:
+
+```{r, eval=FALSE}
+install.packages('rbacon')
+``` 
+
+To use rbacon, first the package has to be loaded (this will also load its companion package rintcal):
+
+```{r}
+library(rbacon)
+```
+
+# Running rbacon
+
+The package comes with two pre-loaded datasets, MSB2K and RLGH3. Start by running the default core, MSB2K. Note R's comments about where the files are going to be placed, as we will need this information later. Press 'y' and/or Enter to accept any suggestions.
+
+```{r, eval=FALSE}
+Bacon()
+```
+
+Bacon will calibrate any C-14 dates, do the MCMC run, calculate age ranges, produce graphs and provide information about the confidence ranges. The output graph, below, contains a number of panels containing important information (so please don't cut them out for your publications):
+
+* First, at the top left we can see the 'fit' or 'energy' of all MCMC (Markov Chain Monte Carlo) iterations of the run. If the iterations seem clustered with sections of lower and of higher energy, then the run probably didn't go well and you might want to try running your core with more iterations (parameter ssize).
+
+* The second panel at the top shows the accumulation rate (in yr/cm, so actually sedimentation time). The prior (green) is a gamma distribution with two parameters: acc.mean and acc.shape. The values of gamma distributions are always >0, ensuring positive accumulation rates. Larger values of shape will result in more peaked prior distributions. The grey shape shows the posterior distribution.
+
+* Then we have the prior (green) and posterior (grey) for the memory, or how much accumulation rates can change from one depth to the other. This is a beta distribution, which allows values between 0 and 1. A very low memory prior would allow for a high variability of accumulation rate, while a very high memory prior would result in a nearly straight age-depth model. Also shown is the section thickness of the piece-wise linear model, and the resulting amounts of sections.
+
+* If you have set a hiatus, then the rightmost top-panel will show the prior (green) and posterior (grey) distributions for this. The prior for this is a uniform distribution (but always >0; the maximum is set at 10,000 years by default but this can be changed).
+
+* Finally there is the main panel, which shows the distribution of the dates in blue (calibrated C-14 dates) or greenish (cal BP dates). More precise dates will peak higher (on the depth scale) than less precise, wider dates. The age-depth model is shown in grey-scale, where darker hues indicate more certain areas. The red dashed curve shows the mean model, and the dashed grey curves the 95% confidence intervals.
+  
+![Bacon output plot](./images/Bacon_output.png)
+
+Besides the graph, Bacon also produces files containing age estimates (95% ranges and the mean) for each depth (by default every cm from the top to the bottom core depth). This file can be found in the core's folder (see '6 Folders and Files').
+
+To see all options and settings, ask for help:
+
+```{r, eval=FALSE}
+?Bacon
+```
+
+and to see all options and settings for the age-model plot, type:
+
+```{r, eval=FALSE}
+?agedepth
+```
+
+# Citations and versions
+
+rbacon is open-source software; you are free to use, copy, distribute and modify it, but please do read this tutorial, the help functions and accompanying paper before using the program. This software is distributed under the terms of the GNU General Public Licence. rbacon does not come with any warranty and the authors do not assume any responsibility for the usefulness of any portion of this program. *Do cite this program when modifying or using it, including its version, Blaauw and Christen (2011)[^1], applied settings and calibration curves used.*
+
+Parts of this software remain under construction. Details such as the default settings and behaviour could change between versions, so please check this manual for the latest information. You are most welcome to report bugs, ideas and missing features to Maarten <maarten.blaauw@qub.ac.uk>, Marco <aquino@cimat.mx> or Andrés <jac@cimat.mx>.
+
+# Choosing priors
+
+## Accumulation rate
+
+Another core that comes with rbacon is RLGH3[^2]. This core has a lower dating density than MSB2K and has a section where there appear to be outlying dates (or in other words, some of the dates don't seem to agree with other nearby dates). Since initial checks indicate a slower accumulation rate (or rather, sedimentation time) than rbacon's default of 20 yr/cm, rbacon will ask if the prior should be changed to 50 yr/cm. For now, respond with `n` or `Enter`, so that the default, non-adapted settings will be used.
+
+```{R, eval=FALSE}
+Bacon('RLGH3')
+```
+
+![age-depth model of RLGH3 using the default settings](./images/RLGH3_default.png)
+
+Note that with the default settings, the age-model bypasses some of the younger dates between 130 and 60 cm core depth, since the older dates within that core section seem to fit better with the model and the dates further downcore and higher up the core. On top of this, the model bypasses the bottom date, because if the age-model were to go through this date, it would require large-scale changes in sedimentation times which seem to be prohibited by the default settings for the prior information. So let's run the model again, this time accepting the suggested value of 50 yr/cm for the accumulation rate `acc.mean` (type `y` and press `Enter`):
+
+```{R, eval=FALSE}
+Bacon('RLGH3')
+```
+
+![age-depth model of RLGH3 using suggested settings](./images/RLGH3_50yrcm.png)
+
+With the adapted prior for the accumulation rate, now the lowermost date *is* taken into account. Now, what if someone you trusted told you that they had some very strong information from other nearby lakes that sedimentation times are very likely to be 50 yr/cm? Then we can set the prior to be much more restrictive/stronger than the default - we let the green curve peak higher so that the accumulation rates are 'forced' to values around 50 yr/cm:
+
+```{R, eval=FALSE}
+Bacon('RLGH3', acc.mean=50, acc.shape=100)
+```
+
+![age-depth model of RLGH3 using a much stronger accumulation rate prior](./images/RLGH3_50yrcm_strong.png)
+
+Bacon did what it was told to do. The posterior accumulation rates fit very well with the prior's mean of 50 yr/cm. The age-depth model itself however is very straight and isn't very realistic, and most of the dates don't fit with the model. Note also the top-left panel which shows the MCMC run; the first thousand or so iterations are still sub-optimal and should really be removed using the `scissors` function. In all, not a good age-depth model, and it's probably a good idea to talk to your expert again, or find another one with more realistic prior information.
+
+When comparing the prior (green) and posterior (grey) distributions of the accumulation rate and the memory, it can be helpful to consider that the Bayesian approach aims to combine prior information with new data in order to 'learn' about the process, in other words to update its information about the parameters involved. The default priors were chosen to be sufficiently broad to allow the data to inform us about the accumulation rate and its variability.
+
+## Memory
+
+Besides the prior for accumulation rates, the other prior is that of the memory, and this defines how much accumulation rate can change from one core depth to another. To take an example, in the previous run the memory (rightmost top panel) is all the way at 1 or 100%. In other words, the accumulation rate at one depth is highly correlated with those at neighbouring depths, i.e. it's a nearly straight line. If you have a site where you have information about how constant the accumulation rate must have been (e.g., a riverine site could have had very episodical and varying accumulation), this can thus be included using the memory prior.
+
+## Hiatuses and slumps
+
+If your site has hiatuses (gaps in accumulation), these can be set by providing their depths. By default, the maximum length of hiatuses is 10,000 years, but this can be adapted, for example:
+
+```{r, eval=FALSE}
+Bacon("RLGH3", acc.mean=50, hiatus.depths=125, hiatus.max=1000)
+```
+
+![age-depth model of RLGH3 assuming a hiatus at 125 cm depth](./images/RLGH3_hiatus.png)
+
+If your core had episodes of instantaneous sedimentation (e.g., visible tephra layers), they can be modelled too:
+
+```{r, eval=FALSE}
+Bacon("RLGH3", acc.mean=50, slump=c(180, 120, 40, 30))
+```
+
+![age-depth model of RLGH3 assuming slumps at 180-120 and 40-30 cm depth](./images/RLGH3_slumps.png)
+
+## Section thickness
+
+The model underlying Bacon is made up of piece-wise linear sections, and for each section the accumulation rate is modelled as constrained by the priors for accumulation rate and memory. The sections, are 5 cm thick by default (`thick=5`). However, for very short cores this would result in a very elbowy model. For very long cores, the default section thickness could result in too many parameters and the model losing itself. Therefore, for very short or long cores, different values for will be suggested for `thick`.
+
+Sometimes for difficult cores it can be a good idea to first run it with fewer, thicker sections in order to find useful combinations of priors and settings, and then running it again with more, thinner sections to obtain an age-depth model that looks 'smooth enough'. Each time, also check that the MCMC run looks fine and stable, and please check and show all panels of the age-model plot.
+
+# Folders and files
+
+It is important to understand where rbacon goes to look for files and will place new files. The first time `rbacon` is running in a new working directory, it will look for an 'umbrella' folder called `Bacon_runs` (or `Cores`), and if it doesn't find this, it will ask if it may make one. Either accept the suggestion, or provide an alternative folder by specifying `coredir`:
+
+```{r, eval=FALSE}
+mydir <- tempdir()
+Bacon(coredir=mydir)
+```
+
+Within this umbrella folder are folders for each individual core. For example, if you've run the default core, there will be a folder `MSB2K`, and similarly for `RLGH3`. Within each core folder there will be the file with the dates, starting with the core name and ending with the .csv extension, e.g., `MSB2K.csv`. So, if your core is named `MyLakeCore`, then Bacon will look for a folder called `MyLakeCore`, and then within that folder looks for a file `MyLakeCore.csv`. Take care with capitalisation, and it's also best not to use spaces in the names.
+
+Your file should contain headers as below, and the fields should be separated by commas. In a spreadsheet program such as MS-Excel or Libreoffice's Calc, you can save your file as .csv. It's often a good idea to then open your .csv file in a plain-text editor such as Wordpad or Notepad, to check that everything looks clean (e.g., no lines filled with just commas, or lots of quotation marks).
+
+What it looks like in a spreadsheet program:
+
+| lab ID      | Age         | Error |  Depth   |  cc  |
+| ----------- | ----------- | ----- | -------- | ---- |
+| UBA-28881   | 2200        | 20    | 5        |  1   |
+| UBA-28882   | 2400        | 20    | 10       |  1   |
+| UBA-28883   | 3550        | 30    | 20       |  1   |
+| UBA-28884   | 4200        | 35    | 25       |  1   |
+
+And in a plain-text editor (with spaces added for enhanced readability):
+
+lab ID, Age, Error, Depth, cc<br>
+UBA-28881, 2200, 20, 5,  1<br>
+UBA-28882, 2400, 20, 10, 1<br>
+UBA-28883, 3550, 30, 20, 1<br>
+UBA-28884, 4200, 35, 25, 1<br>
+
+Some users have reported problems with writing access to some of their folders, owing to permission limitations set by the computer's administrator. Perhaps you might have access to an external disk drive, e.g., `D:\`. Then run Bacon as `Bacon("MyCore", coredir="D:\")`. Then Bacon will look for a folder `MyCore` in `D:\`.
+
+If you have dates with age offsets, such as marine dates from a region with a known delta.R and delta.STD, then this can be specified, either as option (e.g., `Bacon(delta.R=130, delta.STD=30)`), or, recommended, as extra columns in your core's csv file. Add them as columns 6 and 7 (in this example, the second date is terrestrial and has no assumed age offset):
+
+| lab ID      | Age         | Error |  Depth   |  cc  | delta.R | delta.STD |
+| ----------- | ----------- | ----- | -------- | ---- | ------- | --------- |
+| UBA-28881   | 2200        | 20    | 5        |  2   | 130     |   30      |
+| UBA-34567   | 1850        | 20    | 12       |  1   | 0       |   0       |
+| UBA-28882   | 2400        | 20    | 10       |  2   | 130     |   30      |
+| UBA-28883   | 3550        | 30    | 20       |  2   | 130     |   30      |
+| UBA-28884   | 4200        | 35    | 25       |  2   | 130     |   30      |
+
+By default, Bacon uses the t distribution[^3] to model the dates, rather than the more usual normal distribution (default: `Bacon(normal=FALSE)`). With the default parameters `t.a=3` and `t.b=4`, this distribution looks very much like the normal distribution, but it has wider tails. This makes for a very robust model, because it handles scatter and outliers very well. In many cases, Bacon will be able to find its way through most dates while bypassing outlying dates.
+
+In some cases, some dates could be more reliable than others (e.g., some would consist of very reliable charcoal particles, while others would be based on bulk sediment). Then such dates can be given t values which resemble the normal distribution (e.g., `t.a=33`, `t.b=34`), either as option in the Bacon command or within the .csv file:
+
+| lab ID      | Age         | Error |  Depth   |  cc  | delta.R | delta.STD | t.a   |   t.b    |
+| ----------- | ----------- | ----- | -------- | ---- | ------- | --------- | ----  |   -----  |
+| UBA-28881   | 2200        | 20    | 5        |  2   | 130     |   30      | 3     |   4      |
+| UBA-34567   | 1850        | 20    | 12       |  1   | 0       |   0       | 33    |   34     |
+| UBA-28882   | 2400        | 20    | 10       |  2   | 130     |   30      | 3     |   4      |
+| UBA-28883   | 3550        | 30    | 20       |  2   | 130     |   30      | 3     |   4      |
+| UBA-28884   | 4200        | 35    | 25       |  2   | 130     |   30      | 3     |   4      |
+
+If you want to provide t.a and t.b values in your .csv file, they should always be in columns 8 and 9 (and similarly, cc should be in column 5, delta.R in column 6 and delta.STD in column 7). Just provide 0s for delta.R and delta.STD if they don't need to be adapted.
+
+## User interaction
+
+By default, Bacon will tell where it will place files and suggest values where appropriate. You can also tell Bacon to stop suggesting alternative values, or instead accept all suggestions and run the cores without user interaction:
+
+```{r, eval=FALSE}
+Bacon(suggest=FALSE)
+Bacon(accept.suggestions=TRUE)
+```
+
+This can be used to run all cores in a directory while you make yourself some breakfast:
+
+```{r, eval=FALSE}
+allcores <- list.files("Bacon_runs")
+for(i in allcores)
+  try(Bacon(i, accept.suggestions=TRUE))
+```
+
+# Postrun analysis
+
+By default, Bacon will perform millions of MCMC iterations for each age-model run, although only a fraction of these will be stored. In most cases the remaining MCMC iterations will be well mixed (the upper left panel of the fit of the iterations shows no strange features such as sudden systematic drops or rises). However if the iterations seem not well mixed, or if too few remain (say less than a few hundred), then you could check the Gelman and Rubin Reduction Factor[^4]. Too high differences (high Factors) between runs indicate poor MCMC mixing. Robust MCMC mixing is indicated by a Gelman and Rubin Reduction factor below the 1.05 safety threshold.
+
+For example, try the default core, running it five times with a very small sample size of `ssize=100`:
+
+```{r, eval=FALSE}
+Baconvergence("MSB2K", thick=5, runs=5, ssize=100, coredir=tempfile())
+```
+
+```
+ Did 5 Bacon runs.
+ Gelman and Rubin Reduction Factor 1.10078680880009 (smaller and closer to 1 is better).
+ Probably not a robust MCMC run! Too much difference between runs, above the 1.05 threshold. Increase sample size?
+```
+
+## Greyscale plots
+
+Once a robust, reliable and realistic age-depth model has been produced, the fun starts. Greyscale plots for example can be used to show not just one age-depth curve but the entire MCMC run output. If pollen or other 'proxies' have been analysed across a range of depths of your core, then these proxies can be plotted on the time-scale as grey-scale 'ghosts' where less certain sections are plotted in lighter grey than more certain sections. Bacon looks for a file in the core's folder, starting with the core's name and ending in `_proxies.csv`, e.g., `Bacon_runs/MSB2K/MSB2K_proxies.csv`. This file should have columns separated by commas, with the first column being the depth, followed by columns for the proxies. The first row should contain the names of the columns. To produce a proxy ghost of the seventh proxy of MSB2K:
+
+```{r, eval=FALSE}
+proxy.ghost(7)
+```
+
+![proxy.ghost graph of the 7th proxy in core MSB2K](./images/proxyghost.png)
+
+Ghost graphs can also be produced for the accumulation rate throughout the core (`accrate.depth.ghost`) or over time (`accrate.age.ghost`):
+
+```{r, eval=FALSE}
+accrate.depth.ghost()
+accrate.age.ghost()
+```
+
+![ghost-graph of the accumulation rate of core MSB2K against depth](./images/accratedepthghost.png)
+
+![ghost-graph of the accumulation rate of core MSB2K over time](./images/accrateageghost.png)
+
+
+## Other analyses
+
+```{r, echo=FALSE, include=FALSE}
+require(rbacon)
+Bacon("MSB2K", ask=FALSE, coredir=tempdir(), suggest=FALSE)
+agedepth()
+```
+
+R provides a very versatile environment to query the age-model output. To get the age estimate of any single core depth:
+
+```{r}
+Bacon.hist(20)
+```
+
+You can also store the iterations of the age estimates of that depth in a new variable and then query it:
+
+```{r}
+a.d20 <- Bacon.Age.d(20)
+summary(a.d20)
+hist(a.d20)
+```
+
+Or calculate how much time has passed between 30 and 20 cm depth:
+
+```{r}
+a.d30 <- Bacon.Age.d(30)
+a.d20 <- Bacon.Age.d(20)
+summary(a.d30-a.d20)
+hist(a.d30-a.d20)
+```
+
+Accumulation rates at specific depths or ages can also be investigated:
+
+```{r}
+acc.d20 <- accrate.depth(20)
+summary(acc.d20)
+acc.a4500 <- accrate.age(4500)
+summary(acc.a4500)
+```
+
+# Frequently Asked Questions
+
+## What does Bacon stand for?
+
+Bayesian accumulation model. It also stands for a breakfast item which can be cooked floppy/thick or crunchy/thin, much like the prior settings for Bacon.
+
+Moreover, Francis Bacon (1561–1626) once said that "if we begin with certainties, we shall end in doubts; but if we begin with doubts, and are patient in them, we shall end in certainties". This quote is quite appropriate for Bayesian age-models, which aim to express and robustly quantify chronological uncertainties (and while it takes a bit of patience waiting for them to finish a run, they do a better job at this than classical approaches[^5]).
+
+## I don't like Bacon
+
+Try `tofu()`, which does exactly the same but without the meat.
+
+## How do I cite Bacon?
+
+Please cite Blaauw and Christen 2011[^6], as well as the rbacon version you are using (check this with `sessionInfo()`), any calibration curve(s)[^7] used and also any non-default settings.
+
+It is also a good idea to use the latest version of rbacon and to periodically check if new versions have come out. Either run `update.packages()`, `install.packages('rbacon')`, or check the current version number at CRAN[^8]. Please regularly check for and install updates to R itself[^9].
+
+## Can you help me?
+
+After reading the FAQ, you can contact Maarten Blaauw <maarten.blaauw@qub.ac.uk> for help with using `rbacon`, or Andres Christen <jac@cimat.mx> for more detailed statistical/Bayesian questions. Please provide any necessary .csv files and the *exact* list of R commands and output.
+
+## I've found a bug or have an idea for a new feature
+
+Please contact Maarten Blaauw <maarten.blaauw@qub.ac.uk> for rbacon-specific bugs/features, and/or Andres Christen <jac@cimat.mx> if your question contains much statistical detail.
+
+## Where do I put my files?
+
+By default, Bacon looks, within the `Bacon_runs` folder (sometimes called `Cores`), for a folder with the same name as your core. So, if your core is named `MyLakeCore`, then Bacon will look within the `Bacon_runs` folder for another folder called `MyLakeCore`, and then within that folder looks for a file `MyLakeCore.csv`. Take care with capitalisation, and it's also best not to use spaces in the names.
+
+Your file should contain headers as below, and the fields should be separated by commas. In a spreadsheet program such as MS-Excel or Libreoffice's Calc, you can save your file as .csv. It's often a good idea to then open your .csv file in a plain-text editor such as Wordpad or Notepad, to check that everything looks clean (e.g., no lines filled with just commas, or lots of quotation marks).
+
+What it looks like in a spreadsheet program:
+
+| lab ID      | Age         | Error |  Depth   |  cc  |
+| ----------- | ----------- | ----- | -------- | ---- |
+| UBA-28881   | 2200        | 20    | 5        |  1   |
+| UBA-28882   | 2400        | 20    | 10       |  1   |
+| UBA-28883   | 3550        | 30    | 20       |  1   |
+| UBA-28884   | 4200        | 35    | 25       |  1   |
+
+And in a plain-text editor (with spaces added for enhanced readability):
+
+lab ID, Age, Error, Depth, cc<br>
+UBA-28881, 2200, 20, 5,  1<br>
+UBA-28882, 2400, 20, 10, 1<br>
+UBA-28883, 3550, 30, 20, 1<br>
+UBA-28884, 4200, 35, 25, 1<br>
+
+## How can I set a different calibration curve?
+
+By default, rbacon uses the IntCal20 Northern Hemisphere calibration curve[^10], or `cc=1`. This can be set to the Marine20[^11] calibration curve (`cc=2`), the Southern Hemisphere SHCal20[^12] curve (`cc=3`), or even a custom-built one (`cc=4`). The `cc` option can be provided within the Bacon command (e.g., `Bacon("MyCore", cc=3)`), but for reasons of transparency and consistency we recommend instead to add `cc` as a fifth column to your core's .csv file:
+
+| lab ID      | Age         | Error |  Depth   |  cc  |
+| ----------- | ----------- | ----- | -------- | ---- |
+| UBA-28881   | 2200        | 20    | 5        |  3   |
+| UBA-28882   | 2400        | 20    | 10       |  3   |
+| UBA-28883   | 3550        | 30    | 20       |  3   |
+| UBA-28884   | 4200        | 35    | 25       |  3   |
+
+Note that Bacon requires the raw, *uncalibrated* radiocarbon dates as input, and that these dates are calibrated during the modelling process. Thus, Bacon works with the calibrated dates.
+
+## How do I include non-14C dates?
+
+Here again `cc` is your friend. Dates that are already on the cal BP scale, such as independently calendar-dated tephras, pollen events or the known surface age of your core should get `cc=0`. Please translate any AD dates into cal BP (`cal BP = 1950 - AD`). Radiocarbon dates that should be calibrated with IntCal20 Northern Hemisphere calibration curve receive a `cc=1`, those with Marine20 `cc=2`, those with SHCal20 curve `cc=3`, and those with a custom-built one `cc=4`:
+
+| lab ID      | Age         | Error |  Depth   |  cc  |
+| ----------- | ----------- | ----- | -------- | ---- |
+| surface     | -65         | 10    | 0        |  0   |
+| UBA-28881   | 2200        | 20    | 5        |  3   |
+| UBA-28882   | 2400        | 20    | 10       |  3   |
+| UBA-28883   | 3550        | 30    | 20       |  3   |
+| UBA-28884   | 4200        | 35    | 25       |  3   |
+
+For Pb-210 data, please use `rplum`[^13] rather than inputting CRS model output as cal BP dates into Bacon.
+
+Note that Bacon expects >0 errors for all its dates.
+
+## Can I extrapolate beyond the dated levels?
+
+Yes, using the options `d.min` and/or `d.max`, which by default are set to be the upper and lower dated depths.
+
+## Can Bacon calculate age estimates for specific depths?
+
+By default, Bacon calculates age estimates for each cm from the upper to the lowest dated depth. This can be changed by specifying a different value for `d.by`. The default depth units are `depth.unit="cm"` and this can also be adapted. You can also provide a list of depths, e.g., `Bacon("MyCore", depths=1:50)`, or put these in a file `MyCore_depths.csv` in the core's folder and then run as `Bacon("MyCore", depths.file=TRUE)`.
+
+You can also request the age estimate of any core depth after the run, for example for 23.45cm:
+
+```{r, eval=FALSE}
+Bacon.hist(23.45)
+depth23.45 <- Bacon.Age.d(23.45)
+hist(depth23.45)
+mean(depth23.45)
+```
+
+## Can Bacon take into account a hiatus or a slump?
+
+Yes. If your core's stratigraphy indicates a hiatus at say 30 cm core depth, put this as `Bacon(hiatus.depths=30)`. With multiple hiatuses, concatenate the values as, e.g., `Bacon(hiatus.depths=c(30,52))`. Going across a hiatus or boundary, Bacon will lose its memory of the accumulation rate.
+
+If you expect a boundary instead of a hiatus, so just an abrupt change in sedimentation regime without an accompanying gap in time, then use `boundary`, as in `Bacon(boundary=30)` or `Bacon(boundary=c(30,52))`.
+
+If you found events of abrupt sedimentation such as visible tephra layers, these can be modelled as well by providing their top and bottom depths, e.g. `Bacon(slump=c(20,30, 50,55))` for slumps at 55-50 and 30-20 cm depth.
+
+## How can I reload a previous run?
+
+First load the old run (making sure you re-enter any non-default prior settings as options within the Bacon command), telling Bacon not to run it again, then produce a graph to load all the data into R's memory. After this, you should be able to proceed as before:
+
+```{r, eval=FALSE}
+Bacon("MyCore", run=FALSE)
+agedepth()
+# or if you've set the accumulation rate prior to something different than the default:
+Bacon("MyCore", run=FALSE, acc.mean=c(20,5))
+agedepth()
+```
+
+## What value should I use for `thick`?
+
+In most cases, Bacon should be able to find an appropriate value for thick. The default is 5 cm, but if your core is very short or very long, an alternative value for thick is suggested. Too thick sections will look very 'elbowy', and too thin sections could result in too many parameters and a 'lost' model. It is always recommended to try several values for settings, in order to ensure your results are robust and not overly sensitive to minor changes in the settings. Different values for `thick` can be set as follows:
+
+```{r, eval=FALSE}
+Bacon("MyCore", thick=1)
+Bacon("MyCore", 1)
+```
+
+## Why does my age-model look like a trumpet?
+
+Perhaps the model got lost as too many parameters had to be estimated. Does the model follow some of the dated depths, but then it diverges and runs away from the rest of the dates? Try running it with fewer sections (larger value of `thick`).
+
+## Should I adapt the priors to exactly match my core's accumulation rate?
+
+No. In most cases, the default or suggested values for acc.mean should work fine. The default shape parameter `acc.shape=1.5` is set such that a large range of accumulation rates is allowed and the data will allow Bacon to update our information about the most likely accumulation rate values. The same holds for memory's strength parameter `mem.strength=10`. It is thus quite allright for the prior distributions to be much wider than the posterior distributions - then you have learned more about the values of the parameters that make up the age-depth model of your site.
+
+If however you have additional information about a site's accumulation history, this can be included by setting 'stronger', more informative priors. For example, a site might be known to have accumulated without major swings in accumulation rates, and then the memory prior can be set to be close to 1 (e.g., `mem.strength=50, mem.mean=0.9`). On the other hand, sites which are assumed to have experienced wide fluctuations in sedimentations could be modelled by setting the memory prior to very low values (`mem.strength=50, mem.mean=0.1`).
+
+The idea of prior information is just that; it is information you had about the site *before* you started looking at the new data. Bacon will then combine the prior information with the data to update our information.
+
+## Can I set different accumulation rates for different parts of my core?
+
+Yes, by defining a boundary or hiatus at the depths where accumulation rates change, and giving distinct accumulation rate priors for each section. For example, if the stratigraphy of your core changes from lake to a marsh at 80 cm depth, and the prior information for marsh accumulation rates is `acc.mean=10` and for the lake `acc.mean=50`, then you'd model this as:
+
+```{r, eval=FALSE}
+Bacon("MyCore", boundary=80, acc.mean=c(10,50))
+```
+
+Going across a boundary or hiatus, Bacon will lose its memory so the accumulation rates above the boundary/hiatus will not be informed by accumulation rates below it.
+
+## Should I use the mean ages or the median ages?
+
+Bacon provides age estimates for each and any core depth, and this can be reduced to a 95% range, or a mean or median value. However, just using the mean or median ignores the often considerable chronological uncertainties of the age estimates. Why not use all age-model information instead and plot your data using the `proxy.ghost` function?
+
+As outlined above, you can also assess age estimates of any core depth after the run, for example for 23.45cm:
+
+```{r, eval=FALSE}
+Bacon.hist(23.45)
+depth23.45 <- Bacon.Age.d(23.45)
+hist(depth23.45)
+mean(depth23.45)
+quantile(depth23.45, probs=c(.025, .975))
+```
+
+You can also calculate how much time has passed between two or more depths:
+
+```{r, eval=FALSE}
+depth23.45 <- Bacon.Age.d(23.45)
+depth12.34 <- Bacon.Age.d(12.34)
+passed <- depth23.45 - depth12.34
+hist(passed)
+mean(passed)
+quantile(passed, probs=c(.025, .975))
+```
+
+## Should I use Bayesian age-models only for cores with many dates?
+
+Bayesian age-models can deal with an impressive range of dating density and quality[^14], and work very well also for cores dated with only few dates. In fact, with few dates, the model choice becomes even more important, so a Bayesian age-model would be preferable also for low-resolution dated cores.
+
+## What are those blue blobs and what are they doing on the depth scale?
+
+Those are the age distributions of the dated depths. They lie on the calendar axis, and their probabilities for each year are expressed on the depth scale (imagine an invisible additional axis for each individual date). Each date has the same plotted area by default, so very precise dates will peak much higher (on the depth axis) than less precise dates.
+
+## What indicates a good age-depth model?
+
+First of all, check that the MCMC run (top-left panel) looks stable, like white noise with no major structure where iterations seem 'stuck'. Ensure that there is no burn-in remaining. If the MCMC looks bad, try a longer run by specifying a different value for `ssize` (default 4000). You can always run the `scissors` or `thinner` commands to trim the MCMC run to something nice and manageable after the run.
+
+Second, check that the posteriors (grey distributions) for the accumulation rate and memory (and if inferred, the hiatus) either overlap with the priors (green curves; then not much new has been learned), or whether the posterior has learned from marrying the priors with the data.
+
+Finally, check that the age-depth model itself looks reasonable given the information you have about the site. Is the fit with the dates OK, do any bends make sense, do any outlying dates make sense, does the greyscale uncertainty estimate look OK? Here some degree of user expertise is required.
+
+
+
+[^1]: Blaauw, M., Christen, J.A., 2011. Flexible paleoclimate age-depth models using an autoregressive gamma process. *Bayesian Analysis* 6, 457-474
+
+[^2]: Jones, V.J., Stevenson, A.C., Battarbee, R.W., 1989. Acidification of lakes in Galloway, south west Scotland - a diatom and pollen study of the post-glacial history of the Round Loch of Glenhead. *Journal of Ecology* 77, 1-23
+
+[^3]: Christen, J.A., Perez E., S., 2010. A new robust statistical model for radiocarbon data. *Radiocarbon* 51, 1047-1059
+
+[^4]: Brooks, SP. and Gelman, A. 1998. General methods for monitoring convergence of iterative simulations. *Journal of Computational and Graphical Statistics* 7, 434-455
+
+[^5]: Blaauw, M., Christen, J.A., Bennett, K.D., Reimer, P.J., 2018. Double the dates and go for Bayes – impacts of model choice, dating density and quality on chronologies. *Quaternary Science Reviews* 188, 58-66
+
+[^6]: Blaauw, M., Christen, J.A., 2011. Flexible paleoclimate age-depth models using an autoregressive gamma process. *Bayesian Analysis* 6, 457-474
+
+[^7]: Reimer, P. et al., 2020. The IntCal20 northern hemisphere radiocarbon age calibration curve (0–55 cal kBP). *Radiocarbon* 62, 725-757
+
+[^8]: [cran.r-project.org/package=rbacon](https://cran.r-project.org/package=rbacon)
+
+[^9]: [www.r-project.org/](https://www.r-project.org/)
+
+[^10]: Reimer, P. et al., 2020. The IntCal20 northern hemisphere radiocarbon age calibration curve (0–55 cal kBP). *Radiocarbon* 62, 725-757
+
+[^11]: Heaton, T. et al. 2020. Marine20 — the marine radiocarbon age calibration curve (0–55,000 cal BP). *Radiocarbon* 62, 779-820
+
+[^12]: Hogg, A. et al. 2020. SHCal20 southern hemisphere calibration, 0–55,000 years cal BP. *Radiocarbon* 62 759-778
+
+[^13]: Aquino-Lopez, M.A., Blaauw, M., Christen, J.A., Sanderson, N., 2018. Bayesian analysis of 210Pb dating. *Journal of Agricultural, Biological, and Environmental Statistics* 23, 317-333
+
+[^14]: Blaauw, M., Christen, J.A., Bennett, K.D., Reimer, P.J., 2018. Double the dates and go for Bayes – impacts of model choice, dating density and quality on chronologies. *Quaternary Science Reviews* 188, 58-66

@@ -70,7 +70,6 @@ private:
 public:
 
     Input(char *datafile, int maxnumofcurves, int maxm, std::string ccdir);
-
 	//Run the twalk simulation, put the output in outputfnam
 	void RunTwalk(char *outputfnam, int it, int save_every, char *mode= (char *) "w+", int silent=0) {
 

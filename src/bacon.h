@@ -24,7 +24,10 @@ Bacon
 #define BACON_H
 
 //This is my traditional farewell, may be changed to something more "serious"
-#define FAREWELL "Eso es to...eso es to...eso es to...eso es toooodo amigos!\n"
+#define FAREWELL "Eso es to...eso es to...eso es to...eso es toooodo amigos!\n"\
+
+//if(Un01() < 0.5)
+//    #define FAREWELL "Ats us nai!\n";
 
 //#include <stdio.h>
 #include <math.h>
