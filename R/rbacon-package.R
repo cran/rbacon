@@ -12,7 +12,7 @@
 #' @importFrom Rcpp evalCpp
 #' @importFrom coda as.mcmc gelman.diag mcmc.list
 #' @importFrom data.table fread fwrite
-#' @importFrom rintcal ccurve draw.dates
+#' @importFrom rice draw.dates
 #' @useDynLib rbacon, .registration=TRUE
 #' @name rbacon
 #' @keywords internal

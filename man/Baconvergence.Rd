@@ -40,7 +40,7 @@ indicate poor MCMC mixing. Robust MCMC mixing is indicated by a Gelman and Rubin
 \references{
 Brooks, SP. and Gelman, A. (1998) General methods for monitoring
 convergence of iterative simulations.
-_Journal of Computational and Graphical Statistics, *7*, 434-455.
+_Journal of Computational and Graphical Statistics_, *7*, 434-455.
 }
 \author{
 Maarten Blaauw, J. Andres Christen

@@ -20,7 +20,8 @@ Bacon.hist(
   range.col = "blue",
   med.col = "green",
   mean.col = "red",
-  verbose = TRUE
+  verbose = TRUE,
+  save.info = FALSE
 )
 }
 \arguments{
@@ -56,9 +57,11 @@ If \code{draw=FALSE}, then the age ranges, median and mean are given for each de
 \item{mean.col}{Colour of the mean. Defaults to \code{mn.col="red"}.}
 
 \item{verbose}{Provide feedback on what is happening (default \code{verbose=TRUE}).}
+
+\item{save.info}{A variable called `info' with relevant information about the run (e.g., core name, priors, settings, ages, output) can be saved into the working directory. Note that this will overwrite any existing variable with the same name - as an alternative, one could run, e.g., \code{myvar <- Bacon()}, followed by supplying the variable \code{myvar} in any subsequent commands.}
 }
 \value{
-A plot with the histogram and the age ranges, median and mean, or just the age ranges, medians and means if more than one depth \code{d} is given.
+A local variable called `hists', and a plot with the histogram and the age ranges, median and mean, or just the age ranges, medians and means if more than one depth \code{d} is given.
 }
 \description{
 Calculate the distribution of age estimates of single or multiple depths.

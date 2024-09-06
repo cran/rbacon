@@ -16,13 +16,13 @@ Bacon is an age-depth modelling tool which divides a sediment core up into equal
 
 # Installation and loading
 
-Bacon works through R (or Rstudio), and requires a recent version of R (at least 4.0.1). The first time you are using Bacon on your computer, you will have to install its R package, by typing within the terminal of R:
+Bacon works through R (or Rstudio), and requires a recent version of R (at least 4.0.1). The first time you are using Bacon on your computer, you will have to install its R package (named `rbacon`, all lowercase), by typing within the terminal of R:
 
 ```{r, eval=FALSE}
 install.packages('rbacon')
 ``` 
 
-To use rbacon, first the package has to be loaded (this will also load its companion package rintcal):
+To use rbacon, first the package has to be loaded (this will also load its companion packages `rice` and `rintcal`):
 
 ```{r}
 library(rbacon)

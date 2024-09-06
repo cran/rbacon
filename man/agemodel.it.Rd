@@ -4,7 +4,7 @@
 \alias{agemodel.it}
 \title{Extract one age-model iteration}
 \usage{
-agemodel.it(it, set = get("info"), BCAD = set$BCAD)
+agemodel.it(it, set = get("info"), BCAD = set$BCAD, save.info = FALSE)
 }
 \arguments{
 \item{it}{The MCMC iteration of which the age-model should be calculated.}
@@ -12,6 +12,8 @@ agemodel.it(it, set = get("info"), BCAD = set$BCAD)
 \item{set}{Detailed information of the current run, stored within this session's memory as variable info.}
 
 \item{BCAD}{The calendar scale of graphs and age output-files is in \code{cal BP} by default, but can be changed to BC/AD using \code{BCAD=TRUE}.}
+
+\item{save.info}{If TRUE, a variable called `info' with relevant information about the run (e.g., core name, priors, settings, ages, output) is saved into the working directory. Note that this will overwrite any existing variable with the same name.}
 }
 \value{
 A variable with two columns - depth and the age-depth model of a single iteration.

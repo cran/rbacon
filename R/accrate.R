@@ -13,7 +13,7 @@
 #' @param d The depth for which accumulation rates need to be returned.
 #' @param set Detailed information of the current run, stored within this session's memory as variable \code{info}.
 #' @param cmyr Accumulation rates can be calculated in cm/year or year/cm. By default \code{cmyr=FALSE} and accumulation rates are calculated in year per cm.
-#' @param na.rm Remove NA entries. These are NOT removed by default, so that always the same amount of iterations is returned.
+#' @param na.rm Remove NA entries. These are NOT removed by default, ensuring that always the same amount of iterations is returned.
 #' @author Maarten Blaauw, J. Andres Christen
 #' @return all MCMC estimates of accumulation rate of the chosen depth.
 #' @examples
@@ -55,14 +55,14 @@ accrate.depth <- function(d, set=get('info'), cmyr=FALSE, na.rm=FALSE) {
 #' @param ages The ages of the age-depth model. Not provided by default, but can be provided to speed things up if the function is called repeatedly
 #' @param BCAD The calendar scale of graphs and age output-files is in \code{cal BP} by default, but can be changed to BC/AD using \code{BCAD=TRUE}.
 #' @param silent Warn when ages are outside the core's range. Default \code{silent=TRUE}.
-#' @param na.rm Remove NA entries. These are NOT removed by default, so that always the same amount of iterations is returned.
+#' @param na.rm Remove NA entries. These are NOT removed by default, ensuring that always the same amount of iterations is returned.
 #' @author Maarten Blaauw, J. Andres Christen
 #' @return all MCMC estimates of accumulation rate of the chosen age.
 #' @examples
 #' \dontrun{
 #'   Bacon(run=FALSE, coredir=tempfile())
 #'   agedepth(yr.res=50, d.res=50, d.by=10)
-#'   accrate.a5000 = accrate.age(5000)
+#'   accrate.a5000 <- accrate.age(5000)
 #'   plot(accrate.a5000, pch='.')
 #'   hist(accrate.a5000)
 #' }
@@ -92,6 +92,101 @@ accrate.age <- function(age, set=get('info'), cmyr=FALSE, ages=c(), BCAD=set$BCA
     accs <- 1/accs
   return(accs)
 }
+
+
+#' @name accrate.depth.summary
+#' @title Provide a summary of the estimated accumulation rates for any depth of a core.
+#' @description Obtain a summary (95\% range, 68\% range, median, mean) of the accumulation rates (in years per cm, so actually sedimentation times) as estimated by the MCMC iterations for any depth of a core.
+#' @param d The depth for which accumulation rates need to be returned.
+#' @param set Detailed information of the current run, stored within this session's memory as variable \code{info}.
+#' @param cmyr Accumulation rates can be calculated in cm/year or year/cm. By default \code{cmyr=FALSE} and accumulation rates are calculated in year per cm.
+#' @param na.rm Remove NA entries. These are NOT removed by default, so that always the same amount of iterations is returned.
+#' @param probs The probability ranges to be returned. Defaults to the minima and maxima of the 95\% and 68\% ranges, as well as the median: \code{probs=c(.025, .16, .84, .975, .5)}.
+#' @author Maarten Blaauw
+#' @return A summary of the estimated accumulation rate of the chosen depth: minimum of the 95\% interval, minimum of the 68\% interval, maximum of the 68\% interval, maximum of the 95\% interval, median (i.e., 50\%) and mean.
+#' @examples
+#' \dontrun{
+#'   Bacon(run=FALSE, coredir=tempfile())
+#'   agedepth(yr.res=50, d.res=50, d.by=10)
+#'   accrate.depth.summary(20)
+#' }
+#' @export
+accrate.depth.summary <- function(d, set=get('info'), cmyr=FALSE, na.rm=FALSE, probs=c(.025, .16, .84, .975, .5)) {
+  if(length(d) > 1)
+    stop("can handle one depth at a time only")
+  accs <- accrate.depth(d, set, cmyr, na.rm)
+  qu <- quantile(accs, probs, na.rm=na.rm)
+  mn <- mean(accs, na.rm=na.rm)
+  names(mn) <- "mean"
+  return(c(qu, mn))
+}
+
+
+
+#' @name accrate.age.summary
+#' @title Provide a summary of the estimated accumulation rates for any age of a core.
+#' @description Obtain a summary (95\% range, 68\% range, median, mean) of the accumulation rates (in years per cm, so actually sedimentation times) as estimated by the MCMC iterations for any age of a core.
+#' @param age The age for which accumulation rates need to be returned.
+#' @param set Detailed information of the current run, stored within this session's memory as variable \code{info}.
+#' @param cmyr Accumulation rates can be calculated in cm/year or year/cm. By default \code{cmyr=FALSE} and accumulation rates are calculated in year per cm.
+#' @param na.rm Remove NA entries. These are NOT removed by default, so that always the same amount of iterations is returned.
+#' @param probs The probability ranges to be returned. Defaults to the minima and maxima of the 95\% and 68\% ranges, as well as the median: \code{probs=c(.025, .16, .84, .975, .5)}.
+#' @author Maarten Blaauw
+#' @return A summary of the estimated accumulation rate of the chosen depth: minimum of the 95\% interval, minimum of the 68\% interval, maximum of the 68\% interval, maximum of the 95\% interval, median (i.e., 50\%) and mean.
+#' @examples
+#' \dontrun{
+#'   Bacon(run=FALSE, coredir=tempfile())
+#'   agedepth(yr.res=50, d.res=50, d.by=10)
+#'   accrate.age.summary(5000)
+#' }
+#' @export
+accrate.age.summary <- function(age, set=get('info'), cmyr=FALSE, na.rm=FALSE, probs=c(.025, .16, .84, .975, .5)) {
+  if(length(age) > 1)
+    stop("can handle one depth at a time only")
+  accs <- accrate.age(age, set, cmyr, na.rm, probs)
+  qu <- quantile(accs, probs, na.rm=na.rm)
+  mn <- mean(accs, na.rm=na.rm)
+  names(mn) <- "mean"
+  return(c(mn, qu))
+}
+
+
+#' @name accrates.core
+#' @title Provide a summary of the estimated accumulation rates for a range of core depths
+#' @description Obtain a summary (95\% range, 68\% range, median, mean) of the accumulation rates (in years per cm, so actually sedimentation times) as estimated by the MCMC iterations for a range of depths of a core, and optionally write this as a file to the core directory (ending in '_accrates.txt').
+#' @param dseq The sequence of depths for which accumulation rates need to be returned. Defaults to whatever info$dseq is, which most often is a sequence from the top to the bottom of the core at 1 cm increments.
+#' @param set Detailed information of the current run, stored within this session's memory as variable \code{info}.
+#' @param cmyr Accumulation rates can be calculated in cm/year or year/cm. By default \code{cmyr=FALSE} and accumulation rates are calculated in year per cm.
+#' @param na.rm Remove NA entries. These are NOT removed by default, so that always the same amount of iterations is returned.
+#' @param probs The probability ranges to be returned. Defaults to the minima and maxima of the 95\% and 68\% ranges, as well as the median: \code{probs=c(.025, .16, .84, .975, .5)}.
+#' @param round THe number of decimals to report. Defaults to \code{round=2}.
+#' @param write Whether or not to write the summary to a file, in the core's directory and ending in `_accrates.txt`.
+#' @param sep Character to separate the entries within the file. Defaults to a tab, \code{sep="\t"}.
+#' @author Maarten Blaauw
+#' @return A summary of the estimated accumulation rate for all selected depths: minimum of the 95\% interval, minimum of the 68\% interval, maximum of the 68\% interval, maximum of the 95\% interval, median (i.e., 50\%) and mean. This is optionally written to a file in the core directory.
+#' @examples
+#' \dontrun{
+#'   Bacon(run=FALSE, coredir=tempfile())
+#'   agedepth(yr.res=50, d.res=50, d.by=10)
+#'   myaccrates <- accrates.core()
+#' }
+#' @export
+accrates.core <- function(dseq=c(), set=get('info'), cmyr=FALSE, na.rm=FALSE, probs=c(.025, .16, .84, .975, .5), round=2, write=TRUE, sep="\t") {
+  if(length(dseq) == 0)
+    dseq <- set$depths
+  mysummary <- function(dseq)
+    accrate.depth.summary(dseq, set, cmyr, na.rm, probs)
+  allaccs <- t(sapply(dseq, mysummary))
+  allaccs <- round(allaccs,round)
+  
+  if(write) {
+    fl <- paste0(set$coredir, set$core, "/", set$core, "_", set$K, "_accrates.txt")
+    message("writing the accumulation rate summary to ", fl)
+	write.table(allaccs, fl, sep=sep, quote=FALSE, row.names=FALSE)
+  } 
+  invisible(allaccs)
+}
+
 
 
 

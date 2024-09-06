@@ -1,3 +1,10 @@
+# rbacon 3.3.0
+* the default file name for cc4 is now "mixed.14C"
+* Bacon can now run without saving the variable 'info' in the session. E.g., one can run mycore <- Bacon() and then query 'mycore' as one would query 'info'.
+* If the dated depths in the .csv file are not in ascending order, this now throws an error (it was a warning, but this caused a subsequent more opaque error).
+* new functions to summarise accumulation rates according for a single depth or age, or for a sequence of depths: accrate.depth.summary, accrate.age.summary and accrates.core().
+* loads the new R package 'rice' to do most of the legwork related to plotting, calculating and calibrating radiocarbon ages. The 'rintcal' package will become a data package with little user-oriented functionality.
+
 # rbacon 3.2.0
 * the overlap function now works better if d.min and/or d.max are set
 * as per CRAN (Kurt Hornik)'s e-mail, added a sentinel "_PACKAGE" file to the documentation

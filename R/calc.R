@@ -316,8 +316,9 @@ hiatus.slopes <- function(set=get('info'), hiatus.option=1) {
 #' @param med.col Colour of the median. Defaults to \code{med.col="green"}.
 #' @param mean.col Colour of the mean. Defaults to \code{mn.col="red"}.
 #' @param verbose Provide feedback on what is happening (default \code{verbose=TRUE}).
+#' @param save.info A variable called `info' with relevant information about the run (e.g., core name, priors, settings, ages, output) can be saved into the working directory. Note that this will overwrite any existing variable with the same name - as an alternative, one could run, e.g., \code{myvar <- Bacon()}, followed by supplying the variable \code{myvar} in any subsequent commands.
 #' @author Maarten Blaauw, J. Andres Christen
-#' @return A plot with the histogram and the age ranges, median and mean, or just the age ranges, medians and means if more than one depth \code{d} is given.
+#' @return A local variable called `hists', and a plot with the histogram and the age ranges, median and mean, or just the age ranges, medians and means if more than one depth \code{d} is given.
 #' @examples
 #' \dontrun{
 #'   Bacon(run=FALSE, coredir=tempfile())
@@ -326,11 +327,12 @@ hiatus.slopes <- function(set=get('info'), hiatus.option=1) {
 #'   Bacon.hist(20:30)
 #' }
 #' @export
-Bacon.hist <- function(d, set=get('info'), BCAD=set$BCAD, age.lab=c(), age.lim=c(), hist.lab="Frequency", calc.range=TRUE, hist.lim=c(), draw=TRUE, prob=set$prob, hist.col=grey(0.5), hist.border=grey(.2), range.col="blue", med.col="green", mean.col="red", verbose=TRUE) {
+Bacon.hist <- function(d, set=get('info'), BCAD=set$BCAD, age.lab=c(), age.lim=c(), hist.lab="Frequency", calc.range=TRUE, hist.lim=c(), draw=TRUE, prob=set$prob, hist.col=grey(0.5), hist.border=grey(.2), range.col="blue", med.col="green", mean.col="red", verbose=TRUE, save.info=FALSE) {
   outfile <- paste0(set$prefix, ".out")
   if(length(set$output) == 0 || length(set$Tr) == 0) {
     set <- Bacon.AnaOut(outfile, set, MCMC.resample=FALSE)
-    assign_to_global("set", set)
+    if(save.info)
+      assign_to_global("set", set) # should that be 'info'?
   }
   hist3 <- function(d, BCAD) {
     hsts <- list(); maxhist <- 0; minhist <- 1
@@ -361,8 +363,11 @@ Bacon.hist <- function(d, set=get('info'), BCAD=set$BCAD, age.lab=c(), age.lim=c
   assign_to_global("hists", hists)
 
   rng <- array(NA, dim=c(length(d), 4)) # R > 4.0 does not like to fill c() using loops
-  if(calc.range)
+  if(calc.range) {
     rng <- Bacon.rng(d, set, BCAD, prob)
+    for(i in 1:length(d))
+      hists$rng[[i]] <- rng[i,]
+  }
 
   if(length(d)==1)
     if(draw==TRUE) {
@@ -389,7 +394,7 @@ Bacon.hist <- function(d, set=get('info'), BCAD=set$BCAD, age.lab=c(), age.lim=c
         message(100*prob, "% range (", range.col, "): ", round(rng[1],1), " to ", round(rng[2],1), " ", age.lab, "\n")
       }
     }
-  invisible(rng)
+  invisible(rng) # should this become invisible(hists)?
 }
 
 
@@ -399,7 +404,7 @@ Bacon.rng <- function(d, set=get('info'), BCAD=set$BCAD, prob=set$prob) {
   outfile <- paste0(set$prefix, ".out")
   if(length(set$output) == 0 || length(set$Tr) == 0) {
     set <- Bacon.AnaOut(outfile, set, MCMC.resample=FALSE)
-    assign_to_global("set", set)
+    assign_to_global("set", set) # MB Jan 2024; can this go?
   }
 
   if(length(d) > 1)
@@ -413,7 +418,6 @@ Bacon.rng <- function(d, set=get('info'), BCAD=set$BCAD, prob=set$prob) {
       rng[i,1:3] <- quantile(ages, c(((1-prob)/2), 1-((1-prob)/2), .5), na.rm=TRUE)
       rng[i,4] <- mean(ages)
     }
-
     if(length(d) > 1) {
       if(length(d) < 500) # progress bar slows things down when i is large
         setTxtProgressBar(pb, i) else
@@ -436,6 +440,7 @@ Bacon.rng <- function(d, set=get('info'), BCAD=set$BCAD, prob=set$prob) {
 #' @param it The MCMC iteration of which the age-model should be calculated.
 #' @param set Detailed information of the current run, stored within this session's memory as variable info.
 #' @param BCAD The calendar scale of graphs and age output-files is in \code{cal BP} by default, but can be changed to BC/AD using \code{BCAD=TRUE}.
+#' @param save.info If TRUE, a variable called `info' with relevant information about the run (e.g., core name, priors, settings, ages, output) is saved into the working directory. Note that this will overwrite any existing variable with the same name.
 #' @author Maarten Blaauw, J. Andres Christen
 #' @return A variable with two columns - depth and the age-depth model of a single iteration.
 #' @examples
@@ -445,11 +450,12 @@ Bacon.rng <- function(d, set=get('info'), BCAD=set$BCAD, prob=set$prob) {
 #'   lines(agemodel.it(5), col="red")
 #' }
 #' @export
-agemodel.it <- function(it, set=get('info'), BCAD=set$BCAD) {
+agemodel.it <- function(it, set=get('info'), BCAD=set$BCAD, save.info=FALSE) {
   outfile <- paste0(set$prefix, ".out")
   if(length(set$output) == 0 || length(set$Tr) == 0) {
     set <- Bacon.AnaOut(outfile, set, MCMC.resample=FALSE)
-    assign_to_global("set", set)
+    if(save.info)
+      assign_to_global("info", set) # changed 'set' to 'info'
   }
   # does this function work in cores with slumps? also doesn't take into account hiatuses.
   if(length(set$hiatus.depths) > 0)

@@ -346,14 +346,18 @@ read.dets <- function(core, coredir, othername=c(), set=get('info'), sep=",", de
     changed <- 1
   }
   if(min(0, diff(dets[,4])) < 0) { # added 0 (for if just 1 row of dates)
-    message("Warning, the depths in your .csv file are not in ascending order. Please correct this")
-#    dets <- dets[ order(dets[,4]), ] #CHANGED: se elimina "set" antes de dets, por un error en uso del objeto
-    changed <- 1
+    stop("The depths in your .csv file are not in ascending order. Please correct this.")
+    # dets <- dets[ order(dets[,4]), ] #CHANGED: se elimina "set" antes de dets, por un error en uso del objeto
+    # changed <- 1
+  }
+  if(length(grep(",", dets[,1])) > 0)  {# commas in the lab IDs, which can confuse bacon (c++)
+    dets[,1] <- sub(",", "", dets[,1])
+    message("Warning, I removed commas from the lab ID fields")
   }
 
   # if current dets differ from original .csv file, rewrite it
   if(changed > 0)
-    fwrite(as.data.frame(dets), csv.file, sep=sep, dec=dec, row.names=FALSE, col.names=suggested.names[1:ncol(dets)], quote=FALSE) # sep was paste0(sep, "\t") but fwrite needs sep to be exactly 1 char
+    fastwrite(as.data.frame(dets), csv.file, sep=sep, dec=dec, row.names=FALSE, col.names=suggested.names[1:ncol(dets)], quote=FALSE) # sep was paste0(sep, "\t") but fwrite needs sep to be exactly 1 char
   dets
 }
 
@@ -467,7 +471,8 @@ Bacon.settings <- function(core, coredir, dets, thick, remember=TRUE, d.min, d.m
 
 
 # write files to be read by the main Bacon age-depth modelling function
-write.Bacon.file <- function(set=get('info'), younger.than=c(), older.than=c()) {
+write.Bacon.file <- function(set=get('info'), younger.than=c(), older.than=c(), save.info=TRUE) {
+
   if(length(set$slump) > 0) {
     dets <- set$slumpdets
     hiatus.depths <- set$slumphiatus
@@ -543,20 +548,15 @@ write.Bacon.file <- function(set=get('info'), younger.than=c(), older.than=c()) 
       }
 
       for(i in 1:nrow(dets)) {
+        firstentry <- "\nDet "
         if(i %in% older.than)
-          cat("\nDetCensor ", i-1, " : ",  as.character(dets[i,1]), " , ",
-            dets[i,2], ", ", dets[i,3], ", ", dets[i,4],  ",  ",
-            delta.R[i], ",  ", delta.STD[i], ",  ", t.a[i], ",  ", t.b[i], ",  ",
-            cc[i], ";", sep="", file=fl) else
-              if(i %in% younger.than)
-                cat("\nDetCensorE ", i-1, " : ",  as.character(dets[i,1]), " , ",
-                dets[i,2], ", ", dets[i,3], ", ", dets[i,4],  ",  ",
-                delta.R[i], ",  ", delta.STD[i], ",  ", t.a[i], ",  ", t.b[i], ",  ",
-                cc[i], ";", sep="", file=fl) else
-                  cat("\nDet ", i-1, " : ",  as.character(dets[i,1]), " , ",
-                  dets[i,2], ", ", dets[i,3], ", ", dets[i,4],  ",  ",
-                  delta.R[i], ",  ", delta.STD[i], ",  ", t.a[i], ",  ", t.b[i], ",  ",
-                  cc[i], ";", sep="", file=fl)
+          firstentry <- "\nDetCensor "
+        if(i %in% younger.than)
+          firstentry <- "\nDetCensorE "  
+        cat(firstentry, i-1, " : ",  as.character(dets[i,1]), " , ",
+          dets[i,2], ", ", dets[i,3], ", ", dets[i,4],  ",  ",
+          delta.R[i], ",  ", delta.STD[i], ",  ", t.a[i], ",  ", t.b[i], ",  ",
+          cc[i], ";", sep="", file=fl) 
       }
     }
 
@@ -572,7 +572,8 @@ write.Bacon.file <- function(set=get('info'), younger.than=c(), older.than=c()) 
       set$hiatus.max <- rep(set$hiatus.max, length(hiatus.depths))
 #      if(length(set$hiatus.shape)==1)
 #        set$hiatus.shape <- rep(set$hiatus.shape, length(set$hiatus.depths))
-    assign_to_global ("info", set)
+    if(save.info)
+      assign_to_global("info", set)
 
     cat("\n\n### Depths and priors for fixed hiatuses, in descending order",
       "\n##### cm  alpha beta      ha     hb", file=fl)

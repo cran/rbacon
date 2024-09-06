@@ -13,7 +13,7 @@ accrate.depth(d, set = get("info"), cmyr = FALSE, na.rm = FALSE)
 
 \item{cmyr}{Accumulation rates can be calculated in cm/year or year/cm. By default \code{cmyr=FALSE} and accumulation rates are calculated in year per cm.}
 
-\item{na.rm}{Remove NA entries. These are NOT removed by default, so that always the same amount of iterations is returned.}
+\item{na.rm}{Remove NA entries. These are NOT removed by default, ensuring that always the same amount of iterations is returned.}
 }
 \value{
 all MCMC estimates of accumulation rate of the chosen depth.

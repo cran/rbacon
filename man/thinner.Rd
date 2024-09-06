@@ -4,7 +4,7 @@
 \alias{thinner}
 \title{Thin iterations.}
 \usage{
-thinner(proportion = 0.1, set = get("info"), write = TRUE)
+thinner(proportion = 0.1, set = get("info"), write = TRUE, save.info = TRUE)
 }
 \arguments{
 \item{proportion}{Proportion of iterations to remove. Should be between 0 and 1. Default \code{proportion=0.1}.}
@@ -12,6 +12,8 @@ thinner(proportion = 0.1, set = get("info"), write = TRUE)
 \item{set}{Detailed information of the current run, stored within this session's memory as variable \code{info}.}
 
 \item{write}{Whether or not to write the changes to the output file. Defaults to TRUE.}
+
+\item{save.info}{By default, a variable called `info' with relevant information about the run (e.g., core name, priors, settings, ages, output) is saved into the working directory. Note that this will overwrite any existing variable with the same name - as an alternative, one could run, e.g., \code{myvar <- Bacon()}, followed by supplying the variable \code{myvar} in any subsequent commands.}
 }
 \value{
 NA

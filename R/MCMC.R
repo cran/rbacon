@@ -28,6 +28,7 @@ bacon.its <- function(ssize, burnin, set=get('info'), ACCEP_EV=20, EVERY_MULT=25
 #' a warning is given and the iterations are not removed. If the provided number is negative, the iterations will be removed from the end of the run, not from the start. If a range is given, this range of iterations is removed.
 #' @param set Detailed information of the current run, stored within this session's memory as variable \code{info}.
 #' @param write Whether or not to write the changes to the output file. Defaults to TRUE.
+#' @param save.info By default, a variable called `info' with relevant information about the run (e.g., core name, priors, settings, ages, output) is saved into the working directory. Note that this will overwrite any existing variable with the same name - as an alternative, one could run, e.g., \code{myvar <- Bacon()}, followed by supplying the variable \code{myvar} in any subsequent commands.
 #' @author Maarten Blaauw, J. Andres Christen
 #' @return NA
 #' @examples
@@ -39,7 +40,7 @@ bacon.its <- function(ssize, burnin, set=get('info'), ACCEP_EV=20, EVERY_MULT=25
 #' }
 #'
 #' @export
-scissors <- function(burnin, set=get('info'), write=TRUE) {
+scissors <- function(burnin, set=get('info'), write=TRUE, save.info=TRUE) {
   output <- fastread(paste0(set$prefix, ".out"))
   if(set$isplum)
     plumout <- fastread(paste0(set$prefix, "_plum.out"))
@@ -74,7 +75,9 @@ scissors <- function(burnin, set=get('info'), write=TRUE) {
   set$output <- output
   set$Tr <- nrow(output)
   set$Us <- output[,ncol(output)] # is this the correct column?
-  assign_to_global ("info", set)
+  if(save.info)
+    assign_to_global("info", set)
+  invisible(set)
 }
 
 
@@ -86,6 +89,7 @@ scissors <- function(burnin, set=get('info'), write=TRUE) {
 #' @param proportion Proportion of iterations to remove. Should be between 0 and 1. Default \code{proportion=0.1}.
 #' @param set Detailed information of the current run, stored within this session's memory as variable \code{info}.
 #' @param write Whether or not to write the changes to the output file. Defaults to TRUE.
+#' @param save.info By default, a variable called `info' with relevant information about the run (e.g., core name, priors, settings, ages, output) is saved into the working directory. Note that this will overwrite any existing variable with the same name - as an alternative, one could run, e.g., \code{myvar <- Bacon()}, followed by supplying the variable \code{myvar} in any subsequent commands.
 #' @author Maarten Blaauw, J. Andres Christen
 #' @return NA
 #' @examples
@@ -97,7 +101,7 @@ scissors <- function(burnin, set=get('info'), write=TRUE) {
 #' }
 #'
 #' @export
-thinner <- function(proportion=0.1, set=get('info'), write=TRUE) {
+thinner <- function(proportion=0.1, set=get('info'), write=TRUE, save.info=TRUE) {
   output <- fastread(paste0(set$prefix, ".out"))
   if(set$isplum)
     plumout <- fastread(paste0(set$prefix, "_plum.out"))
@@ -108,8 +112,8 @@ thinner <- function(proportion=0.1, set=get('info'), write=TRUE) {
   if(write)
     fastwrite(output, paste0(set$prefix, ".out"), col.names=FALSE, row.names=FALSE)
 
-  info <- get('info')
-  info$output <- output
+  #info <- get('info')
+  set$output <- output
   if(set$isplum) {
     plumout <- plumout[-proportion,]
     if(write)
@@ -117,7 +121,9 @@ thinner <- function(proportion=0.1, set=get('info'), write=TRUE) {
     set$phi <- plumout[,1]
     set$ps <- plumout[,-1] # could be >1 columns
   }
-  assign_to_global ("info", info)
+  if(save.info)
+    assign_to_global("info", set)
+  invisible(set)
 }
 
 
@@ -146,7 +152,7 @@ thinner <- function(proportion=0.1, set=get('info'), write=TRUE) {
 #' @references
 #' Brooks, SP. and Gelman, A. (1998) General methods for monitoring
 #' convergence of iterative simulations.
-#' _Journal of Computational and Graphical Statistics, *7*, 434-455.
+#' _Journal of Computational and Graphical Statistics_, *7*, 434-455.
 #' @export
 Baconvergence <- function(core="MSB2K", runs=5, suggest=FALSE, verbose=TRUE, ...) {
   MCMC <- list()
@@ -195,15 +201,17 @@ overlap <- function(set=get('info'), digits=0, verbose=TRUE) {
   these <- top:bottom
   inside <- rep(1, length(these))
   for(i in these) {
+
     daterng <- set$calib$probs[[i]]
     daterng <- cbind(cumsum(daterng[,2])/sum(daterng[,2]), daterng[,1])
     daterng <- approx(daterng[,1], daterng[,2], c((1-set$prob)/2, 1-(1-set$prob)/2))$y
-    age <- quantile(Bacon.Age.d(d[i], BCAD=FALSE), c((1-set$prob)/2, 1-(1-set$prob)/2), na.rm=TRUE)
+    age <- quantile(Bacon.Age.d(d[i], set, BCAD=FALSE), c((1-set$prob)/2, 1-(1-set$prob)/2), na.rm=TRUE)
     daterng <- daterng[!is.na(daterng)]
     if(length(daterng) > 0)
       if(max(daterng) < min(age) || max(age) < min(daterng))
         inside[i] <- 0
   }
+
   inside <- 100*sum(inside)/length(these)
   if(verbose) 
     message(if(inside < 80) "Warning! Only ", round(inside, digits), "% of the dates overlap with the age-depth model (", 100*set$prob, "% ranges)")

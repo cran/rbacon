@@ -96,7 +96,7 @@ A date's distribution, added to an age-depth plot.
 Add dated depths to plots, e.g. to show dates that weren't used in the age-depth model
 }
 \details{
-Sometimes it is useful to add additional dating information to age-depth plots, e.g., to show outliers or how dates calibrate with different estimated offsets. Calls rintcal's draw.dates function.
+Sometimes it is useful to add additional dating information to age-depth plots, e.g., to show outliers or how dates calibrate with different estimated offsets. Calls rice's draw.dates function.
 }
 \examples{
 \donttest{

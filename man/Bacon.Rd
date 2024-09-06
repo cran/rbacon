@@ -67,6 +67,7 @@ Bacon(
   age.res = 200,
   yr.res = age.res,
   close.connections = TRUE,
+  save.info = TRUE,
   older.than = c(),
   younger.than = c(),
   save.elbowages = FALSE,
@@ -144,7 +145,7 @@ allow for a large range of posterior memory values. Please note that the default
 
 \item{cc3}{For southern hemisphere 14C dates (SHCal20).}
 
-\item{cc4}{Use an alternative curve (3 columns: cal BP, 14C age, error, separated by white spaces and saved as a plain-text file). See \code{cc.dir}.}
+\item{cc4}{Provide the name of an alternative curve (3 columns: cal BP, 14C age, error, separated by white spaces and saved as a plain-text file). It is important here to first produce a tailor-made folder for your and the default calibration curves to live in. See \code{cc.dir}. Defaults to \code{cc4="mixed.14C"}.}
 
 \item{cc.dir}{Directory where the calibration curves for C14 dates \code{cc} are located. By default uses the location of the rintcal package which provides the calibration curves. If you want to use custom-made calibration curves, first set up a new folder using the function new.ccdir() in the rintcal package, e.g., \code{new.ccdir="MyCurves"}, then place the custom curve in that folder using \code{mix.ccurves(, cc.dir="MyCurves", save=TRUE)}.}
 
@@ -226,6 +227,8 @@ Lower values will result in lighter grey but values >1 are not allowed.}
 
 \item{close.connections}{Internal option to close connections after a run. Default \code{close.connections=TRUE}.}
 
+\item{save.info}{By default, a variable called `info' with relevant information about the run (e.g., core name, priors, settings, ages, output) is saved into the working directory. Note that this will overwrite any existing variable with the same name - as an alternative, one could run, e.g., \code{myvar <- Bacon()}, followed by supplying the variable \code{myvar} in any subsequent commands.}
+
 \item{older.than}{an option to enable dates at the limit of C-14 dating. If there are older.than dates, they tell us that the core should be older than a certain age at that depth. For example, if the 7th and 8th dates in the core's .csv file are older-than dates, use as \code{older.than=c(7,8)}. The MCMC run could be problematic if the older-than ages do not fit with the other information.}
 
 \item{younger.than}{an option to provide younger-than ages, for example a historical pollen marker. If there are younger-than dates, they tell us that the core should be younger than a certain age at that depth. For example, if the 7th and 8th dates in the core's .csv file are younger.than dates, use as \code{younger.than=c(7,8)}. The MCMC run could be problematic if the younger.than ages do not fit with the other information.}
@@ -258,12 +261,12 @@ it is often used to age-model 14C-dated sequences. Radiocarbon dates should be c
 (for terrestrial northern hemisphere material; Reimer et al., 2020), Marine20 (for marine dates; Hughen et al., 2020),
 SHCal20 (for southern hemisphere dates; Hogg et al., 2020) or any other calibration curve (see below), while modern 14C
 dates are calibrated using one of the post-bomb calibration curves (NH1, NH2 or NH3 for the northern hemisphere,
-SH1-2 or SH3 for the southern hemisphere; Hua et al., 2013). See \url{http://calib.org/CALIBomb/} if you are unsure which
+SH1-2 or SH3 for the southern hemisphere; Hua et al., 2022). See \url{http://calib.org/CALIBomb/} if you are unsure which
 postbomb curve you need. If Bacon finds postbomb dates (negative 14C ages) and you haven't specified a postbomb curve,
 you will be prompted. Provide postbomb curves as, e.g., \code{postbomb=1} for the NH1 postbomb curve (2 for NH2, 3 for NH3, 4 for SH1-2, 5 for SH3).
 For calendar dates, i.e. dates that are already on the calendar scale and thus should not be calibrated, set\code{cc=0}.
 
-Since version 3.1.0, Bacon can also handle younger-than and older-than ages, with the model aiming to either go 'above'
+Since version 3.1.0, rbacon can also handle younger-than and older-than ages, with the model aiming to either go 'above'
 or 'below' such dates as requested. If the resulting combination of parameters becomes problematic (e.g., no initial
 combination of parameters can be found that obeys the priors or is in chronological order), then the output will often be wrong.
 If so, using the function \link{set.initvals} could help.
@@ -302,8 +305,7 @@ Hogg et al. 2020 SHCal20 Southern Hemisphere calibration, 0-55,000 years cal BP.
 
 Hughen et al. 2020 Marine20-the marine radiocarbon age calibration curve (0-55,000 cal BP). Radiocarbon 62(4): 779-820.  \doi{10.1017/RDC.2020.68}
 
-Hua, Q., Barbetti, M., Rakowski, A.Z., 2013. Atmospheric radiocarbon for the period 1950-2010.
-Radiocarbon 55(4): 2059-2072. \doi{10.2458/azu_js_rc.v55i2.16177}
+Hua et al. 2022 Atmospheric radiocarbon for the period 1950-2019. Radiocarbon 64(4), 723-745, \doi{10.1017/RDC.2021.95}
 
 Jones, V.J., Stevenson, A.C., Battarbee, R.W., 1989. Acidification of lakes in Galloway, south west Scotland
 - a diatom and pollen study of the post-glacial history of the Round Loch of Glenhead.

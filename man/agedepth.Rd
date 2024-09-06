@@ -15,6 +15,7 @@ agedepth(
   yr.lab = age.lab,
   kcal = FALSE,
   acc.lab = c(),
+  mem.lab = c(),
   d.min = c(),
   d.max = c(),
   d.by = c(),
@@ -61,7 +62,6 @@ agedepth(
   pbmeasured.col = "blue",
   pb.lim = c(),
   supp.col = "purple",
-  plot.tail = TRUE,
   remove.tail = TRUE,
   MCMC.resample = TRUE,
   hiatus.col = grey(0.5),
@@ -115,7 +115,8 @@ agedepth(
   plot.pdf = FALSE,
   dates.only = FALSE,
   model.only = FALSE,
-  verbose = TRUE
+  verbose = TRUE,
+  save.info = TRUE
 )
 }
 \arguments{
@@ -138,6 +139,8 @@ agedepth(
 \item{kcal}{Use kcal BP. Default is \code{kcal=FALSE}.}
 
 \item{acc.lab}{The labels for the accumulation rate plot (top middle). Default \code{d.lab="Acc. rate (yr/cm)"} (or whatever units you're using).}
+
+\item{mem.lab}{The labels for the memory plot (top right). Default \code{d.lab="Memory"}.}
 
 \item{d.min}{Minimum depth of age-depth model (use this to extrapolate to depths higher than the top dated depth).}
 
@@ -234,9 +237,7 @@ and its name should start with the core's name and end with '_depths.txt'. Then 
 
 \item{supp.col}{Colour of supported Pb-210. Defaults to purple, because why not.}
 
-\item{plot.tail}{The depth axis can extend to all Pb measurements (\code{plot.tail=TRUE}), or leave out the ones where background has been reached.}
-
-\item{remove.tail}{Whether or not to remove the tail measurements when plotting. Sometimes automated removal might go wrong, so then this option can be used to avoid removing the tail measurements. Quite similar to plot.tail.}
+\item{remove.tail}{Whether or not to remove the tail measurements when plotting. Sometimes automated removal might go wrong, so then this option can be used to avoid removing the tail measurements.}
 
 \item{MCMC.resample}{After the MCMC run, if there are more MCMC iterations than requested, only the last 'ssize' iterations will be retained. Defaults to TRUE.}
 
@@ -343,6 +344,8 @@ and its name should start with the core's name and end with '_depths.txt'. Then 
 \item{model.only}{By default, panels showing the MCMC iterations and the priors and posteriors for accumulation rate and memory are plotted above the main age-depth model panel. This can be avoided by supplying \code{model.only=TRUE}. Note however that this removes relevant information to evaluate the age-depth model, so we do recommend to present age-models together with these upper panels.}
 
 \item{verbose}{Provide a summary of the age ranges after producing the age-depth model graph; default \code{verbose=FALSE}.}
+
+\item{save.info}{By default, a variable called `info' with relevant information about the run (e.g., core name, priors, settings, ages, output) is saved into the working directory. Note that this will overwrite any existing variable with the same name - as an alternative, one could run, e.g., \code{myvar <- Bacon()}, followed by supplying the variable \code{myvar} in any subsequent commands.}
 }
 \value{
 A plot of the age-depth model, and estimated ages incl. confidence ranges for each depth.

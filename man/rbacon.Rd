@@ -2,8 +2,8 @@
 % Please edit documentation in R/rbacon-package.R
 \docType{package}
 \name{rbacon}
-\alias{rbacon}
 \alias{rbacon-package}
+\alias{rbacon}
 \title{rbacon}
 \description{
 Bacon produces Bayesian age-depth models from dated deposits, reconstructing Bayesian 

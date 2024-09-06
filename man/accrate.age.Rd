@@ -27,7 +27,7 @@ accrate.age(
 
 \item{silent}{Warn when ages are outside the core's range. Default \code{silent=TRUE}.}
 
-\item{na.rm}{Remove NA entries. These are NOT removed by default, so that always the same amount of iterations is returned.}
+\item{na.rm}{Remove NA entries. These are NOT removed by default, ensuring that always the same amount of iterations is returned.}
 }
 \value{
 all MCMC estimates of accumulation rate of the chosen age.
@@ -46,7 +46,7 @@ by the MCMC iterations for any age of a core. Deals with only 1 age at a time. S
 \dontrun{
   Bacon(run=FALSE, coredir=tempfile())
   agedepth(yr.res=50, d.res=50, d.by=10)
-  accrate.a5000 = accrate.age(5000)
+  accrate.a5000 <- accrate.age(5000)
   plot(accrate.a5000, pch='.')
   hist(accrate.a5000)
 }
