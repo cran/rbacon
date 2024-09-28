@@ -48,10 +48,13 @@
 #' @param plot.range Whether or not to plot the curves showing the confidence ranges of the age-model. Defaults to (\code{plot.range=TRUE}).
 #' @param range.col The colour of the curves showing the confidence ranges of the age-model. Defaults to medium grey (\code{range.col=grey(0.5)}).
 #' @param range.lty The line type of the curves showing the confidence ranges of the age-model. Defaults to \code{range.lty=12}.
+#' @param range.lwd Widths of the lines of the ranges of the age-depth model. Default \code{range.lwd=1}.
 #' @param mn.col The colour of the mean age-depth model: default \code{mn.col="red"}.
 #' @param mn.lty The line type of the mean age-depth model. Default \code{mn.lty=12}.
+#' @param mn.lwd Width of the line of the mean age-depth model. Default \code{mn.lwd=1}.
 #' @param med.col The colour of the median age-depth model: not drawn by default \code{med.col=NA}.
 #' @param med.lty The line type of the median age-depth model. Default \code{med.lty=12}.
+#' @param med.lwd Width of the line of the median age-depth model. Default \code{med.lwd=1}.
 #' @param C14.col The colour of the calibrated ranges of the dates. Default is semi-transparent blue: \code{C14.col=rgb(0,0,1,.35)}.
 #' @param C14.border The colours of the borders of calibrated 14C dates. Default is semi-transparent dark blue: \code{C14.border=rgb(0, 0, 1, 0.5)}.
 #' @param cal.col The colour of the non-14C dates. Default is semi-transparent blue-green: \code{cal.col=rgb(0,.5,.5,.35)}.
@@ -61,7 +64,7 @@
 #' @param pbmodelled.col Colour of the modelled 210Pb values. Defaults to shades of blue: \code{pbmodelled.col=function(x) rgb(0,0,1,x)}.
 #' @param pbmeasured.col Colour of the measured 210Pb values (default \code{pbmeasured.col="blue"}). Draws rectangles of the upper and lower depths as well as the Pb values with 95 percent error ranges. 
 #' @param pb.lim Axis limits for the Pb-210 data. Calculated automatically by default (\code{pblim=c()}).
-#' @param supp.col Colour of supported Pb-210. Defaults to purple, because why not.
+#' @param supp.col Colour of supported Pb-210. Defaults to semi-transparent purple, because why not.
 #' @param remove.tail Whether or not to remove the tail measurements when plotting. Sometimes automated removal might go wrong, so then this option can be used to avoid removing the tail measurements.
 #' @param MCMC.resample After the MCMC run, if there are more MCMC iterations than requested, only the last 'ssize' iterations will be retained. Defaults to TRUE.
 #' @param hiatus.col The colour of the depths of any hiatuses. Default \code{hiatus.col=grey(0.5)}.
@@ -90,9 +93,15 @@
 #' @param mar.right Plot margins for the topright panel (amount of white space along edges of axes 1-4). Default \code{mar.right=c(3,3,1,1)}.
 #' @param mar.main Plot margins for the main panel (amount of white space along edges of axes 1-4). Default \code{mar.main=c(3,3,1,1)}.
 #' @param righthand Adapt the righthand margins by a certain amount (default 2) to allow a righthand axis to be plotted (for plum)
-#' @param mgp Axis text margins (where should titles, labels and tick marks be plotted). Defaults to \code{mgp=c(1.7, .7, .0)}.
+#' @param mgp Axis text margins (where should titles, labels and tick marks be plotted). Defaults to \code{mgp=c(1.7, 0.7, 0.0)}.
 #' @param xaxs Extension of x-axis. By default, add some extra white-space at both extremes (\code{xaxs="r"}). See ?par for other options.
 #' @param yaxs Extension of y-axis. By default, add no extra white-space at both extremes (\code{yaxs="i"}). See ?par for other options.
+#' @param MCMC.col Colour of the MCMC output. Defaults to \code{post.col=grey(0.4))}.
+#' @param post.col Colour of the posterior histogram. Defaults to \code{post.col=grey(0.8))}.
+#' @param post.border Colour of the posterior border. Defaults to \code{post.border=grey(0.4))}.
+#' @param prior.col Colour of the prior curve. Defaults to light green, \code{prior.col=3)}.
+#' @param prior.lwd Line width of the prior curve. Defaults to \code{prior.lwd=2)}.
+#' @param prior.fontcol Colour of the font accompanying the posterior histograms. Defaults to red, \code{prior.fontcol=2)}.
 #' @param prior.ticks Plot tickmarks and values on the vertical axes for the prior and posterior distributions. Defaults to no tick marks (\code{prior.ticks="n"}). Set to \code{prior.ticks="s"} to plot the tick marks. Note that these values are of little practical use, as they correspond poorly to, e.g., the mean and strength values. All that matters is that the areas of both the prior and the posterior distributions sum to 1; wider distributions tend to give lower peaks, and narrower distributions higher peaks. 
 #' @param prior.fontsize Font size of the prior, relative to R's standard size. Defaults to \code{prior.fontsize=0.9}.
 #' @param toppanel.fontsize Font size of the top panels, relative to R's standard size. Defaults to \code{prior.fontsize=0.9}.
@@ -125,7 +134,7 @@
 #'   agedepth()
 #' }
 #' @export
-agedepth <- function(set=get('info'), BCAD=set$BCAD, depth.unit=set$depth.unit, age.unit="yr", unit=depth.unit, d.lab=c(), age.lab=c(), yr.lab=age.lab, kcal=FALSE, acc.lab=c(), mem.lab=c(), d.min=c(), d.max=c(), d.by=c(), depths=set$depths, depths.file=FALSE, accordion=c(), plotatthesedepths=c(), age.min=c(), yr.min=age.min, age.max=c(), yr.max=age.max, hiatus.option=1, dark=c(), prob=set$prob, rounded=c(), d.res=400, age.res=400, yr.res=age.res, date.res=100, rotate.axes=FALSE, rev.age=FALSE, rev.yr=rev.age, rev.d=FALSE, maxcalc=500, height=1, calheight=1, mirror=TRUE, up=TRUE, cutoff=.1, plot.range=TRUE, range.col=grey(.5), range.lty="12", mn.col="red", mn.lty="12", med.col=NA, med.lty="12", C14.col=rgb(0,0,1,.35), C14.border=rgb(0,0,1,.5), cal.col=rgb(0,.5,.5,.35), cal.border=rgb(0,.5,.5,.5), dates.col=c(), pb.background=.5, pbmodelled.col=function(x) rgb(0,0,1,.5*x), pbmeasured.col="blue", pb.lim=c(), supp.col="purple", remove.tail=TRUE, MCMC.resample=TRUE, hiatus.col=grey(0.5), hiatus.lty="12", rgb.scale=c(0,0,0), rgb.res=100, slump.col=grey(0.8), normalise.dists=TRUE, same.heights=FALSE, cc=set$cc, title=set$core, title.location="topleft", title.size=1.5, plot.labels=FALSE, labels=c(), label.age=1, label.size=0.8, label.col="black", label.offset=c(0,0), label.adj=c(0.5,0), label.rot=0, after=set$after, bty="l", mar.left=c(3,3,1,.5), mar.middle=c(3,0,1,.5), mar.right=c(3,0,1,.5), mar.main=c(3,3,1,1), righthand=3, mgp=c(1.7,.7,.0), xaxs="r", yaxs="i", prior.ticks="n", prior.fontsize=0.9, toppanel.fontsize=0.9, mainpanel.tickfontsize=1, mainpanel.labelfontsize=1, acc.xlim=c(), acc.ylim=c(), mem.xlim=c(), mem.ylim=c(), hiatus.xlim=c(), hiatus.ylim=c(), phi.xlim=c(), phi.ylim=c(), supp.xlim=c(), supp.ylim=c(), xaxt="s", yaxt="s", plot.pb=TRUE, pb.lty=1, plot.pdf=FALSE, dates.only=FALSE, model.only=FALSE, verbose=TRUE, save.info=TRUE) {
+agedepth <- function(set=get('info'), BCAD=set$BCAD, depth.unit=set$depth.unit, age.unit="yr", unit=depth.unit, d.lab=c(), age.lab=c(), yr.lab=age.lab, kcal=FALSE, acc.lab=c(), mem.lab=c(), d.min=c(), d.max=c(), d.by=c(), depths=set$depths, depths.file=FALSE, accordion=c(), plotatthesedepths=c(), age.min=c(), yr.min=age.min, age.max=c(), yr.max=age.max, hiatus.option=1, dark=c(), prob=set$prob, rounded=c(), d.res=400, age.res=400, yr.res=age.res, date.res=100, rotate.axes=FALSE, rev.age=FALSE, rev.yr=rev.age, rev.d=FALSE, maxcalc=500, height=1, calheight=1, mirror=TRUE, up=TRUE, cutoff=.1, plot.range=TRUE, range.col=grey(.5), range.lty="12", range.lwd=1, mn.col="red", mn.lty="12", mn.lwd=1, med.col=NA, med.lty="12", med.lwd=1, C14.col=rgb(0,0,1,.35), C14.border=rgb(0,0,1,.5), cal.col=rgb(0,.5,.5,.35), cal.border=rgb(0,.5,.5,.5), dates.col=c(), pb.background=.5, pbmodelled.col=function(x) rgb(0,0,1,.5*x), pbmeasured.col="blue", pb.lim=c(), supp.col=rgb(.5,0,.5,.5), remove.tail=TRUE, MCMC.resample=TRUE, hiatus.col=grey(0.5), hiatus.lty="12", rgb.scale=c(0,0,0), rgb.res=100, slump.col=grey(0.8), normalise.dists=TRUE, same.heights=FALSE, cc=set$cc, title=set$core, title.location="topleft", title.size=1.5, plot.labels=FALSE, labels=c(), label.age=1, label.size=0.8, label.col="black", label.offset=c(0,0), label.adj=c(0.5,0), label.rot=0, after=set$after, bty="l", mar.left=c(3,3,1,.5), mar.middle=c(3,0,1,.5), mar.right=c(3,0,1,.5), mar.main=c(3,3,1,1), righthand=3, mgp=c(1.7,.7,.0), xaxs="r", yaxs="i", MCMC.col=grey(.4), post.col=grey(.8), post.border=grey(.4), prior.col=3, prior.lwd=2, prior.fontcol=2, prior.ticks="n", prior.fontsize=0.9, toppanel.fontsize=0.9, mainpanel.tickfontsize=1, mainpanel.labelfontsize=1, acc.xlim=c(), acc.ylim=c(), mem.xlim=c(), mem.ylim=c(), hiatus.xlim=c(), hiatus.ylim=c(), phi.xlim=c(), phi.ylim=c(), supp.xlim=c(), supp.ylim=c(), xaxt="s", yaxt="s", plot.pb=TRUE, pb.lty=1, plot.pdf=FALSE, dates.only=FALSE, model.only=FALSE, verbose=TRUE, save.info=TRUE) {
 # Load the output, if it exists
   outp <- paste0(set$prefix, ".out")
   if(file.exists(outp))
@@ -165,20 +174,20 @@ agedepth <- function(set=get('info'), BCAD=set$BCAD, depth.unit=set$depth.unit, 
       if(is.na(set$boundary[1]))
         ifelse(set$isplum, pn <- c(1:6, rep(7,6)), pn <- c(1:4, rep(5,4)))
     layout(matrix(pn, nrow=2, byrow=TRUE), heights=c(.3,.7))
-    PlotLogPost(set, 0, set$Tr, xaxs=xaxs, yaxs=yaxs, panel.size=toppanel.fontsize) # convergence information
+    PlotLogPost(set, 0, set$Tr, xaxs=xaxs, yaxs=yaxs, panel.size=toppanel.fontsize, col=MCMC.col) # convergence information
     newpar <- par(mar=mar.middle) # reduce white space
     #on.exit(par(oldpar))
-    PlotAccPost(set, depth.unit=depth.unit, age.unit=age.unit, xaxs=xaxs, yaxs=yaxs, yaxt=prior.ticks, prior.size=prior.fontsize, panel.size=toppanel.fontsize, acc.xlim=acc.xlim, acc.ylim=acc.ylim, acc.lab=acc.lab)
-    PlotMemPost(set, set$core, set$K, "", set$mem.strength, set$mem.mean, ds=1, thick=set$thick, xaxs=xaxs, yaxs=yaxs, yaxt=prior.ticks, prior.size=prior.fontsize, panel.size=toppanel.fontsize, mem.xlim=mem.xlim, mem.ylim=mem.ylim, mem.lab=mem.lab)
+    PlotAccPost(set, depth.unit=depth.unit, age.unit=age.unit, xaxs=xaxs, yaxs=yaxs, yaxt=prior.ticks, prior.size=prior.fontsize, panel.size=toppanel.fontsize, acc.xlim=acc.xlim, acc.ylim=acc.ylim, acc.lab=acc.lab, line.col=prior.col, line.width=prior.lwd, text.col=prior.fontcol, hist.col=post.col, hist.border=post.border)
+    PlotMemPost(set, set$core, set$K, "", set$mem.strength, set$mem.mean, ds=1, thick=set$thick, xaxs=xaxs, yaxs=yaxs, yaxt=prior.ticks, prior.size=prior.fontsize, panel.size=toppanel.fontsize, mem.xlim=mem.xlim, mem.ylim=mem.ylim, mem.lab=mem.lab, line.col=prior.col, line.width=prior.lwd, text.col=prior.fontcol, hist.col=post.col, hist.border=post.border)
     if(!is.na(set$hiatus.depths[1]))
       if(is.na(set$boundary[1]))
-         PlotHiatusPost(set, set$hiatus.max, xaxs=xaxs, yaxs=yaxs, yaxt=prior.ticks, prior.size=prior.fontsize, panel.size=toppanel.fontsize, hiatus.xlim=mem.xlim, hiatus.ylim=mem.ylim)
+         PlotHiatusPost(set, set$hiatus.max, xaxs=xaxs, yaxs=yaxs, yaxt=prior.ticks, prior.size=prior.fontsize, panel.size=toppanel.fontsize, hiatus.xlim=mem.xlim, hiatus.ylim=mem.ylim, line.col=prior.col, line.width=prior.lwd, text.col=prior.fontcol, hist.col=post.col, hist.border=post.border)
     if(set$isplum) {
-       PlotPhiPost(set, xaxs=xaxs, yaxs=yaxs, yaxt=prior.ticks, prior.size=prior.fontsize, panel.size=toppanel.fontsize, phi.xlim=phi.xlim, phi.ylim=phi.ylim)
+       PlotPhiPost(set, xaxs=xaxs, yaxs=yaxs, yaxt=prior.ticks, prior.size=prior.fontsize, panel.size=toppanel.fontsize, phi.xlim=phi.xlim, phi.ylim=phi.ylim, line.col=prior.col, line.width=prior.lwd, text.col=prior.fontcol, hist.col=post.col, hist.border=post.border)
        if(set$nPs > 1)
          prior.ticks <- "s" # because with varying supported Pb, the y-axis is important
        par(mar=mar.right)
-       PlotSuppPost(set, xaxs=xaxs, yaxs=yaxs, yaxt=prior.ticks, prior.size=prior.fontsize, panel.size=toppanel.fontsize, supp.xlim=supp.xlim, supp.ylim=supp.ylim)
+       PlotSuppPost(set, xaxs=xaxs, yaxs=yaxs, yaxt=prior.ticks, prior.size=prior.fontsize, panel.size=toppanel.fontsize, supp.xlim=supp.xlim, supp.ylim=supp.ylim, line.col=prior.col, line.width=prior.lwd, text.col=prior.fontcol, hist.col=post.col, hist.border=post.border, data.col=supp.col)
        mar.main[4] <- mar.main[4] + righthand # to enable space for righthand axis
     }
     par(mar=mar.main) # new May 2021
@@ -360,15 +369,15 @@ agedepth <- function(set=get('info'), BCAD=set$BCAD, depth.unit=set$depth.unit, 
     for(i in 1:ncol(th)) {
       h <- th[1,i] : th[2,i]
       if(rotate.axes) {
-        lines(ranges[h,1], d[h], col=range.col, lty=range.lty)
-        lines(ranges[h,2], d[h], col=range.col, lty=range.lty)
-        lines(ranges[h,3], d[h], col=med.col, lty=med.lty) # median
-        lines(ranges[h,4], d[h], col=mn.col, lty=mn.lty) # mean
+        lines(ranges[h,1], d[h], col=range.col, lty=range.lty, lwd=range.lwd)
+        lines(ranges[h,2], d[h], col=range.col, lty=range.lty, lwd=range.lwd)
+        lines(ranges[h,3], d[h], col=med.col, lty=med.lty, lwd=med.lwd) # median
+        lines(ranges[h,4], d[h], col=mn.col, lty=mn.lty, lwd=mn.lwd) # mean
       } else {
-          lines(d[h], ranges[h,1], col=range.col, lty=range.lty)
-          lines(d[h], ranges[h,2], col=range.col, lty=range.lty)
-          lines(d[h], ranges[h,3], col=med.col, lty=med.lty) # median
-          lines(d[h], ranges[h,4], col=mn.col, lty=mn.lty) # mean
+          lines(d[h], ranges[h,1], col=range.col, lty=range.lty, lwd=range.lwd)
+          lines(d[h], ranges[h,2], col=range.col, lty=range.lty, lwd=range.lwd)
+          lines(d[h], ranges[h,3], col=med.col, lty=med.lty, lwd=med.lwd) # median
+          lines(d[h], ranges[h,4], col=mn.col, lty=mn.lty, lwd=mn.lwd) # mean
         }
     }
 

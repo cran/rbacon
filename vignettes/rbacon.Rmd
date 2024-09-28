@@ -251,13 +251,13 @@ agedepth()
 
 R provides a very versatile environment to query the age-model output. To get the age estimate of any single core depth:
 
-```{r}
+```{r, fig.width=5, fig.height=4}
 Bacon.hist(20)
 ```
 
 You can also store the iterations of the age estimates of that depth in a new variable and then query it:
 
-```{r}
+```{r, fig.width=5, fig.height=4}
 a.d20 <- Bacon.Age.d(20)
 summary(a.d20)
 hist(a.d20)
@@ -265,7 +265,7 @@ hist(a.d20)
 
 Or calculate how much time has passed between 30 and 20 cm depth:
 
-```{r}
+```{r, fig.width=5, fig.height=4}
 a.d30 <- Bacon.Age.d(30)
 a.d20 <- Bacon.Age.d(20)
 summary(a.d30-a.d20)
@@ -279,6 +279,14 @@ acc.d20 <- accrate.depth(20)
 summary(acc.d20)
 acc.a4500 <- accrate.age(4500)
 summary(acc.a4500)
+```
+
+To automate the above, and write a file with accumulation rate summaries to your core's folder:
+
+```{r}
+accrate.depth.summary(20)
+accrate.age.summary(4500)
+accrates.core()
 ```
 
 # Frequently Asked Questions
@@ -459,6 +467,15 @@ Bayesian age-models can deal with an impressive range of dating density and qual
 ## What are those blue blobs and what are they doing on the depth scale?
 
 Those are the age distributions of the dated depths. They lie on the calendar axis, and their probabilities for each year are expressed on the depth scale (imagine an invisible additional axis for each individual date). Each date has the same plotted area by default, so very precise dates will peak much higher (on the depth axis) than less precise dates.
+
+## I want different colours
+
+Play around with the following options within the `agedepth` function: `C14.col`, `C14.border`, `cal.col`, `cal.border`. These set the colours for the distributions and their borders for the (calibrated) C14 dates and cal BP dates, respectively. If you want to set an individual colour for each date, you can also use the option `dates.col`, e.g.:
+
+```{r, eval=FALSE}
+my_fancy_colours <- sample(colours(), nrow(info$dets))
+agedepth(height=50, dates.col=my_fancy_colours)
+```
 
 ## What indicates a good age-depth model?
 

@@ -13,6 +13,7 @@
 #' @importFrom coda as.mcmc gelman.diag mcmc.list
 #' @importFrom data.table fread fwrite
 #' @importFrom rice draw.dates
+#' @importFrom rintcal ccurve
 #' @useDynLib rbacon, .registration=TRUE
 #' @name rbacon
 #' @keywords internal

@@ -26,7 +26,7 @@ accrates.core(
 
 \item{probs}{The probability ranges to be returned. Defaults to the minima and maxima of the 95\% and 68\% ranges, as well as the median: \code{probs=c(.025, .16, .84, .975, .5)}.}
 
-\item{round}{THe number of decimals to report. Defaults to \code{round=2}.}
+\item{round}{The number of decimals to report. Defaults to \code{round=2}.}
 
 \item{write}{Whether or not to write the summary to a file, in the core's directory and ending in `_accrates.txt`.}
 

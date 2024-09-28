@@ -48,10 +48,13 @@ agedepth(
   plot.range = TRUE,
   range.col = grey(0.5),
   range.lty = "12",
+  range.lwd = 1,
   mn.col = "red",
   mn.lty = "12",
+  mn.lwd = 1,
   med.col = NA,
   med.lty = "12",
+  med.lwd = 1,
   C14.col = rgb(0, 0, 1, 0.35),
   C14.border = rgb(0, 0, 1, 0.5),
   cal.col = rgb(0, 0.5, 0.5, 0.35),
@@ -61,7 +64,7 @@ agedepth(
   pbmodelled.col = function(x) rgb(0, 0, 1, 0.5 * x),
   pbmeasured.col = "blue",
   pb.lim = c(),
-  supp.col = "purple",
+  supp.col = rgb(0.5, 0, 0.5, 0.5),
   remove.tail = TRUE,
   MCMC.resample = TRUE,
   hiatus.col = grey(0.5),
@@ -93,6 +96,12 @@ agedepth(
   mgp = c(1.7, 0.7, 0),
   xaxs = "r",
   yaxs = "i",
+  MCMC.col = grey(0.4),
+  post.col = grey(0.8),
+  post.border = grey(0.4),
+  prior.col = 3,
+  prior.lwd = 2,
+  prior.fontcol = 2,
   prior.ticks = "n",
   prior.fontsize = 0.9,
   toppanel.fontsize = 0.9,
@@ -209,13 +218,19 @@ and its name should start with the core's name and end with '_depths.txt'. Then 
 
 \item{range.lty}{The line type of the curves showing the confidence ranges of the age-model. Defaults to \code{range.lty=12}.}
 
+\item{range.lwd}{Widths of the lines of the ranges of the age-depth model. Default \code{range.lwd=1}.}
+
 \item{mn.col}{The colour of the mean age-depth model: default \code{mn.col="red"}.}
 
 \item{mn.lty}{The line type of the mean age-depth model. Default \code{mn.lty=12}.}
 
+\item{mn.lwd}{Width of the line of the mean age-depth model. Default \code{mn.lwd=1}.}
+
 \item{med.col}{The colour of the median age-depth model: not drawn by default \code{med.col=NA}.}
 
 \item{med.lty}{The line type of the median age-depth model. Default \code{med.lty=12}.}
+
+\item{med.lwd}{Width of the line of the median age-depth model. Default \code{med.lwd=1}.}
 
 \item{C14.col}{The colour of the calibrated ranges of the dates. Default is semi-transparent blue: \code{C14.col=rgb(0,0,1,.35)}.}
 
@@ -235,7 +250,7 @@ and its name should start with the core's name and end with '_depths.txt'. Then 
 
 \item{pb.lim}{Axis limits for the Pb-210 data. Calculated automatically by default (\code{pblim=c()}).}
 
-\item{supp.col}{Colour of supported Pb-210. Defaults to purple, because why not.}
+\item{supp.col}{Colour of supported Pb-210. Defaults to semi-transparent purple, because why not.}
 
 \item{remove.tail}{Whether or not to remove the tail measurements when plotting. Sometimes automated removal might go wrong, so then this option can be used to avoid removing the tail measurements.}
 
@@ -293,11 +308,23 @@ and its name should start with the core's name and end with '_depths.txt'. Then 
 
 \item{righthand}{Adapt the righthand margins by a certain amount (default 2) to allow a righthand axis to be plotted (for plum)}
 
-\item{mgp}{Axis text margins (where should titles, labels and tick marks be plotted). Defaults to \code{mgp=c(1.7, .7, .0)}.}
+\item{mgp}{Axis text margins (where should titles, labels and tick marks be plotted). Defaults to \code{mgp=c(1.7, 0.7, 0.0)}.}
 
 \item{xaxs}{Extension of x-axis. By default, add some extra white-space at both extremes (\code{xaxs="r"}). See ?par for other options.}
 
 \item{yaxs}{Extension of y-axis. By default, add no extra white-space at both extremes (\code{yaxs="i"}). See ?par for other options.}
+
+\item{MCMC.col}{Colour of the MCMC output. Defaults to \code{post.col=grey(0.4))}.}
+
+\item{post.col}{Colour of the posterior histogram. Defaults to \code{post.col=grey(0.8))}.}
+
+\item{post.border}{Colour of the posterior border. Defaults to \code{post.border=grey(0.4))}.}
+
+\item{prior.col}{Colour of the prior curve. Defaults to light green, \code{prior.col=3)}.}
+
+\item{prior.lwd}{Line width of the prior curve. Defaults to \code{prior.lwd=2)}.}
+
+\item{prior.fontcol}{Colour of the font accompanying the posterior histograms. Defaults to red, \code{prior.fontcol=2)}.}
 
 \item{prior.ticks}{Plot tickmarks and values on the vertical axes for the prior and posterior distributions. Defaults to no tick marks (\code{prior.ticks="n"}). Set to \code{prior.ticks="s"} to plot the tick marks. Note that these values are of little practical use, as they correspond poorly to, e.g., the mean and strength values. All that matters is that the areas of both the prior and the posterior distributions sum to 1; wider distributions tend to give lower peaks, and narrower distributions higher peaks.}
 

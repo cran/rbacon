@@ -8,7 +8,7 @@ accrate.age.summary(
   age,
   set = get("info"),
   cmyr = FALSE,
-  na.rm = FALSE,
+  na.rm = TRUE,
   probs = c(0.025, 0.16, 0.84, 0.975, 0.5)
 )
 }

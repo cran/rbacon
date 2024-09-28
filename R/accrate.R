@@ -140,15 +140,16 @@ accrate.depth.summary <- function(d, set=get('info'), cmyr=FALSE, na.rm=FALSE, p
 #'   accrate.age.summary(5000)
 #' }
 #' @export
-accrate.age.summary <- function(age, set=get('info'), cmyr=FALSE, na.rm=FALSE, probs=c(.025, .16, .84, .975, .5)) {
+accrate.age.summary <- function(age, set=get('info'), cmyr=FALSE, na.rm=TRUE, probs=c(.025, .16, .84, .975, .5)) {
   if(length(age) > 1)
     stop("can handle one depth at a time only")
-  accs <- accrate.age(age, set, cmyr, na.rm, probs)
+  accs <- accrate.age(age, set, cmyr, na.rm=na.rm)
   qu <- quantile(accs, probs, na.rm=na.rm)
   mn <- mean(accs, na.rm=na.rm)
   names(mn) <- "mean"
   return(c(mn, qu))
 }
+
 
 
 #' @name accrates.core
@@ -159,7 +160,7 @@ accrate.age.summary <- function(age, set=get('info'), cmyr=FALSE, na.rm=FALSE, p
 #' @param cmyr Accumulation rates can be calculated in cm/year or year/cm. By default \code{cmyr=FALSE} and accumulation rates are calculated in year per cm.
 #' @param na.rm Remove NA entries. These are NOT removed by default, so that always the same amount of iterations is returned.
 #' @param probs The probability ranges to be returned. Defaults to the minima and maxima of the 95\% and 68\% ranges, as well as the median: \code{probs=c(.025, .16, .84, .975, .5)}.
-#' @param round THe number of decimals to report. Defaults to \code{round=2}.
+#' @param round The number of decimals to report. Defaults to \code{round=2}.
 #' @param write Whether or not to write the summary to a file, in the core's directory and ending in `_accrates.txt`.
 #' @param sep Character to separate the entries within the file. Defaults to a tab, \code{sep="\t"}.
 #' @author Maarten Blaauw

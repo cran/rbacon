@@ -224,14 +224,14 @@ calib.plot <- function(set=get('info'), dets=set$dets, accordion=c(), BCAD=set$B
 bacon.calib <- function(dat, set=get('info'), date.res=100, cutoff=0.01, postbomb=set$postbomb, normal=set$normal, t.a=set$t.a, t.b=set$t.b, delta.R=set$delta.R, delta.STD=set$delta.STD, cc.dir=c()) {
   # read in the curves
 
-  cc1 <- ccurve(set$cc1, cc.dir=cc.dir)
-  cc2 <- ccurve(set$cc2, cc.dir=cc.dir)
-  cc3 <- ccurve(set$cc3, cc.dir=cc.dir)
+  cc1 <- rintcal::ccurve(set$cc1, cc.dir=cc.dir)
+  cc2 <- rintcal::ccurve(set$cc2, cc.dir=cc.dir)
+  cc3 <- rintcal::ccurve(set$cc3, cc.dir=cc.dir)
   if(set$cc4=="ConstCal" || set$cc4=="\"ConstCal\"") cc4 <- NA else
      cc4 <- fastread(file.path(cc.dir, set$cc4))[,1:3] # file.path was paste0
 
   if(postbomb != 0) {
-    bomb <- ccurve(postbomb, postbomb=TRUE, glue=FALSE, cc.dir=cc.dir) # glue=FALSE added July 2023
+    bomb <- rintcal::ccurve(postbomb, postbomb=TRUE, glue=FALSE, cc.dir=cc.dir) # glue=FALSE added July 2023
     # bomb.x <- seq(max(bomb[,1]), min(bomb[,1]), by=-.1) # interpolate
     bomb <- bomb[order(bomb[,1], decreasing=FALSE),]
     bomb.x <- seq(min(bomb[,1]), max(bomb[,1]), by=.1) # interpolate

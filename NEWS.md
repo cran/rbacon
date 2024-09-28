@@ -1,3 +1,8 @@
+# rbacon 3.3.1
+* now uses the updated rice package (which loads the data rintcal package).
+* new options in the age-depth function to steer the formatting of the prior information, such as line width and colour
+* new functions to summarise modelled accumulation rates: 'accrate.depth.summary()' and 'accrate.age.summary()' to provide summaries of single depths and ages, respectively, and 'accrates.core()' to write these summaries for all depths of a core to its folder.
+
 # rbacon 3.3.0
 * the default file name for cc4 is now "mixed.14C"
 * Bacon can now run without saving the variable 'info' in the session. E.g., one can run mycore <- Bacon() and then query 'mycore' as one would query 'info'.
