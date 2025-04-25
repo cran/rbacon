@@ -14,6 +14,7 @@
 #' @param set Detailed information of the current run, stored within this session's memory as variable \code{info}.
 #' @param cmyr Accumulation rates can be calculated in cm/year or year/cm. By default \code{cmyr=FALSE} and accumulation rates are calculated in year per cm.
 #' @param na.rm Remove NA entries. These are NOT removed by default, ensuring that always the same amount of iterations is returned.
+#' @param inversion.threshold Very small accumulation rate values will become very large when their inverse is calculated. By default, any accumulation rate smaller than 1e-6 is set to 1e-6.
 #' @author Maarten Blaauw, J. Andres Christen
 #' @return all MCMC estimates of accumulation rate of the chosen depth.
 #' @examples
@@ -26,16 +27,19 @@
 #'   mean(d20)
 #' }
 #' @export
-accrate.depth <- function(d, set=get('info'), cmyr=FALSE, na.rm=FALSE) {
+accrate.depth <- function(d, set=get('info'), cmyr=FALSE, na.rm=FALSE, inversion.threshold=1e-6) {
   accs.elbows <- set$output[,2:(set$K+1)]
   if(min(set$elbows) <= d && max(set$elbows) >= d)
     accs <- unlist(accs.elbows[max(which(set$elbows <= d))]) else
-  #  accs <- set$output[,1+min(which(set$elbows >= d))] else # was 1 + max(which(set$elbows < d))...
       accs <- NA
   accs <- as.numeric(accs)
   if(na.rm)
     accs <- accs[!is.na(accs)]
-  if(cmyr) 1/accs else accs
+  if(cmyr) {
+    accs[accs < inversion.threshold] <- inversion.threshold
+    accs <- 1/accs
+  }
+  return(accs)
 }
 
 
@@ -70,28 +74,33 @@ accrate.depth <- function(d, set=get('info'), cmyr=FALSE, na.rm=FALSE) {
 accrate.age <- function(age, set=get('info'), cmyr=FALSE, ages=c(), BCAD=set$BCAD, silent=TRUE, na.rm=FALSE) {
   if(length(ages) == 0)
     ages <- sapply(set$elbows, Bacon.Age.d)
+  if(BCAD)
+    ages <- BCADtocalBP(ages)
 
   if(!silent)
     if(age < min(ages) || age > max(ages))
-     stop(" Warning, age outside the core's age range!\n")
+      stop(" Warning, age outside the core's age range!\n")
 
-  # can this be made faster, i.e. without the loop?
-  # accs <- c()
+   # these two lines do the same as the loop below, 
+   #   but at the same speed and values outside the ages do not get NAs
+   # col_indices <- rowSums(ages <= age) + 1 
+   # accs <- set$output[cbind(seq_len(nrow(ages)), col_indices)]
+
   accs <- rep(NA_real_, nrow(ages)) # suggested by henningte on github
   for(i in 2:ncol(ages)) {
-    if(BCAD)
-      these <- (ages[,i-1] > age) * (ages[,i] < age) else
-        these <- (ages[,i-1] < age) * (ages[,i] > age)
+    these <- (ages[,i-1] < age) & (ages[,i] > age)
     if(sum(these) > 0) # age lies within these age-model iterations
-      #accs <- c(accs, set$output[which(these>0),i]) # was i+1
       accs[which(these>0)] <- set$output[which(these>0),i] # Jan 2023
   }
+
   if(na.rm)
     accs <- accs[!is.na(accs)]
   if(cmyr)
     accs <- 1/accs
+
   return(accs)
 }
+
 
 
 #' @name accrate.depth.summary
@@ -283,7 +292,7 @@ accrate.depth.ghost <- function(set=get('info'), d=set$elbows, d.lim=c(), acc.li
     for(i in 2:length(d)) {
       accs <- acc[[i-1]]
       col <- rgb(rgb.scale[1], rgb.scale[2], rgb.scale[3], seq(max(accs$y[!is.na(accs$y)]), 0, length=rgb.res)) # was acc[[i]]
-      image(accs$x, d[c(i-1, i)], t(1-t(accs$y)), add=TRUE, col=col) # was acc[[i]]
+      ghost.mirror(accs$x, d[c(i-1, i)], t(1-t(accs$y)), col=col) # was acc[[i]]
     }
     if(plot.range) {
       lines(min.rng, d, type="s", col=range.col, lty=range.lty)
@@ -300,7 +309,7 @@ accrate.depth.ghost <- function(set=get('info'), d=set$elbows, d.lim=c(), acc.li
       for(i in 2:length(d)) {
         accs <- acc[[i-1]]
         col <- rgb(rgb.scale[1], rgb.scale[2], rgb.scale[3], seq(max(accs$y[!is.na(accs$y)]), 0, length=rgb.res)) # was acc[[i]]
-        image(d[c(i-1, i)], accs$x, 1-t(accs$y), add=TRUE, col=col) # was acc[[i]]
+        ghost.mirror(d[c(i-1, i)], accs$x, 1-t(accs$y), col=col) # was acc[[i]]
       }
       if(plot.range) {
         lines(d, min.rng, type="s", col=range.col, lty=range.lty, pch=NA)
@@ -376,7 +385,7 @@ accrate.age.ghost <- function(set=get('info'), age.lim=c(), age.lab=c(), kcal=FA
   if(length(age.lim) == 0) 
      age.lim <- extendrange(set$ranges[,5]) # just the mean ages, not the extremes
   if(set$BCAD) # was set$BCAD
-    age.lim <- 1950 - age.lim # work with cal BP internally
+    age.lim <- BCADtocalBP(age.lim) # work with cal BP internally
   age.seq <- seq(min(age.lim), max(age.lim), length=age.res)
     
   if(length(acc.lim) == 0) {
@@ -435,11 +444,11 @@ accrate.age.ghost <- function(set=get('info'), age.lim=c(), age.lab=c(), kcal=FA
     yaxt <- ifelse(kcal || BCAD, "n", "s")
     plot(0, type="n", ylim=age.lim, ylab=age.lab, xlim=acc.lim, xlab=acc.lab, yaxs=xaxs, xaxs=yaxs, yaxt=yaxt, bty="n")
     if(BCAD)
-      axis(2, pretty(age.lim), labels=1950-pretty(age.lim)) else
+      axis(2, pretty(age.lim), labels=calBPtoBCAD(pretty(age.lim))) else
         if(kcal)
           axis(2, pretty(age.lim), labels=pretty(age.lim)/1e3)
-    image(acc.seq, age.seq, t(z), col=cols, add=TRUE)
-    if(plot.range) {
+    ghost.mirror(acc.seq, age.seq, t(z), col=cols)
+	if(plot.range) {
       lines(acc.rng[,1], age.seq, pch=".", col=range.col, lty=range.lty)
       lines(acc.rng[,2], age.seq, pch=".", col=range.col, lty=range.lty)
     }
@@ -451,10 +460,10 @@ accrate.age.ghost <- function(set=get('info'), age.lim=c(), age.lab=c(), kcal=FA
       xaxt <- ifelse(kcal || BCAD, "n", "s")
       plot(0, type="n", xlim=age.lim, xlab=age.lab, ylim=acc.lim, xaxt=xaxt, ylab=acc.lab, xaxs=xaxs, yaxs=yaxs, bty="n")
       if(BCAD)
-        axis(1, pretty(age.lim), labels=1950-pretty(age.lim)) else
+        axis(1, pretty(age.lim), labels=calBPtoBCAD(pretty(age.lim))) else
         if(kcal)
           axis(1, pretty(age.lim), labels=pretty(age.lim)/1e3)
-      image(age.seq, acc.seq, t(t(z)), col=cols, add=TRUE)
+      ghost.mirror(age.seq, acc.seq, z, col=cols)
       if(plot.range) {
         lines(age.seq, acc.rng[,1], pch=".", col=range.col, lty=range.lty)
         lines(age.seq, acc.rng[,2], pch=".", col=range.col, lty=range.lty)
@@ -468,6 +477,7 @@ accrate.age.ghost <- function(set=get('info'), age.lim=c(), age.lab=c(), kcal=FA
   box(bty=bty)
   invisible(stored)
 }
+
 
 
 #' @name flux.age.ghost
@@ -569,8 +579,8 @@ flux.age.ghost <- function(proxy=1, age.lim=c(), yr.lim=age.lim, age.res=200, yr
       plot(0, type="n", xlim=age.lim, xlab=age.lab, ylim=flux.lim, ylab=flux.lab, xaxt="n")
   if(BCAD && !set$BCAD) {
     if(rotate.axes)
-      axis(2, pretty(age.lim), labels=1950-pretty(age.lim)) else
-        axis(1, pretty(age.lim), labels=1950-pretty(age.lim))
+      axis(2, pretty(age.lim), labels=calBPtoBCAD(pretty(age.lim))) else
+        axis(1, pretty(age.lim), labels=calBPtoBCAD(pretty(age.lim)))
   } else
       ifelse(rotate.axes, axis(2), axis(1))
 
@@ -591,8 +601,8 @@ flux.age.ghost <- function(proxy=1, age.lim=c(), yr.lim=age.lim, age.res=200, yr
       col <- rgb(rgb.scale[1], rgb.scale[2], rgb.scale[3],
         seq(0, max(flux.hist$y[!is.na(flux.hist$y)]), length=rgb.res))
       if(rotate.axes)
-        image(flux.hist$x, age.seq[c(i-1,i)], matrix(flux.hist$y), add=TRUE, col=col) else
-          image(age.seq[c(i-1,i)], flux.hist$x, t(matrix(flux.hist$y)), add=TRUE, col=col)
+        ghost.mirror(flux.hist$x, age.seq[c(i-1,i)], matrix(flux.hist$y), col=col) else
+          ghost.mirror(age.seq[c(i-1,i)], flux.hist$x, t(matrix(flux.hist$y)), col=col)
     }
   }
 

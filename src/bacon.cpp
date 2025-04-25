@@ -1,4 +1,4 @@
-/*
+ /*
 
  BACON:
 
@@ -46,50 +46,17 @@ the files:
 
 // [[Rcpp::export]]
 int bacon( std::string inputfile1, std::string outputfile1, int ssize, std::string dircc) {// Command line: bacon inputfile outputfile
-//
-  //Rprintf("inputfile is: %s,\n outputfile: %s,\n ssize %d,\n dircc %s", inputfile1, outputfile1, ssize, dircc);
-  char *inputfile = new char[inputfile1.length() + 1];
-//  printf("%s\n", inputfile1.c_str());
+	
+	char *inputfile = new char[inputfile1.length() + 1];
   strcpy(inputfile, inputfile1.c_str());
-  //JEV avoid warning int i=0; i<inputfile1.length() ; i++
-//  for (unsigned int i=0; i<inputfile1.length() ; i++){   // MB remove this Oct 2020 as it just repeats printing the name/location of the bacon file?
-//     printf("'%c' ", inputfile1.c_str()[i]);
-//     Rprintf("'%c' ", inputfile1.c_str()[i]);
-//    Rprintf("%c", inputfile1.c_str()[i]);
-//  }
+
 
   char *outputfile = new char[outputfile1.length() + 1];
-  //  printf("%s\n", inputfile1.c_str());
   strcpy(outputfile, outputfile1.c_str());
 
-  // do stuff
-  // delete [] inputfile;
-
-//  char inputfile[]=inputfile1.c_str() ; //"EDENFULL_31.bacon";
-//  char outputfile[]="test.out";
-  //printf("%s %s %d \n",inputfile,outputfile,ssize);
-
-  //	if (argc < 4) {
-  // 	printf("Usage: bacon inputfile outputfile ssize\n");
-  //
-  // 	exit(0);
-  // }
-
-  // char  ax[BUFFSIZE];
-  //Rprintf("antes!\n");
-
   //Program file
-  //sprintf( ax, "Cores/%s/%s.bacon", argv[1], argv[2]);
-  // sprintf( ax, "%s", argv[1]);
   //Read everything from the program file
   Input All( inputfile, MAXNUMOFCURVES, MAXNUMOFDETS, dircc);
-  //Rprintf("despues!\n");
-
-  //File to save the twalk output
-  // sprintf( ax, "%s", argv[2]);
-
-  // int ssize;
-  // sscanf( argv[3], " %d", &ssize);
 
   //ssize is the final sample size needed
   //ssize = it/(ACCEP_EV * All.Dim() * EVERY_MULT) - BURN_IN_MULT
@@ -109,60 +76,8 @@ int bacon( std::string inputfile1, std::string outputfile1, int ssize, std::stri
 
   All.outputFiles(outputfile1); // this was not present in rbacon's bacon.cpp! March 2021
 
-  /*
-  char  ax2[BUFFSIZE];
-  //File to save the thinned twalk output
-  sprintf( ax2, "%s", argv[2]);
 
-
-  FILE *F, *G;
-  if ((F = fopen( ax, "r")) == NULL) {
-  printf("Could not open %s for reading.\n", ax);
-
-  //exit(0);
-  }
-  if ((G = fopen( ax2, "w+")) == NULL) {
-  printf("Could not open %s for writing.\n", ax2);
-
-  //exit(0);
-  }
-
-
-  char ln[CHARBUFFER];
-  int burnin= BURN_IN_MULT*All.Dim(), j=0;
-  every = 1;
-  //subsample the twalk output:
-  printf("\nSubsampling %s, burnin= %d, every= %d and store results in %s ...\n", ax, burnin, every, ax2);
-  while (!feof(F)) {
-  fgets( ln, CHARBUFFER, F);
-  if (j == burnin) break;
-  j++;
-  }
-
-  j=0;
-  int ss=0;
-  while (!feof(F)) {
-
-  fgets( ln, CHARBUFFER, F);
-  if ((j % every) == 0) {
-
-  fputs( ln, G);
-  ss++;
-  }
-  j++;
-  }
-  printf("out.all size= %d\n", j);
-
-  fclose(F);
-  fclose(G);
-
-  printf("Removing %s\n", ax);
-  remove(ax);
-
-  printf("Final sample size %d\n", ss);
-  */
-
- Rprintf("bacon: burn in (initial iterations which will be removed): %d\n", All.Dim() * EVERY_MULT * BURN_IN_MULT);
+  Rprintf("bacon: burn in (initial iterations which will be removed): %d\n", All.Dim() * EVERY_MULT * BURN_IN_MULT);
 
 if (Un01() < 0.5) {
 	Rprintf(FAREWELL);} else

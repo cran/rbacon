@@ -311,14 +311,16 @@ double BetaSim( double a, double b) { /*Beta: p(x) dx = K x^{a-1} (1-x)^{b-1} dx
 	return BetaDev( &RNG, a, b);
 }
 
+double UnifSim(double a, double b) { /* MB Proposal, April 2025 */
+    return Unab( 0.0, b); /* left end is always 0 */
+}
 
-
-/* Wraper for the GSL implementation of the standard Gaussian cdf */
+/* Wrapper for the GSL implementation of the standard Gaussian cdf */
 double NorF(const double x) {
     return gsl_cdf_ugaussian_P(x);
 }
 
-/* Wraper for the GSL implementation of the standard t dist cdf 
+/* Wrapper for the GSL implementation of the standard t dist cdf 
 double StTF(const double x) {
     return gsl_cdf_utdist_P(x);
 }

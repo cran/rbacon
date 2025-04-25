@@ -45,10 +45,10 @@
 #'   add.dates(5000, 100, 60)
 #' }
 #' @export
-add.dates <- function(mn, sdev, depth, cc=1, set=get('info'), above=1e-6, postbomb=0, normal=TRUE, delta.R=set$delta.R, delta.STD=set$delta.STD, t.a=set$t.a, t.b=set$t.b, date.res=100, height=.1, calheight=1, agesteps=1, cutoff=0.005, col=rgb(1,0,0,.5), border=rgb(1,0,0,.5), rotate.axes=FALSE, mirror=TRUE, up=TRUE, BCAD=FALSE, pch=4, cc.dir=c()) {
+add.dates <- function(mn, sdev, depth, cc=1, set=get('info'), above=1e-6, postbomb=0, normal=TRUE, delta.R=0, delta.STD=0, t.a=set$t.a, t.b=set$t.b, date.res=100, height=1, calheight=1, agesteps=1, cutoff=0.005, col=rgb(1,0,0,.5), border=rgb(1,0,0,.5), rotate.axes=FALSE, mirror=TRUE, up=TRUE, BCAD=FALSE, pch=4, cc.dir=c()) {
 
   dists <- draw.dates(mn-delta.R, sqrt(sdev^2+delta.STD^2), depth, cc=cc, postbomb=postbomb, normal=normal, t.a=t.a, t.b=t.b, dist.res=date.res, ex=height, threshold=cutoff, col=col, border=border, draw.hpd=FALSE, rotate.axes=!rotate.axes, mirror=mirror, up=up, cc.dir=cc.dir, add=TRUE, BCAD=BCAD)
-  
+
   if(length(pch) > 0) {
     best <- c()
     for(i in 1:length(mn)) 
@@ -82,6 +82,7 @@ add.dates <- function(mn, sdev, depth, cc=1, set=get('info'), above=1e-6, postbo
 #' @param yr.lab Deprecated - use age.lab instead
 #' @param height The heights of the distributions of the dates. See also \code{normalise.dists}.
 #' @param calheight Multiplier for the heights of the distributions of dates on the calendar scale. Defaults to \code{calheight=1}.
+#' @param ex Alternative for providing heights of the dates' distributions. Defaults to 1 for all dates, but could also provide individual ex values for each date, e.g., ex=rep(1, nrow(set$dets)); ex[1:4] <- 2
 #' @param mirror Plot the dates as 'blobs'. Set to \code{mirror=FALSE} to plot simple distributions.
 #' @param up Directions of distributions if they are plotted non-mirrored. Default \code{up=TRUE}.
 #' @param cutoff Avoid plotting very low probabilities of date distributions (default \code{cutoff=0.1}).
@@ -102,10 +103,7 @@ add.dates <- function(mn, sdev, depth, cc=1, set=get('info'), above=1e-6, postbo
 #'   calib.plot()
 #' @export
 ### produce plots of the calibrated distributions
-calib.plot <- function(set=get('info'), dets=set$dets, accordion=c(), BCAD=set$BCAD, cc=set$cc, rotate.axes=FALSE, rev.d=FALSE, rev.age=FALSE, rev.yr=rev.age, age.lim=c(), yr.lim=age.lim, date.res=100, d.lab=c(), age.lab=c(), yr.lab=age.lab, height=1, calheight=1, mirror=TRUE, up=TRUE, cutoff=.1, C14.col=rgb(0,0,1,.5), C14.border=rgb(0,0,1,.75), cal.col=rgb(0,.5,.5,.5), cal.border=rgb(0,.5,.5,.75), dates.col=c(), slump.col=grey(0.8), new.plot=TRUE, plot.dists=TRUE, same.heights=FALSE) {
-	
-  # agedepth calls as follows:
-  #calib.plot(set, BCAD=BCAD, cc=cc, rotate.axes=rotate.axes, height=height, calheight=calheight, mirror=mirror, up=up, date.res=date.res, cutoff=cutoff, C14.col=C14.col, C14.border=C14.border, cal.col=cal.col, cal.border=cal.border, dates.col=dates.col, new.plot=FALSE, same.heights=same.heights)
+calib.plot <- function(set=get('info'), dets=set$dets, accordion=c(), BCAD=set$BCAD, cc=set$cc, rotate.axes=FALSE, rev.d=FALSE, rev.age=FALSE, rev.yr=rev.age, age.lim=c(), yr.lim=age.lim, date.res=100, d.lab=c(), age.lab=c(), yr.lab=age.lab, height=1, calheight=1, ex=1, mirror=TRUE, up=TRUE, cutoff=.1, C14.col=rgb(0,0,1,.5), C14.border=rgb(0,0,1,.75), cal.col=rgb(0,.5,.5,.5), cal.border=rgb(0,.5,.5,.75), dates.col=c(), slump.col=grey(0.8), new.plot=TRUE, plot.dists=TRUE, same.heights=FALSE) {
   
   # we have to set ka (kcal?) as an option as well
 
@@ -125,7 +123,6 @@ calib.plot <- function(set=get('info'), dets=set$dets, accordion=c(), BCAD=set$B
     }
   }
 
-  #draw.dates(dets[,2]-d.R, sqrt(dets[,3]^2+d.STD^2), dets[,4], cc=cc, BCAD=BCAD, rotate.axes=!rotate.axes, d.rev=rev.d, dist.res=date.res, d.lab=d.lab, age.rev=age.rev, age.lim=age.lim, height=ex, mirror=mirror, up=up, threshold=cutoff, col=C14.col, border=C14.border, cal.col=cal.col, cal.border=cal.border, t.a=t.a, t.b=t.b)
   if(length(age.lim) == 0)
     lims <- c()
   for(i in 1:length(set$calib$probs))
@@ -133,8 +130,8 @@ calib.plot <- function(set=get('info'), dets=set$dets, accordion=c(), BCAD=set$B
   age.min <- min(lims)
   age.max <- max(lims)
   if(BCAD) {
-    age.min <- 1950 - age.min
-    age.max <- 1950 - age.max
+    age.min <- calBPtoBCAD(age.min)
+    age.max <- calBPtoBCAD(age.max)
     }
   if(length(age.lab) == 0)
     age.lab <- ifelse(set$BCAD, "BC/AD", paste("cal", set$age.unit, " BP"))
@@ -150,6 +147,10 @@ calib.plot <- function(set=get('info'), dets=set$dets, accordion=c(), BCAD=set$B
     if(rotate.axes)
       plot(0, type="n", xlim=age.lim, ylim=dlim[2:1], xlab=age.lab, ylab=d.lab, main="") else
         plot(0, type="n", xlim=dlim, ylim=age.lim, xlab=d.lab, ylab=age.lab, main="")
+  if(length(ex) == 1)
+    ex <- rep(ex, nrow(set$dets)) else
+  if(length(ex) != nrow(set$dets))
+	  stop("ex should either be 1 value or provided for all dates")
 
   if(length(set$slump) > 0)
     if(rotate.axes)
@@ -173,7 +174,7 @@ calib.plot <- function(set=get('info'), dets=set$dets, accordion=c(), BCAD=set$B
       if(length(accordion) == 2)
         d <- stretch(d, accordion[1], accordion[2])
       if(BCAD)
-        cal[,1] <- 1950-cal[,1]
+        cal[,1] <- calBPtoBCAD(cal[,1])
       if((max(cal[,1]) - min(cal[,1])) > 4*agesteps)
         cal <- approx(cal[,1], cal[,2], seq(min(cal[,1]), max(cal[,1]), by=agesteps)) else
           cal <- approx(cal[,1], cal[,2], seq(min(cal[,1]), max(cal[,1]), length=100))
@@ -188,7 +189,7 @@ calib.plot <- function(set=get('info'), dets=set$dets, accordion=c(), BCAD=set$B
 
       x = cal[,1]
       y = cal[,2]
-      y = y[!duplicated(x)]
+      y = ex[i]*y[!duplicated(x)]
       x = x[!duplicated(x)]
       cal <- approx(x, y, seq(min(x), max(x), length= 100)) # tmp but probably not a bad idea
 
@@ -204,15 +205,24 @@ calib.plot <- function(set=get('info'), dets=set$dets, accordion=c(), BCAD=set$B
       if(cc[i] == 0) {
           col <- cal.col
           border <- cal.border
-        } else {
-            col <- C14.col
-            border <- C14.border
-          }
+      } else {
+          col <- C14.col
+          border <- C14.border
+        }
 
+     # alternative way to provide colours
      if(length(dates.col) > 0) {
-        col <- dates.col[i]
-        border <- dates.col[i]
-      }
+       if(length(dates.col) == 1) {
+         col <- dates.col
+         border <- dates.col
+		} else {
+            if(length(dates.col) != length(set$calib$probs))
+              stop("dates.col has to be 1 value or have a value for each date")	
+            col <- dates.col[i]
+            border <- dates.col[i]
+          }  
+     }
+	  
       polygon(pol, col=col, border=border)
     }
 }

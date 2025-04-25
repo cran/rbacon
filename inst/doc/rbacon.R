@@ -1,55 +1,55 @@
 ## ----eval=FALSE---------------------------------------------------------------
-#  install.packages('rbacon')
+# install.packages('rbacon')
 
 ## -----------------------------------------------------------------------------
 library(rbacon)
 
 ## ----eval=FALSE---------------------------------------------------------------
-#  Bacon()
+# Bacon()
 
 ## ----eval=FALSE---------------------------------------------------------------
-#  ?Bacon
+# ?Bacon
 
 ## ----eval=FALSE---------------------------------------------------------------
-#  ?agedepth
+# ?agedepth
 
 ## ----eval=FALSE---------------------------------------------------------------
-#  Bacon('RLGH3')
+# Bacon('RLGH3')
 
 ## ----eval=FALSE---------------------------------------------------------------
-#  Bacon('RLGH3')
+# Bacon('RLGH3')
 
 ## ----eval=FALSE---------------------------------------------------------------
-#  Bacon('RLGH3', acc.mean=50, acc.shape=100)
+# Bacon('RLGH3', acc.mean=50, acc.shape=100)
 
 ## ----eval=FALSE---------------------------------------------------------------
-#  Bacon("RLGH3", acc.mean=50, hiatus.depths=125, hiatus.max=1000)
+# Bacon("RLGH3", acc.mean=50, hiatus.depths=125, hiatus.max=1000)
 
 ## ----eval=FALSE---------------------------------------------------------------
-#  Bacon("RLGH3", acc.mean=50, slump=c(180, 120, 40, 30))
+# Bacon("RLGH3", acc.mean=50, slump=c(180, 120, 40, 30))
 
 ## ----eval=FALSE---------------------------------------------------------------
-#  mydir <- tempdir()
-#  Bacon(coredir=mydir)
+# mydir <- tempdir()
+# Bacon(coredir=mydir)
 
 ## ----eval=FALSE---------------------------------------------------------------
-#  Bacon(suggest=FALSE)
-#  Bacon(accept.suggestions=TRUE)
+# Bacon(suggest=FALSE)
+# Bacon(accept.suggestions=TRUE)
 
 ## ----eval=FALSE---------------------------------------------------------------
-#  allcores <- list.files("Bacon_runs")
-#  for(i in allcores)
-#    try(Bacon(i, accept.suggestions=TRUE))
+# allcores <- list.files("Bacon_runs")
+# for(i in allcores)
+#   try(Bacon(i, accept.suggestions=TRUE))
 
 ## ----eval=FALSE---------------------------------------------------------------
-#  Baconvergence("MSB2K", thick=5, runs=5, ssize=100, coredir=tempfile())
+# Baconvergence("MSB2K", thick=5, runs=5, ssize=100, coredir=tempfile())
 
 ## ----eval=FALSE---------------------------------------------------------------
-#  proxy.ghost(7)
+# proxy.ghost(7)
 
 ## ----eval=FALSE---------------------------------------------------------------
-#  accrate.depth.ghost()
-#  accrate.age.ghost()
+# accrate.depth.ghost()
+# accrate.age.ghost()
 
 ## ----echo=FALSE, include=FALSE------------------------------------------------
 require(rbacon)
@@ -79,44 +79,46 @@ summary(acc.a4500)
 ## -----------------------------------------------------------------------------
 accrate.depth.summary(20)
 accrate.age.summary(4500)
+
+## -----------------------------------------------------------------------------
 accrates.core()
 
 ## ----eval=FALSE---------------------------------------------------------------
-#  Bacon.hist(23.45)
-#  depth23.45 <- Bacon.Age.d(23.45)
-#  hist(depth23.45)
-#  mean(depth23.45)
+# Bacon.hist(23.45)
+# depth23.45 <- Bacon.Age.d(23.45)
+# hist(depth23.45)
+# mean(depth23.45)
 
 ## ----eval=FALSE---------------------------------------------------------------
-#  Bacon("MyCore", run=FALSE)
-#  agedepth()
-#  # or if you've set the accumulation rate prior to something different than the default:
-#  Bacon("MyCore", run=FALSE, acc.mean=c(20,5))
-#  agedepth()
+# Bacon("MyCore", run=FALSE)
+# agedepth()
+# # or if you've set the accumulation rate prior to something different than the default:
+# Bacon("MyCore", run=FALSE, acc.mean=c(20,5))
+# agedepth()
 
 ## ----eval=FALSE---------------------------------------------------------------
-#  Bacon("MyCore", thick=1)
-#  Bacon("MyCore", 1)
+# Bacon("MyCore", thick=1)
+# Bacon("MyCore", 1)
 
 ## ----eval=FALSE---------------------------------------------------------------
-#  Bacon("MyCore", boundary=80, acc.mean=c(10,50))
+# Bacon("MyCore", boundary=80, acc.mean=c(10,50))
 
 ## ----eval=FALSE---------------------------------------------------------------
-#  Bacon.hist(23.45)
-#  depth23.45 <- Bacon.Age.d(23.45)
-#  hist(depth23.45)
-#  mean(depth23.45)
-#  quantile(depth23.45, probs=c(.025, .975))
+# Bacon.hist(23.45)
+# depth23.45 <- Bacon.Age.d(23.45)
+# hist(depth23.45)
+# mean(depth23.45)
+# quantile(depth23.45, probs=c(.025, .975))
 
 ## ----eval=FALSE---------------------------------------------------------------
-#  depth23.45 <- Bacon.Age.d(23.45)
-#  depth12.34 <- Bacon.Age.d(12.34)
-#  passed <- depth23.45 - depth12.34
-#  hist(passed)
-#  mean(passed)
-#  quantile(passed, probs=c(.025, .975))
+# depth23.45 <- Bacon.Age.d(23.45)
+# depth12.34 <- Bacon.Age.d(12.34)
+# passed <- depth23.45 - depth12.34
+# hist(passed)
+# mean(passed)
+# quantile(passed, probs=c(.025, .975))
 
 ## ----eval=FALSE---------------------------------------------------------------
-#  my_fancy_colours <- sample(colours(), nrow(info$dets))
-#  agedepth(height=50, dates.col=my_fancy_colours)
+# my_fancy_colours <- sample(colours(), nrow(info$dets))
+# agedepth(dates.col=my_fancy_colours)
 

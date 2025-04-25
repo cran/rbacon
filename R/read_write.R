@@ -33,11 +33,23 @@ set.initvals <- function(set=get('info'), core=set$core, values=c(), click=1) {
 
   if(length(values) == 0) { # then the user will click on an existing graph to select age-depth points
     message("Please select your initval age-depth points on the graph by clicking with your left mouse button. When you are done selecting, use right-click.")
+	
+    if(set$isplum)
+      if(set$hasBaconData) {
+        par(mfg=c(2,1)) # bottom-left panel
+		message("Please select your data from the bottom-left panel with the cal BP/C14 dates")
+      }	
+	
     if(click == 1) # user right-clicks once done
       draft.agedepth <- locator() else
         draft.agedepth <- locator(click)
     points(draft.agedepth, col=2, pch=4, cex=5, lwd=2)
     message("Lovely.")
+	
+    if(set$isplum)
+      if(set$hasBaconData)
+        par(mfg=c(2,2)) # back to bottom-right panel
+	
     ages <- approx(draft.agedepth$x, draft.agedepth$y, elbows, rule=2)$y
     agedepth <- cbind(elbows, ages)
     accs <- diff(ages) / diff(elbows)
@@ -350,9 +362,13 @@ read.dets <- function(core, coredir, othername=c(), set=get('info'), sep=",", de
     # dets <- dets[ order(dets[,4]), ] #CHANGED: se elimina "set" antes de dets, por un error en uso del objeto
     # changed <- 1
   }
-  if(length(grep(",", dets[,1])) > 0)  {# commas in the lab IDs, which can confuse bacon (c++)
-    dets[,1] <- sub(",", "", dets[,1])
+  if(any(grepl(",", dets[,1])))  {# commas in the lab IDs, which can confuse bacon (c++)
+    dets[,1] <- gsub(",", "", dets[,1])
     message("Warning, I removed commas from the lab ID fields")
+  }
+  if(any(grepl('"', dets[,1]))) {# commas in the lab IDs, which can confuse bacon (c++)
+    dets[,1] <- gsub('"', '', dets[,1])
+    message("Warning, I removed quotation marks")
   }
 
   # if current dets differ from original .csv file, rewrite it
@@ -471,7 +487,7 @@ Bacon.settings <- function(core, coredir, dets, thick, remember=TRUE, d.min, d.m
 
 
 # write files to be read by the main Bacon age-depth modelling function
-write.Bacon.file <- function(set=get('info'), younger.than=c(), older.than=c(), save.info=TRUE) {
+write.Bacon.file <- function(set=get('info'), younger.than=c(), older.than=c(), save.info=set$save.info) {
 
   if(length(set$slump) > 0) {
     dets <- set$slumpdets
@@ -655,7 +671,7 @@ Plum.AnaOut <- function(fnam, set=get('info'), MCMC.resample=TRUE) {
   set$TrPs <- nrow(out)
   set$phi  <- out[,1]
   set$ps   <- out[,2:(n+1)]
-  set
+  return(set)
 }
 
 

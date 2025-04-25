@@ -36,6 +36,8 @@ double GammaSim(double a, double b); /*Gamma: p(x) dx = K x^{a-1} e^{-x/b} dx*/
 
 double BetaSim(double a, double b); /*Beta: p(x) dx = K x^{a-1} (1-x)^{b-1} dx */
 
+double UnifSim(double a, double b); /* MB April 2025 */
+
 double gsl_cdf_ugaussian_P (const double x); /* defined in GSL gauss.cpp */
 /* Wrapper for the GSL implementation of the standard Gaussian cdf */
 double NorF(const double x);

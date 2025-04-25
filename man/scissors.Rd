@@ -4,7 +4,7 @@
 \alias{scissors}
 \title{Remove the first n iterations.}
 \usage{
-scissors(burnin, set = get("info"), write = TRUE, save.info = TRUE)
+scissors(burnin, set = get("info"), write = TRUE, save.info = set$save.info)
 }
 \arguments{
 \item{burnin}{Number of iterations to remove  of the iterative time series. If this value is higher than the amount of remaining iterations,

@@ -163,8 +163,9 @@ class BaconFix: public Bacon {
 					int l=0;
 					for (int k=K-1; k>0; k--) {
 						if ((fcmp( c(k-1), h[l]) == -1) && (fcmp( h[l], c(k)) != 1)) { //forgets
-							x[k] = X[k];
-
+							//double thishiatus = ((double) rand() / RAND_MAX) * hb[l]; // MB Apr 2025
+							//x[k] = X[k] + (thishiatus / c(k)-c(k-1)); // MB Apr 2025
+							x[k] = X[k]; // MB commented April 2025
 							l++; //jump to next hiatus, but max one hiatus in each section.
 						}
 						else //continue with memory
@@ -313,7 +314,10 @@ class BaconFix: public Bacon {
 					int l=0;
 					for (int k=K-1; k>0; k--) {
 						if ((fcmp( c(k-1), h[l]) == -1) && (fcmp( h[l], c(k)) != 1)) { //if c_{k-1} < h_l & h_l !> c_k, forgets
-							X0[k]  = GammaSim( ha[l], 1.0/(hb[l]*Dc) );
+                        //printf("\nha is %f, hb is %f\n", ha[l], hb[l]); // MB April 2025, but should model accrate, not jump
+						    X0[k]  = GammaSim( ha[l], 1.0/(hb[l]*Dc) ); // this is the original one
+							//X0[k]  = GammaSim( alpha[l], mult/beta[l]) + (UnifSim(0, hb[l])/Dc); // MB April 2025
+							//printf("Valor de hb %lf\n",hb[l]);
 							//x0[k]  = GammaSim( alpha[l], mult/(beta[l]) ); // MB May 2019
 							//x[k] = X0[k];
 							l++; //jump to next hiatus, but max one hiatus in each section.
@@ -629,6 +633,7 @@ class BaconFix: public Bacon {
 
 					for (int k=K-1; k>0; k--) {
 						if ((fcmp( c(k-1), h[l]) == -1) && (fcmp( h[l], c(k)) != 1)) { //forgets
+							//Uprior += priorHU( l, hb[k]); //MB April 2025
 							Uprior += priorHU( l, x[k]); //prior for the hiatus jump in hiatus l
 							l++; //jump to next hiatus, but max one hiatus in each section.
 						}

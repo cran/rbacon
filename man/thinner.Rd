@@ -4,7 +4,12 @@
 \alias{thinner}
 \title{Thin iterations.}
 \usage{
-thinner(proportion = 0.1, set = get("info"), write = TRUE, save.info = TRUE)
+thinner(
+  proportion = 0.1,
+  set = get("info"),
+  write = TRUE,
+  save.info = set$save.info
+)
 }
 \arguments{
 \item{proportion}{Proportion of iterations to remove. Should be between 0 and 1. Default \code{proportion=0.1}.}

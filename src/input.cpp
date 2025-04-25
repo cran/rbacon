@@ -264,7 +264,7 @@ Input::Input(char *datafile, int emaxnumofcurves, int maxm, std::string ccdir) {
             strcat( last_v_fnam, ".last");//File name for last values
             bacon_dim = bacon->get_dim();
             if ((IV = fopen( init_v_fnam, "r")) == NULL){
-                Rprintf("Since no file %s was provided with initial values for the twalk, I will be using simulated values.\n", init_v_fnam);
+                Rprintf("Since no file %s was provided with initial values for the twalk, I will start from simulated values.\n", init_v_fnam);
                 X0 = bacon->Getx0();
                 Xp0 = bacon->Getxp0(); }
             else { //Read initial values into X0 and Xp0

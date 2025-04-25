@@ -170,7 +170,7 @@ draw.pbmodelled <- function(set=get('info'), BCAD=set$BCAD, rotate.axes=FALSE, r
     # save the values for later
     set$Ai <- Ai
     set$A.rng <- A.rng
-    assign_to_global("info", set, .GlobalEnv) # doesn't work
+    #assign_to_global("info", set, .GlobalEnv) # doesn't work
 
     this <- ifelse(rotate.axes, 3, 4)
     pretty.pb <- pretty(c(pbmin, pbmax)) # not OK?
@@ -192,8 +192,8 @@ draw.pbmodelled <- function(set=get('info'), BCAD=set$BCAD, rotate.axes=FALSE, r
         }
 
       if(rotate.axes)
-        image(ages, c(depths[i]-thickness[i], depths[i]), t(z), col=pbmodelled.col(seq(0, 1-max(z),  length=50)), add=TRUE) else
-          image(c(depths[i]-thickness[i], depths[i]), ages, z, col=pbmodelled.col(seq(0, 1-max(z), length=50)), add=TRUE)
+        ghost.mirror(ages, c(depths[i]-thickness[i], depths[i]), t(z), col=pbmodelled.col(seq(0, 1-max(z),  length=50))) else
+          ghost.mirror(c(depths[i]-thickness[i], depths[i]), ages, z, col=pbmodelled.col(seq(0, 1-max(z), length=50)))
     }
   }
 
@@ -208,7 +208,7 @@ draw.pbmodelled <- function(set=get('info'), BCAD=set$BCAD, rotate.axes=FALSE, r
 #   }
 
     if(plot.measured)
-      draw.pbmeasured(newplot=FALSE, rotate.axes=rotate.axes, BCAD=BCAD, on.agescale=TRUE, pb.lim=pb.lim, age.lim=age.lim, supp.col=supp.col)
+      draw.pbmeasured(set=set, newplot=FALSE, rotate.axes=rotate.axes, BCAD=BCAD, on.agescale=TRUE, pb.lim=pb.lim, age.lim=age.lim, supp.col=supp.col)	
 }
 
 
@@ -235,8 +235,8 @@ A.modelled <- function(d.top, d.bottom, dens, set=get('info'), phi=set$phi, sup=
     sup <- sup[,dd]
   }
 
-  t.top <- Bacon.Age.d(d.top, BCAD=FALSE) - set$theta0
-  t.bottom <- Bacon.Age.d(d.bottom, BCAD=FALSE) - set$theta0
+  t.top <- Bacon.Age.d(d.top, set=set, BCAD=FALSE) - set$theta0
+  t.bottom <- Bacon.Age.d(d.bottom, set=set, BCAD=FALSE) - set$theta0
   #  multiply <- ifelse(set$Bqkg, 10, 500)
   multiply <- 1 # since Bqkg or dpmg is already set earlier (for set$dets and set$detsPlum)
   return(sup + ((phi / (.03114*multiply*dens) ) * (exp( -.03114*t.top) - exp(-.03114*t.bottom)) ) )
@@ -260,7 +260,7 @@ background <- function(set=get('info'), Al=set$Al) {
     dets <- set$dets[which(set$dets[,9] == 5),4:6] # only Pb data
     ps <- cbind(set$ps)
     for(i in 1:nrow(dets)) {
-      As <- A.modelled(dets[i,1]-dets[i,2], dets[i,1], dets[i,3])
+      As <- A.modelled(dets[i,1]-dets[i,2], dets[i,1], dets[i,3], set=set)
       if(set$ra.case == 2)
         ps <- set$ps[,i] else
           ps <- set$ps

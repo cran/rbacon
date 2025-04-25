@@ -22,6 +22,7 @@ calib.plot(
   yr.lab = age.lab,
   height = 1,
   calheight = 1,
+  ex = 1,
   mirror = TRUE,
   up = TRUE,
   cutoff = 0.1,
@@ -70,6 +71,8 @@ calib.plot(
 \item{height}{The heights of the distributions of the dates. See also \code{normalise.dists}.}
 
 \item{calheight}{Multiplier for the heights of the distributions of dates on the calendar scale. Defaults to \code{calheight=1}.}
+
+\item{ex}{Alternative for providing heights of the dates' distributions. Defaults to 1 for all dates, but could also provide individual ex values for each date, e.g., ex=rep(1, nrow(set$dets)); ex[1:4] <- 2}
 
 \item{mirror}{Plot the dates as 'blobs'. Set to \code{mirror=FALSE} to plot simple distributions.}
 

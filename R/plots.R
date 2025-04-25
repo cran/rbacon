@@ -55,7 +55,7 @@ proxy.ghost <- function(proxy=1, proxy.lab=NULL, proxy.res=250, age.res=200, yr.
   proxy <- proxy[which(proxy[,1] <= set$d.max),]
   proxy <- proxy[which(proxy[,1] >= set$d.min),]
   pr.mn.ages <- approx(set$ranges[,1], set$ranges[,5], proxy[,1], rule=1)$y
-  if(length(unique(proxy[,2]))==1)
+  if(length(unique(proxy[,2])) == 1)
     stop("this proxy's values remain constant throughout the core, and cannot be proxy-ghosted!", call.=FALSE)
   proxyseq <- seq(min(proxy[,2]), max(proxy[,2]), length=proxy.res)
 #  out <- list(yrseq=c(), binned=c(), maxs=c())
@@ -73,8 +73,9 @@ proxy.ghost <- function(proxy=1, proxy.lab=NULL, proxy.res=250, age.res=200, yr.
   }
   if(verbose)
     message("Calculating histograms")
-  Bacon.hist(ds, set, calc.range=FALSE) # BCAD always FALSE
-  hists <- get('hists')
+
+  hists <- Bacon.hist(ds, set, calc.range=FALSE) # BCAD always FALSE
+  #hists <- get('hists')
   message("\n")
 
   age.min <- c()
@@ -99,33 +100,39 @@ proxy.ghost <- function(proxy=1, proxy.lab=NULL, proxy.res=250, age.res=200, yr.
     stop("dark values larger than 1 are not allowed\n", call.=FALSE) else
       max.counts[max.counts > dark] <- dark
   max.counts[max.counts < cutoff] <- NA # don't plot too small/light values
-  if(length(age.lim)==0)
+  if(length(age.lim) == 0)
     if(xaxs=="r")
       age.lim <- extendrange(pretty(age.seq), f=.04) else
         age.lim <- range(age.seq)[2:1]
   if(age.rev)
     age.lim <- age.lim[2:1]
   if(BCAD) {
-    age.lim <- 1950-age.lim
+    age.lim <- calBPtoBCAD(age.lim)
     max.counts <- max.counts[,ncol(max.counts):1]
-    age.seq <- 1950-rev(age.seq)
+    age.seq <- calBPtoBCAD(rev(age.seq))
   }
 
-  if(length(proxy.lim)==0)
+  if(length(proxy.lim) == 0)
     proxy.lim <- range(proxyseq)
   if(proxy.rev)
     proxy.lim <- proxy.lim[2:1]
-  col <-  rgb(rgb.scale[1], rgb.scale[2], rgb.scale[3], seq(0, darkest, length=rgb.res))
+  col <- rgb(rgb.scale[1], rgb.scale[2], rgb.scale[3], seq(0, darkest, length=rgb.res))
   if(rotate.axes) {
-    image(proxyseq, age.seq, max.counts, xlim=proxy.lim, ylim=age.lim, col=col, ylab=age.lab, xlab=proxy.lab, xaxs=xaxs, yaxs=yaxs, xaxt=xaxt, yaxt=yaxt, add=add)
+    if(!add)
+	  plot(0, type="n", xlim=proxy.lim, ylim=age.lim, ylab=age.lab, xlab=proxy.lab, xaxs=xaxs, yaxs=yaxs, xaxt=xaxt, yaxt=yaxt) 
+	ghost.mirror(proxyseq, age.seq, max.counts, col=col)
     if(plot.mean)
       lines(proxy[,2], pr.mn.ages, col=mean.col)
   } else {
-    image(age.seq, proxyseq, t(max.counts), xlim=age.lim, ylim=proxy.lim, col=col, xlab=age.lab, ylab=proxy.lab, xaxs=xaxs, yaxs=yaxs, xaxt=xaxt, yaxt=yaxt, add=add)
+      if(!add)
+        plot(0, type="n", ylim=proxy.lim, xlim=age.lim, xlab=age.lab, ylab=proxy.lab, xaxs=xaxs, yaxs=yaxs, xaxt=xaxt, yaxt=yaxt)
+	ghost.mirror(age.seq, proxyseq, t(max.counts), col=col)  
     if(plot.mean)
       lines(pr.mn.ages, proxy[,2], col=mean.col)
   }
   box(bty=bty)
+  
+  invisible(list(ages=age.seq, proxy=proxyseq, counts=max.counts, means=cbind(pr.mn.ages, proxy[,2])))
 }
 
 
@@ -224,7 +231,7 @@ AgesOfEvents <- function(window, move, set=get('info'), plot.steps=FALSE, BCAD=s
   events(min.age, max.age, move, window, outfile, MCMCname, nrow(set$output), set$K, set$elbows[1], set$thick, probfile, nrow(probs))
   probs <- fastread(outfile)
   if(BCAD) {
-    probs[,1] <- 1950 - probs[,1]
+    probs[,1] <- calBPtoBCAD(probs[,1])
     o <- order(probs[,1])
     probs <- probs[o,]
   }

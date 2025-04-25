@@ -56,7 +56,7 @@ Bacon.Age.d <- function(d, set=get('info'), its=set$output, BCAD=set$BCAD, na.rm
          ages <- NA # Feb 2021
 
     if(BCAD)
-      ages <- 1950 - ages
+      ages <- calBPtoBCAD(ages)
     return(c(ages))
 }
 
@@ -85,8 +85,8 @@ Bacon.Age.d <- function(d, set=get('info'), its=set$output, BCAD=set$BCAD, na.rm
 #' @export
 Bacon.d.Age <- function(age, set=get("info"), BCAD=set$BCAD, its=set$output, na.rm=FALSE ){
 
-  if(BCAD) 
-    age <- 1950 - age # if the customer decides to enter the age in BCAD
+  if(BCAD && !set$BCAD) 
+    age <- BCADtocalBP(age)
   if(length(age) > 1) 
     stop("Bacon.d.Age can handle one age at a time only", call. = FALSE)
   if(length(its) == 0 ) 
@@ -327,13 +327,14 @@ hiatus.slopes <- function(set=get('info'), hiatus.option=1) {
 #'   Bacon.hist(20:30)
 #' }
 #' @export
-Bacon.hist <- function(d, set=get('info'), BCAD=set$BCAD, age.lab=c(), age.lim=c(), hist.lab="Frequency", calc.range=TRUE, hist.lim=c(), draw=TRUE, prob=set$prob, hist.col=grey(0.5), hist.border=grey(.2), range.col="blue", med.col="green", mean.col="red", verbose=TRUE, save.info=FALSE) {
+Bacon.hist <- function(d, set=get('info'), BCAD=set$BCAD, age.lab=c(), age.lim=c(), hist.lab="Frequency", calc.range=TRUE, hist.lim=c(), draw=TRUE, prob=set$prob, hist.col=grey(0.5), hist.border=grey(.2), range.col="blue", med.col="green", mean.col="red", verbose=TRUE, save.info=set$save.info) {
   outfile <- paste0(set$prefix, ".out")
   if(length(set$output) == 0 || length(set$Tr) == 0) {
     set <- Bacon.AnaOut(outfile, set, MCMC.resample=FALSE)
     if(save.info)
       assign_to_global("set", set) # should that be 'info'?
   }
+  
   hist3 <- function(d, BCAD) {
     hsts <- list(); maxhist <- 0; minhist <- 1
     pb <- txtProgressBar(min=0, max=max(1,length(d)-1), style = 3)
@@ -360,7 +361,8 @@ Bacon.hist <- function(d, set=get('info'), BCAD=set$BCAD, age.lab=c(), age.lim=c
     return(hsts)
   }
   hists <- hist3(d, BCAD)
-  assign_to_global("hists", hists)
+  if(save.info)
+    assign_to_global("hists", hists)
 
   rng <- array(NA, dim=c(length(d), 4)) # R > 4.0 does not like to fill c() using loops
   if(calc.range) {
@@ -394,7 +396,8 @@ Bacon.hist <- function(d, set=get('info'), BCAD=set$BCAD, age.lab=c(), age.lim=c
         message(100*prob, "% range (", range.col, "): ", round(rng[1],1), " to ", round(rng[2],1), " ", age.lab, "\n")
       }
     }
-  invisible(rng) # should this become invisible(hists)?
+  #invisible(rng)
+  invisible(hists)
 }
 
 
@@ -424,11 +427,7 @@ Bacon.rng <- function(d, set=get('info'), BCAD=set$BCAD, prob=set$prob) {
           if(i %% 10 == 0)
             setTxtProgressBar(pb, i)
     }
-#  if(length(d) > 1)
-#    setTxtProgressBar(pb, i)
   }
-  #if(length(d) > 1)
-  #  close(pb)
   return(rng)
 }
 
@@ -450,7 +449,7 @@ Bacon.rng <- function(d, set=get('info'), BCAD=set$BCAD, prob=set$prob) {
 #'   lines(agemodel.it(5), col="red")
 #' }
 #' @export
-agemodel.it <- function(it, set=get('info'), BCAD=set$BCAD, save.info=FALSE) {
+agemodel.it <- function(it, set=get('info'), BCAD=set$BCAD, save.info=set$save.info) {
   outfile <- paste0(set$prefix, ".out")
   if(length(set$output) == 0 || length(set$Tr) == 0) {
     set <- Bacon.AnaOut(outfile, set, MCMC.resample=FALSE)

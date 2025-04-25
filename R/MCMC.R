@@ -40,7 +40,7 @@ bacon.its <- function(ssize, burnin, set=get('info'), ACCEP_EV=20, EVERY_MULT=25
 #' }
 #'
 #' @export
-scissors <- function(burnin, set=get('info'), write=TRUE, save.info=TRUE) {
+scissors <- function(burnin, set=get('info'), write=TRUE, save.info=set$save.info) {
   output <- fastread(paste0(set$prefix, ".out"))
   if(set$isplum)
     plumout <- fastread(paste0(set$prefix, "_plum.out"))
@@ -101,7 +101,7 @@ scissors <- function(burnin, set=get('info'), write=TRUE, save.info=TRUE) {
 #' }
 #'
 #' @export
-thinner <- function(proportion=0.1, set=get('info'), write=TRUE, save.info=TRUE) {
+thinner <- function(proportion=0.1, set=get('info'), write=TRUE, save.info=set$save.info) {
   output <- fastread(paste0(set$prefix, ".out"))
   if(set$isplum)
     plumout <- fastread(paste0(set$prefix, "_plum.out"))

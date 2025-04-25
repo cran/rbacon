@@ -3,9 +3,12 @@
 #################### user-invisible plot functions ####################
 
 # to plot greyscale/ghost graphs of the age-depth model
-agedepth.ghost <- function(set=get('info'), dseq=c(), d.min=set$d.min, d.max=set$d.max, accordion=c(), BCAD=set$BCAD, rotate.axes=FALSE, d.res=400, age.res=400, rgb.res=100, dark=c(), rgb.scale=c(0,0,0), cutoff=0.001, age.lim) {
+agedepth.ghost <- function(set=get('info'), dseq=c(), d.min=set$d.min, d.max=set$d.max, accordion=c(), BCAD=set$BCAD, rotate.axes=FALSE, rev.d=FALSE, rev.age=FALSE, d.res=400, age.res=400, rgb.res=100, dark=c(), rgb.scale=c(0,0,0), cutoff=0.001, age.lim) {
   if(length(dseq) == 0)
     dseq <- seq(d.min, d.max, length=d.res)
+  if(length(age.lim) == 0)
+    age.lim <- range(set$ranges[,2:3]) # 95% age ranges
+  
   if(set$isplum) # plum has a strange feature with a grey shape appearing
     dseq <- dseq[-1] # at dmin. Thus removing the first depth
   if(length(set$slump) > 0) {
@@ -21,9 +24,9 @@ agedepth.ghost <- function(set=get('info'), dseq=c(), d.min=set$d.min, d.max=set
  if(length(accordion) == 2)
     dseq <- squeeze(dseq, accordion[1], accordion[2])
 
-  Bacon.hist(dseq, set, BCAD=BCAD, calc.range=FALSE, draw=FALSE)
-  hists <- get('hists')
-  scales <- array(0, dim=c(length(dseq), age.res))
+  hists <- Bacon.hist(dseq, set, BCAD=BCAD, calc.range=FALSE, draw=FALSE, save.info=FALSE)
+  
+  scales <- array(0, dim=c(length(dseq), age.res)) # depths vertical/rows, ages horizontal/columns 
   ageseq <- seq(min(age.lim), max(age.lim), length=age.res)
   for(i in 1:length(hists)) { # was length(dseq)
   if(length(hists[[i]]) < 7)
@@ -48,10 +51,28 @@ agedepth.ghost <- function(set=get('info'), dseq=c(), d.min=set$d.min, d.max=set
   cols <- rgb(rgb.scale[1], rgb.scale[2], rgb.scale[3], seq(0,1, length=rgb.res))
   
   scales[scales<cutoff] <- NA # so that pixels with probs very close to 0 are not plotted as white but empty
-  
+  scales[is.na(scales)] <- 0
+
   if(rotate.axes)
-    image(ageseq, dseq, t(scales), add=TRUE, col=cols, useRaster=FALSE) else
-      image(dseq, ageseq, scales, add=TRUE, col=cols, useRaster=FALSE)
+    ghost.mirror(ageseq, dseq, t(scales), col=cols) else
+      ghost.mirror(dseq, ageseq, scales, col=cols)
+}
+
+
+
+ghost.mirror <- function(xseq, yseq, z, col) {
+  coors <- par("usr")
+  
+  if(coors[2] < coors[1]) 
+     z <- z[nrow(z):1,]
+  if(coors[4] < coors[3]) 
+     z <- z[,ncol(z):1]
+
+  # ensure regular spacing (even when there are slumps)
+  xseq <- seq(xseq[1], xseq[length(xseq)], length.out=length(xseq))
+  yseq <- seq(yseq[1], yseq[length(yseq)], length.out=length(yseq))
+  
+  image(xseq, yseq, z, add=TRUE, col=col, useRaster=TRUE)
 }
 
 
@@ -173,6 +194,8 @@ PlotAccPost <- function(set=get('info'), s=set$acc.shape, mn=set$acc.mean, main=
   post <- c()
   for(i in hi)
     post <- c(post, set$output[[i]])
+  post.mn <- mean(post)
+  post.shape <- post.mn^2 / var(post)
   post <- density(post, from=0)
   post <- cbind(c(0, post$x, max(post$x)), c(0, post$y, 0))
   maxprior <- dgamma((s-1)/(s/mn), s, s/mn)
@@ -188,13 +211,18 @@ PlotAccPost <- function(set=get('info'), s=set$acc.shape, mn=set$acc.mean, main=
   plot(0, type="n", xlim=acc.xlim, xlab=acc.lab, ylim=acc.ylim, ylab="", xaxs=xaxs, yaxs=yaxs, yaxt=yaxt, cex.axis=panel.size)
   polygon(post, col=hist.col, border=hist.border)
   PlotAccPrior(s, mn, add=TRUE, xlim=acc.xlim, xlab="", ylab=ylab, main=main, csize=prior.size, line.col=line.col, line.width=line.width, text.col=text.col)
+  invisible(c(post.mn, post.shape))
 }
 
 
 
 # plot the posterior (and prior) of the memory
 PlotMemPost <- function(set=get('info'), corenam, K, main="", s=set$mem.strength, mn=set$mem.mean, ylab="Density", ds=1, thick, xaxs="i", yaxs="i", yaxt="n", prior.size=.9, panel.size=.9, mem.xlim=c(), mem.ylim=c(), mem.lab=c(), line.col=3, line.width=2, text.col=2, hist.col=grey(0.8), hist.border=grey(0.4)) {
-  post <- density(set$output[,2+set$K]^(1/set$thick), from=0, to=1) # was output[,set$n] but not ok for rplum
+  post <- set$output[,2+set$K]^(1/set$thick)
+  post.mn <- mean(post)
+  post.strength <- post.mn * (1-post.mn) / var(post)-1
+  
+  post <- density(post, from=0, to=1) # was output[,set$n] but not ok for rplum
   post <- cbind(c(min(post$x), post$x, max(post$x)), c(0, post$y, 0))
   maxprior <- max(dbeta((0:100)/100, s*mn, s*(1-mn)))
   if(length(mem.xlim) == 0)
@@ -209,6 +237,7 @@ PlotMemPost <- function(set=get('info'), corenam, K, main="", s=set$mem.strength
   plot(0, type="n", xlab=mem.lab, xlim=mem.xlim, ylim=mem.ylim, ylab="", main="", xaxs=xaxs, yaxs=yaxs, yaxt=yaxt, cex.axis=panel.size)
   polygon(post, col=hist.col, border=hist.border)
   PlotMemPrior(s, mn, thick, set, add=TRUE, xlab="", ylab=ylab, main=main, csize=prior.size, line.col=line.col, line.width=line.width, text.col=text.col)
+  invisible(c(post.mn, post.strength))
 }
 
 
@@ -221,6 +250,10 @@ PlotHiatusPost <- function(set=get('info'), mx=set$hiatus.max, main="", xlab=pas
     above <- Bacon.Age.d(i-after, set)
     gaps <- c(gaps, below - above)
   }
+  
+  post.mn <- mean(gaps)
+  post.shape <- post.mn^2 / var(gaps)
+  
   if(length(hiatus.xlim) == 0)
     hiatus.xlim <- c(0, 1.1*(max(mx, gaps)))
   max.y <- 1.1/mx
@@ -236,6 +269,7 @@ PlotHiatusPost <- function(set=get('info'), mx=set$hiatus.max, main="", xlab=pas
     col=hist.col, border=hist.border)
 
   PlotHiatusPrior(add=TRUE, xlab="", ylab=ylab, main=main, csize=prior.size, line.col=line.col, line.width=line.width, text.col=text.col)
+  invisible(c(post.mn, post.shape))
 }
 
 
@@ -246,6 +280,9 @@ PlotSuppPost <- function(set=get('info'), xaxs="i", yaxs="i", legend=TRUE, supp.
 
   if(length(supp.xlim) == 0)
     supp.xlim <- c(min( set$detsPlum[,4]), max(set$detsPlum[,4]))
+
+  post.mn <- mean(set$ps)
+  post.shape <- post.mn^2 / var(set$ps)
 
   if(set$nPs > 1) {
     rng <- array(NA, dim=c(set$nPs, 22)) # 22 is the number of segments to draw. Always???
@@ -288,12 +325,17 @@ PlotSuppPost <- function(set=get('info'), xaxs="i", yaxs="i", legend=TRUE, supp.
 
   if(legend)
     legend("topright", txt, bty="n", cex=prior.size, text.col=text.col, adj=c(0,.2))
+  
+  invisible(c(post.mn, post.shape))
 }
 
 
 
 # plot the Supply data (for plum)
 PlotPhiPost <- function(set=get('info'), xlab=paste0("Bq/",expression(m^2)," yr"), ylab="", xaxs="i", yaxs="i", legend=TRUE, yaxt="n", csize=.8, prior.size=.9, panel.size=.9, phi.xlim=c(), phi.ylim=c(), line.col=3, line.width=2, text.col=2, hist.col=grey(0.8), hist.border=grey(0.4)) {
+  post.mn <- mean(set$phi)
+  post.shape <- post.mn^2 / var(set$phi)
+  
   post <- density(set$phi)
   if(length(phi.xlim) == 0)
     phi.xlim <- range(post$x)
@@ -310,4 +352,15 @@ PlotPhiPost <- function(set=get('info'), xlab=paste0("Bq/",expression(m^2)," yr"
 
   if(legend)
     legend("topright", txt, bty="n", cex=prior.size, text.col=text.col, adj=c(0,.2))
+  
+  invisible(c(post.mn, post.shape))
+}
+
+
+
+export.pdf <- function(fl) {
+  if(capabilities("cairo")) 
+    dev.copy(cairo_pdf, file=fl) else 
+      dev.copy(pdf, file=fl)
+  dev.off()	
 }

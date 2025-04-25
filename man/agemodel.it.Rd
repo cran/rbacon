@@ -4,7 +4,7 @@
 \alias{agemodel.it}
 \title{Extract one age-model iteration}
 \usage{
-agemodel.it(it, set = get("info"), BCAD = set$BCAD, save.info = FALSE)
+agemodel.it(it, set = get("info"), BCAD = set$BCAD, save.info = set$save.info)
 }
 \arguments{
 \item{it}{The MCMC iteration of which the age-model should be calculated.}
