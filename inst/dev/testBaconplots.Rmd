@@ -1,0 +1,144 @@
+---
+title: "rbacon plot tests"
+---
+
+```{r, results="hide"}
+require(rbacon)
+#require(devtools)
+#load_all("~/Dropbox/devsoftware/rbacon")
+fry <- tempdir()
+Bacon(run=FALSE, ask=F, coredir=fry, ssize=500, BCAD=F)
+agedepth()
+```
+
+```{r, results="hide"}
+agedepth(rotate.axes=TRUE)
+```
+
+```{r, results="hide"}
+agedepth(BCAD=TRUE)
+```
+
+```{r, results="hide"}
+agedepth(rotate.axes=TRUE, BCAD=TRUE)
+```
+
+```{r, results="hide"}
+agedepth(rev.d=TRUE)
+```
+
+```{r, results="hide"}
+agedepth(rev.age=TRUE)
+```
+
+```{r, results="hide"}
+agedepth(rev.d=TRUE, rev.age=TRUE)
+```
+
+```{r, results="hide"}
+agedepth(rotate.axes=TRUE, rev.d=TRUE, rev.age=TRUE)
+```
+
+```{r, results="hide"}
+agedepth(BCAD=T)
+```
+
+```{r, results="hide"}
+agedepth(BCAD=T, rev.age=T)
+```
+
+```{r, results="hide"}
+agedepth(BCAD=F)
+```
+
+```{r, results="hide"}
+proxy.ghost()
+```
+
+```{r, results="hide"}
+layout(1)
+accrate.depth.ghost()
+```
+
+```{r, results="hide"}
+accrate.depth.ghost(rotate.axes=T)
+```
+
+```{r, results="hide"}
+accrate.depth.ghost(rev.d=T)
+```
+
+```{r, results="hide"}
+accrate.depth.ghost(rev.acc=T)
+```
+
+```{r, results="hide"}
+accrate.depth.ghost(rev.d=T, rev.acc=T)
+```
+
+```{r, results="hide"}
+accrate.depth.ghost(rev.d=T, rev.acc=T, rotate.axes=T)
+```
+
+```{r, results="hide"}
+accrate.age.ghost()
+```
+
+```{r, results="hide"}
+accrate.age.ghost(rotate.axes=T)
+```
+
+```{r, results="hide"}
+accrate.age.ghost(rev.age=T)
+```
+
+```{r, results="hide"}
+accrate.age.ghost(rev.acc=T)
+```
+
+```{r, results="hide"}
+accrate.age.ghost(BCAD=T)
+```
+
+```{r, results="hide"}
+accrate.age.ghost(BCAD=T, rev.acc=T, rev.age=T)
+```
+
+```{r, results="hide"}
+accrate.age.ghost(rev.age=T, rev.acc=T)
+```
+
+```{r, results="hide"}
+accrate.age.ghost(rev.age=T, rev.acc=T, rotate.axes=T)
+```
+
+```{r, results="hide"}
+myflux <- cbind(0:100, rnorm(101, 100, 5))
+flux.age.ghost(flux=myflux)
+```
+
+```{r, results="hide"}
+flux.age.ghost(rotate.axes=T, flux=myflux)
+```
+
+```{r, results="hide"}
+flux.age.ghost(rev.flux=T, flux=myflux)
+```
+
+```{r, results="hide"}
+flux.age.ghost(rev.age=T, flux=myflux)
+```
+
+```{r, results="hide"}
+Bacon(slump=c(20,21), ssize=500, coredir=fry, ask=F)
+```
+
+
+```{r, results="hide"}
+Bacon("RLGH3", coredir=fry, accept.suggestions=T, ask=F)
+```
+
+
+```{r, results="hide"}
+accrate.age.ghost(BCAD=T)
+```

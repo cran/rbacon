@@ -32,6 +32,9 @@ accrate.age.ghost(
   rotate.axes = FALSE,
   rev.age = FALSE,
   rev.acc = FALSE,
+  use.raster = FALSE,
+  flip.acc = FALSE,
+  flip.age = FALSE,
   xaxs = "i",
   yaxs = "i",
   bty = "l"
@@ -91,6 +94,12 @@ accrate.age.ghost(
 \item{rev.age}{The direction of the age axis, which can be reversed using \code{rev.age=TRUE}.}
 
 \item{rev.acc}{The direction of the accumulation rate axis, which can be reversed (\code{rev.acc=TRUE}.}
+
+\item{use.raster}{Rasters can be aligned or not in the underlying image function. Setting \code{use.raster=FALSE} takes a bit longer to draw and sometimes causes strange lines owing to anti-aliasing. Therefore, \code{use.raster=TRUE} is the default, however on some devices (e.g., OSX quartz) this causes greyscales to 'flip'. If this is the case, use 'flip.acc=TRUE'.}
+
+\item{flip.acc}{When using \code{use.raster=TRUE}, sometimes greyscales are flipped. If this is the case, see if setting \code{flip.acc=TRUE} solves this.}
+
+\item{flip.age}{When using \code{use.raster=TRUE}, sometimes greyscales are flipped. If this is the case, see if setting \code{flip.age=TRUE} solves this.}
 
 \item{xaxs}{Extension of the x-axis. White space can be added to the vertical axis using \code{xaxs="r"}.}
 

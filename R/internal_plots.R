@@ -3,31 +3,24 @@
 #################### user-invisible plot functions ####################
 
 # to plot greyscale/ghost graphs of the age-depth model
-agedepth.ghost <- function(set=get('info'), dseq=c(), d.min=set$d.min, d.max=set$d.max, accordion=c(), BCAD=set$BCAD, rotate.axes=FALSE, rev.d=FALSE, rev.age=FALSE, d.res=400, age.res=400, rgb.res=100, dark=c(), rgb.scale=c(0,0,0), cutoff=0.001, age.lim) {
+agedepth.ghost <- function(set=get('info'), dseq=c(), d.min=set$d.min, d.max=set$d.max, accordion=c(), BCAD=set$BCAD, rotate.axes=FALSE, rev.d=FALSE, rev.age=FALSE, d.res=400, age.res=400, rgb.res=100, dark=c(), rgb.scale=c(0,0,0), cutoff=0.001, age.lim, use.raster=FALSE, flip.d=FALSE, flip.age=FALSE) {
   if(length(dseq) == 0)
-    dseq <- seq(d.min, d.max, length=d.res)
+    d.seq <- seq(d.min, d.max, length=d.res)
+  d.lim <- range(d.seq)
+
   if(length(age.lim) == 0)
     age.lim <- range(set$ranges[,2:3]) # 95% age ranges
-  
+  age.seq <- seq(min(age.lim), max(age.lim), length=age.res)
+
   if(set$isplum) # plum has a strange feature with a grey shape appearing
-    dseq <- dseq[-1] # at dmin. Thus removing the first depth
-  if(length(set$slump) > 0) {
-    d.inside <- c()
-    for(i in 1:nrow(set$slump)) {
-      inside <- which(dseq < max(set$slump[i,]))
-      inside <- which(dseq[inside] > min(set$slump[i,]))
-      d.inside <- c(d.inside, inside)
-    }
-  dseq <- dseq[-d.inside]
-  }
+    d.seq <- d.seq[-1] # at dmin. Thus removing the first depth
 
- if(length(accordion) == 2)
-    dseq <- squeeze(dseq, accordion[1], accordion[2])
+ if(length(accordion) == 2) # but will not work with image since constant bins required
+    d.seq <- squeeze(d.seq, accordion[1], accordion[2])
 
-  hists <- Bacon.hist(dseq, set, BCAD=BCAD, calc.range=FALSE, draw=FALSE, save.info=FALSE)
-  
-  scales <- array(0, dim=c(length(dseq), age.res)) # depths vertical/rows, ages horizontal/columns 
-  ageseq <- seq(min(age.lim), max(age.lim), length=age.res)
+  hists <- Bacon.hist(d.seq, set, BCAD=BCAD, calc.range=FALSE, draw=FALSE, save.info=FALSE)
+
+  z <- array(0, dim=c(age.res, length(d.seq))) # ages in rows, depths in columns
   for(i in 1:length(hists)) { # was length(dseq)
   if(length(hists[[i]]) < 7)
       ages <- sort(unlist(hists[[i]])) else {
@@ -35,53 +28,102 @@ agedepth.ghost <- function(set=get('info'), dseq=c(), d.min=set$d.min, d.max=set
          ages <- NA else
            ages <- seq(hists[[i]]$th0, hists[[i]]$th1, length=hists[[i]]$n)
        if(length(ages[!is.na(ages)]) > 0)
-        scales[i,] <- approx(ages, hists[[i]]$counts, ageseq, rule=2)$y
+        z[,i] <- approx(ages, hists[[i]]$counts, age.seq, rule=2)$y
      }
   }
+  #z <- z[nrow(z):1,] # images are drawn as bitmaps from bottom left up
+  z <- t(z)
   minmax <- hists[[length(hists)]]$min
   maxmax <- hists[[length(hists)]]$max
-  scales <- scales/maxmax # normalise to the height of most precise age estimate
+  z <- z/maxmax # normalise to the height of most precise age estimate
   if(length(dark) == 0)
     dark <- 10 * minmax/maxmax
-  scales[scales > dark] <- dark
-  scales <- scales/max(scales) # May 2021
-  dseq <- sort(dseq)
+  z[z > dark] <- dark
+  z <- z/max(z) # May 2021
+  z[z<cutoff] <- NA # do not plot pixels with probs very close to 0
+  z[is.na(z)] <- 0
+#  if(deviceIsQuartz()) 
+#    if(use.raster)
+#      z <- z[,ncol(z):1] 
+  
+  if(flip.d)
+    z <- z[nrow(z):1,] 
+  if(flip.age)
+    z <- z[,ncol(z):1] 
+  
   if(length(accordion) == 2)
-    dseq <- stretch(dseq, accordion[1], accordion[2]) # careful now!
+    d.seq <- stretch(d.seq, accordion[1], accordion[2]) # careful now!
+  
+#  if(rev.d) {
+  #  d.seq <- rev(d.seq)
+#  }
+#  if(rev.age)
+#    age.seq <- rev(age.seq)
+#  if(BCAD)
+#     z <- z[nrow(z):1,]
+#  if(rotate.axes)
+#     z <- z[nrow(z):1,]
+
   cols <- rgb(rgb.scale[1], rgb.scale[2], rgb.scale[3], seq(0,1, length=rgb.res))
-  
-  scales[scales<cutoff] <- NA # so that pixels with probs very close to 0 are not plotted as white but empty
-  scales[is.na(scales)] <- 0
-
+	
   if(rotate.axes)
-    ghost.mirror(ageseq, dseq, t(scales), col=cols) else
-      ghost.mirror(dseq, ageseq, scales, col=cols)
+    image(age.seq, d.seq, t(z), col=cols, add=TRUE, rev.y=rev.d, rev.x=rev.age, useRaster=use.raster) else
+      image(d.seq, age.seq, z, col=cols, add=TRUE, rev.x=rev.d, rev.y=rev.age, useRaster=use.raster)
 }
 
 
 
-ghost.mirror <- function(xseq, yseq, z, col) {
-  coors <- par("usr")
-  
-  if(coors[2] < coors[1]) 
-     z <- z[nrow(z):1,]
-  if(coors[4] < coors[3]) 
-     z <- z[,ncol(z):1]
-
-  # ensure regular spacing (even when there are slumps)
-  xseq <- seq(xseq[1], xseq[length(xseq)], length.out=length(xseq))
-  yseq <- seq(yseq[1], yseq[length(yseq)], length.out=length(yseq))
-  
-  image(xseq, yseq, z, add=TRUE, col=col, useRaster=TRUE)
+# OSX's quartz device sometimes flips greyscale plots around on the y scale
+deviceIsQuartz <- function() {
+  .Platform$OS.type == "unix" &&
+    grepl("darwin", R.version$platform) &&
+    names(dev.cur()) == "quartz"
 }
+
+
+
+# # not working as consistently across systems as I'd like, so not using for now
+# ghost.image <- function(xseq, yseq, z, col, rev.x=FALSE, rev.y=FALSE, to.one=FALSE) {
+#   # ensure regular spacing (even when there are slumps)
+#   xseq <- seq(xseq[1], xseq[length(xseq)], length.out=length(xseq))
+#   yseq <- seq(yseq[1], yseq[length(yseq)], length.out=length(yseq))
+#
+#   if(rev.x) # flip x
+#     z <- z[,ncol(z):1]
+#   if(rev.y) # flip y
+#     z <- z[nrow(z):1,]
+#   if(to.one) # then scale to 0 - 1
+#     z <- (z - min(z)) / (max(z) - min(z))
+#
+#   usr <- par("usr")
+#   xscale <- usr[1:2]
+#   yscale <- usr[3:4]
+#
+#   xmid <- mean(range(xseq))
+#     ymid <- mean(range(yseq))
+#     w <- diff(range(xseq)) / diff(xscale)
+#     h <- diff(range(yseq)) / diff(yscale)
+#
+#   z_cols <- col[as.numeric(cut(z, breaks = 100))]
+#   img <- matrix(z_cols, nrow=length(xseq), ncol=length(yseq)) # not ncol/nrow?
+#   rasterImage(as.raster(img), min(xseq), min(yseq), max(xseq), max(yseq))
+#   #grid::grid.raster(as.raster(img),
+#   #  x = grid::unit(mean(range(xseq)), "native"),
+#   #  y = grid::unit(mean(range(yseq)), "native"),
+#   #  width = grid::unit(diff(range(xseq)), "native"),
+#   #  height = grid::unit(diff(range(yseq)), "native"),
+#   #  interpolate = FALSE, default.units = "native")
+# }
 
 
 
 # Time series of the log of the posterior
-PlotLogPost <- function(set, from=0, to=set$Tr, xaxs="i", yaxs="i", panel.size=.9, col=grey(0.4))
-  plot(from:(to-1), -set$Us[(from+1):to], type="l",
+PlotLogPost <- function(set, from=0, to=set$Tr, xaxs="i", yaxs="i", panel.size=.9, col=grey(0.4)) {
+  y <- -set$Us[(from+1):to]
+  y[is.infinite(y)] <- NA
+  plot(from:(to-1), y, type="l",
     ylab="Log of Objective", xlab="Iteration", main="", xaxs=xaxs, yaxs=yaxs, col=col, cex.axis=panel.size)
-
+}
 
 
 # plot the prior for the accumulation rate
@@ -281,8 +323,8 @@ PlotSuppPost <- function(set=get('info'), xaxs="i", yaxs="i", legend=TRUE, supp.
   if(length(supp.xlim) == 0)
     supp.xlim <- c(min( set$detsPlum[,4]), max(set$detsPlum[,4]))
 
-  post.mn <- mean(set$ps)
-  post.shape <- post.mn^2 / var(set$ps)
+  post.mn <- mean(unlist(set$ps)) # added unlist April 2025
+  post.shape <- post.mn^2 / var(unlist(set$ps))
 
   if(set$nPs > 1) {
     rng <- array(NA, dim=c(set$nPs, 22)) # 22 is the number of segments to draw. Always???
@@ -333,8 +375,8 @@ PlotSuppPost <- function(set=get('info'), xaxs="i", yaxs="i", legend=TRUE, supp.
 
 # plot the Supply data (for plum)
 PlotPhiPost <- function(set=get('info'), xlab=paste0("Bq/",expression(m^2)," yr"), ylab="", xaxs="i", yaxs="i", legend=TRUE, yaxt="n", csize=.8, prior.size=.9, panel.size=.9, phi.xlim=c(), phi.ylim=c(), line.col=3, line.width=2, text.col=2, hist.col=grey(0.8), hist.border=grey(0.4)) {
-  post.mn <- mean(set$phi)
-  post.shape <- post.mn^2 / var(set$phi)
+  post.mn <- mean(unlist(set$phi))
+  post.shape <- post.mn^2 / var(unlist(set$phi))
   
   post <- density(set$phi)
   if(length(phi.xlim) == 0)

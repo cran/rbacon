@@ -17,9 +17,9 @@ proxy.ghost(
   dark = 1,
   darkest = 1,
   rotate.axes = FALSE,
-  proxy.rev = FALSE,
-  age.rev = FALSE,
-  yr.rev = age.rev,
+  rev.proxy = FALSE,
+  rev.age = FALSE,
+  yr.rev = rev.age,
   plot.mean = FALSE,
   mean.col = "red",
   age.lim = NULL,
@@ -63,11 +63,11 @@ proxy.ghost(
 
 \item{rotate.axes}{The default is to plot the calendar horizontally, however the plot can be rotated (\code{rotate.axes=TRUE}).}
 
-\item{proxy.rev}{The proxy axis can be reversed if \code{proxy.rev=TRUE}.}
+\item{rev.proxy}{The proxy axis can be reversed if \code{rev.proxy=TRUE}.}
 
-\item{age.rev}{The calendar axis can be reversed using \code{yr.rev=TRUE}.}
+\item{rev.age}{The calendar axis can be reversed using \code{rev.age=TRUE}.}
 
-\item{yr.rev}{Deprecated - use age.rev instead}
+\item{yr.rev}{Deprecated - use rev.age instead}
 
 \item{plot.mean}{The mean ages of the proxy values can be added using \code{plot.mean=TRUE}.}
 

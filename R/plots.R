@@ -16,9 +16,9 @@
 #' @param dark By default, the darkest grey value is assigned to the most likely value within the entire core (normalised to 1; \code{dark=1}). By setting dark to, e.g., \code{dark=.8}, all values of and above 0.8 will be darkest (and values below that threshold will be lighter grey the lower their probabilities).
 #' @param darkest Darkness of the most likely value. Is black by default (\code{darkest=1}); lower values will result in lighter grey.
 #' @param rotate.axes The default is to plot the calendar horizontally, however the plot can be rotated (\code{rotate.axes=TRUE}).
-#' @param proxy.rev The proxy axis can be reversed if \code{proxy.rev=TRUE}.
-#' @param age.rev The calendar axis can be reversed using \code{yr.rev=TRUE}.
-#' @param yr.rev Deprecated - use age.rev instead
+#' @param rev.proxy The proxy axis can be reversed if \code{rev.proxy=TRUE}.
+#' @param rev.age The calendar axis can be reversed using \code{rev.age=TRUE}.
+#' @param yr.rev Deprecated - use rev.age instead
 #' @param plot.mean The mean ages of the proxy values can be added using \code{plot.mean=TRUE}.
 #' @param mean.col Colour of the weighted mean ages of the proxy values.
 #' @param age.lim Minimum and maximum calendar age ranges, calculated automatically by default (\code{yr.lim=NULL}).
@@ -44,7 +44,7 @@
 #'   proxy.ghost()
 #' }
 #' @export
-proxy.ghost <- function(proxy=1, proxy.lab=NULL, proxy.res=250, age.res=200, yr.res=age.res, rgb.scale=c(0,0,0), rgb.res=100, set=get('info'), cutoff=0.001, dark=1, darkest=1, rotate.axes=FALSE, proxy.rev=FALSE, age.rev=FALSE, yr.rev=age.rev, plot.mean=FALSE, mean.col="red", age.lim=NULL, yr.lim=age.lim, proxy.lim=NULL, sep=",", xaxs="i", yaxs="i", xaxt="s", yaxt="s", bty="l", BCAD=set$BCAD, age.lab=ifelse(BCAD, "BC/AD", "cal yr BP"), yr.lab=age.lab, verbose=TRUE, add=FALSE) {
+proxy.ghost <- function(proxy=1, proxy.lab=NULL, proxy.res=250, age.res=200, yr.res=age.res, rgb.scale=c(0,0,0), rgb.res=100, set=get('info'), cutoff=0.001, dark=1, darkest=1, rotate.axes=FALSE, rev.proxy=FALSE, rev.age=FALSE, yr.rev=rev.age, plot.mean=FALSE, mean.col="red", age.lim=NULL, yr.lim=age.lim, proxy.lim=NULL, sep=",", xaxs="i", yaxs="i", xaxt="s", yaxt="s", bty="l", BCAD=set$BCAD, age.lab=ifelse(BCAD, "BC/AD", "cal yr BP"), yr.lab=age.lab, verbose=TRUE, add=FALSE) {
   if(length(set$Tr)==0)
     stop("please first run agedepth()", call.=FALSE)
   proxies <- read.csv(paste0(set$coredir, set$core, "/", set$core, "_proxies.csv"), header=TRUE, sep=sep)
@@ -75,7 +75,6 @@ proxy.ghost <- function(proxy=1, proxy.lab=NULL, proxy.res=250, age.res=200, yr.
     message("Calculating histograms")
 
   hists <- Bacon.hist(ds, set, calc.range=FALSE) # BCAD always FALSE
-  #hists <- get('hists')
   message("\n")
 
   age.min <- c()
@@ -104,29 +103,34 @@ proxy.ghost <- function(proxy=1, proxy.lab=NULL, proxy.res=250, age.res=200, yr.
     if(xaxs=="r")
       age.lim <- extendrange(pretty(age.seq), f=.04) else
         age.lim <- range(age.seq)[2:1]
-  if(age.rev)
+  max.counts <- max.counts[,ncol(max.counts):1]	# tmp May 2025
+  if(rev.proxy)
+	  max.counts <- max.counts[nrow(max.counts):1,]
+  if(rev.age) {
     age.lim <- age.lim[2:1]
+	max.counts <- max.counts[,ncol(max.counts):1]
+  }
   if(BCAD) {
     age.lim <- calBPtoBCAD(age.lim)
     max.counts <- max.counts[,ncol(max.counts):1]
-    age.seq <- calBPtoBCAD(rev(age.seq))
+    age.seq <- calBPtoBCAD(age.seq)
   }
 
   if(length(proxy.lim) == 0)
     proxy.lim <- range(proxyseq)
-  if(proxy.rev)
-    proxy.lim <- proxy.lim[2:1]
+  if(rev.proxy)
+    proxy.lim <- rev(proxy.lim)
   col <- rgb(rgb.scale[1], rgb.scale[2], rgb.scale[3], seq(0, darkest, length=rgb.res))
   if(rotate.axes) {
     if(!add)
 	  plot(0, type="n", xlim=proxy.lim, ylim=age.lim, ylab=age.lab, xlab=proxy.lab, xaxs=xaxs, yaxs=yaxs, xaxt=xaxt, yaxt=yaxt) 
-	ghost.mirror(proxyseq, age.seq, max.counts, col=col)
+	image(proxyseq, age.seq, max.counts, col=col, add=TRUE, useRaster=TRUE)
     if(plot.mean)
       lines(proxy[,2], pr.mn.ages, col=mean.col)
   } else {
       if(!add)
         plot(0, type="n", ylim=proxy.lim, xlim=age.lim, xlab=age.lab, ylab=proxy.lab, xaxs=xaxs, yaxs=yaxs, xaxt=xaxt, yaxt=yaxt)
-	ghost.mirror(age.seq, proxyseq, t(max.counts), col=col)  
+	image(age.seq, proxyseq, t(max.counts), col=col, add=TRUE, useRaster=TRUE)  
     if(plot.mean)
       lines(pr.mn.ages, proxy[,2], col=mean.col)
   }

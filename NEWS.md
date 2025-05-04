@@ -1,3 +1,8 @@
+# rbacon 3.4.2
+* adapted `agedepth()`, `draw.pbmodelled()`, `PlotPhiPost()` and `PlotSuppost()` to make rplum plotting more robust. 
+* changes to how greyscales are plotted. The setting use.raster=TRUE introduced in rbacon 3.4.0 unfortunately causes unexpected behaviour especially between different operation systems (sometimes the images are flipped). Therefore the default will be use.raster=FALSE, with options to set it to TRUE (the user can unflip the images using the 'flip.acc', 'flip.d' and 'flip.age' options).
+* within the inst/dev/ folder, there is now a testBaconplots.Rmd function which automates plotting and checking many functions. There is also a file render-plots.yml which can be used to test many plots on a range of github systems (ubuntu, fedora and windows). Produced html files can be downloaded and checked locally. To do this, the file has to be placed in .github/workflows/.
+
 # rbacon 3.4.1
 * removed `rice::` mentions to functions called from `rice`, since this could cause warnings in the `rplum` package.
 

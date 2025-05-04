@@ -1,11 +1,13 @@
 Package: rbacon
 Type: Package
 Title: Age-Depth Modelling using Bayesian Statistics
-Version: 3.4.1
-Author: Maarten Blaauw [aut, cre] (<https://orcid.org/0000-0002-5680-1515>),
-  J. Andres Christen [aut, ctb, cph]
-    (<https://orcid.org/0000-0002-5795-4345>),
-  Marco A. Aquino Lopez [aut] (<https://orcid.org/0000-0002-5076-7205>),
+Version: 3.4.2
+Author: Maarten Blaauw [aut, cre] (ORCID:
+    <https://orcid.org/0000-0002-5680-1515>),
+  J. Andres Christen [aut, ctb, cph] (ORCID:
+    <https://orcid.org/0000-0002-5795-4345>),
+  Marco A. Aquino Lopez [aut] (ORCID:
+    <https://orcid.org/0000-0002-5076-7205>),
   Judith Esquivel Vazquez [ctb],
   Oscar M. Gonzalez V. [ctb],
   Ted Belding [cph],
@@ -60,5 +62,5 @@ RoxygenNote: 7.3.2
 Suggests: knitr, rmarkdown, utf8
 VignetteBuilder: knitr
 Maintainer: Maarten Blaauw <maarten.blaauw@qub.ac.uk>
-Packaged: 2025-04-25 09:43:11 UTC; maarten
-Date/Publication: 2025-04-25 11:20:05 UTC
+Packaged: 2025-05-04 21:17:31 UTC; maarten
+Date/Publication: 2025-05-04 21:40:02 UTC

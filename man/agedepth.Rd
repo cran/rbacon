@@ -39,6 +39,9 @@ agedepth(
   rev.age = FALSE,
   rev.yr = rev.age,
   rev.d = FALSE,
+  use.raster = FALSE,
+  flip.age = FALSE,
+  flip.d = FALSE,
   maxcalc = 500,
   height = 1,
   calheight = 1,
@@ -201,6 +204,12 @@ and its name should start with the core's name and end with '_depths.txt'. Then 
 \item{rev.yr}{Deprecated - use rev.age instead.}
 
 \item{rev.d}{The direction of the depth axis, which can be reversed using \code{rev.d=TRUE}.}
+
+\item{use.raster}{Rasters can be aligned or not in the underlying image function. Setting \code{use.raster=FALSE, default} takes a bit longer to draw and sometimes causes strange lines owing to anti-aliasing. However, the alternative of \code{use.raster=TRUE} causes greyscales on some devices (e.g., OSX quartz) to 'flip'. If this is the case, use 'flip.acc=TRUE'.}
+
+\item{flip.age}{When using \code{use.raster=TRUE}, sometimes greyscales are flipped. If this is the case, see if setting \code{flip.age=TRUE} can flip the ages back again.}
+
+\item{flip.d}{When using \code{use.raster=TRUE}, sometimes greyscales are flipped. If this is the case, see if setting \code{flip.d=TRUE} can flip the depths back again.}
 
 \item{maxcalc}{Number of depths to calculate ages for. If this is more than \code{maxcalc=500}, a warning will be shown that calculations will take time.}
 

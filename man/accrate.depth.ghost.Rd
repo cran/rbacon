@@ -32,7 +32,9 @@ accrate.depth.ghost(
   xaxs = "r",
   yaxs = "r",
   bty = "l",
-  remove.laststep = TRUE
+  remove.laststep = TRUE,
+  use.raster = FALSE,
+  flip.acc = FALSE
 )
 }
 \arguments{
@@ -91,6 +93,10 @@ accrate.depth.ghost(
 \item{bty}{Type of box to be drawn around the plot (\code{"n"} for none, and \code{"l"} (default), \code{"7"}, \code{"c"}, \code{"u"}, or \code{"o"} for correspondingly shaped boxes).}
 
 \item{remove.laststep}{Add a white line to remove spurious lines at the extreme of the graph. Defaults to TRUE.}
+
+\item{use.raster}{Rasters can be aligned or not in the underlying image function. Setting \code{use.raster=FALSE, default} takes a bit longer to draw and sometimes causes strange lines owing to anti-aliasing. However, the alternative of \code{use.raster=TRUE} causes greyscales on some devices (e.g., OSX quartz) to 'flip'. If this is the case, use 'flip.acc=TRUE'.}
+
+\item{flip.acc}{When using \code{use.raster=TRUE}, sometimes greyscales are flipped. If this is the case, see if setting \code{flip.acc=TRUE} solves this.}
 }
 \value{
 A grey-scale plot of accumulation rate against core depth, and (invisibly) the list of depths and their accumulation rates (ranges, medians, means).

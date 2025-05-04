@@ -234,6 +234,8 @@ accrates.core <- function(dseq=c(), set=get('info'), cmyr=FALSE, na.rm=FALSE, pr
 #' @param yaxs Extension of y-axis. By default, add no extra white-space at both extremes (\code{yaxs="i"}). See ?par for other options.
 #' @param bty Type of box to be drawn around the plot (\code{"n"} for none, and \code{"l"} (default), \code{"7"}, \code{"c"}, \code{"u"}, or \code{"o"} for correspondingly shaped boxes).
 #' @param remove.laststep Add a white line to remove spurious lines at the extreme of the graph. Defaults to TRUE.
+#' @param use.raster Rasters can be aligned or not in the underlying image function. Setting \code{use.raster=FALSE, default} takes a bit longer to draw and sometimes causes strange lines owing to anti-aliasing. However, the alternative of \code{use.raster=TRUE} causes greyscales on some devices (e.g., OSX quartz) to 'flip'. If this is the case, use 'flip.acc=TRUE'.
+#' @param flip.acc When using \code{use.raster=TRUE}, sometimes greyscales are flipped. If this is the case, see if setting \code{flip.acc=TRUE} solves this. 
 #' @author Maarten Blaauw, J. Andres Christen
 #' @return A grey-scale plot of accumulation rate against core depth, and (invisibly) the list of depths and their accumulation rates (ranges, medians, means).
 #' @examples
@@ -245,7 +247,7 @@ accrates.core <- function(dseq=c(), set=get('info'), cmyr=FALSE, na.rm=FALSE, pr
 #'   head(tmp)
 #' }
 #' @export
-accrate.depth.ghost <- function(set=get('info'), d=set$elbows, d.lim=c(), acc.lim=c(), d.lab=c(), cmyr=FALSE, acc.lab=c(), dark=1, cutoff=0.001, rgb.scale=c(0,0,0), rgb.res=100, prob=0.95, plot.range=TRUE, range.col=grey(0.5), range.lty=2, plot.mean=TRUE, mean.col="red", mean.lty=2, plot.median=TRUE, median.col="blue", median.lty=2,  rotate.axes=FALSE, rev.d=FALSE, rev.acc=FALSE, xaxs="r", yaxs="r", bty="l", remove.laststep=TRUE) {
+accrate.depth.ghost <- function(set=get('info'), d=set$elbows, d.lim=c(), acc.lim=c(), d.lab=c(), cmyr=FALSE, acc.lab=c(), dark=1, cutoff=0.001, rgb.scale=c(0,0,0), rgb.res=100, prob=0.95, plot.range=TRUE, range.col=grey(0.5), range.lty=2, plot.mean=TRUE, mean.col="red", mean.lty=2, plot.median=TRUE, median.col="blue", median.lty=2, rotate.axes=FALSE, rev.d=FALSE, rev.acc=FALSE, xaxs="r", yaxs="r", bty="l", remove.laststep=TRUE, use.raster=FALSE, flip.acc=FALSE) {
   max.acc <- 0; max.dens <- 0
   acc <- list(); min.rng <- numeric(length(d)); max.rng <- numeric(length(d)); mean.rng <- numeric(length(d)); median.rng <- numeric(length(d))
   for(i in 1:length(d))
@@ -291,26 +293,51 @@ accrate.depth.ghost <- function(set=get('info'), d=set$elbows, d.lim=c(), acc.li
     plot(0, type="n", xlab=acc.lab, ylab=d.lab, ylim=d.lim, xlim=acc.lim, bty="n", xaxs=xaxs, yaxs=yaxs)
     for(i in 2:length(d)) {
       accs <- acc[[i-1]]
-      col <- rgb(rgb.scale[1], rgb.scale[2], rgb.scale[3], seq(max(accs$y[!is.na(accs$y)]), 0, length=rgb.res)) # was acc[[i]]
-      ghost.mirror(accs$x, d[c(i-1, i)], t(1-t(accs$y)), col=col) # was acc[[i]]
+      if(flip.acc)
+        z <- 1-t(rev(accs$y)) else
+          z <- 1-t(accs$y)
+      if(deviceIsQuartz()) 
+        if(use.raster)
+          if(rev.acc)	
+            z <- t(rev(z))
+	  
+      col <- rgb(rgb.scale[1], rgb.scale[2], rgb.scale[3], seq(max(accs$y[!is.na(accs$y)]), 0, length=rgb.res))
+	  image(accs$x, d[c(i - 1, i)], t(z), add=TRUE, col=col, useRaster=use.raster)
     }
-    if(plot.range) {
-      lines(min.rng, d, type="s", col=range.col, lty=range.lty)
-      lines(max.rng, d, type="s", col=range.col, lty=range.lty)
-    }
+    if(plot.range)
+      for(i in 2:(length(d))) {
+        segments(min.rng[i-1], d[i-1], min.rng[i-1], d[i], col=range.col, lty=range.lty)
+        segments(min.rng[i-1], d[i], min.rng[i], d[i], col=range.col, lty=range.lty)
+        segments(max.rng[i-1], d[i-1], max.rng[i-1], d[i], col=range.col, lty=range.lty)
+        segments(max.rng[i-1], d[i], max.rng[i], d[i], col=range.col, lty=range.lty)
+      }
     if(plot.mean)
-      lines(mean.rng, d, type="s", col=mean.col, lty=mean.lty)
+      for(i in 2:length((d))) {
+        segments(mean.rng[i-1], d[i-1], mean.rng[i-1], d[i], col=mean.col, lty=mean.lty)
+        segments(mean.rng[i-1], d[i], mean.rng[i], d[i], col=mean.col, lty=mean.lty)
+      }
     if(plot.median)
-      lines(median.rng, d, type="s", col=median.col, lty=median.lty)
+      for(i in 2:length((d))) {
+        segments(median.rng[i-1], d[i-1], median.rng[i-1], d[i], col=median.col, lty=median.lty)
+        segments(median.rng[i-1], d[i], median.rng[i], d[i], col=median.col, lty=median.lty)
+      }
     if(remove.laststep)
       abline(h=min(set$elbows), col="white", lwd=2)
   } else {
       plot(0, type="n", xlab=d.lab, ylab=acc.lab, xlim=d.lim, ylim=acc.lim, bty="n", xaxs=xaxs, yaxs=yaxs)
       for(i in 2:length(d)) {
         accs <- acc[[i-1]]
-        col <- rgb(rgb.scale[1], rgb.scale[2], rgb.scale[3], seq(max(accs$y[!is.na(accs$y)]), 0, length=rgb.res)) # was acc[[i]]
-        ghost.mirror(d[c(i-1, i)], accs$x, 1-t(accs$y), col=col) # was acc[[i]]
-      }
+       if(flip.acc)
+         z <- 1-t(rev(accs$y)) else
+           z <- 1-t(accs$y)
+       if(deviceIsQuartz()) 
+         if(use.raster)
+           z <- t(z[length(z):1])
+			
+        col <- rgb(rgb.scale[1], rgb.scale[2], rgb.scale[3], seq(max(accs$y[!is.na(accs$y)]), 0, length=rgb.res))
+		image(d[c(i - 1, i)], accs$x, z, add=TRUE, col=col, useRaster=use.raster) 
+	  }
+	  
       if(plot.range) {
         lines(d, min.rng, type="s", col=range.col, lty=range.lty, pch=NA)
         lines(d, max.rng, type="s", col=range.col, lty=range.lty, pch=NA)
@@ -370,6 +397,9 @@ accrate.depth.ghost <- function(set=get('info'), d=set$elbows, d.lim=c(), acc.li
 #' @param xaxs Extension of the x-axis. White space can be added to the vertical axis using \code{xaxs="r"}.
 #' @param yaxs Extension of the y-axis. White space can be added to the vertical axis using \code{yaxs="r"}.
 #' @param bty Type of box to be drawn around the plot (\code{"n"} for none, and \code{"l"} (default), \code{"7"}, \code{"c"}, \code{"u"}, or \code{"o"} for correspondingly shaped boxes).
+#' @param use.raster Rasters can be aligned or not in the underlying image function. Setting \code{use.raster=FALSE} takes a bit longer to draw and sometimes causes strange lines owing to anti-aliasing. Therefore, \code{use.raster=TRUE} is the default, however on some devices (e.g., OSX quartz) this causes greyscales to 'flip'. If this is the case, use 'flip.acc=TRUE'.
+#' @param flip.acc When using \code{use.raster=TRUE}, sometimes greyscales are flipped. If this is the case, see if setting \code{flip.acc=TRUE} solves this. 
+#' @param flip.age When using \code{use.raster=TRUE}, sometimes greyscales are flipped. If this is the case, see if setting \code{flip.age=TRUE} solves this. 
 #' @author Maarten Blaauw, J. Andres Christen
 #' @return A greyscale plot of accumulation rate against calendar age, and (invisibly) the list of ages and their accumulation rates (ranges, medians, means).
 #' @examples
@@ -381,7 +411,7 @@ accrate.depth.ghost <- function(set=get('info'), d=set$elbows, d.lim=c(), acc.li
 #'   head(tmp)
 #' }
 #' @export
-accrate.age.ghost <- function(set=get('info'), age.lim=c(), age.lab=c(), kcal=FALSE, age.res=400, acc.res=200, cutoff=.001, dark=1, rgb.scale=c(0,0,0), rgb.res=100, prob=.95, plot.range=TRUE, range.col=grey(0.5), range.lty=2, plot.mean=TRUE, mean.col="red", mean.lty=2, plot.median=TRUE, median.col="blue", median.lty=2, acc.lim=c(), acc.lab=c(), BCAD=set$BCAD, cmyr=FALSE, rotate.axes=FALSE, rev.age=FALSE, rev.acc=FALSE, xaxs="i", yaxs="i", bty="l") {
+accrate.age.ghost <- function(set=get('info'), age.lim=c(), age.lab=c(), kcal=FALSE, age.res=400, acc.res=200, cutoff=.001, dark=1, rgb.scale=c(0,0,0), rgb.res=100, prob=.95, plot.range=TRUE, range.col=grey(0.5), range.lty=2, plot.mean=TRUE, mean.col="red", mean.lty=2, plot.median=TRUE, median.col="blue", median.lty=2, acc.lim=c(), acc.lab=c(), BCAD=set$BCAD, cmyr=FALSE, rotate.axes=FALSE, rev.age=FALSE, rev.acc=FALSE, use.raster=FALSE, flip.acc=FALSE, flip.age=FALSE, xaxs="i", yaxs="i", bty="l") {
   if(length(age.lim) == 0) 
      age.lim <- extendrange(set$ranges[,5]) # just the mean ages, not the extremes
   if(set$BCAD) # was set$BCAD
@@ -396,7 +426,7 @@ accrate.age.ghost <- function(set=get('info'), age.lim=c(), age.lab=c(), kcal=FA
   }  
   acc.seq <- seq(min(acc.lim, na.rm=TRUE), max(acc.lim, na.rm=TRUE), length=acc.res)
   
-  z <- array(0, dim=c(age.res, acc.res))
+  z <- array(0, dim=c(acc.res, age.res)) # accs in rows, ages in columns
   acc.rng <- array(NA, dim=c(age.res, 2))
   acc.mean <- rep(NA, age.res); acc.median <- acc.mean
 
@@ -411,24 +441,45 @@ accrate.age.ghost <- function(set=get('info'), age.lim=c(), age.lab=c(), kcal=FA
     acc <- accrate.age(age.seq[i], cmyr=cmyr, ages=ages, silent=TRUE, BCAD=FALSE)
     acc <- acc[!is.na(acc)]
     if(length(acc[!is.na(acc)]) > 1) {
-      z[i,] <- density(acc, from=min(acc.lim, na.rm=TRUE), to=max(acc.lim, na.rm=TRUE), n=acc.res)$y
+      z[,i] <- density(acc, from=min(acc.lim, na.rm=TRUE), to=max(acc.lim, na.rm=TRUE), n=acc.res)$y
       acc.rng[i,] <- quantile(acc, c((1-prob)/2, 1-((1-prob)/2)))
       acc.mean[i] <- mean(acc)
       acc.median[i] <- median(acc)
     }
   }
-  message("\n")
+  message("") # print a newline
   stored <- cbind(age.seq, acc.rng[,1], acc.rng[,2], acc.median, acc.mean)
   colnames(stored) <- c("ages", "min.rng", "max.rng", "median", "mean")
 
+  z <- t(z) # when using image to draw the greyscales, it will rotate z
+  if(flip.acc)
+    z <- z[,ncol(z):1] 
+  if(flip.age)
+    z <- z[nrow(z):1,]  
   z <- z/(dark*max(z)) # normalise, set dark to black
   z[z>1] <- 1 # avoid values > 1
-  z[z<cutoff] <- NA # do not plot very small/light greyscale values
-  
-  if(rev.age)
+  z[z<cutoff] <- NA # do not plot very small/light greyscale values  	
+
+ # if(deviceIsQuartz()) 
+ #   if(use.raster)
+ #     z <- z[,ncol(z):1]
+  if(rev.acc) {
+    acc.lim <- rev(acc.lim)  
+    if(use.raster)
+      if(deviceIsQuartz()) 
+         z <- z[,ncol(z):1]
+  }
+  if(rev.age) {
     age.lim <- rev(age.lim)
-  if(rev.acc)
-    acc.lim <- rev(acc.lim)
+    if(use.raster)
+      if(deviceIsQuartz()) 
+        z <- z[nrow(z):1,]
+  }
+#  if(BCAD)
+#     z <- z[nrow(z):1,]
+
+  cols <- rgb(rgb.scale[1], rgb.scale[2], rgb.scale[3], seq(0,1, length=rgb.res))	
+
   if(length(age.lab) == 0)
     if(BCAD)
       age.lab <- "BC/AD" else
@@ -438,8 +489,6 @@ accrate.age.ghost <- function(set=get('info'), age.lim=c(), age.lab=c(), kcal=FA
       acc.lab <- paste0("accumulation rate (", set$depth.unit, "/", set$age.unit, ")") else
         acc.lab <- paste0("accumulation rate (", set$age.unit, "/", set$depth.unit, ")")
 
-  cols <- rgb(rgb.scale[1], rgb.scale[2], rgb.scale[3], seq(0, 1, length=rgb.res))
-
   if(rotate.axes) {
     yaxt <- ifelse(kcal || BCAD, "n", "s")
     plot(0, type="n", ylim=age.lim, ylab=age.lab, xlim=acc.lim, xlab=acc.lab, yaxs=xaxs, xaxs=yaxs, yaxt=yaxt, bty="n")
@@ -447,8 +496,9 @@ accrate.age.ghost <- function(set=get('info'), age.lim=c(), age.lab=c(), kcal=FA
       axis(2, pretty(age.lim), labels=calBPtoBCAD(pretty(age.lim))) else
         if(kcal)
           axis(2, pretty(age.lim), labels=pretty(age.lim)/1e3)
-    ghost.mirror(acc.seq, age.seq, t(z), col=cols)
-	if(plot.range) {
+  	#rasterImage(as.raster(img), min(age.seq), min(acc.seq), max(age.seq), max(acc.seq))
+	image(acc.seq, age.seq, t(z), col=cols, add=TRUE, useRaster=use.raster)	
+    if(plot.range) {
       lines(acc.rng[,1], age.seq, pch=".", col=range.col, lty=range.lty)
       lines(acc.rng[,2], age.seq, pch=".", col=range.col, lty=range.lty)
     }
@@ -463,7 +513,9 @@ accrate.age.ghost <- function(set=get('info'), age.lim=c(), age.lab=c(), kcal=FA
         axis(1, pretty(age.lim), labels=calBPtoBCAD(pretty(age.lim))) else
         if(kcal)
           axis(1, pretty(age.lim), labels=pretty(age.lim)/1e3)
-      ghost.mirror(age.seq, acc.seq, z, col=cols)
+        image(age.seq, acc.seq, z, add=TRUE, col=cols, useRaster=use.raster)
+	#  rasterImage(as.raster(img), min(age.seq), min(acc.seq), max(age.seq), max(acc.seq))	
+
       if(plot.range) {
         lines(age.seq, acc.rng[,1], pch=".", col=range.col, lty=range.lty)
         lines(age.seq, acc.rng[,2], pch=".", col=range.col, lty=range.lty)
@@ -522,6 +574,9 @@ accrate.age.ghost <- function(set=get('info'), age.lim=c(), age.lab=c(), kcal=FA
 #' @param rev.flux The flux axis can be reversed with \code{rev.flux=TRUE}.
 #' @param rev.age The direction of the age axis can be reversed using \code{rev.age=TRUE}.
 #' @param rev.yr Deprecated - use rev.age instead
+#' @param use.raster Rasters can be aligned or not in the underlying image function. By default, we use \code{use.raster=FALSE}. This takes a bit longer to draw and sometimes causes strange lines owing to anti-aliasing. Therefore, \code{use.raster=TRUE} would be preferable, however on some devices this causes greyscales to 'flip'. If this is the case, use 'flip.flux=TRUE' or 'flip.age=TRUE'.
+#' @param flip.flux When using \code{use.raster=TRUE}, sometimes greyscales are flipped. If this is the case, see if setting \code{flip.acc=TRUE} solves this. 
+#' @param flip.age When using \code{use.raster=TRUE}, sometimes greyscales are flipped. If this is the case, see if setting \code{flip.age=TRUE} solves this. 
 #' @author Maarten Blaauw, J. Andres Christen
 #' @return A plot of flux rates.
 #' @examples
@@ -531,7 +586,7 @@ accrate.age.ghost <- function(set=get('info'), age.lim=c(), age.lab=c(), kcal=FA
 #'   flux.age.ghost(1)
 #' }
 #' @export
-flux.age.ghost <- function(proxy=1, age.lim=c(), yr.lim=age.lim, age.res=200, yr.res=age.res, set=get('info'), flux=c(), plot.range=TRUE, prob=.8, range.col=grey(0.5), range.lty=2, plot.mean=TRUE, mean.col="red", mean.lty=2, plot.median=TRUE, median.col="blue", median.lty=2, flux.lim=c(), flux.lab=expression("flux (g cm"^-1*" yr"^-1*")"), upper=.95, rgb.scale=c(0,0,0), rgb.res=100, dark=set$dark, cutoff=0.001, BCAD=set$BCAD, age.lab=c(), yr.lab=age.lab, rotate.axes=FALSE, rev.flux=FALSE, rev.age=FALSE, rev.yr=rev.age) {
+flux.age.ghost <- function(proxy=1, age.lim=c(), yr.lim=age.lim, age.res=400, yr.res=age.res, set=get('info'), flux=c(), plot.range=TRUE, prob=.8, range.col=grey(0.5), range.lty=2, plot.mean=TRUE, mean.col="red", mean.lty=2, plot.median=TRUE, median.col="blue", median.lty=2, flux.lim=c(), flux.lab=expression("flux (g cm"^-1*" yr"^-1*")"), upper=.95, rgb.scale=c(0,0,0), rgb.res=100, dark=set$dark, cutoff=0.001, BCAD=set$BCAD, age.lab=c(), yr.lab=age.lab, rotate.axes=FALSE, rev.flux=FALSE, rev.age=FALSE, rev.yr=rev.age, use.raster=FALSE, flip.age=FALSE, flip.flux=FALSE) {
   if(length(flux) == 0) { # then read a .csv file, expecting data in columns with headers
     flux <- read.csv(paste0(set$coredir, set$core, "/", set$core, "_flux.csv"))
     flux <- cbind(flux[,1], flux[,1+proxy])
@@ -548,9 +603,11 @@ flux.age.ghost <- function(proxy=1, age.lim=c(), yr.lim=age.lim, age.res=200, yr
     }
 
   age.seq <- seq(min(min.age, max.age), max(min.age, max.age), length=age.res)
+
+  pb <- txtProgressBar(min=0, max=max(1,length(age.seq)-1), style = 3)
   fluxes <- array(NA, dim=c(nrow(set$output), length(age.seq)))
   for(i in 1:nrow(set$output)) {
-    #setTxtProgressBar(pb, i)
+    setTxtProgressBar(pb, i)
     ages <- as.numeric(set$output[i,1:(ncol(set$output)-1)]) # 1st step to calculate ages for each set$elbows
     ages <- c(ages[1], ages[1]+set$thick * cumsum(ages[2:length(ages)])) # now calculate the ages for each set$elbows
     ages.d <- approx(ages, c(set$elbows, max(set$elbows)+set$thick), age.seq, rule=1)$y # find the depth belonging to each age.seq, NA if none
@@ -559,9 +616,12 @@ flux.age.ghost <- function(proxy=1, age.lim=c(), yr.lim=age.lim, age.res=200, yr
     fluxes[i,] <- flux.d / as.numeric(set$output[i,(1+ages.i)]) # (amount / cm^3) / (yr/cm) = amount * cm-2 * yr-1
     fluxes[is.na(fluxes)] <- 0
   }
-  message("\n")
+  
+  message("") # print newline
   if(length(flux.lim) == 0)
     flux.lim <- c(0, quantile(fluxes[!is.na(fluxes)], upper))
+  if(rev.flux)
+    flux.lim <- rev(flux.lim) 
   max.dens <- 0
 
   for(i in 1:length(age.seq)) {
@@ -572,6 +632,8 @@ flux.age.ghost <- function(proxy=1, age.lim=c(), yr.lim=age.lim, age.res=200, yr
 
   if(length(age.lim) == 0)
     age.lim <- range(age.seq)
+  if(rev.age)
+    age.lim <- rev(age.lim)
   if(length(age.lab) == 0)
     age.lab <- ifelse(BCAD, "BC/AD", "cal BP")
   if(rotate.axes)
@@ -586,6 +648,7 @@ flux.age.ghost <- function(proxy=1, age.lim=c(), yr.lim=age.lim, age.res=200, yr
 
   min.rng <- numeric(length(age.seq)); max.rng <- numeric(length(age.seq)); mean.rng <- numeric(length(age.seq)); median.rng <- numeric(length(age.seq))
   for(i in 2:length(age.seq)) {
+    setTxtProgressBar(pb, i)  
     tmp <- fluxes[!is.na(fluxes[,i]),i] # all fluxes that fall at the required age.seq age
     rng <- quantile(tmp, c((1-prob)/2, 1-((1-prob)/2)))
     min.rng[i] <- rng[1]
@@ -594,17 +657,31 @@ flux.age.ghost <- function(proxy=1, age.lim=c(), yr.lim=age.lim, age.res=200, yr
     median.rng[i] <- median(tmp)
     if(length(tmp[tmp>=0]) > 2) {
       flux.hist <- density(tmp, from=0, to=max(flux.lim))
-      flux.hist$y <- flux.hist$y - min(flux.hist$y) # no negative fluxes
-      flux.hist$y <- flux.hist$y / (dark*max.dens) # normalise
-      flux.hist$y[flux.hist$y > 1] <- 1 # no values > 1
-      flux.hist$y[flux.hist$y < cutoff] <- NA # do not plot very small/light greyscale values
+      x <- flux.hist$x
+      z <- flux.hist$y - min(flux.hist$y) # no negative fluxes
+      z <- z / (dark*max.dens) # normalise
+      z[z > 1] <- 1 # no values > 1
+      z[z < cutoff] <- NA # do not plot very small/light greyscale values
+      z <- z[length(z):1]
+
+#      if(use.raster)
+#        if(deviceIsQuartz()) 
+#          z <- z[nrow(z):1,]
+	  
+      if(rev.flux)
+        z <- rev(z)
+
       col <- rgb(rgb.scale[1], rgb.scale[2], rgb.scale[3],
-        seq(0, max(flux.hist$y[!is.na(flux.hist$y)]), length=rgb.res))
+        seq(0, max(z[!is.na(z)]), length=rgb.res))
+      age.rng <- age.seq[c(i-1,i)]
+
       if(rotate.axes)
-        ghost.mirror(flux.hist$x, age.seq[c(i-1,i)], matrix(flux.hist$y), col=col) else
-          ghost.mirror(age.seq[c(i-1,i)], flux.hist$x, t(matrix(flux.hist$y)), col=col)
+        image(flux.hist$x, age.seq[c(i-1, i)], matrix(flux.hist$y), add=TRUE, col=col, useRaster=use.raster) else
+          image(age.seq[c(i-1, i)], flux.hist$x, t(matrix(flux.hist$y)), add=TRUE, col=col, useRaster=use.raster)	  
     }
   }
+
+  message("")
 
   if(plot.range)
     if(rotate.axes) {

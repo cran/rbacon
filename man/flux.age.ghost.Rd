@@ -8,7 +8,7 @@ flux.age.ghost(
   proxy = 1,
   age.lim = c(),
   yr.lim = age.lim,
-  age.res = 200,
+  age.res = 400,
   yr.res = age.res,
   set = get("info"),
   flux = c(),
@@ -35,7 +35,10 @@ flux.age.ghost(
   rotate.axes = FALSE,
   rev.flux = FALSE,
   rev.age = FALSE,
-  rev.yr = rev.age
+  rev.yr = rev.age,
+  use.raster = FALSE,
+  flip.age = FALSE,
+  flip.flux = FALSE
 )
 }
 \arguments{
@@ -101,6 +104,12 @@ flux.age.ghost(
 \item{rev.age}{The direction of the age axis can be reversed using \code{rev.age=TRUE}.}
 
 \item{rev.yr}{Deprecated - use rev.age instead}
+
+\item{use.raster}{Rasters can be aligned or not in the underlying image function. By default, we use \code{use.raster=FALSE}. This takes a bit longer to draw and sometimes causes strange lines owing to anti-aliasing. Therefore, \code{use.raster=TRUE} would be preferable, however on some devices this causes greyscales to 'flip'. If this is the case, use 'flip.flux=TRUE' or 'flip.age=TRUE'.}
+
+\item{flip.age}{When using \code{use.raster=TRUE}, sometimes greyscales are flipped. If this is the case, see if setting \code{flip.age=TRUE} solves this.}
+
+\item{flip.flux}{When using \code{use.raster=TRUE}, sometimes greyscales are flipped. If this is the case, see if setting \code{flip.acc=TRUE} solves this.}
 }
 \value{
 A plot of flux rates.

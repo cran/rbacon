@@ -1,0 +1,165 @@
+name: Render Bacon Plot to HTML
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  render-html-ubuntu:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up R
+        uses: r-lib/actions/setup-r@v2
+
+      - name: Setup pandoc
+        uses: r-lib/actions/setup-pandoc@v2		
+
+      - name: Install system dependencies for HTML rendering
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libcurl4-openssl-dev libssl-dev libxml2-dev libpng-dev libfreetype6-dev
+
+      - name: Cache R packages
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.R_LIBS_USER }}
+          key: ${{ runner.os }}-r-${{ hashFiles('**/DESCRIPTION') }}
+          restore-keys: |
+            ${{ runner.os }}-r-
+
+      - name: Install R packages
+        run: |
+          mkdir -p "${HOME}/R/library"
+          Rscript -e 'options(repos = c(CRAN = "https://cloud.r-project.org")); install.packages(c("rmarkdown", "knitr", "coda", "rintcal", "rice"), dependencies = TRUE)'
+        shell: bash
+
+      - name: Clean previous builds
+        run: |
+          rm -rf rbacon/src/*.o rbacon/src/*.so rbacon/src/*.dll rbacon/libs
+
+      - name: Install rbacon (from source in repo or CRAN)
+        run: |
+          Rscript -e 'install.packages(".", repos = NULL, type = "source")'
+        shell: Rscript {0}
+
+      - name: Render testBaconplots.Rmd to HTML
+        run: |
+          Rscript -e 'rmarkdown::render("testBaconplots.Rmd", output_format = "html_document", output_file = "testBaconplots_ubuntu.html")'
+        shell: Rscript {0}
+
+      - name: Upload HTML output
+        uses: actions/upload-artifact@v4
+        with:
+          name: bacon-html-ubuntu
+          path: testBaconplots_ubuntu.html
+
+  render-html-fedora:
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest  # This pulls the latest Fedora Docker image
+    env:
+      R_LIBS_USER: /github/home/R/library  # Use github.workspace for the path
+
+    steps:
+      - name: Install system dependencies and R
+        run: |
+          dnf -y install \
+            R-core \
+            R-devel \
+            gawk \
+            pandoc \
+            wget \
+            libcurl-devel \
+            openssl-devel \
+            libxml2-devel \
+            tar \
+            make \
+            gcc \
+            fribidi-devel \
+            fontconfig-devel
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set global CRAN mirror
+        run: |
+          echo 'options(repos = c(CRAN = "https://cloud.r-project.org"))' >> ~/.Rprofile
+
+      - name: Install R package dependencies
+        run: |
+          Rscript -e 'install.packages(c("fs", "sass", "bslib", "rmarkdown", "systemfonts", "textshaping", "stringi", "httpuv", "shiny"))'
+        shell: bash
+
+      - name: Install R packages
+        run: |
+          mkdir -p "${HOME}/R/library"
+          Rscript -e 'options(repos = c(CRAN = "https://cloud.r-project.org")); install.packages(c("rmarkdown", "knitr", "coda", "rintcal", "rice"), dependencies = TRUE)'
+        shell: bash
+
+      - name: Check if rmarkdown is installed
+        run: |
+          Rscript -e 'if (!requireNamespace("rmarkdown", quietly = TRUE)) stop("rmarkdown not installed!")'
+
+      - name: Install rbacon from source
+        run: |
+          Rscript -e 'options(repos = c(CRAN = "https://cloud.r-project.org")); install.packages(".", repos = NULL, type = "source")'
+
+      - name: Render HTML from Rmd
+        run: |
+          Rscript -e 'rmarkdown::render("testBaconplots.Rmd", output_format = "html_document", output_file = "testBaconplots_fedora.html")'
+
+      - name: Upload rendered HTML
+        uses: actions/upload-artifact@v4
+        with:
+          name: bacon-html-fedora
+          path: testBaconplots_fedora.html
+
+
+ 
+  render-html-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up R
+        uses: r-lib/actions/setup-r@v2
+
+      - name: Setup pandoc
+        uses: r-lib/actions/setup-pandoc@v2		
+
+      - name: Cache R packages
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.R_LIBS_USER }}
+          key: ${{ runner.os }}-r-${{ hashFiles('**/DESCRIPTION') }}
+          restore-keys: |
+            ${{ runner.os }}-r-
+
+      - name: Install R packages
+        run: |
+          Rscript -e 'install.packages(c("rmarkdown", "knitr", "coda", "rintcal", "rice"), dependencies = TRUE)'
+        shell: Rscript {0}
+
+      - name: Install rbacon (from source in repo)
+        run: |
+          Rscript -e 'install.packages(".", repos = NULL, type = "source")'
+        shell: Rscript {0}
+
+      - name: Render testBaconplots_windows.Rmd to HTML
+        run: |
+          rmarkdown::render("testBaconplots.Rmd", output_format = "html_document", output_file = "testBaconplots_windows.html")
+        shell: Rscript {0}
+
+      - name: Upload HTML output
+        uses: actions/upload-artifact@v4
+        with:
+          name: bacon-html-windows
+          path: testBaconplots_windows.html
+
+
