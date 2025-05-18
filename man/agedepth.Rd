@@ -130,7 +130,8 @@ agedepth(
   model.only = FALSE,
   verbose = TRUE,
   roundby = 2,
-  save.info = set$save.info
+  save.info = set$save.info,
+  ssize = 4000
 )
 }
 \arguments{
@@ -388,6 +389,8 @@ and its name should start with the core's name and end with '_depths.txt'. Then 
 \item{roundby}{Rounding of the values reported at the end of the function. Defaults to 2 decimals.}
 
 \item{save.info}{By default, a variable called `info' with relevant information about the run (e.g., core name, priors, settings, ages, output) is saved into the working directory. Note that this will overwrite any existing variable with the same name - as an alternative, one could run, e.g., \code{myvar <- Bacon()}, followed by supplying the variable \code{myvar} in any subsequent commands.}
+
+\item{ssize}{Number of MCMC iterations to use.}
 }
 \value{
 A plot of the age-depth model, and estimated ages incl. confidence ranges for each depth.

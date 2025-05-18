@@ -29,7 +29,7 @@
 #' @export
 accrate.depth <- function(d, set=get('info'), cmyr=FALSE, na.rm=FALSE, inversion.threshold=1e-6) {
   accs.elbows <- set$output[,2:(set$K+1)]
-  if(min(set$elbows) <= d && max(set$elbows) >= d)
+  if(!is.na(d) && all(!is.na(set$elbows)) && min(set$elbows) <= d && d <= max(set$elbows))
     accs <- unlist(accs.elbows[max(which(set$elbows <= d))]) else
       accs <- NA
   accs <- as.numeric(accs)
@@ -192,7 +192,7 @@ accrates.core <- function(dseq=c(), set=get('info'), cmyr=FALSE, na.rm=FALSE, pr
   if(write) {
     fl <- paste0(set$coredir, set$core, "/", set$core, "_", set$K, "_accrates.txt")
     message("writing the accumulation rate summary to ", fl)
-	write.table(allaccs, fl, sep=sep, quote=FALSE, row.names=FALSE)
+    write.table(allaccs, fl, sep=sep, quote=FALSE, row.names=FALSE)
   } 
   invisible(allaccs)
 }
@@ -248,12 +248,14 @@ accrates.core <- function(dseq=c(), set=get('info'), cmyr=FALSE, na.rm=FALSE, pr
 #' }
 #' @export
 accrate.depth.ghost <- function(set=get('info'), d=set$elbows, d.lim=c(), acc.lim=c(), d.lab=c(), cmyr=FALSE, acc.lab=c(), dark=1, cutoff=0.001, rgb.scale=c(0,0,0), rgb.res=100, prob=0.95, plot.range=TRUE, range.col=grey(0.5), range.lty=2, plot.mean=TRUE, mean.col="red", mean.lty=2, plot.median=TRUE, median.col="blue", median.lty=2, rotate.axes=FALSE, rev.d=FALSE, rev.acc=FALSE, xaxs="r", yaxs="r", bty="l", remove.laststep=TRUE, use.raster=FALSE, flip.acc=FALSE) {
+
   max.acc <- 0; max.dens <- 0
   acc <- list(); min.rng <- numeric(length(d)); max.rng <- numeric(length(d)); mean.rng <- numeric(length(d)); median.rng <- numeric(length(d))
   for(i in 1:length(d))
     if(length(acc.lim) == 0)
       acc[[i]] <- density(accrate.depth(d[i], set, cmyr=cmyr), from=0) else
         acc[[i]] <- density(accrate.depth(d[i], set, cmyr=cmyr), from=0, to=max(acc.lim))
+
   for(i in 1:length(d)) {
     max.acc <- max(max.acc, acc[[i]]$x)
     max.dens <- max(max.dens, acc[[i]]$y)
@@ -263,7 +265,7 @@ accrate.depth.ghost <- function(set=get('info'), d=set$elbows, d.lim=c(), acc.li
     max.rng[i] <- quants[2]
     mean.rng[i] <- mean(accs)
     median.rng[i] <- median(accs)
-   }
+  }
   stored <- cbind(d, min.rng, max.rng, median.rng, mean.rng)
   colnames(stored) <- c("depth", "min.rng", "max.rng", "median", "mean")
 
@@ -298,11 +300,11 @@ accrate.depth.ghost <- function(set=get('info'), d=set$elbows, d.lim=c(), acc.li
           z <- 1-t(accs$y)
       if(deviceIsQuartz()) 
         if(use.raster)
-          if(rev.acc)	
+          if(rev.acc)
             z <- t(rev(z))
-	  
+
       col <- rgb(rgb.scale[1], rgb.scale[2], rgb.scale[3], seq(max(accs$y[!is.na(accs$y)]), 0, length=rgb.res))
-	  image(accs$x, d[c(i - 1, i)], t(z), add=TRUE, col=col, useRaster=use.raster)
+      image(accs$x, d[c(i - 1, i)], t(z), add=TRUE, col=col, useRaster=use.raster)
     }
     if(plot.range)
       for(i in 2:(length(d))) {
@@ -333,11 +335,10 @@ accrate.depth.ghost <- function(set=get('info'), d=set$elbows, d.lim=c(), acc.li
        if(deviceIsQuartz()) 
          if(use.raster)
            z <- t(z[length(z):1])
-			
         col <- rgb(rgb.scale[1], rgb.scale[2], rgb.scale[3], seq(max(accs$y[!is.na(accs$y)]), 0, length=rgb.res))
-		image(d[c(i - 1, i)], accs$x, z, add=TRUE, col=col, useRaster=use.raster) 
-	  }
-	  
+        image(d[c(i - 1, i)], accs$x, z, add=TRUE, col=col, useRaster=use.raster)
+    }
+
       if(plot.range) {
         lines(d, min.rng, type="s", col=range.col, lty=range.lty, pch=NA)
         lines(d, max.rng, type="s", col=range.col, lty=range.lty, pch=NA)
@@ -433,12 +434,12 @@ accrate.age.ghost <- function(set=get('info'), age.lim=c(), age.lab=c(), kcal=FA
   # speed things up by not repeatedly calculating ages in accrate.age
   ages <- array(0, dim=c(nrow(set$output), length(set$elbows)))
   for(i in 1:ncol(ages))
-    ages[,i] <- Bacon.Age.d(set$elbows[i], BCAD=FALSE)
+    ages[,i] <- Bacon.Age.d(set$elbows[i], set, BCAD=FALSE)
 
   pb <- txtProgressBar(min=0, max=max(1,length(age.seq)-1), style = 3)
   for(i in 1:age.res) {
     setTxtProgressBar(pb, i)
-    acc <- accrate.age(age.seq[i], cmyr=cmyr, ages=ages, silent=TRUE, BCAD=FALSE)
+    acc <- accrate.age(age.seq[i], set, cmyr=cmyr, ages=ages, silent=TRUE, BCAD=FALSE)
     acc <- acc[!is.na(acc)]
     if(length(acc[!is.na(acc)]) > 1) {
       z[,i] <- density(acc, from=min(acc.lim, na.rm=TRUE), to=max(acc.lim, na.rm=TRUE), n=acc.res)$y
@@ -496,8 +497,8 @@ accrate.age.ghost <- function(set=get('info'), age.lim=c(), age.lab=c(), kcal=FA
       axis(2, pretty(age.lim), labels=calBPtoBCAD(pretty(age.lim))) else
         if(kcal)
           axis(2, pretty(age.lim), labels=pretty(age.lim)/1e3)
-  	#rasterImage(as.raster(img), min(age.seq), min(acc.seq), max(age.seq), max(acc.seq))
-	image(acc.seq, age.seq, t(z), col=cols, add=TRUE, useRaster=use.raster)	
+    #rasterImage(as.raster(img), min(age.seq), min(acc.seq), max(age.seq), max(acc.seq))
+    image(acc.seq, age.seq, t(z), col=cols, add=TRUE, useRaster=use.raster)
     if(plot.range) {
       lines(acc.rng[,1], age.seq, pch=".", col=range.col, lty=range.lty)
       lines(acc.rng[,2], age.seq, pch=".", col=range.col, lty=range.lty)
@@ -514,7 +515,7 @@ accrate.age.ghost <- function(set=get('info'), age.lim=c(), age.lab=c(), kcal=FA
         if(kcal)
           axis(1, pretty(age.lim), labels=pretty(age.lim)/1e3)
         image(age.seq, acc.seq, z, add=TRUE, col=cols, useRaster=use.raster)
-	#  rasterImage(as.raster(img), min(age.seq), min(acc.seq), max(age.seq), max(acc.seq))	
+      # rasterImage(as.raster(img), min(age.seq), min(acc.seq), max(age.seq), max(acc.seq))
 
       if(plot.range) {
         lines(age.seq, acc.rng[,1], pch=".", col=range.col, lty=range.lty)
@@ -601,7 +602,7 @@ flux.age.ghost <- function(proxy=1, age.lim=c(), yr.lim=age.lim, age.res=400, yr
       min.age <- min(age.lim)
       max.age <- max(age.lim)
     }
-
+cat(1)
   age.seq <- seq(min(min.age, max.age), max(min.age, max.age), length=age.res)
 
   pb <- txtProgressBar(min=0, max=max(1,length(age.seq)-1), style = 3)
@@ -616,7 +617,7 @@ flux.age.ghost <- function(proxy=1, age.lim=c(), yr.lim=age.lim, age.res=400, yr
     fluxes[i,] <- flux.d / as.numeric(set$output[i,(1+ages.i)]) # (amount / cm^3) / (yr/cm) = amount * cm-2 * yr-1
     fluxes[is.na(fluxes)] <- 0
   }
-  
+
   message("") # print newline
   if(length(flux.lim) == 0)
     flux.lim <- c(0, quantile(fluxes[!is.na(fluxes)], upper))
@@ -664,10 +665,6 @@ flux.age.ghost <- function(proxy=1, age.lim=c(), yr.lim=age.lim, age.res=400, yr
       z[z < cutoff] <- NA # do not plot very small/light greyscale values
       z <- z[length(z):1]
 
-#      if(use.raster)
-#        if(deviceIsQuartz()) 
-#          z <- z[nrow(z):1,]
-	  
       if(rev.flux)
         z <- rev(z)
 
@@ -699,4 +696,73 @@ flux.age.ghost <- function(proxy=1, age.lim=c(), yr.lim=age.lim, age.res=400, yr
     if(rotate.axes)
       lines(median.rng, age.seq, col=median.col, lty=median.lty) else
        lines(age.seq, median.rng, col=median.col, lty=median.lty)
+}
+
+
+
+flux.age.ghost.v2 <- function(set=get("info"), flux=c(), d = 1, prob = 0.95, ...) {
+    if(length(flux) == 0) { # then read a .csv file, expecting data in columns with headers
+    flux <- read.csv(paste0(set$coredir, set$core, "/", set$core, "_flux.csv"))
+    flux <- cbind(flux[,1], flux[,2])
+      isNA <- is.na(flux[,2])
+      flux <- flux[!isNA,]
+  }
+  if (ncol(flux) != 2) stop("flux should have 2 columns")
+
+  # Set up
+  n.itr <- nrow(set$output)
+  n.depths <- ncol(set$output) - 1
+  depth.seq <- seq(d, by = d, length.out = n.depths)
+  age.mat <- t(apply(set$output, 1, function(row) {
+    cumsum(c(row[1], row[2:(n.depths+1)] * set$thick))
+  }))
+
+  # Age sequence across the full MCMC ensemble
+  age.seq <- seq(min(age.mat, na.rm = TRUE), max(age.mat, na.rm = TRUE), by = d)
+
+  # Interpolation function for flux (in depth space)
+  flux_fun <- approxfun(flux[,1], flux[,2], rule = 2)  # depth → flux
+
+  # Pre-allocate
+  fluxes <- matrix(NA_real_, nrow = n.itr, ncol = length(age.seq))
+
+  for (i in 1:n.itr) {
+    ages <- age.mat[i, ]
+    acc.rates <- 1 / as.numeric(set$output[i, 2:(n.depths+1)])  # inverse of years/cm
+    elbows <- set$elbows
+
+    # Interpolate: age → depth for this iteration
+    depth_at_age <- approx(ages, elbows, xout = age.seq, rule = 1)$y
+
+    # Remove ages outside this iteration’s model range
+    valid <- !is.na(depth_at_age)
+
+    # Flux at depth
+    flux_vals <- rep(NA_real_, length(age.seq))
+    flux_vals[valid] <- flux_fun(depth_at_age[valid])
+
+    # Acc rate at depth
+    acc_vals <- rep(NA_real_, length(age.seq))
+    acc_vals[valid] <- approx(elbows, acc.rates, xout = depth_at_age[valid], rule = 1)$y
+
+    # Flux per yr = flux / accrate
+    fluxes[i, valid] <- flux_vals[valid] / acc_vals[valid]
+  }
+
+  # Summarise across iterations
+  lower <- apply(fluxes, 2, quantile, probs = (1 - prob) / 2, na.rm = TRUE)
+  upper <- apply(fluxes, 2, quantile, probs = 1 - (1 - prob) / 2, na.rm = TRUE)
+  mean.flux <- colMeans(fluxes, na.rm = TRUE)
+  median.flux <- apply(fluxes, 2, median, na.rm = TRUE)
+
+  # Plot
+  plot(age.seq, mean.flux, type = "n", ylim = range(c(lower, upper), na.rm = TRUE),
+       xlab = "calendar years", ylab = "flux per year", ...)
+
+  polygon(c(age.seq, rev(age.seq)), c(lower, rev(upper)), col = "grey", border = NA)
+  lines(age.seq, mean.flux, col = "red")
+  lines(age.seq, median.flux, col = "blue")
+
+  invisible(list(age.seq = age.seq, mean = mean.flux, median = median.flux,
+                 lower = lower, upper = upper))
 }

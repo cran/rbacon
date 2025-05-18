@@ -33,23 +33,23 @@ set.initvals <- function(set=get('info'), core=set$core, values=c(), click=1) {
 
   if(length(values) == 0) { # then the user will click on an existing graph to select age-depth points
     message("Please select your initval age-depth points on the graph by clicking with your left mouse button. When you are done selecting, use right-click.")
-	
+
     if(set$isplum)
       if(set$hasBaconData) {
         par(mfg=c(2,1)) # bottom-left panel
-		message("Please select your data from the bottom-left panel with the cal BP/C14 dates")
-      }	
-	
+        message("Please select your data from the bottom-left panel with the cal BP/C14 dates")
+      }
+
     if(click == 1) # user right-clicks once done
       draft.agedepth <- locator() else
         draft.agedepth <- locator(click)
     points(draft.agedepth, col=2, pch=4, cex=5, lwd=2)
     message("Lovely.")
-	
+
     if(set$isplum)
       if(set$hasBaconData)
         par(mfg=c(2,2)) # back to bottom-right panel
-	
+
     ages <- approx(draft.agedepth$x, draft.agedepth$y, elbows, rule=2)$y
     agedepth <- cbind(elbows, ages)
     accs <- diff(ages) / diff(elbows)
@@ -140,15 +140,15 @@ bacon2clam <- function(core, bacondir="Bacon_runs", clamdir="clam_runs", sep=","
 
   if(ncol(baconfl) == 4) {
     C14 <- ages
-	message("Warning, I am assuming that these are radiocarbon dates, not cal BP")
+    message("Warning, I am assuming that these are radiocarbon dates, not cal BP")
   }
   if(ncol(baconfl) >= 5) {# then cc specified
-	calBP[which(baconfl[,5] == 0)] <- ages[which(baconfl[,5] == 0)]
-	C14[which(baconfl[,5] > 0)] <- ages[which(baconfl[,5] > 0)]
+    calBP[which(baconfl[,5] == 0)] <- ages[which(baconfl[,5] == 0)]
+    C14[which(baconfl[,5] > 0)] <- ages[which(baconfl[,5] > 0)]
   }
   if(ncol(baconfl) >= 7) { # then also offsets specified
     res <- baconfl[,6]
-	error <- sqrt(error^2 + baconfl[,7]^2)
+    error <- sqrt(error^2 + baconfl[,7]^2)
   }
 
   clamfl <- cbind(ID, C14, calBP, error, res, d)
@@ -303,7 +303,8 @@ read.dets <- function(core, coredir, othername=c(), set=get('info'), sep=",", de
             if(name[6] %in% dSTD.names) ok <- ok+1
             if(name[7] %in% ta.names) ok <- ok+1
             if(name[8] %in% tb.names) ok <- ok+1
-            if(range(dets[,8] - dets[,7]) == c(1,1)) ok <- ok+1
+            #if(all(range(dets[,8] - dets[,7]) == c(1,1)) ok <- ok+1
+            if(all(dets[,8] == dets[,7]+1)) ok <- ok + 1
             if(ok == 5) { # check that these set expected t distribution values
               dets <- cbind(dets[,1:4], rep(cc, nrow(dets)), dets[,5:6]) # some shuffling
               message(" Assumed order of columns in dets file: lab ID, Age, error, depth, dR, dSTD. \nAdding calibration curve column (fifth column, before dR and dSTD) and saving as", csv.file)
@@ -652,7 +653,7 @@ Bacon.AnaOut <- function(fnam, set=get('info'), MCMC.resample=TRUE) {
   set$Tr <- nrow(out)
   set$Us <- out[,n+1]
   set$output <- out[,1:n]
-  set
+  return(set)
 }
 
 
@@ -680,4 +681,71 @@ Plum.AnaOut <- function(fnam, set=get('info'), MCMC.resample=TRUE) {
 # parameter position defaults to 1, which equals an assignment to the global environment
 assign_to_global <- function(key, val, pos=1) {
   assign(key, val, envir=as.environment(pos) )
+}
+
+
+
+#' @name ageranges
+#' @title save age ranges of depth(s) 
+#' @description Calculates an age summary (min/max probability range, median and mean) of a depth or a series of depths. The depths are returned and can be saved to a file.  
+#' @return The minimum and maximum of the probability range (default 2.5% of both sides), median and mean ages for a depth or series of depths.
+#' @param d Depth or depths for which age summaries are to be calculated. If left empty, a sequence of depths is calculated from the top to the bottom of the core, see 'd.by'.
+#' @param file The name of the file where the age summary has to be stored. If empty (default), the ages are returned.
+#' @param sep Separator for the fields, if saving to a file (defaults to a tab, "\\t").
+#' @param set Detailed information of the current run, stored within this session's memory as variable \code{info}.
+#' @param BCAD The calendar scale of graphs and age output-files is in cal BP (calendar or calibrated years before the present, where the present is AD 1950) by default, but can be changed to BC/AD using \code{BCAD=TRUE}.
+#' @param na.rm Whether or not NAs are to be removed. Defaults to \code{na.rm=FALSE}. NAs will still be returned for depths outside of the core's depth range.
+#' @param prob Probability range. Half of the range is taken away from both sides of the distribution (e.g., 2.5\% for the default of \code{prob=0.95}).
+#' @param d.by Steps for calculation of depths, if `d` is left empty. Defaults to steps of 1. 
+#' @param roundby Rounding for the age estimates. Defaults to 1 decimal.
+#' @param show.progress Show a progress bar. Defaults to TRUE.
+#' @export
+ageranges <- function(d=c(), file=c(), sep="\t", set=get("info"), BCAD=set$BCAD, na.rm=FALSE, prob=0.95, d.by=1, roundby=1, show.progress=TRUE) {
+  if(length(d) == 0)
+    d <- seq(set$d.min, set$d.max, by=d.by)
+  
+  n <- length(d)
+  mins <- numeric(length(d))
+  maxs <- numeric(length(d))
+  medians <- numeric(length(d))
+  means <- numeric(length(d))
+
+  if(show.progress)
+    if(n > 50) 
+      pb <- txtProgressBar(min=0, max=max(1, length(d)-1), style=3)
+	   
+  for(i in seq_len(n)) {
+	if(show.progress)
+      if(n >= 50)
+        if(n < 500 || i %% 10 == 0) 
+          setTxtProgressBar(pb, i)
+	  
+    ages <- Bacon.Age.d(d[i], set, BCAD=BCAD, na.rm=na.rm)
+    quan <- quantile(ages, c((1-prob)/2, 1-((1-prob)/2), .5), na.rm=na.rm)
+    mins[i] <- quan[1]
+    maxs[i] <- quan[2]
+    medians[i] <- quan[3]
+    means[i] <- mean(ages) 	
+  }
+  if(show.progress && n>50)
+    message("")
+  
+  mins <- round(mins, roundby)
+  maxs <- round(maxs, roundby)
+  medians <- round(medians, roundby)
+  means <- round(means, roundby)
+  
+  if(length(d) == 1) {
+    names <- c(paste0("min.", 100*prob), paste0("max.", 100 * prob),
+      "median", "mean")	  
+	summ <- setNames(c(mins, maxs, medians, means), names)
+  } else {
+      summ <- data.frame(depth = d, mins, maxs, medians, means)
+      colnames(summ) <- c("depth",
+        paste0("min.", 100 * prob), paste0("max.", 100*prob),
+        "median", "mean")
+    }
+  if(length(file) > 0)
+    fastwrite(summ, file, col.names=TRUE, row.names=FALSE, sep=sep, quote=FALSE)
+  return(summ)	  
 }

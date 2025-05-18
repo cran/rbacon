@@ -50,7 +50,7 @@ Bacon will calibrate any C-14 dates, do the MCMC run, calculate age ranges, prod
   
 ![Bacon output plot](./images/Bacon_output.png)
 
-Besides the graph, Bacon also produces files containing age estimates (95% ranges and the mean) for each depth (by default every cm from the top to the bottom core depth). This file can be found in the core's folder (see '6 Folders and Files').
+Besides the graph, Bacon also produces files containing age estimates (95% ranges and the mean) for each depth (by default every cm from the top to the bottom core depth). This file can be found in the core's folder (see '6 Folders and Files'). Also reported are how well the MCMC run went, and summaries of the confidence ranges, the overlap between the dates and the age-depth model, and the posterior values for the accumulation rate and memory.
 
 To see all options and settings, ask for help:
 
@@ -387,6 +387,14 @@ hist(depth23.45)
 mean(depth23.45)
 ```
 
+To summarize the age estimates (95% ranges, medians, means) of depths of interest (for example, from 10 to 20 cm), use:
+
+```{r}
+ageranges(10:20)
+```
+
+These age ranges can also be saved to a file - please see `?ageranges'.
+
 ## Can Bacon take into account a hiatus or a slump?
 
 Yes. If your core's stratigraphy indicates a hiatus at say 30 cm core depth, put this as `Bacon(hiatus.depths=30)`. With multiple hiatuses, concatenate the values as, e.g., `Bacon(hiatus.depths=c(30,52))`. Going across a hiatus or boundary, Bacon will lose its memory of the accumulation rate.
@@ -483,6 +491,8 @@ agedepth(dates.col=my_fancy_colours)
 ## What indicates a good age-depth model?
 
 First of all, check that the MCMC run (top-left panel) looks stable, like white noise with no major structure where iterations seem 'stuck'. Ensure that there is no burn-in remaining. If the MCMC looks bad, try a longer run by specifying a different value for `ssize` (default 4000). You can always run the `scissors` or `thinner` commands to trim the MCMC run to something nice and manageable after the run.
+
+Bacon will provide some indicators of how well the MCMC run went - first the `effective sample size (ess)` which informs us of how well the MCMC is mixed, and then `z` which gives an indication of how stationary the MCMC run was (higher values of `z` indicate drifts). Low `ess` or high `z` will result in warnings.
 
 Second, check that the posteriors (grey distributions) for the accumulation rate and memory (and if inferred, the hiatus) either overlap with the priors (green curves; then not much new has been learned), or whether the posterior has learned from marrying the priors with the data. Bacon will report summaries of the posterior distributions, which could be compared to the prior distributions.
 

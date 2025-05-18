@@ -193,6 +193,56 @@ Baconvergence <- function(core="MSB2K", runs=5, suggest=FALSE, verbose=TRUE, ...
 
 
 
+#' @name MCMC.diagnostics
+#' @title Test mixing and stationarity of the MCMC run
+#' @description Test how well-mixed and stationary the MCMC run is. A good value for the effective sample size ('ess', number of effective independent samples from the MCMC iterations) is >200 (>1000 indicates an excelling mixing). Besides the mixing, stationarity 'z' is also measured (the start of the run is compared with the end). A 'z' below 1.96 (1 standard deviation) indicates no drift, and if it is >2.58 (2 standard deviations) then the MCMC chain is likely drifting.
+#' @details Generally Bacon will perform millions of MCMC iterations for each age-model run, although only a fraction
+#' of these will be stored. In most cases the remaining MCMC iterations will be well mixed (ess, and also visually check that the upper left panel
+#' of the fit of the iterations shows no strange features such as sudden systematic drops or rises).
+#' @param set Detailed information of the current run, stored within this session's memory as variable \code{info}.
+#' @param ssize Number of MCMC iterations.
+#' @return The 'ess' and 'z' scores, together with an evaluation of the values.
+#' @examples
+#'   \donttest{
+#'     Bacon(ssize=100, coredir=tempfile()) # check the reported warnings
+#'   }
+#' @export
+MCMC.diagnostics <- function(set=get("info"), ssize=nrow(set$output)) {
+  energy <- coda::as.mcmc(set$Us)
+  ess <- coda::effectiveSize(energy)
+  z <- abs(coda::geweke.diag(energy)$z)
+  
+  ssize.warn <- paste0(" please run more iterations (ssize >", ssize, ")")
+  
+  if(length(energy) < 500) {
+    message("Warning: very short MCMC chain,", ssize.warn) 
+	invisible(NA)  
+  } else {
+  			
+    if(ess < 10)
+	  message("Warning, the MCMC run has a very high autocorrelation (effective sample size=", round(ess,2), ", <100. So,", ssize.warn) else
+      if(ess < 100)
+        message("Warning, poor MCMC mixing (effective sample size=", round(ess,2), ", <100) -" , ssize.warn) else
+        if(ess < 200)
+          message("MCMC mixing (effective sample size=", round(ess,2),  ", <200) could be better -", ssize.warn) else
+	      if(ess < 1000)
+            message("Good MCMC mixing (effective sample size=", round(ess,2), ", >200)") else
+              message("Excellent MCMC mixing (effective sample size=", round(ess,2), ", >1000)")	    
+
+    if(z < 1.96) # <1 sd
+       message("No sign of MCMC drift (z=", round(z,2), ", <1.96), OK") else
+       if(z < 2.58) # <2 sd
+         message("Warning, there's a hint of MCMC drift (z=", round(z,2), ", >1.96), run again?", ssize.warn) else  
+           message("Warning, non-stationary MCMC (z=", round(z,2), ", >2.58), please run again", ssize.warn)
+
+    diag <- c(ess, z)
+    names(diag) <- c("effective sample size (ess)", "z")		  
+    invisible(diag)
+  }
+}
+
+
+
 # calculate the proportion of dates that are within the age-depth model's confidence ranges
 overlap <- function(set=get('info'), digits=0, verbose=TRUE) {
   d <- set$dets[,4]

@@ -1,3 +1,7 @@
+
+# make flux ghostplot more efficient by filling a grid (using cut?)
+
+
 # in the inst/dev/ folder, there is now a testBaconplots.Rmd function which automates plotting and checking many functions. There is also a file render-plots.yml which can be used to test many plots on a range of github systems (ubuntu, fedora and windows). Produced html files can be downloaded and checked locally. To do this, the file has to be placed in .github/workflows/.
 
 # Check if we can/should return to using a gamma distribution instead of a uniform one for the hiatus
@@ -474,9 +478,9 @@ Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=
     #cat("this is the bacon file: ", txt)
     bacon(txt, as.character(outfile), ssize+burnin, cc.dir)
     info <- scissors(burnin, info, save.info=save.info)
-	output <- info$output # tmp
-    info <- agedepth(info, BCAD=BCAD, depths.file=depths.file, depths=depths, verbose=TRUE, age.unit=age.unit, depth.unit=depth.unit, save.info=save.info, ...)
-	info$output <- output
+    output <- info$output # tmp
+    info <- agedepth(info, BCAD=BCAD, depths.file=depths.file, depths=depths, verbose=TRUE, age.unit=age.unit, depth.unit=depth.unit, save.info=save.info, ssize=ssize, ...)
+    info$output <- output
     #    cat(mean(info$Tr)) # this is to check how hists and info get saved
 
     if(plot.pdf)
@@ -487,7 +491,8 @@ Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=
               pdf(file=paste0(info$prefix, ".pdf"))
             agedepth(info, BCAD=BCAD, depths.file=depths.file, depths=depths, verbose=FALSE, age.unit=age.unit, depth.unit=depth.unit, save.info=FALSE, ...)
             dev.off()
-        }		
+        }
+     return(info)
   }
 
 ### run bacon if initial graphs seem OK; run automatically, not at all, or only plot the age-depth model
@@ -495,14 +500,14 @@ Bacon <- function(core="MSB2K", thick=5, coredir="", prob=0.95, d.min=NA, d.max=
   if(!run)
     prepare() else
       if(!ask)
-        cook() else {
+        info <- cook() else {
           prepare()
           if(accept.suggestions)
             ans <- "y" else
               ans <- readline(message(" Run ", core, " with ", info$K, " sections? (Y/n) "))
           ans <- tolower(substr(ans,1,1))[1]
           if(ans=="y" || ans=="")
-            cook() else
+            info <- cook() else
               message("  OK. Please adapt settings")
         }
  # if(close.connections)

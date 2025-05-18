@@ -1,3 +1,15 @@
+# rbacon 3.5.2
+* removed the ageranges example to avoid the CRAN NOTE about a slow example
+
+# rbacon 3.5.1
+* reduced the runtime of the ageranges examples to avoid the CRAN NOTE
+
+# rbacon 3.5.0
+* accrate.age.ghost and accrate.depth.ghost can now be run without saving `info`, e.g. as in: 'mycore <- Bacon(save.info=FALSE, ask=FALSE); layout(1); accrate.depth.ghost(set=mycore)'.
+* adding delta.R and delta.STD columns to a .csv file was causing an occasional error which has been fixed (reported by Najoua Gharsalli).
+* a new function `ageranges` to summarize age estimates of depths. 
+* a new function `MCMC.diagnostics` which calculates the quality of the MCMC run (we're looking for a high value of 'effective sample size' which indicates good mixing, and a low value of 'z' which indicates a stationary run, without drift).
+
 # rbacon 3.4.2
 * adapted `agedepth()`, `draw.pbmodelled()`, `PlotPhiPost()` and `PlotSuppost()` to make rplum plotting more robust. 
 * changes to how greyscales are plotted. The setting use.raster=TRUE introduced in rbacon 3.4.0 unfortunately causes unexpected behaviour especially between different operation systems (sometimes the images are flipped). Therefore the default will be use.raster=FALSE, with options to set it to TRUE (the user can unflip the images using the 'flip.acc', 'flip.d' and 'flip.age' options).
@@ -9,7 +21,7 @@
 # rbacon 3.4.0
 * radiocarbon ages can now be entered as F14C or pMC values (e.g. for postbomb dates). Please indicate using the F14C or pMC option which ones are in F14C/pMC (e.g., `Bacon(F14C=2:4)` if dates 2 to 4 are in F14C). These values will then automatically be rewritten as C14 ages.
 * the proxy.ghost function now invisibly returns a table of the values used in the grid composing the greyscale plot.
-* add.dates now plots additional dates as expected, also when rotate.axes=TRUE (although rotate.axes still has to be set to TRUE after using the agedepth function with agedepth=TRUE).
+* add.dates now plots additional dates as expected, also when rotate.axes=TRUE (although rotate.axes still has to be set to TRUE after using the agedepth function with rotate.axes=TRUE).
 * the agedepth function now treats provided values for d.min and d.max better.
 * greyscale 'ghost' plots (`agedepth`, `accrate.depth.ghost`, `accrate.age.ghost`, `proxy.ghost`) should now plot with fewer disturbances such as lines. This is done by setting `useRaster=TRUE` in `image`.
 * if available on your system, 'cairo_pdf' will be used to plot pdfs.
