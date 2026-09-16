@@ -10,8 +10,24 @@ validateDirectoryName <- function(dir) {
 
 
 
+#' @name Bacon_runs
+#' @title list the folders present in the current core directory
+#' @description Lists all folders located within the core's directory.
+#' @details The directory is either "Bacon_runs", "Cores" or a custom-named one.
+#' @author Maarten Blaauw, J. Andres Christen
+#' @return A list of folders
+#' @param set Detailed information of the current run, stored within this session's memory as variable \code{info}.
+#' @param coredir The directory where the Bacon runs reside. Defaults to \code{coredir="Bacon_runs"}.
+#' @export
+Bacon_runs <- function(set=get('info'), coredir=set$coredir) {
+  if(length(coredir) == 0)
+    coredir <- "Bacon_runs"
+  list.files(coredir)
+}
+
+
 #' @name set.initvals
-#' @title Set initial values for the Bacon MCMC run.
+#' @title set initial values for the Bacon MCMC run
 #' @description Select initial values th0 and th1 for a Bacon MCMC run and write them into a file that can be read by Bacon.
 #' @details By default, the initial MCMC values th0 and th1 of the Bacon age-depth model (upper ages and accumulation rate
 #' for each model section) are estimated randomly. Since version 3.1.0, these starting values can
@@ -51,7 +67,7 @@ set.initvals <- function(set=get('info'), core=set$core, values=c(), click=1) {
         par(mfg=c(2,2)) # back to bottom-right panel
 
     ages <- approx(draft.agedepth$x, draft.agedepth$y, elbows, rule=2)$y
-    agedepth <- cbind(elbows, ages)
+    #agedepth <- cbind(elbows, ages)
     accs <- diff(ages) / diff(elbows)
     accs <- c(accs[1], accs)
     accs1 <- abs(jitter(accs)) # add some scatter to ensure that th
@@ -63,6 +79,8 @@ set.initvals <- function(set=get('info'), core=set$core, values=c(), click=1) {
     init1 <- c(ages1, accs1, w1)
     init2 <- c(ages2, accs2, w2)
     } else { # user provides 2 sets of starting points
+      if(nrow(values) != 2)
+        stop("the parameter 'values' needs to consist of two rows, each with the starting age followed by values for the section accumulation rates, and finally a value for the memory parameter w")
       init1 <- values[1,]
       init2 <- values[2,]
     }
@@ -72,7 +90,7 @@ set.initvals <- function(set=get('info'), core=set$core, values=c(), click=1) {
 
 
 #' @name clam2bacon
-#' @title Translate clam .csv files to Bacon .csv files.
+#' @title translate clam .csv files to Bacon .csv files
 #' @description Reads a clam .csv file containing the dates, and transforms it into a Bacon .csv file.
 #' @details Please ensure that if the clam file has offset (d.R) estimates, that errors (d.STD) are provided manually, since these values cannot be determined automatically from the clam .csv file.
 #' @author Maarten Blaauw, J. Andres Christen
@@ -110,7 +128,7 @@ clam2bacon <- function(core, clamdir="clam_runs", bacondir="Bacon_runs", sep=","
 
 
 #' @name bacon2clam
-#' @title Translate Bacon .csv files to clam .csv files.
+#' @title translate Bacon .csv files to clam .csv files
 #' @description Reads a Bacon .csv file containing the dates, and transforms it into a clam .csv file.
 #' @details Assumes that Bacon .csv files with 4 columns indicate 14C dates. Please make sure this is correct.
 #' @author Maarten Blaauw, J. Andres Christen
@@ -162,7 +180,7 @@ bacon2clam <- function(core, bacondir="Bacon_runs", clamdir="clam_runs", sep=","
 
 
 #' @name Bacon.cleanup
-#' @title Remove files made to produce the current core's age-depth model.
+#' @title remove files made to produce the current core's age-depth model
 #' @description Remove files ending in .bacon, .plum (if it exists), .out, .pdf, _ages.txt, and _settings.txt of current core.
 #' @details If cores behave badly, you can try cleaning up previous runs and settings, by
 #' removing files *.bacon, *.plum, *.out, *.pdf, *_ages.txt, and *_settings.txt of current core.
@@ -179,9 +197,10 @@ Bacon.cleanup <- function(set=get('info')) {
     paste0(set$coredir,set$core, "/", set$core, "_settings.txt"))
   for(i in files)
     if(file.exists(i))
-      tmp <- file.remove(i)
-  if(exists("tmp"))
-    rm(tmp)
+    #  tmp <- file.remove(i)
+      file.remove(i)
+  #if(exists("tmp"))
+  #  rm(tmp)
 #  if(exists('info')) # new Oct 2020
 #    rm(info)
   message("Previous runs of core ", set$core, " with thick=", set$thick, " ", set$depth.unit, " deleted. Now try running the core again\n")
@@ -189,8 +208,8 @@ Bacon.cleanup <- function(set=get('info')) {
 
 
 
-# If coredir is left empty, check for a folder named Cores in the current working directory, and if this doesn't exist, for a folder called Bacon_runs (make this folder if it doesn't exist yet and if the user agrees).
-# Check if we have write access. If not, tell the user to provide a different, writeable location for coredir.
+# If coredir is left empty, checks for a folder named Cores in the current working directory, and if this doesn't exist, for a folder called Bacon_runs (then makes this folder if it doesn't exist yet and if the user agrees).
+# Checks if we have write access. If not, tells the user to provide a different, writeable location for coredir.
 assign_coredir <- function(coredir, core, ask=TRUE, isPlum=FALSE) {
   ifelse(isPlum, runs <- "Plum_runs", runs <- "Bacon_runs")
   if(coredir == "") {
@@ -225,7 +244,7 @@ assign_coredir <- function(coredir, core, ask=TRUE, isPlum=FALSE) {
 # read the dets file, converting old formats to new ones if so required
 read.dets <- function(core, coredir, othername=c(), set=get('info'), sep=",", dec=".", cc=1) {
   # if a .csv file exists, read it (checking that it is more recent than any .dat file in the folder). Otherwise, read the .dat file, check the columns, report back if >4 (>5?) columns, and convert to .csv (report this also)
-  if(length(othername)> 0) {
+  if(length(othername) > 0) {
     csv.file <- paste0(coredir, core, "/", othername)
     dat.file <- csv.file
   } else {
@@ -245,7 +264,22 @@ read.dets <- function(core, coredir, othername=c(), set=get('info'), sep=",", de
     message("Warning, sep should be 1 character only, please adapt")
 
   if(file.exists(csv.file)) {
-    dets <- fastread(csv.file, header=TRUE, sep=sep)
+
+    # first do some cleaning of the .csv file if necessary
+    txt <- readLines(csv.file, warn=FALSE)
+    orig <- txt
+    txt <- gsub('"', "", txt) # remove quotation marks
+    txt <- gsub("\u00A0", " ", txt) # and invisible spaces
+    txt <- gsub(" *,", ",", txt) # and spaces before commas
+    lastline <- txt[length(txt)]
+    if(nchar(lastline) > 0 && !grepl("\n$", lastline))
+      txt <- c(txt, "") # the last line should be empty
+    if(!identical(txt, orig))
+      changed <- 1
+
+    # now actually read the .csv file
+    dets <- fastread(text = txt, header = TRUE, sep = sep)
+
     if(file.exists(dat.file)) # deal with old .dat files
       if(file.mtime(csv.file) < file.mtime(dat.file))
         message("Warning, the .dat file is newer than the .csv file! I will read the .csv file. From now on please modify ", csv.file, ", not ", dat.file) else
@@ -271,8 +305,8 @@ read.dets <- function(core, coredir, othername=c(), set=get('info'), sep=",", de
       ok <- 0
       # if((name[5] %in% cc.names) && (min(dets[,5])[1] >= 0) && (max(dets[,5])[1] <= 4)) {} else
       if(name[5] %in% cc.names) ok <- ok+1
-      if(min(dets[,5])[1] >= 0) ok <- ok+1
-      if(max(dets[,5])[1] <= 4) ok <- ok+1
+      if(min(dets[,5], na.rm=TRUE)[1] >= 0) ok <- ok+1
+      if(max(dets[,5], na.rm=TRUE)[1] <= 4) ok <- ok+1
       if(ok < 3)
         stop("unexpected name or values in fifth column (cc, should be between 0 and 4). Please check the manual for guidelines in producing a correct .csv file.\n", call.=FALSE)
     } else
@@ -290,8 +324,8 @@ read.dets <- function(core, coredir, othername=c(), set=get('info'), sep=",", de
         if(ncol(dets) == 7) { # probably a 'new' file: cc, dR, dSTD
           ok <- 0
           if(name[5] %in% cc.names) ok <- ok+1
-          if(min(dets[,5])[1] >= 0) ok <- ok+1
-          if(max(dets[,5])[1] <= 4) ok <- ok+1
+          if(min(dets[,5], na.rm=TRUE)[1] >= 0) ok <- ok+1
+          if(max(dets[,5], na.rm=TRUE)[1] <= 4) ok <- ok+1
           if(name[6] %in% dR.names) ok <- ok+1
           if(name[7] %in% dSTD.names) ok <- ok+1
           if(ok < 5)
@@ -315,9 +349,9 @@ read.dets <- function(core, coredir, othername=c(), set=get('info'), sep=",", de
             if(ncol(dets) == 9) { # most complex case, many checks needed
               ok <- 0
               if(name[9] %in% cc.names) ok <- ok+1 # almost sure this is a 'classic' dets file
-              if(min(dets[,9])[1] >= 0) ok <- ok+1
-              if(max(dets[,9])[1] <= 4) ok <- ok+1
-              tab <- range(dets[,8] - dets[,7])
+              if(min(dets[,9], na.rm=TRUE)[1] >= 0) ok <- ok+1
+              if(max(dets[,9], na.rm=TRUE)[1] <= 4) ok <- ok+1
+              tab <- range(dets[,8] - dets[,7], na.rm=TRUE)
               if(tab[1] == 1) ok <- ok+1
               if(tab[2] == 1) ok <- ok+1
               if(name[5] %in% dR.names) ok <- ok+1
@@ -331,9 +365,9 @@ read.dets <- function(core, coredir, othername=c(), set=get('info'), sep=",", de
               } else { # probably a 'new' file from more recent Bacon
                 ok <- 0
                 if(name[5] %in% cc.names) ok <- ok+1
-                if(min(dets[,5])[1] >= 0) ok <- ok+1
-                if(max(dets[,5])[1] <= 4) ok <- ok+1
-                tab <- range(dets[,9] - dets[,8])
+                if(min(dets[,5], na.rm=TRUE)[1] >= 0) ok <- ok+1
+                if(max(dets[,5], na.rm=TRUE)[1] <= 4) ok <- ok+1
+                tab <- range(dets[,9] - dets[,8], na.rm=TRUE)
                 if(tab[1] == 1) ok <- ok+1
                 if(tab[2] == 1) ok <- ok+1
                 if(name[8] %in% ta.names) ok <- ok+1
@@ -374,23 +408,28 @@ read.dets <- function(core, coredir, othername=c(), set=get('info'), sep=",", de
 
   # if current dets differ from original .csv file, rewrite it
   if(changed > 0)
-    fastwrite(as.data.frame(dets), csv.file, sep=sep, dec=dec, row.names=FALSE, col.names=suggested.names[1:ncol(dets)], quote=FALSE) # sep was paste0(sep, "\t") but fwrite needs sep to be exactly 1 char
+    fastwrite(as.data.frame(dets), csv.file, sep=sep, dec=dec, row.names=FALSE, col.names=suggested.names[1:ncol(dets)], quote=FALSE)
   dets
 }
 
 
 
 # read in default values, values from previous run, any specified values, and report the desired one. Internal function.
-Bacon.settings <- function(core, coredir, dets, thick, remember=TRUE, d.min, d.max, d.by, depths.file, slump, acc.mean, acc.shape, mem.mean, mem.strength, boundary, hiatus.depths, hiatus.max, hiatus.shape, BCAD, cc, postbomb, cc1, cc2, cc3, cc4, depth.unit, normal, t.a, t.b, delta.R, delta.STD, prob, defaults, runname, ssize, dark, youngest.age, oldest.age, cutoff, age.res, after, age.unit) {
+Bacon.settings <- function(core, coredir, dets, thick, remember=TRUE, d.min, d.max, d.by, depths.file, slump, acc.mean, acc.shape, mem.mean, mem.strength, boundary, hiatus.depths, hiatus.mean, hiatus.shape, BCAD, cc, postbomb, cc1, cc2, cc3, cc4, depth.unit, normal, t.a, t.b, delta.R, delta.STD, prob, defaults, runname, ssize, dark, youngest.age, oldest.age, cutoff, age.res, after, age.unit) {
 
-  vals <- list(d.min, d.max, d.by, depths.file, slump, acc.mean, acc.shape, mem.mean, mem.strength, boundary, hiatus.depths, hiatus.max, BCAD, cc, postbomb, cc1, cc2, cc3, cc4, depth.unit, normal, t.a, t.b, delta.R, delta.STD, prob, age.unit) # do these now need the length for each parameter where available?
-  valnames <- c("d.min", "d.max", "d.by", "depths.file", "slump", "acc.mean", "acc.shape", "mem.mean", "mem.strength", "boundary", "hiatus.depths", "hiatus.max", "BCAD", "cc", "postbomb", "cc1", "cc2", "cc3", "cc4", "depth.unit", "normal", "t.a", "t.b", "delta.R", "delta.STD", "prob", "age.unit")
+  vals <- list(d.min, d.max, d.by, depths.file, slump, acc.mean, acc.shape, mem.mean, mem.strength, boundary, hiatus.depths, hiatus.mean, hiatus.shape, BCAD, cc, postbomb, cc1, cc2, cc3, cc4, depth.unit, normal, t.a, t.b, delta.R, delta.STD, prob, age.unit) # do these now need the length for each parameter where available?
+  valnames <- c("d.min", "d.max", "d.by", "depths.file", "slump", "acc.mean", "acc.shape", "mem.mean", "mem.strength", "boundary", "hiatus.depths", "hiatus.mean", "hiatus.shape", "BCAD", "cc", "postbomb", "cc1", "cc2", "cc3", "cc4", "depth.unit", "normal", "t.a", "t.b", "delta.R", "delta.STD", "prob", "age.unit")
+  
+  #  removed hiatus.shape as this is an extra entry which could give unexpected results when reading existing settings files
 
   extr <- function(i, def=deffile, pre=prevfile, exists.pre=prevf, rem=remember, sep=" ", isnum=TRUE) {
     if(length(vals[[i]]) > 0) # tmp
       if(any(is.na(vals[[i]]))) {
-        ext.def <- strsplit(def[i], sep)[[1]]
+        # find the line in the settings file containing the parameter of interest
+        k <- grep(valnames[i], deffile)
+        ext.def <- strsplit(def[k], sep)[[1]]
         ext.def <- ext.def[-length(ext.def)] # remove description
+
         if(exists.pre) {
           ext.pre <- strsplit(pre[i], sep)[[1]]
           ext.pre <- ext.pre[-length(ext.pre)] # remove description
@@ -430,11 +469,17 @@ Bacon.settings <- function(core, coredir, dets, thick, remember=TRUE, d.min, d.m
   mem.strength <- extr(9)
   boundary <- if(is.na(boundary)[1]) NA else sort(extr(10))
   hiatus.depths <- if(is.na(hiatus.depths)[1]) NA else sort(extr(11))
-  hiatus.max <- extr(12)
-  BCAD <- extr(13); cc <- extr(14); postbomb <- extr(15); cc1 <- extr(16, isnum=FALSE)
-  cc2 <- extr(17, isnum=FALSE); cc3 <- extr(18, isnum=FALSE); cc4 <- extr(19, isnum=FALSE)
-  depth.unit <- extr(20, isnum=FALSE); normal <- extr(21); t.a <- extr(22); t.b <- extr(23)
-  delta.R <- extr(24); delta.STD <- extr(25); prob <- extr(26); age.unit <- extr(27, isnum=FALSE)
+  #hiatus.max <- extr(12); 
+  hiatus.mean <- extr(12) 
+  hiatus.shape <- extr(13)
+  if(length(hiatus.mean) == 1)
+    hiatus.mean <- rep(hiatus.mean, length(hiatus.depths))
+  if(length(hiatus.shape) == 1)
+    hiatus.shape <- rep(hiatus.shape, length(hiatus.depths))
+  BCAD <- extr(14); cc <- extr(15); postbomb <- extr(16); cc1 <- extr(17, isnum=FALSE)
+  cc2 <- extr(18, isnum=FALSE); cc3 <- extr(19, isnum=FALSE); cc4 <- extr(20, isnum=FALSE)
+  depth.unit <- extr(21, isnum=FALSE); normal <- extr(22); t.a <- extr(23); t.b <- extr(24)
+  delta.R <- extr(25); delta.STD <- extr(26); prob <- extr(27); age.unit <- extr(28, isnum=FALSE)
 
   if(is.na(d.min)) # removed || d.min == "NA" 10 April 2020
     d.min <- min(dets[,4])
@@ -460,12 +505,12 @@ Bacon.settings <- function(core, coredir, dets, thick, remember=TRUE, d.min, d.m
   for(i in mem.strength) scat(i, " "); scat("#mem.strength\n", "")
   for(i in boundary) scat(i, " "); scat("#boundary\n", "")
   for(i in hiatus.depths) scat(i, " "); scat("#hiatus.depths\n", "")
-  for(i in hiatus.max) scat(i, " "); scat("#hiatus.max\n", "")
-  for(i in hiatus.max) scat(i, " "); scat("#hiatus.max\n", "") # redundant
+  for(i in hiatus.mean) scat(i, " "); scat("#hiatus.mean\n", "")
+  for(i in hiatus.shape) scat(i, " "); scat("#hiatus.shape\n", "") 
   cat(BCAD, " #BCAD\n", cc, " #cc\n", postbomb, " #postbomb\n",
     cc1, " #cc1\n", cc2, " #cc2\n", cc3, " #cc3\n", cc4, " #cc4\n",
     depth.unit, " #depth.unit\n", normal, " #normal\n", t.a, " #t.a\n", t.b, " #t.b\n",
-    delta.R, " #delta.R\n", delta.STD, " #d.STD\n", prob, " #prob\n", age.unit, "#age.unit\n", sep="", file=prevfile)
+    delta.R, " #delta.R\n", delta.STD, " #d.STD\n", prob, " #prob\n", age.unit, " #age.unit\n", sep="", file=prevfile)
   close(prevfile)
 
   if(length(youngest.age) == 0)
@@ -477,7 +522,7 @@ Bacon.settings <- function(core, coredir, dets, thick, remember=TRUE, d.min, d.m
     d.by=d.by, depths.file=depths.file, slump=slump,
     acc.mean=acc.mean, acc.shape=acc.shape, mem.mean=mem.mean,
     mem.strength=mem.strength, boundary=boundary,
-    hiatus.depths=hiatus.depths, hiatus.max=hiatus.max,
+    hiatus.depths=hiatus.depths, hiatus.mean=hiatus.mean, hiatus.shape=hiatus.shape,
     BCAD=BCAD, cc=cc, postbomb=postbomb,
     cc1=cc1, cc2=cc2, cc3=cc3, cc4=cc4, depth.unit=noquote(depth.unit), unit=depth.unit, age.unit=noquote(age.unit), normal=normal,
     t.a=t.a, t.b=t.b, delta.R=delta.R, delta.STD=delta.STD, prob=prob, date=date(),
@@ -578,26 +623,33 @@ write.Bacon.file <- function(set=get('info'), younger.than=c(), older.than=c(), 
     }
 
   if(!is.na(hiatus.depths[1])) {
-    if(is.null(boundary[1]))
+    if(is.na(boundary[1]) || length(boundary) == 0)
       message("  Hiatus set at depth(s)", paste("", hiatus.depths)) else
         message("  Boundary set at depth(s) ",  paste("", boundary))
     if(length(set$acc.shape) == 1)
       set$acc.shape <- rep(set$acc.shape, length(hiatus.depths)+1)
     if(length(set$acc.mean) == 1)
       set$acc.mean <- rep(set$acc.mean, length(hiatus.depths)+1)
-    if(length(set$hiatus.max) == 1)
-      set$hiatus.max <- rep(set$hiatus.max, length(hiatus.depths))
-#      if(length(set$hiatus.shape)==1)
-#        set$hiatus.shape <- rep(set$hiatus.shape, length(set$hiatus.depths))
+    if(length(set$hiatus.mean) == 1)
+      set$hiatus.mean <- rep(set$hiatus.mean, length(hiatus.depths))
+    if(length(set$hiatus.shape)==1)
+      set$hiatus.shape <- rep(set$hiatus.shape, length(set$hiatus.depths))
     if(save.info)
       assign_to_global("info", set)
+    
 
     cat("\n\n### Depths and priors for fixed hiatuses, in descending order",
       "\n##### cm  alpha beta      ha     hb", file=fl)
-    for(i in length(hiatus.depths):1)
+    for(i in length(hiatus.depths):1) {
+      # piste = slope of acc.rate + jump of hiatus. The slope is a weighted mix of the acc.mean priors from below and above the hiatus
+      frac.below <- (set$elbows[min(which(set$elbows >= hiatus.depths[i]))] -
+        hiatus.depths[i]) / set$thick # fraction of section below the hiatus
+      slope <- frac.below*set$acc.mean[i+1] + (1-frac.below)*set$acc.mean[i]
+      piste <- set$hiatus.shape[i]/(set$hiatus.mean[i] + slope*set$thick) 
       cat("\nHiatus ", i-1, ":  ", hiatus.depths[i], ",  ", set$acc.shape[i+1],
-        ",  ", set$acc.shape[i+1]/set$acc.mean[i+1], ",  ", .9, # last value (h.a) was NA but this conflicts with setting initial values for hiatus length # .9 was 0.1, should be <1
-        ",  ", set$hiatus.max[i], ";", sep="", file=fl)
+        ",  ", set$acc.shape[i+1]/set$acc.mean[i+1], ",  ", set$hiatus.shape[i], 
+        ",  ", piste, ";", sep="", file=fl)
+    }
   }
 
   cK <- set$d.min+(set$thick*set$K)
@@ -694,13 +746,16 @@ assign_to_global <- function(key, val, pos=1) {
 #' @param sep Separator for the fields, if saving to a file (defaults to a tab, "\\t").
 #' @param set Detailed information of the current run, stored within this session's memory as variable \code{info}.
 #' @param BCAD The calendar scale of graphs and age output-files is in cal BP (calendar or calibrated years before the present, where the present is AD 1950) by default, but can be changed to BC/AD using \code{BCAD=TRUE}.
-#' @param na.rm Whether or not NAs are to be removed. Defaults to \code{na.rm=FALSE}. NAs will still be returned for depths outside of the core's depth range.
+#' @param na.rm Whether or not NAs are to be removed. Defaults to \code{na.rm=TRUE}. NAs will still be returned for depths outside of the core's depth range.
 #' @param prob Probability range. Half of the range is taken away from both sides of the distribution (e.g., 2.5\% for the default of \code{prob=0.95}).
 #' @param d.by Steps for calculation of depths, if `d` is left empty. Defaults to steps of 1. 
 #' @param roundby Rounding for the age estimates. Defaults to 1 decimal.
 #' @param show.progress Show a progress bar. Defaults to TRUE.
+#' @param verbose Inform the user of what is happening. Defaults to TRUE.
+#' @param use.cpp Whether or not to use a cpp function to calculate the ages. Defaults to TRUE, but can be set to FALSE (much slower but less experimental)
+#' @param age.bins Size of the age bins (in years) if use.cpp=TRUE. Defaults to every 1 year.
 #' @export
-ageranges <- function(d=c(), file=c(), sep="\t", set=get("info"), BCAD=set$BCAD, na.rm=FALSE, prob=0.95, d.by=1, roundby=1, show.progress=TRUE) {
+ageranges <- function(d=c(), file=c(), sep="\t", set=get("info"), BCAD=set$BCAD, na.rm=TRUE, prob=0.95, d.by=1, roundby=1, show.progress=TRUE, verbose=TRUE, use.cpp=TRUE, age.bins=1) {
   if(length(d) == 0)
     d <- seq(set$d.min, set$d.max, by=d.by)
   
@@ -710,42 +765,71 @@ ageranges <- function(d=c(), file=c(), sep="\t", set=get("info"), BCAD=set$BCAD,
   medians <- numeric(length(d))
   means <- numeric(length(d))
 
-  if(show.progress)
-    if(n > 50) 
-      pb <- txtProgressBar(min=0, max=max(1, length(d)-1), style=3)
-	   
-  for(i in seq_len(n)) {
-	if(show.progress)
-      if(n >= 50)
-        if(n < 500 || i %% 10 == 0) 
-          setTxtProgressBar(pb, i)
-	  
-    ages <- Bacon.Age.d(d[i], set, BCAD=BCAD, na.rm=na.rm)
-    quan <- quantile(ages, c((1-prob)/2, 1-((1-prob)/2), .5), na.rm=na.rm)
-    mins[i] <- quan[1]
-    maxs[i] <- quan[2]
-    medians[i] <- quan[3]
-    means[i] <- mean(ages) 	
-  }
-  if(show.progress && n>50)
-    message("")
-  
-  mins <- round(mins, roundby)
-  maxs <- round(maxs, roundby)
-  medians <- round(medians, roundby)
-  means <- round(means, roundby)
-  
-  if(length(d) == 1) {
-    names <- c(paste0("min.", 100*prob), paste0("max.", 100 * prob),
-      "median", "mean")	  
-	summ <- setNames(c(mins, maxs, medians, means), names)
-  } else {
-      summ <- data.frame(depth = d, mins, maxs, medians, means)
-      colnames(summ) <- c("depth",
-        paste0("min.", 100 * prob), paste0("max.", 100*prob),
-        "median", "mean")
+  if(use.cpp) {
+    hiatus <- set$hiatus.depths
+    if(length(set$slump) > 0) {
+      d <- toslump(d, set$slump)
+      if(!is.na(hiatus[1]))
+        hiatus <- set$slumphiatus
     }
+
+    summ <- tryCatch({
+    if(is.na(hiatus[1])) 
+      summ <- depths_ageranges(d, out=as.matrix(set$output), 
+        elbows=set$elbows, n_rows=set$Tr, prob=prob) else
+        summ <- depths_ageranges_hiatus(d, out=as.matrix(set$output), 
+          elbows=set$elbows, hiatus_depths=hiatus,
+          slopes_above=set$slope.above, slopes_below=set$slope.below,
+          elbow_above_hiatus=set$elbow.above, elbow_below_hiatus=set$elbow.below,
+          n_rows=set$Tr, prob=prob)
+      },
+        error = function(e) {warning("C++ problem, please run again using use.cpp=FALSE"); return(NULL)}, interrupt = function(e) {stop("Operation interrupted by user")})
+
+  # also needs to deal with slumps...
+  if(BCAD)
+    summ[,2:5] <- BCADtocalBP(summ[,2:5])
+  summ[,2:5] <- round(summ[,2:5], roundby)
+  
+  } else {
+
+    if(show.progress && verbose)
+      if(n > 50) 
+        pb <- txtProgressBar(min=0, max=max(1, length(d)-1), style=3)
+
+    for(i in seq_len(n)) {
+     if(show.progress && verbose)
+       if(n >= 50)
+         if(n < 500 || i %% 10 == 0)
+           setTxtProgressBar(pb, i)
+
+      ages <- Bacon.Age.d(d[i], set, BCAD=BCAD, na.rm=FALSE)
+      quan <- quantile(ages, c((1-prob)/2, 1-((1-prob)/2), .5), na.rm=na.rm)
+      mins[i] <- quan[1]
+      maxs[i] <- quan[2]
+      medians[i] <- quan[3]
+      means[i] <- mean(ages)
+    }
+    if(show.progress && verbose && n>50)
+      message("")
+
+    mins <- round(mins, roundby)
+    maxs <- round(maxs, roundby)
+    medians <- round(medians, roundby)
+    means <- round(means, roundby)
+
+    if(length(d) == 1) {
+      names <- c(paste0("min.", 100*prob), paste0("max.", 100 * prob),
+        "median", "mean")
+      summ <- setNames(c(mins, maxs, medians, means), names)
+    } else {
+        summ <- data.frame(d, mins, maxs, medians, means)
+        colnames(summ) <- c("depth",
+          paste0("min.", 100 * prob), paste0("max.", 100*prob),
+          "median", "mean")
+      }
+    }
+
   if(length(file) > 0)
     fastwrite(summ, file, col.names=TRUE, row.names=FALSE, sep=sep, quote=FALSE)
-  return(summ)	  
+  return(summ)
 }

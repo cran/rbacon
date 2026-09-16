@@ -2,7 +2,7 @@
 % Please edit documentation in R/read_write.R
 \name{Bacon.cleanup}
 \alias{Bacon.cleanup}
-\title{Remove files made to produce the current core's age-depth model.}
+\title{remove files made to produce the current core's age-depth model}
 \usage{
 Bacon.cleanup(set = get("info"))
 }

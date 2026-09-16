@@ -2,7 +2,7 @@
 % Please edit documentation in R/plots.R
 \name{AgesOfEvents}
 \alias{AgesOfEvents}
-\title{Event probabilities against calendar age}
+\title{event probabilities against calendar age}
 \usage{
 AgesOfEvents(
   window,

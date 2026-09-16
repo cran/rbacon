@@ -2,7 +2,7 @@
 % Please edit documentation in R/calc.R
 \name{squeeze}
 \alias{squeeze}
-\title{Squeeze some depths of a core}
+\title{squeeze some depths of a core}
 \usage{
 squeeze(d, boundary, times)
 }

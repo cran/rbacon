@@ -2,7 +2,7 @@
 % Please edit documentation in R/rbacon.R
 \name{Bacon}
 \alias{Bacon}
-\title{Main age-depth modelling function}
+\title{main age-depth modelling function}
 \usage{
 Bacon(
   core = "MSB2K",
@@ -25,6 +25,8 @@ Bacon(
   mem.mean = 0.5,
   boundary = NA,
   hiatus.depths = NA,
+  hiatus.mean = 1000,
+  hiatus.shape = 0.5,
   hiatus.max = 10000,
   add = c(),
   after = 1e-04/thick,
@@ -37,6 +39,7 @@ Bacon(
   postbomb = 0,
   F14C = c(),
   pMC = c(),
+  hot.stop = TRUE,
   delta.R = 0,
   delta.STD = 0,
   t.a = 3,
@@ -44,6 +47,7 @@ Bacon(
   normal = FALSE,
   suggest = TRUE,
   accept.suggestions = FALSE,
+  adjust.dby = TRUE,
   reswarn = c(10, 200),
   remember = TRUE,
   ask = TRUE,
@@ -64,6 +68,8 @@ Bacon(
   MaxAge = c(),
   cutoff = 0.01,
   plot.pdf = TRUE,
+  quartz = FALSE,
+  cairo = FALSE,
   dark = 1,
   date.res = 100,
   age.res = 200,
@@ -74,6 +80,7 @@ Bacon(
   younger.than = c(),
   save.elbowages = FALSE,
   verbose = TRUE,
+  use.cpp = TRUE,
   ...
 )
 }
@@ -119,7 +126,7 @@ Its shape is set by acc.shape (default \code{acc.shape=1.5}; higher values resul
 \item{acc.mean}{The accumulation rate prior consists of a gamma distribution with two parameters. Its mean is set by acc.mean (default \code{acc.mean=20} yr/cm (or whatever age or depth units are chosen),
 which can be changed to, e.g., 5, 10 or 50 for different kinds of deposits). Multiple values can be given in case of hiatuses or boundaries, e.g., Bacon(hiatus.depths=23, acc.mean=c(5,20))}
 
-\item{mem.strength}{The prior for the memory (dependence of accumulation rate between neighbouring depths) is a beta distribution, which looks much like the gamma distribution.
+\item{mem.strength}{The prior for the memory (dependence of accumulation rate between neighbouring depths) is a beta distribution, which looks much like the gamma distribution,
 but its values are always between 0 (no assumed memory) and 1 (100\% memory). Its default settings of \code{mem.strength=10}
 (higher values result in more peaked shapes) allow for a large range of posterior memory values. Please note that the default memory prior has been updated from rbacon version 2.5.1 on, to repair a bug.}
 
@@ -127,12 +134,16 @@ but its values are always between 0 (no assumed memory) and 1 (100\% memory). It
 its values are always between 0 (no assumed memory) and 1 (100\% memory). Its default settings of \code{mem.mean=0.5}
 allow for a large range of posterior memory values. Please note that the default memory prior has been updated from rbacon version 2.5.1. on, to repair a bug.}
 
-\item{boundary}{The assumed depths of any boundary, which divides sections of different accumulation rate regimes (e.g., as indicated by major change in the stratigraphy). No hiatus is assumed between these sections, and memory is reset crossing the boundary. Different accumulation priors can be set for the sections above and below the boundary, e.g., \code{acc.mean=c(5, 20)}. See also \code{hiatus.depths}, \code{mem.mean}, \code{acc.mean} and \code{acc.shape}. Setting many boundaries might not work, and having more than one boundary per model section (see \code{'thick'}) might not work either.}
+\item{boundary}{The assumed depths of any boundary, which divides sections of different accumulation rate regimes (e.g., as indicated by major change in the stratigraphy). No hiatus is assumed between these sections, and memory is reset crossing the boundary. Different accumulation priors can be set for the sections above and below the boundary, e.g., \code{acc.mean=c(5, 20)}. See also \code{hiatus.depths}, \code{mem.mean}, \code{acc.mean} and \code{acc.shape}. Setting many boundaries might not work, and the maximum numbers of boundaries per model section (see \code{'thick'}) is 1.}
 
 \item{hiatus.depths}{The assumed depths for any hiatus should be provided as, e.g.,
-\code{hiatus.depths=20} for one at 20cm depth, and \code{hiatus.depths=c(20,40)} for two hiatuses at 20 and 40 cm depth.}
+\code{hiatus.depths=20} for one at 20 cm depth, and \code{hiatus.depths=c(20,40)} for two hiatuses at 20 and 40 cm depth.}
 
-\item{hiatus.max}{The prior for the maximum length of the hiatus. Hiatus length is a uniform distribution, with equal probabilities between 0 and \code{hiatus.max} yr (or whatever other \code{age.unit} is chosen).}
+\item{hiatus.mean}{The prior for the mean of the hiatus gamma prior. Defaults to 1000 and should be >0.}
+
+\item{hiatus.shape}{The prior for the shape of the hiatus gamma prior. Set to 0.5 (default) to favour short time gaps but enable larger ones. Set to 1 for an exponential prior distribution, and to >1 for a distribution that peaks around hiatus.mean. The influence of hiatus.mean on the posterior chronology depends on hiatus.shape. Larger values of hiatus.shape produce a more informative prior and thus constrain posterior hiatus estimates more strongly around hiatus.mean, whereas smaller values allow the dating evidence to dominate.}
+
+\item{hiatus.max}{The hiatus prior used to be a uniform distribution with hiatus.max as its limits. Please use hiatus.mean and hiatus.shape instead. Will be deprecated.}
 
 \item{add}{Add a value to the maximum hiatus length if a boundary is chosen. Defaults to 100 yr (or whatever other age unit is chosen). Can be adapted if Bacon complains that the parameters are out of support.}
 
@@ -153,9 +164,11 @@ allow for a large range of posterior memory values. Please note that the default
 
 \item{postbomb}{Use a postbomb curve for negative (i.e. postbomb) 14C ages. \code{0 = none, 1 = NH1, 2 = NH2, 3 = NH3, 4 = SH1-2, 5 = SH3}}
 
-\item{F14C}{Radiocarbon ages can be provided as F14C values. If doing so, please indicate here which dates were entered as F14C (e.g., if the first 4 dates are in F14C, write \code{F14C=1:4}). The F14C values in your .csv file will then be replaced by their corresponding C14 ages.}
+\item{F14C}{Radiocarbon ages can be provided as F14C values. If doing so (for example if some of your dates are modern/postbomb), please indicate here which dates were entered as F14C (e.g., if the first 4 dates are in F14C, write \code{F14C=1:4}). The F14C values in your core's .csv file will then be replaced by their corresponding C14 ages.}
 
-\item{pMC}{Radiocarbon ages can be provided as pMC values. If doing so, please indicate here which dates were entered as pMC (e.g., if the first 4 dates are in pMC, write \code{pMC=1:4}). The pMC values in your .csv file will then be replaced by their corresponding C14 ages.}
+\item{pMC}{Radiocarbon ages can be provided as pMC values. If doing so, please indicate here which dates were entered as pMC (e.g., if the first 4 dates are in pMC, write \code{pMC=1:4}). The pMC values in your core's .csv file will then be replaced by their corresponding C14 ages.}
+
+\item{hot.stop}{Stop with a warning if provided F14C or pMC values (see above) are negative or above 3 resp. 300. Defaults to \code{hot.stop=TRUE}.}
 
 \item{delta.R}{Mean of core-wide age offsets (e.g., regional marine offsets).}
 
@@ -175,7 +188,9 @@ For symmetry reasons, t.a must always be equal to t.b-1.}
 
 \item{suggest}{If initial analysis of the data indicates abnormally slow or fast accumulation rates, Bacon will suggest to change the prior.}
 
-\item{accept.suggestions}{Automatically accept the suggested values. Use with care. Default \code{accept.suggestions=FALSE}.
+\item{accept.suggestions}{Automatically accept the suggested values. Use with care. Default \code{accept.suggestions=FALSE}.}
+
+\item{adjust.dby}{Automatically adjust d.by to a value smaller than thick. Defaults to \code{adjust.dby=TRUE}.
 Also, if the length of the core would cause too few or too many sections with the default settings, Bacon will suggest an alternative section thickness \code{thick}.
 Accept these suggested alternative settings by typing "y" (or "yes please" if you prefer to be polite), or leave as is by typing "n" (or anything else, really). To get rid of these suggestions, use \code{suggest=FALSE}.}
 
@@ -222,6 +237,10 @@ try running your core again with \code{remember=FALSE}, or, start cleanly by typ
 
 \item{plot.pdf}{Produce a pdf file of the age-depth plot. Defaults to \code{plot.pdf=TRUE} after a Bacon run.}
 
+\item{quartz}{Use quartz-based pdf plots if available (on Mac OS). Defaults to FALSE.}
+
+\item{cairo}{Use cairo-based pdf plots if available (on Mac OS). Defaults to FALSE.}
+
 \item{dark}{Darkness of the greyscale age-depth model. The darkest grey value is \code{dark=1} by default.
 Lower values will result in lighter grey but values >1 are not allowed.}
 
@@ -243,6 +262,8 @@ Lower values will result in lighter grey but values >1 are not allowed.}
 
 \item{verbose}{Provide feedback on what is happening (default \code{verbose=TRUE}).}
 
+\item{use.cpp}{Whether or not to use a cpp function to calculate the ages. Defaults to TRUE, but can be set to FALSE (much slower but less experimental)}
+
 \item{...}{options for the age-depth graph. See \link{agedepth} and \link{calib.plot}}
 }
 \value{
@@ -260,7 +281,7 @@ and through millions of Markov Chain Monte Carlo (MCMC) iterations estimates
 the accumulation rate (in years/cm; so more correctly, sedimentation times) for each of these sections.
 Combined with an estimated starting date for the first section, these accumulation rates then form the age-depth model.
 The accumulation rates are constrained by prior information on the accumulation rate (\code{acc.mean, acc.shape}) and its
-variability between neighbouring depths, or "memory" (\code{mem.mean, mem.strength}). Hiatuses can be introduced as well, also constrained by prior information (\code{hiatus.max}).
+variability between neighbouring depths, or "memory" (\code{mem.mean, mem.strength}). Hiatuses can be introduced as well, also constrained by prior information (\code{hiatus.mean, hiatus.shape}).
 
 Although Bacon works with any kind of absolute dates (e.g., OSL, tephra or other dates on a calendar scale),
 it is often used to age-model 14C-dated sequences. Radiocarbon dates should be calibrated using either IntCal20

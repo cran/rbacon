@@ -2,7 +2,7 @@
 % Please edit documentation in R/read_write.R
 \name{set.initvals}
 \alias{set.initvals}
-\title{Set initial values for the Bacon MCMC run.}
+\title{set initial values for the Bacon MCMC run}
 \usage{
 set.initvals(set = get("info"), core = set$core, values = c(), click = 1)
 }

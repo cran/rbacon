@@ -2,14 +2,16 @@
 % Please edit documentation in R/MCMC.R
 \name{MCMC.diagnostics}
 \alias{MCMC.diagnostics}
-\title{Test mixing and stationarity of the MCMC run}
+\title{test mixing and stationarity of the MCMC run}
 \usage{
-MCMC.diagnostics(set = get("info"), ssize = nrow(set$output))
+MCMC.diagnostics(set = get("info"), ssize = nrow(set$output), talk = TRUE)
 }
 \arguments{
 \item{set}{Detailed information of the current run, stored within this session's memory as variable \code{info}.}
 
 \item{ssize}{Number of MCMC iterations.}
+
+\item{talk}{Whether or not to provide feedback. Defaults to TRUE.}
 }
 \value{
 The 'ess' and 'z' scores, together with an evaluation of the values.

@@ -2,7 +2,7 @@
 % Please edit documentation in R/agedepth.R
 \name{agedepth}
 \alias{agedepth}
-\title{Plot an age-depth model}
+\title{plot an age-depth model}
 \usage{
 agedepth(
   set = get("info"),
@@ -28,11 +28,12 @@ agedepth(
   age.max = c(),
   yr.max = age.max,
   hiatus.option = 1,
-  dark = c(),
+  dark = 1,
+  darkest = 1,
   prob = set$prob,
   rounded = c(),
-  d.res = 400,
-  age.res = 400,
+  d.res = 500,
+  age.res = 500,
   yr.res = age.res,
   date.res = 100,
   rotate.axes = FALSE,
@@ -73,6 +74,8 @@ agedepth(
   MCMC.resample = TRUE,
   hiatus.col = grey(0.5),
   hiatus.lty = "12",
+  from.col = "white",
+  to.col = "black",
   rgb.scale = c(0, 0, 0),
   rgb.res = 100,
   slump.col = grey(0.8),
@@ -101,8 +104,18 @@ agedepth(
   xaxs = "r",
   yaxs = "i",
   MCMC.col = grey(0.4),
-  post.col = grey(0.8),
-  post.border = grey(0.4),
+  post.col = rgb(0, 0, 0, 0.2),
+  post.border = rgb(0, 0, 0, 0.4),
+  acc.post.col = c(),
+  acc.post.border = c(),
+  mem.post.col = c(),
+  mem.post.border = c(),
+  hiatus.post.col = c(),
+  hiatus.post.border = c(),
+  phi.post.col = c(),
+  phi.post.border = c(),
+  s.post.col = c(),
+  s.post.border = c(),
   prior.col = 3,
   prior.lwd = 2,
   prior.fontcol = 2,
@@ -126,12 +139,16 @@ agedepth(
   plot.pb = TRUE,
   pb.lty = 1,
   plot.pdf = FALSE,
+  quartz = FALSE,
+  cairo = FALSE,
   dates.only = FALSE,
   model.only = FALSE,
   verbose = TRUE,
   roundby = 2,
   save.info = set$save.info,
-  ssize = 4000
+  write.summary = TRUE,
+  ssize = 4000,
+  use.cpp = TRUE
 )
 }
 \arguments{
@@ -184,7 +201,9 @@ and its name should start with the core's name and end with '_depths.txt'. Then 
 
 \item{hiatus.option}{How to calculate accumulation rates and ages for sections with hiatuses. Either extrapolate from surrounding sections (default, \code{hiatus.option=1}), use a w-weighted mix between the prior and posterior values for depths below the hiatus and prior information only for above the hiatus (\code{hiatus.option=2}), or use the originally calculated slopes (\code{hiatus.option=0}).}
 
-\item{dark}{Darkness of the greyscale age-depth model. By default, the darkest grey value is calculated as 10 times the height of the lowest-precision age estimate \code{dark=c()}. Lower values will result in lighter grey but values >1 are not allowed.}
+\item{dark}{The value beyond which any higher values will be clipped. Set to 1 by default. This can be set to lower values if for example only a very small area in the plot obtains the darkest values - then lowering the `dark` value will darker a larger area.}
+
+\item{darkest}{The darkest grey value is darkest=1 by default; lower values will result in lighter maximum colours; values >1 are not advised.}
 
 \item{prob}{Confidence interval to report (between 0 and 1, default 0.95 or 95\%).}
 
@@ -274,9 +293,13 @@ and its name should start with the core's name and end with '_depths.txt'. Then 
 
 \item{hiatus.lty}{The line type of the depths of any hiatuses. Default \code{hiatus.lty=12}.}
 
-\item{rgb.scale}{The function to produce a coloured representation of all age-models. Needs 3 values for the intensity of red, green and blue. Defaults to grey-scales: \code{rgb.scale=c(0,0,0)}, but could also be, say, scales of red (\code{rgb.scale=c(1,0,0)}).}
+\item{from.col}{Starting colour of the gradient for the ghost plot of the age-depth model. Defaults to \code{from.col="white"}.}
 
-\item{rgb.res}{Resolution of the colour spectrum depicting the age-depth model. Default \code{rgb.res=100}.}
+\item{to.col}{Colour of the gradient for the ghost plot of the age-depth model. Defaults to a greyscale, \code{to.col="black"}.}
+
+\item{rgb.scale}{As alternative to 'from.col' and 'to.col', rgb.scale can be used to produce a coloured representation of all age-models. Needs 3 values for the intensity of red, green and blue. Defaults to grey-scales: \code{rgb.scale=c(0,0,0)}, but could also be, say, scales of red (\code{rgb.scale=c(1,0,0)}).}
+
+\item{rgb.res}{Resolution of the colour spectrum depicting the age-depth model, if using 'rgb.scale'. Default \code{rgb.res=100}.}
 
 \item{slump.col}{Colour of slumps. Defaults to \code{slump.col=grey(0.8)}.}
 
@@ -330,13 +353,33 @@ and its name should start with the core's name and end with '_depths.txt'. Then 
 
 \item{MCMC.col}{Colour of the MCMC output. Defaults to \code{post.col=grey(0.4))}.}
 
-\item{post.col}{Colour of the posterior histogram. Defaults to \code{post.col=grey(0.8))}.}
+\item{post.col}{Colour of the posterior histogram. Defaults to \code{post.col=grey(0.8))}. In case of hiatuses/boundaries, you can provide colours for the individual sections, e.g., post.col=c(2,3,4).}
 
-\item{post.border}{Colour of the posterior border. Defaults to \code{post.border=grey(0.4))}.}
+\item{post.border}{Colour of the posterior border. Defaults to \code{post.border=grey(0.4))}.  In case of hiatuses/boundaries, you can provide colours for the individual sections, e.g., post.col=c(2,3,4).}
 
-\item{prior.col}{Colour of the prior curve. Defaults to light green, \code{prior.col=3)}.}
+\item{acc.post.col}{Colour of the posterior of the accumulation rate (yr/cm). Defaults to \code{post.col=grey(0.8))}. Multiple colours can be provided. See post.col.}
 
-\item{prior.lwd}{Line width of the prior curve. Defaults to \code{prior.lwd=2)}.}
+\item{acc.post.border}{Colour of the posterior border of the accumulation rate (yr/cm). Defaults to \code{post.border=grey(0.4))}. Multiple colours can be provided. See post.border.}
+
+\item{mem.post.col}{Colour of the posterior of the memory. Defaults to \code{post.col=grey(0.8))}. See post.col.}
+
+\item{mem.post.border}{Colour of the posterior of the memory. Defaults to \code{post.border=grey(0.4))}. See post.border.}
+
+\item{hiatus.post.col}{Colour of the posterior of the hiatus length. Defaults to \code{post.col=grey(0.8))}. Multiple colours can be provided. See post.col.}
+
+\item{hiatus.post.border}{Colour of the border of the hiatus length. Defaults to \code{post.border=grey(0.4))}. Multiple colours can be provided. See post.border.}
+
+\item{phi.post.col}{Colour of the posterior of the 210Pb influx phi. Defaults to \code{post.col=grey(0.8))}. See post.col.}
+
+\item{phi.post.border}{Colour of the posterior border of the 210Pb influx phi. Defaults to \code{post.border=grey(0.4))}. See post.border.}
+
+\item{s.post.col}{Colour of the posterior of the supported 210Pb. Defaults to \code{post.col=grey(0.8))}. See post.col.}
+
+\item{s.post.border}{Colour of the border of the posterior supported 210Pb. Defaults to \code{post.border=grey(0.4))}. See post.border.}
+
+\item{prior.col}{Colour of the prior curves. Defaults to light green, \code{prior.col=3)}.}
+
+\item{prior.lwd}{Line width of the prior curves. Defaults to \code{prior.lwd=2)}.}
 
 \item{prior.fontcol}{Colour of the font accompanying the posterior histograms. Defaults to red, \code{prior.fontcol=2)}.}
 
@@ -380,6 +423,10 @@ and its name should start with the core's name and end with '_depths.txt'. Then 
 
 \item{plot.pdf}{Produce a pdf file of the age-depth plot.}
 
+\item{quartz}{Use quartz-based pdf plots if available (on Mac OS). Defaults to FALSE.}
+
+\item{cairo}{Use cairo-based pdf plots if available (on Mac OS). Defaults to FALSE.}
+
 \item{dates.only}{By default, the age-depth model is plotted on top of the dates. This can be avoided by supplying \code{dates.only=TRUE}.}
 
 \item{model.only}{By default, panels showing the MCMC iterations and the priors and posteriors for accumulation rate and memory are plotted above the main age-depth model panel. This can be avoided by supplying \code{model.only=TRUE}. Note however that this removes relevant information to evaluate the age-depth model, so we do recommend to present age-models together with these upper panels.}
@@ -390,7 +437,11 @@ and its name should start with the core's name and end with '_depths.txt'. Then 
 
 \item{save.info}{By default, a variable called `info' with relevant information about the run (e.g., core name, priors, settings, ages, output) is saved into the working directory. Note that this will overwrite any existing variable with the same name - as an alternative, one could run, e.g., \code{myvar <- Bacon()}, followed by supplying the variable \code{myvar} in any subsequent commands.}
 
+\item{write.summary}{Whether or not to write a file to the core's folder, which summarizes the run (MCMC, model fit, priors, posteriors, learning).}
+
 \item{ssize}{Number of MCMC iterations to use.}
+
+\item{use.cpp}{Whether or not to use a cpp function to calculate the ages. Defaults to TRUE, but can be set to FALSE (much slower but less experimental)}
 }
 \value{
 A plot of the age-depth model, and estimated ages incl. confidence ranges for each depth.

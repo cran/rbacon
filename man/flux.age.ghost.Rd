@@ -2,18 +2,27 @@
 % Please edit documentation in R/accrate.R
 \name{flux.age.ghost}
 \alias{flux.age.ghost}
-\title{Plot flux rates for proxies.}
+\title{plot flux rates for proxies}
 \usage{
 flux.age.ghost(
-  proxy = 1,
-  age.lim = c(),
-  yr.lim = age.lim,
-  age.res = 400,
-  yr.res = age.res,
-  set = get("info"),
+  column = 1,
   flux = c(),
+  set = get("info"),
+  coredir = set$coredir,
+  remove.hiatuses = TRUE,
+  age.lab = c(),
+  age.lim = c(),
+  age.rev = FALSE,
+  age.res = 500,
+  age.compress = -0.01,
+  flux.lim = c(),
+  flux.rev = FALSE,
+  flux.lab = "flux (proxy/yr)",
+  flux.res = 500,
+  BCAD = set$BCAD,
+  prob = 0.95,
+  clip.prob = 0.99,
   plot.range = TRUE,
-  prob = 0.8,
   range.col = grey(0.5),
   range.lty = 2,
   plot.mean = TRUE,
@@ -22,97 +31,87 @@ flux.age.ghost(
   plot.median = TRUE,
   median.col = "blue",
   median.lty = 2,
-  flux.lim = c(),
-  flux.lab = expression("flux (g cm"^-1 * " yr"^-1 * ")"),
-  upper = 0.95,
-  rgb.scale = c(0, 0, 0),
-  rgb.res = 100,
-  dark = set$dark,
-  cutoff = 0.001,
-  BCAD = set$BCAD,
-  age.lab = c(),
-  yr.lab = age.lab,
+  flux.cols = col.scales(256, "white", "black", darkest = darkest),
+  dark = 0.9,
+  darkest = 1,
   rotate.axes = FALSE,
-  rev.flux = FALSE,
-  rev.age = FALSE,
-  rev.yr = rev.age,
   use.raster = FALSE,
-  flip.age = FALSE,
-  flip.flux = FALSE
+  xaxs = "i",
+  yaxs = "i",
+  bty = "l"
 )
 }
 \arguments{
-\item{proxy}{Which proxy to use (counting from the column number in the .csv file after the depths column).}
+\item{column}{Which proxy to use (counting from the column number in the .csv file after the depths column).}
 
-\item{age.lim}{Minimum and maximum calendar age ranges, calculated automatically by default (\code{age.lim=c()}).}
-
-\item{yr.lim}{Deprecated - use age.lim instead}
-
-\item{age.res}{Resolution or amount of greyscale pixels to cover the age scale of the plot. Default \code{age.res=200}.}
-
-\item{yr.res}{Deprecated - use age.res instead}
+\item{flux}{Instead of using a file, the data can also be provided as a variable. The first column should be the depths, and the variable 'column' should indicate which column (after the depth column) contains the proxy of interest. For example, if using Plum we could produce a greyscale of the mass accumulation rate: myflux <- info$detsPlum[,c(4,6)];}
 
 \item{set}{Detailed information of the current run, stored within this session's memory as variable info.}
 
-\item{flux}{Define a flux variable within the R session (consisting of depths and their proxy concentrations in two columns) and provide the name of this variable, e.g.:
-\code{flux.age.ghost(flux=flux1)}. If left empty (\code{flux=c()}), a flux file is expected (see \code{proxy}).}
+\item{coredir}{Folder where the core's files \code{core} are and/or will be located. This will be a folder with the core's name, within either the folder \code{coredir='Bacon_runs/'}, or the folder Cores/ if it already exists within R's working directory, or a custom-built folder. For example, use \code{coredir="."} to place the core's folder within the current working directory, or \code{coredir="F:"} if you want to put the core's folder and files on a USB drive loaded under F:.}
 
-\item{plot.range}{Plot curves that indicate a probability range, at resolution of yr.res.}
-
-\item{prob}{Probability range, defaults to \code{prob=0.8} (10 \% at each side).}
-
-\item{range.col}{Red seems nice.}
-
-\item{range.lty}{Line type of the confidence ranges.}
-
-\item{plot.mean}{Plot the mean fluxes.}
-
-\item{mean.col}{Red seems nice.}
-
-\item{mean.lty}{Line type of the means.}
-
-\item{plot.median}{Plot the median fluxes.}
-
-\item{median.col}{Blue seems nice.}
-
-\item{median.lty}{Line type of the medians.}
-
-\item{flux.lim}{Limits of the flux axes.}
-
-\item{flux.lab}{Axis labels. Defaults to \code{flux.lab="flux"}.}
-
-\item{upper}{Maximum flux rates to plot. Defaults to the upper 99\%; \code{upper=0.99}.}
-
-\item{rgb.scale}{The function to produce a coloured representation of all age-models. Needs 3 values for the intensity of red, green and blue. Defaults to grey-scales: \code{rgb.scale=c(0,0,0)}, but could also be, say, scales of red (\code{rgb.scale=c(1,0,0)}).}
-
-\item{rgb.res}{Resolution of the colour spectrum depicting the age-depth model. Default \code{rgb.res=100}.}
-
-\item{dark}{The darkest grey value is \code{dark=1} by default; lower values will result in lighter grey but \code{values >1} are not allowed.}
-
-\item{cutoff}{Point below which colours will no longer be printed. Default \code{cutoff=0.001}.}
-
-\item{BCAD}{The calendar scale of graphs and age output-files is in \code{cal BP} by default, but can be changed to BC/AD using \code{BCAD=TRUE}.}
+\item{remove.hiatuses}{Hiatuses will affect apparent accumulation rates within sections. Therefore, by default the hiatus jumps will be removed from the accumulation rates within sections containing hiatuses.}
 
 \item{age.lab}{The labels for the calendar axis (default \code{age.lab="cal BP"} or \code{"BC/AD"} if \code{BCAD=TRUE}).}
 
-\item{yr.lab}{Deprecated - use age.lab instead}
+\item{age.lim}{Minimum and maximum calendar age ranges, calculated automatically by default (\code{age.lim=c()}).}
+
+\item{age.rev}{The direction of the age axis can be reversed using \code{age.rev=TRUE}.}
+
+\item{age.res}{Resolution or amount of greyscale pixels to cover the age scale of the plot. Default \code{age.res=500}.}
+
+\item{age.compress}{Since the bottom and top edges of age-models often show weird flux behaviour, the top and bottom half are shaved off by default (1\%, \code{age.compress=-0.01}).}
+
+\item{flux.lim}{Limits of the flux axes.}
+
+\item{flux.rev}{The flux axis can be reversed with \code{flux.rev=TRUE}.}
+
+\item{flux.lab}{Axis labels. Defaults to \code{flux.lab="flux"}.}
+
+\item{flux.res}{Resolution or amount of greyscale pixels to cover the flux scale of the plot. Default \code{flux.res=500}.}
+
+\item{BCAD}{The calendar scale of graphs and age output-files is in \code{cal BP} by default, but can be changed to BC/AD using \code{BCAD=TRUE}.}
+
+\item{prob}{Probability for the flux ranges; defaults to \code{prob=0.95}.}
+
+\item{clip.prob}{Since some iterations show very high flux values, it is useful to clip the top values. Defaults to \code{clip.prob=0.975}.}
+
+\item{plot.range}{Plot curves that indicate a probability range.}
+
+\item{range.col}{Grey seems nice (default \code{range.col=grey(0.5)}).}
+
+\item{range.lty}{Line type of the flux ranges. Defaults to dashed, \code{range.lty=2}.}
+
+\item{plot.mean}{Plot the mean fluxes. Default TRUE.}
+
+\item{mean.col}{Red seems nice.}
+
+\item{mean.lty}{Line type of the means. Defaults to dashed, \code{range.lty=2}.}
+
+\item{plot.median}{Plot the median fluxes. Default TRUE}
+
+\item{median.col}{Blue seems nice.}
+
+\item{median.lty}{Line type of the medians. Defaults to dashed, \code{range.lty=2}.}
+
+\item{flux.cols}{Colour of the flux ghost graph. Defaults to greyscales, \code{flux.cols=gray.colors(256, start=darkest, end=0)}.}
+
+\item{dark}{Any (normalised) flux value above this threshold is set to the threshold; default is \code{dark=0.9}.}
+
+\item{darkest}{The darkest value. Set to 1 for the darkest colour to be black if using a greyscale.}
 
 \item{rotate.axes}{The default of plotting calendar year on the horizontal axis and fluxes on the vertical one can be changed with \code{rotate.axes=TRUE}.}
 
-\item{rev.flux}{The flux axis can be reversed with \code{rev.flux=TRUE}.}
+\item{use.raster}{Rasters can be aligned or not in the underlying image function. By default, we use \code{use.raster=FALSE}. This takes a bit longer to draw and sometimes causes strange lines owing to anti-aliasing.}
 
-\item{rev.age}{The direction of the age axis can be reversed using \code{rev.age=TRUE}.}
+\item{xaxs}{Limits of the horizontal axis. By default does not extend, \code{xaxs="i"}.}
 
-\item{rev.yr}{Deprecated - use rev.age instead}
+\item{yaxs}{Limits of the vertical axis. By default does not extend, \code{yaxs="i"}.}
 
-\item{use.raster}{Rasters can be aligned or not in the underlying image function. By default, we use \code{use.raster=FALSE}. This takes a bit longer to draw and sometimes causes strange lines owing to anti-aliasing. Therefore, \code{use.raster=TRUE} would be preferable, however on some devices this causes greyscales to 'flip'. If this is the case, use 'flip.flux=TRUE' or 'flip.age=TRUE'.}
-
-\item{flip.age}{When using \code{use.raster=TRUE}, sometimes greyscales are flipped. If this is the case, see if setting \code{flip.age=TRUE} solves this.}
-
-\item{flip.flux}{When using \code{use.raster=TRUE}, sometimes greyscales are flipped. If this is the case, see if setting \code{flip.acc=TRUE} solves this.}
+\item{bty}{Type of box to plot around the graph. Defaults to L-shaped, \code{bty="l"}.}
 }
 \value{
-A plot of flux rates.
+A plot of flux rates, and the underlying greyscales, means, medians and ranges (invisibly).
 }
 \description{
 Plot grey-scale representation of estimated flux rates for proxies against calendar age.

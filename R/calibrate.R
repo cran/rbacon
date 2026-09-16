@@ -9,10 +9,12 @@
 #' @param sdev Reported error of the date. Can be multiple dates.
 #' @param depth Depth of the date.
 #' @param cc The calibration curve to use: \code{cc=1} for IntCal20 (northern hemisphere terrestrial), \code{cc=2} for Marine20 (marine), \code{cc=0} for none (dates that are already on the cal BP scale).
-#' @param set Detailed information of the current run, stored within this session's memory as variable \code{info}.
+#' @param BCAD The calendar scale is in cal BP by default, but can be changed to BC/AD using \code{BCAD=TRUE}.
 #' @param above Threshold for plotting of probability values. Defaults to \code{above=1e-3}.
 #' @param postbomb Use a postbomb curve for negative (i.e. postbomb) 14C ages. \code{0 = none, 1 = NH1, 2 = NH2, 3 = NH3, 4 = SH1-2, 5 = SH3}
 #' @param normal By default, Bacon uses the t-distribution (Christen and Perez 2009) to treat the dates. Use \code{normal=TRUE} to use the normal/Gaussian distribution. This will generally give higher weight to the dates.
+#' @param is.F Dates can be provided as F14C values. Defaults to \code{is.F=FALSE}.
+#' @param is.pMC Dates can be provided as pMC values. Defaults to \code{is.pMC=FALSE}.
 #' @param delta.R Mean of core-wide age offsets (e.g., regional marine offsets).
 #' @param delta.STD Error of core-wide age offsets (e.g., regional marine offsets).
 #' @param t.a The dates are treated using the t distribution by default (\code{normal=FALSE}).
@@ -33,21 +35,19 @@
 #' @param rotate.axes The default of plotting age on the horizontal axis and event probability on the vertical one can be changed with \code{rotate.axes=TRUE}.
 #' @param mirror Plot the dates as 'blobs'. Set to \code{mirror=FALSE} to plot simple distributions.
 #' @param up Directions of distributions if they are plotted non-mirrored. Default \code{up=TRUE}.
-#' @param BCAD The calendar scale of graphs is in \code{cal BP} by default, but can be changed to BC/AD using \code{BCAD=TRUE}.
 #' @param pch The shape of any marker to be added to the date. Defaults to a cross, \code{pch=4}. To leave empty, use \code{pch=NA}.
 #' @param cc.dir Directory where the calibration curves for C14 dates \code{cc} are located. By default \code{cc.dir=c()}.
 #' @author Maarten Blaauw, J. Andres Christen
 #' @return A date's distribution, added to an age-depth plot.
 #' @examples
 #' \donttest{
-#'   Bacon(run=FALSE, coredir=tempfile())
-#'   agedepth()
+#'   plot(0, type="n", xlim=c(0, 100), ylim=c(0, 8000))
 #'   add.dates(5000, 100, 60)
 #' }
 #' @export
-add.dates <- function(mn, sdev, depth, cc=1, set=get('info'), above=1e-6, postbomb=0, normal=TRUE, delta.R=0, delta.STD=0, t.a=set$t.a, t.b=set$t.b, date.res=100, height=1, calheight=1, agesteps=1, cutoff=0.005, col=rgb(1,0,0,.5), border=rgb(1,0,0,.5), rotate.axes=FALSE, mirror=TRUE, up=TRUE, BCAD=FALSE, pch=4, cc.dir=c()) {
+add.dates <- function(mn, sdev, depth, cc=1, BCAD=FALSE, above=1e-6, postbomb=0, normal=TRUE, is.F=FALSE, is.pMC=FALSE, delta.R=0, delta.STD=0, t.a=3, t.b=4, date.res=100, height=1, calheight=1, agesteps=1, cutoff=0.005, col=rgb(1,0,0,.5), border=rgb(1,0,0,.5), rotate.axes=FALSE, mirror=TRUE, up=TRUE, pch=4, cc.dir=c()) {
 
-  dists <- draw.dates(mn-delta.R, sqrt(sdev^2+delta.STD^2), depth, cc=cc, postbomb=postbomb, normal=normal, t.a=t.a, t.b=t.b, dist.res=date.res, ex=height, threshold=cutoff, col=col, border=border, draw.hpd=FALSE, rotate.axes=!rotate.axes, mirror=mirror, up=up, cc.dir=cc.dir, add=TRUE, BCAD=BCAD)
+  dists <- rice::draw.dates(mn-delta.R, sqrt(sdev^2+delta.STD^2), depth, cc=cc, BCAD=BCAD, is.F=is.F, is.pMC=is.pMC, postbomb=postbomb, normal=normal, t.a=t.a, t.b=t.b, dist.res=date.res, ex=height, threshold=cutoff, col=col, border=border, draw.hpd=FALSE, rotate.axes=!rotate.axes, mirror=mirror, up=up, cc.dir=cc.dir, add=TRUE)
 
   if(length(pch) > 0) {
     best <- c()
@@ -106,25 +106,13 @@ add.dates <- function(mn, sdev, depth, cc=1, set=get('info'), above=1e-6, postbo
 calib.plot <- function(set=get('info'), dets=set$dets, accordion=c(), BCAD=set$BCAD, cc=set$cc, rotate.axes=FALSE, rev.d=FALSE, rev.age=FALSE, rev.yr=rev.age, age.lim=c(), yr.lim=age.lim, date.res=100, d.lab=c(), age.lab=c(), yr.lab=age.lab, height=1, calheight=1, ex=1, mirror=TRUE, up=TRUE, cutoff=.1, C14.col=rgb(0,0,1,.5), C14.border=rgb(0,0,1,.75), cal.col=rgb(0,.5,.5,.5), cal.border=rgb(0,.5,.5,.75), dates.col=c(), slump.col=grey(0.8), new.plot=TRUE, plot.dists=TRUE, same.heights=FALSE) {
   
   # we have to set ka (kcal?) as an option as well
-
-  #dets <- set$dets # should this be set$detsBacon (if it exists)?
-  d.R <- 0; d.STD <- 0
-  t.a <- set$t.a; t.b <- set$t.b
   cc <- rep(cc, nrow(dets))
-  if(ncol(dets) > 4) {
-    cc <- dets[,5]
-    if(ncol(dets) >= 7) {
-      d.R <- dets[,6]
-      d.STD <- dets[,7] 
-    }
-    if(ncol(dets) > 7) {
-      t.a <- dets[,8]
-      t.b <- dets[,9]
-    }
-  }
+  if(ncol(dets) > 4)
+    cc <- dets[,5] 
 
   if(length(age.lim) == 0)
-    lims <- c()
+    lims <- c() else
+      lims <- age.lim
   for(i in 1:length(set$calib$probs))
     lims <- c(lims, set$calib$probs[[i]][,1])
   age.min <- min(lims)
@@ -150,7 +138,7 @@ calib.plot <- function(set=get('info'), dets=set$dets, accordion=c(), BCAD=set$B
   if(length(ex) == 1)
     ex <- rep(ex, nrow(set$dets)) else
   if(length(ex) != nrow(set$dets))
-	  stop("ex should either be 1 value or provided for all dates")
+    stop("ex should either be 1 value or provided for all dates")
 
   if(length(set$slump) > 0)
     if(rotate.axes)
@@ -176,7 +164,7 @@ calib.plot <- function(set=get('info'), dets=set$dets, accordion=c(), BCAD=set$B
       if(BCAD)
         cal[,1] <- calBPtoBCAD(cal[,1])
       if((max(cal[,1]) - min(cal[,1])) > 4*agesteps)
-        cal <- approx(cal[,1], cal[,2], seq(min(cal[,1]), max(cal[,1]), by=agesteps)) else
+        cal <- approx(cal[,1], cal[,2], seq(min(cal[,1], na.rm=TRUE), max(cal[,1], na.rm=TRUE), by=max(.001, agesteps))) else
           cal <- approx(cal[,1], cal[,2], seq(min(cal[,1]), max(cal[,1]), length=100))
       # the above is not ideal because it causes different heights for very precise distributions
 
@@ -191,7 +179,7 @@ calib.plot <- function(set=get('info'), dets=set$dets, accordion=c(), BCAD=set$B
       y = cal[,2]
       y = ex[i]*y[!duplicated(x)]
       x = x[!duplicated(x)]
-      cal <- approx(x, y, seq(min(x), max(x), length= 100)) # tmp but probably not a bad idea
+      cal <- approx(x, y, seq(min(x, na.rm=TRUE), max(x, na.rm=TRUE), length= 100)) # tmp but probably not a bad idea
 
       if(mirror)
         pol <- cbind(c(d-cal$y, d+rev(cal$y)), c(cal$x, rev(cal$x))) else
@@ -201,7 +189,6 @@ calib.plot <- function(set=get('info'), dets=set$dets, accordion=c(), BCAD=set$B
 
       if(rotate.axes)
         pol <- cbind(pol[,2], pol[,1])
-     # if(ncol(set$dets)==4 && cc > 0 || (ncol(set$dets) > 4 && set$dets[i,5] > 0)) {
       if(cc[i] == 0) {
           col <- cal.col
           border <- cal.border
@@ -215,14 +202,14 @@ calib.plot <- function(set=get('info'), dets=set$dets, accordion=c(), BCAD=set$B
        if(length(dates.col) == 1) {
          col <- dates.col
          border <- dates.col
-		} else {
+       } else {
             if(length(dates.col) != length(set$calib$probs))
-              stop("dates.col has to be 1 value or have a value for each date")	
+              stop("dates.col has to be 1 value or have a value for each date")
             col <- dates.col[i]
             border <- dates.col[i]
           }  
      }
-	  
+
       polygon(pol, col=col, border=border)
     }
 }
@@ -242,7 +229,6 @@ bacon.calib <- function(dat, set=get('info'), date.res=100, cutoff=0.01, postbom
 
   if(postbomb != 0) {
     bomb <- rintcal::ccurve(postbomb, postbomb=TRUE, glue=FALSE, cc.dir=cc.dir) # glue=FALSE added July 2023
-    # bomb.x <- seq(max(bomb[,1]), min(bomb[,1]), by=-.1) # interpolate
     bomb <- bomb[order(bomb[,1], decreasing=FALSE),]
     bomb.x <- seq(min(bomb[,1]), max(bomb[,1]), by=.1) # interpolate
     bomb.y <- approx(bomb[,1], bomb[,2], bomb.x)$y
@@ -259,8 +245,9 @@ bacon.calib <- function(dat, set=get('info'), date.res=100, cutoff=0.01, postbom
 
   d.cal <- function(cc, rcmean, w2, t.a, t.b) { # formula updated Oct 2020
     if(set$normal)
-      cal <- cbind(cc[,1], dnorm(cc[,2], rcmean, sqrt(cc[,3]^2+w2))) else
-        cal <- cbind(cc[,1], (t.b + ((rcmean-cc[,2])^2) / (2*(cc[,3]^2 + w2))) ^ (-1*(t.a+0.5))) # t dist
+      cal <- cbind(cc[,1], dnorm(cc[,2], rcmean, sqrt(cc[,3]^2+w2))) else # then t dist
+        cal <- cbind(cc[,1], ((t.b + ((rcmean-cc[,2])^2) / (2*(cc[,3]^2 + w2))) ^ (-1*(t.a+0.5)))/sqrt(cc[,3]^2 + w2) )
+
     cal[,2] <- cal[,2] / sum(cal[,2]) # normalise
     
     above <- which(cal[,2]/max(cal[,2]) > cutoff)
@@ -293,7 +280,7 @@ bacon.calib <- function(dat, set=get('info'), date.res=100, cutoff=0.01, postbom
     if(length(dets) >= 9) { # the user provided t.a and t.b values for each date
       t.a <- dets[8]
       t.b <- dets[9]
-      if(round(t.b-t.a) != 1)
+      if(round(is.numeric(t.b-t.a)) != 1) # added is.numeric June 2026
         stop("t.b - t.a should always be 1, check the manual", call.=FALSE)
     }
     calib$probs[[i]] <- d.cal(calcurve, dets[2]-delta.R, dets[3]^2+delta.STD^2, t.a, t.b)

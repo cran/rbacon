@@ -868,12 +868,11 @@ public:
 				nm, y, std, x, deltaR, deltaSTD, a, b, cc->Name());
 	}
 
+    // calculate the (-log of) cumulative probability distribution
 	double U(double theta) {
-        cc->cal(theta);
-
-        double sigma = sqrt(vr + sqr(cc->GetSig()));
-        
-        return -log(1.0-NorF((y - cc->GetMu())/sigma));
+        cc->cal(theta); 
+        double sigma = sqrt(vr + sqr(cc->GetSig())); // combined error
+        return -log(1.0-NorF((y - cc->GetMu())/sigma)); // getMu finds the mu of theta
     }
 	double Ut(double theta) { 
         /* Not yet implemented, the student-t cdf:
@@ -894,15 +893,14 @@ public:
 				nm, y, std, x, deltaR, deltaSTD, a, b, cc->Name());
 	}
 
+    // calculate the (-log of) cumulative probability distribution
 	double U(double theta) {
         cc->cal(theta);
-
-        double sigma = sqrt(vr + sqr(cc->GetSig()));
-        
+        double sigma = sqrt(vr + sqr(cc->GetSig())); 
         return -log(NorF((y - cc->GetMu())/sigma));
     }
 	double Ut(double theta) { 
-        /* Not yet implemented, the stydent-t cdf:
+        /* Not yet implemented, the student-t cdf:
         return -log(1.0-StTF((y - cc->GetMu())/cc->GetSig())); }
         we will use a Gaussian as above */
         return U(theta);

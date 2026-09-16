@@ -9,6 +9,14 @@
 Bacon produces Bayesian age-depth models from dated deposits, reconstructing Bayesian 
 accumulation histories through combining radiocarbon and other dates with prior information (Blaauw and Christen, 2011).
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/Maarten14C/rbacon}
+  \item \url{https://CRAN.R-project.org/package=rbacon}
+}
+
+}
 \author{
 Maarten Blaauw <maarten.blaauw@qub.ac.uk> J. Andres Christen <jac@cimat.mx>
 }

@@ -2,13 +2,14 @@
 % Please edit documentation in R/accrate.R
 \name{accrates.core}
 \alias{accrates.core}
-\title{Provide a summary of the estimated accumulation rates for a range of core depths}
+\title{provide a summary of the estimated accumulation rates for a range of core depths}
 \usage{
 accrates.core(
   dseq = c(),
   set = get("info"),
   cmyr = FALSE,
-  na.rm = FALSE,
+  remove.hiatuses = TRUE,
+  na.rm = TRUE,
   probs = c(0.025, 0.16, 0.84, 0.975, 0.5),
   round = 2,
   write = TRUE,
@@ -21,6 +22,8 @@ accrates.core(
 \item{set}{Detailed information of the current run, stored within this session's memory as variable \code{info}.}
 
 \item{cmyr}{Accumulation rates can be calculated in cm/year or year/cm. By default \code{cmyr=FALSE} and accumulation rates are calculated in year per cm.}
+
+\item{remove.hiatuses}{Any hiatuses will affect apparent accumulation rates within sections. Therefore, by default the hiatus jumps will be removed from the accumulation rates within sections containing hiatuses.}
 
 \item{na.rm}{Remove NA entries. These are NOT removed by default, so that always the same amount of iterations is returned.}
 

@@ -2,12 +2,13 @@
 % Please edit documentation in R/accrate.R
 \name{accrate.depth.summary}
 \alias{accrate.depth.summary}
-\title{Provide a summary of the estimated accumulation rates for any depth of a core.}
+\title{provide a summary of the estimated accumulation rates for any depth of a core}
 \usage{
 accrate.depth.summary(
   d,
   set = get("info"),
   cmyr = FALSE,
+  remove.hiatuses = TRUE,
   na.rm = FALSE,
   probs = c(0.025, 0.16, 0.84, 0.975, 0.5)
 )
@@ -19,7 +20,9 @@ accrate.depth.summary(
 
 \item{cmyr}{Accumulation rates can be calculated in cm/year or year/cm. By default \code{cmyr=FALSE} and accumulation rates are calculated in year per cm.}
 
-\item{na.rm}{Remove NA entries. These are NOT removed by default, so that always the same amount of iterations is returned.}
+\item{remove.hiatuses}{Hiatuses will affect apparent accumulation rates within sections. Therefore, by default the hiatus jumps will be removed from the accumulation rates within sections containing hiatuses.}
+
+\item{na.rm}{Remove NA entries. These are NOT removed by default, so that always the same amount of iterations is returned. NAs will however be removed if a core has slumps.}
 
 \item{probs}{The probability ranges to be returned. Defaults to the minima and maxima of the 95\% and 68\% ranges, as well as the median: \code{probs=c(.025, .16, .84, .975, .5)}.}
 }
@@ -27,7 +30,7 @@ accrate.depth.summary(
 A summary of the estimated accumulation rate of the chosen depth: minimum of the 95\% interval, minimum of the 68\% interval, maximum of the 68\% interval, maximum of the 95\% interval, median (i.e., 50\%) and mean.
 }
 \description{
-Obtain a summary (95\% range, 68\% range, median, mean) of the accumulation rates (in years per cm, so actually sedimentation times) as estimated by the MCMC iterations for any depth of a core.
+Obtain a summary (95\% range, 68\% range, 50\%=median, mean) of the accumulation rates (in years per cm, so actually sedimentation times) as estimated by the MCMC iterations for any depth of a core.
 }
 \examples{
 \dontrun{

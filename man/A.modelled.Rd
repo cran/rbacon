@@ -2,7 +2,7 @@
 % Please edit documentation in R/forplum.R
 \name{A.modelled}
 \alias{A.modelled}
-\title{Calculate modelled 210Pb}
+\title{calculate modelled 210Pb}
 \usage{
 A.modelled(
   d.top,

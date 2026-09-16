@@ -216,7 +216,7 @@ Input::Input(char *datafile, int emaxnumofcurves, int maxm, std::string ccdir) {
 			hiatus_pars[3][H] = rpars[3]; //ha
 			hiatus_pars[4][H] = rpars[4]; //hb
 
-      Rprintf("Hiatus at: %f\n", hiatus_pars[0][H]);
+      Rprintf("Hiatus or boundary at: %f\n", hiatus_pars[0][H]);
 
 			H++;
 

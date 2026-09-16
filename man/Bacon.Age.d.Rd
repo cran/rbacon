@@ -2,7 +2,7 @@
 % Please edit documentation in R/calc.R
 \name{Bacon.Age.d}
 \alias{Bacon.Age.d}
-\title{Output all ages for a single depth.}
+\title{output all ages for a single depth}
 \usage{
 Bacon.Age.d(
   d,

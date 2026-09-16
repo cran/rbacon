@@ -23,7 +23,7 @@ library(rbacon)
 # Bacon('RLGH3', acc.mean=50, acc.shape=100)
 
 ## ----eval=FALSE---------------------------------------------------------------
-# Bacon("RLGH3", acc.mean=50, hiatus.depths=125, hiatus.max=1000)
+# Bacon("RLGH3", acc.mean=50, hiatus.depths=125, hiatus.mean=100)
 
 ## ----eval=FALSE---------------------------------------------------------------
 # Bacon("RLGH3", acc.mean=50, slump=c(180, 120, 40, 30))
@@ -37,8 +37,7 @@ library(rbacon)
 # Bacon(accept.suggestions=TRUE)
 
 ## ----eval=FALSE---------------------------------------------------------------
-# allcores <- list.files("Bacon_runs")
-# for(i in allcores)
+# for(i in Bacon_runs())
 #   try(Bacon(i, accept.suggestions=TRUE))
 
 ## ----eval=FALSE---------------------------------------------------------------
@@ -124,4 +123,7 @@ ageranges(10:20)
 ## ----eval=FALSE---------------------------------------------------------------
 # my_fancy_colours <- sample(colours(), nrow(info$dets))
 # agedepth(dates.col=my_fancy_colours)
+
+## ----eval=FALSE---------------------------------------------------------------
+# agedepth(from.col="papayawhip", to.col="saddlebrown")`
 

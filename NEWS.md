@@ -1,11 +1,47 @@
+# rbacon 4.0.0
+
+## new features
+* hiatuses are now constrained by a gamma prior (as in the original Bacon paper, Blaauw & Christen 2011), no longer by a uniform prior. The parameters are hiatus.mean and hiatus.shape. In most cases, the data will be dominant steering the hiatus size. If you are very sure about the prior size of the hiatus, set hiatus.shape to high values such as 10 or 100.
+* calculations of age ranges and age-depth ghost plots are now much faster when using the default `use.cpp=TRUE` in the functions `Bacon`, `agedepth`, `proxy.ghost` and `ageranges`. This option causes the underlying calculations to be done in cpp, not R. This feature is experimental and can be deactivated using `use.cpp=FALSE` in the above functions.
+* colour gradients (ghost plots) in `agedepth` can now also be provided as `from.col` and `to.col`, to choose from one of the >600 colour names within R's function `colours()`. For example, `agedepth(from.col="papayawhip", to.col="saddlebrown")`.
+* when there are hiatuses or boundaries, the posterior accumulation rates below/above the hiatuses/boundaries are plotted as individual histograms - same for hiatuses. Multiple posteriors can also be given their colours, e.g., `agedepth(acc.post.col=c(rgb(1,0,0,.2), rgb(0,1,0,.2)))`.
+* new option `hot.stop` in the `Bacon` function that stops if any provided F14C or pMC values are either negative or above 3 or 300, respectively. Defaults to TRUE.
+* new function `Bacon_runs` which lists the cores available in the Bacon_runs directory. 
+* cleaned up the `flux.age.ghost` function, adding an option to plot ages as BC/AD (the default remains cal BP).
+* any arguments/options that the user provided within the `Bacon()` command can now be retrieved by typing `info$command`.
+
+## improvements
+* `accrate.depth` and related functions now deal better with slumps. Upon invoking a slump, `accrate.depth` no longer reports NAs for the lowermost sections of the piece-wise age-depth model.
+* if a core's .csv file (the one containing the dates) contains invisible spaces, quotation marks or spaces preceding commas (e.g., in the headers), these are now removed.
+* greyscales and axis limits in some plotting functions are now more robust to the range of values (since it's using quantiles instead of max).
+* within the `Bacon()` command, `d.by` is now adjusted automatically if it is larger than `thick`. This can be avoided by setting `adjust.dby=FALSE`.
+* even funnier feedback at the end of MCMC runs.
+* rewrote the function `flux.age.ghost` to make it much faster.
+* the check for `cairo` capabilities of macOS systems has been updated in the `Bacon` function.
+* `add.dates` now has options `BCAD`, `is.F` and `is.pMC`.
+* `agemodel.it` now deals better with hiatuses and slumps.
+* `proxy.ghost` gains the option to plot the median ages (mean ages were already an option).
+* when calculating what proportion of the dates fit within the age-depth model, this is now done by checking for each date if any of its hpd intervals fall within any of the model's hpds (default 95\% confidence ranges).
+* if boundaries or hiatuses are set, the acc.rate and (if present) hiatus panels of the main `agedepth` function now show the posteriors of the multiple sections separately. They can also be coloured separately using for example `post.col=c(3,5)`.
+* supported 210Pb values are now plotted better when `ra.case=2`.
+
+## bug fixes
+* if a depth above/smaller than d.min is provided in 'Bacon.hist', this now fails with a more informative error message. 
+* cleaned up the function `accrate.age.ghost`.
+* `accrate.age` now deals better with hiatuses.
+* now using `rice` version 2.2.1 and `rintcal` version 1.4.0. 
+* `model.dates.hpd` and `model.Pb.hpd` now call rice's `hpd.overlap` function using the option to pad the distributions with 0 at both ends. This avoids problems with open-ended distributions. 
+* cleaned up 'orphan' variables.
+* some more changes to make the plotting of pdfs more robust on different operating systems.
+
 # rbacon 3.5.2
-* removed the ageranges example to avoid the CRAN NOTE about a slow example
+* removed the ageranges example to avoid the CRAN NOTE about a slow example.
 
 # rbacon 3.5.1
-* reduced the runtime of the ageranges examples to avoid the CRAN NOTE
+* reduced the runtime of the ageranges examples to avoid the CRAN NOTE.
 
 # rbacon 3.5.0
-* accrate.age.ghost and accrate.depth.ghost can now be run without saving `info`, e.g. as in: 'mycore <- Bacon(save.info=FALSE, ask=FALSE); layout(1); accrate.depth.ghost(set=mycore)'.
+* accrate.age.ghost and accrate.depth.ghost can now be run without adding the variable `info` to the session, e.g. as in: 'mycore <- Bacon(save.info=FALSE, ask=FALSE); layout(1); accrate.depth.ghost(set=mycore)'.
 * adding delta.R and delta.STD columns to a .csv file was causing an occasional error which has been fixed (reported by Najoua Gharsalli).
 * a new function `ageranges` to summarize age estimates of depths. 
 * a new function `MCMC.diagnostics` which calculates the quality of the MCMC run (we're looking for a high value of 'effective sample size' which indicates good mixing, and a low value of 'z' which indicates a stationary run, without drift).
@@ -26,8 +62,8 @@
 * greyscale 'ghost' plots (`agedepth`, `accrate.depth.ghost`, `accrate.age.ghost`, `proxy.ghost`) should now plot with fewer disturbances such as lines. This is done by setting `useRaster=TRUE` in `image`.
 * if available on your system, 'cairo_pdf' will be used to plot pdfs.
 * after a run, the posteriors (for accumulation rate, memory, and if present hiatus, phi and supported) are now summarized in a message.
-* The heights of the distributions of the dates can now also be set through a variable `ex`, which could either be of length 1, or have a value for each date in the core. This way, some dates can be plotted at different heights. 
-* When running Bacon as `tmp <- Bacon(save.info=FALSE)`, no additional variables beside 'tmp' will be saved in the session. For subsequent calculations, provide 'tmp', e.g. as in `Bacon.hist(20:40, set=tmp)`. The default remains to save an object 'info' to the session, and this object will then be used to make any further calculations using `set=get('info')`. 
+* the heights of the distributions of the dates can now also be set through a variable `ex`, which could either be of length 1, or have a value for each date in the core. This way, some dates can be plotted at different heights. 
+* when running Bacon as `tmp <- Bacon(save.info=FALSE)`, no additional variables beside 'tmp' will be saved in the session. For subsequent calculations, provide 'tmp', e.g. as in `Bacon.hist(20:40, set=tmp)`. The default remains to save an object 'info' to the session, and this object will then be used to make any further calculations using `set=get('info')`. 
 
 # rbacon 3.3.1
 * now uses the updated rice package (which loads the data rintcal package).
@@ -37,7 +73,7 @@
 # rbacon 3.3.0
 * the default file name for cc4 is now "mixed.14C"
 * Bacon can now run without saving the variable 'info' in the session. E.g., one can run mycore <- Bacon() and then query 'mycore' as one would query 'info'.
-* If the dated depths in the .csv file are not in ascending order, this now throws an error (it was a warning, but this caused a subsequent more opaque error).
+* if the dated depths in the .csv file are not in ascending order, this now throws an error (it was a warning, but this caused a subsequent more opaque error).
 * new functions to summarise accumulation rates according for a single depth or age, or for a sequence of depths: accrate.depth.summary, accrate.age.summary and accrates.core().
 * loads the new R package 'rice' to do most of the legwork related to plotting, calculating and calibrating radiocarbon ages. The 'rintcal' package will become a data package with little user-oriented functionality.
 
@@ -57,7 +93,7 @@
 * updated rintcal so that the files containing the NH and SH postbomb curves work as expected
 * added an 'accordion' option to squeeze cores with highly irregularly dated sections (e.g., with a few cm of high-res Pb-210 data combined with much longer but lower-resolution C-14 data). Cores can be 'squeezed' and 'stretched' - please check the documentation of the new 'stretch' function. Use with great care
 * added an option to agedepth called plotatthesedepths, to enable plotting alternative depths (e.g., after using the compress function), for example agedepth(depths=1:100, plotatthesedepths=1.5*(1:100), d.max=200)
-* The upper panels of the accumulation rate, memory, hiatus size, phi and supported (where relevant) gain options to adapt their x/y axis limits
+* the upper panels of the accumulation rate, memory, hiatus size, phi and supported (where relevant) gain options to adapt their x/y axis limits
 * renamed the options MinAge and MaxAge to the hopefully less confusing youngest.age and oldest.age
 * added an option save.ages=TRUE to write a file *_elbowages.txt with the ages for all elbows
 * added function set.initvals() to allow running with preset initial MCMC points
@@ -118,79 +154,79 @@
 * added median curves for accrate.age.ghost and accrate.depth.ghost (as means can be influenced by extreme values)
 
 # rbacon 2.5.1
-* Adapted the default prior for memory to 0.5 (mean) and 10 (strength), to repair a bug with the original bacon c++ code. This default should work with most cores and give similar results to the previous settings for the memory prior
-* Updated c/c++ code (as used in version 2.4.1 with some minor additional updates) 
+* adapted the default prior for memory to 0.5 (mean) and 10 (strength), to repair a bug with the original bacon c++ code. This default should work with most cores and give similar results to the previous settings for the memory prior
+* updated c/c++ code (as used in version 2.4.1 with some minor additional updates) 
 * pMC.age and other IntCal functions should now load as expected (without having to specify, e.g., IntCal::pMC.age)
 * the heights of the calibrated distributions should now scale better according to how precise they are
 * the add.dates function now handles postbomb dates. It can also store the calibrated information using, e.g., tmp <- add.dates(2450,30,20); tmp
-* The greyscale age-depth graph is now more easily exported to external graphics editors, because areas with very low probabilities are now left empty (instead of plotted as white)
+* the greyscale age-depth graph is now more easily exported to external graphics editors, because areas with very low probabilities are now left empty (instead of plotted as white)
 * corrected a bug where ages above d.min received incorrect ages
-* Added an option prior.ticks to show tickmarks and values on the vertical axes of the panels that show the prior distributions. These are not drawn by default, as they don't provide much information and clutter the graphs
-* Added new options title.size and prior.fontsize for the size of the fonts of the core's title and the red information on settings in the top panels, respectively
-* Repaired the functions accrate.depth(), accrate.age(), accrate.depth.ghost() and accrate.age.ghost()
+* added an option prior.ticks to show tickmarks and values on the vertical axes of the panels that show the prior distributions. These are not drawn by default, as they don't provide much information and clutter the graphs
+* added new options title.size and prior.fontsize for the size of the fonts of the core's title and the red information on settings in the top panels, respectively
+* repaired the functions accrate.depth(), accrate.age(), accrate.depth.ghost() and accrate.age.ghost()
 * agemodel.it now treats the upper depth of a core as expected
 
 # rbacon 2.5.0
 * updated src/kernel.cpp and src/twalk.h, to repair a bug in one of the moves ('hop'). This means we can now add the updated MCMC code of version 2.4.0 again and accommodate code to run 210Pb-dated cores (via the package rplum) 
-* Radiocarbon calibration curves are now loaded from the imported IntCal R package, and have been removed from the rbacon package to save space and remove duplication
-* Added option rgb.scale to draw shades of other colours than grey, e.g. red: rgb.scales(1,0,0), for the functions agedepth, accrate.depth.ghost, accrate.age.ghost, proxy.ghost and flux.age.ghost (based on an idea kindly provided by Oliver Wilson).
-* Related to rgb.scale, the resolution of the colours has been renamed from grey.res to rgb.res
+* radiocarbon calibration curves are now loaded from the imported IntCal R package, and have been removed from the rbacon package to save space and remove duplication
+* added option rgb.scale to draw shades of other colours than grey, e.g. red: rgb.scales(1,0,0), for the functions agedepth, accrate.depth.ghost, accrate.age.ghost, proxy.ghost and flux.age.ghost (based on an idea kindly provided by Oliver Wilson).
+* related to rgb.scale, the resolution of the colours has been renamed from grey.res to rgb.res
 * added option 'add' to add proxy.ghost graphs to existing plots (based on an idea by Oliver Wilson)
-* Repaired bug with greyscales accrate.age.ghost
+* repaired bug with greyscales accrate.age.ghost
 * if the file with the dates has been modified more recently than a loaded run (e.g., dates could have been added, removed or changed), then a warning is now given that Bacon.cleanup should be ran
-* Added a new function Bacon.d.Age to provide the depths belonging to a specific modelled age (kindly contributed by Timon Netzel)
-* Depth units are now handled better by the agedepth function
-* New option accept.suggestions, which automatically accepts suggestions regarding acc.rate and thick. Use with caution (this option was kindly suggested by Quinn Asena)
-* By default, a section is now added below the bottom-most dated depth, in order to ensure that the this depth is always taken into account. Defaults to add.bottom=TRUE. 
-* The calibrated distributions should now be of the same size again, so that more precise dates peak more than less precise ones (suggested by Tiffany Napier).
+* added a new function Bacon.d.Age to provide the depths belonging to a specific modelled age (kindly contributed by Timon Netzel)
+* depth units are now handled better by the agedepth function
+* new option accept.suggestions, which automatically accepts suggestions regarding acc.rate and thick. Use with caution (this option was kindly suggested by Quinn Asena)
+* by default, a section is now added below the bottom-most dated depth, in order to ensure that the this depth is always taken into account. Defaults to add.bottom=TRUE. 
+* the calibrated distributions should now be of the same size again, so that more precise dates peak more than less precise ones (suggested by Tiffany Napier).
 
 # rbacon 2.4.3
 * replaced 'cat' with 'message' or 'warning' where possible
 * updated to the IntCal20 calibration curves (Reimer et al., 2020)
 
 # rbacon 2.4.2
-* Reverted the c/c++ code back to that of version 2.3.9.1, owing to problems with the code introduced in version 2.4.0 (posteriors of memory and age-model are apparently too wide)
-* Repaired bug that caused an error when using slumps or boundaries
-* Enhanced behaviour of rotate.axes option
+* reverted the c/c++ code back to that of version 2.3.9.1, owing to problems with the code introduced in version 2.4.0 (posteriors of memory and age-model are apparently too wide)
+* repaired bug that caused an error when using slumps or boundaries
+* enhanced behaviour of rotate.axes option
 
 # rbacon 2.4.1
-* Updated the code to deal with changes in how base-R deals with c() in loops, as suggested by Martin Maechler's e-mail 29 February 2020
+* updated the code to deal with changes in how base-R deals with c() in loops, as suggested by Martin Maechler's e-mail 29 February 2020
 
 # rbacon 2.4.0
-* The MCMC code has been updated to remove bugs and to accommodate runs with the upcoming 'rplum' package for 210Pb dating
-* Added functions which are required to run the 'rplum' package (although 'rbacon' does not require 'rplum' to be installed)
+* the MCMC code has been updated to remove bugs and to accommodate runs with the upcoming 'rplum' package for 210Pb dating
+* added functions which are required to run the 'rplum' package (although 'rbacon' does not require 'rplum' to be installed)
 
 # rbacon 2.3.9.1
-* Added a new option calheight, which acts as a multiplier for the relative height of non-14C dates
-* Set default for y-axis to have no space added after the extreme values (yaxs="i"); x-axis has some space added by default (xaxs="r")
-* Added a bit of space to d.max and d.min in the main age-depth graph, to accommodate age blobs
-* New option kcal, which gives tick marks every 1,000 cal years (default kcal=FALSE)
-* Corrected an error when running a core with 4 columns in the .csv file and cc=0
+* added a new option calheight, which acts as a multiplier for the relative height of non-14C dates
+* set default for y-axis to have no space added after the extreme values (yaxs="i"); x-axis has some space added by default (xaxs="r")
+* added a bit of space to d.max and d.min in the main age-depth graph, to accommodate age blobs
+* new option kcal, which gives tick marks every 1,000 cal years (default kcal=FALSE)
+* corrected an error when running a core with 4 columns in the .csv file and cc=0
 * depth.unit and age.unit now work correctly when provided as options in Bacon or agedepth
-* Corrected a bug where thickness (dC) was sometimes internally set to wrong values
-* Redid hiatuses: If a core has one or more hiatuses, then variables slopes.above and slopes.below are made for each hiatus, and used internally to adapt ages and accumulation rates for each depth below and above a hiatus within a section containing a hiatus. 
-* Slumps, hiatuses and boundaries have gone through a thorough check and should now work better than they did before. Reports of weird behaviour welcome!
-* Renamed info\$d to info\$elbows (internal; for better consistency with the naming of parameters within the Bacon paper)
+* corrected a bug where thickness (dC) was sometimes internally set to wrong values
+* redid hiatuses: If a core has one or more hiatuses, then variables slopes.above and slopes.below are made for each hiatus, and used internally to adapt ages and accumulation rates for each depth below and above a hiatus within a section containing a hiatus. 
+* slumps, hiatuses and boundaries have gone through a thorough check and should now work better than they did before. Reports of weird behaviour welcome!
+* renamed info\$d to info\$elbows (internal; for better consistency with the naming of parameters within the Bacon paper)
 
 # rbacon 2.3.8
 * repaired a bug in cal.h which prevented the postbomb curve postbomb_SH3 from being used
 * repaired bug where the prior for the accumulation rate would not always be drawn entirely
 * Bacon.hist now takes alternative values for prob into account (e.g., prob=.68)
-* The agedepth function now deals better with d.min and d.max values
-* Colours of cal BP dates now as expected when cc=0 is provided as Bacon option 
-* The fit of the dates to the age-model is now reported correctly also when BCAD=TRUE
-* Date distributions should now plot as expected over a wider range of values
-* New option acc.lab to provide alternative label for the accumulation rate axis (top-middle panel of the main agedepth graph)
-* When provided, d.max or d.min are now dealt with better if extra columns are provided for dR/dSTD and/or t.a/t.b in the core's .csv file
-* New options depth.unit (default 'cm') and age.unit (default 'yr'), deprecating the previous poorly named option 'unit' which defaulted to 'cm'. So can now also deal with, e.g., 'Ma' and 'km'
-* Replaced occurrences of yr with the more generic unit of age (deprecate yr.min, yr.max, MinYr, MaxYr)
-* When Bacon asks for confirmation to run a core (Y/n), the user can now simply press Enter instead of having to type y first. Similarly, by default suggestions to adapt the prior accumulation rate are not accepted (y/N)
-* Enhanced drawing of very precise ages (e.g., 1 yr)
+* the agedepth function now deals better with d.min and d.max values
+* colours of cal BP dates now as expected when cc=0 is provided as Bacon option 
+* the fit of the dates to the age-model is now reported correctly also when BCAD=TRUE
+* date distributions should now plot as expected over a wider range of values
+* new option acc.lab to provide alternative label for the accumulation rate axis (top-middle panel of the main agedepth graph)
+* when provided, d.max or d.min are now dealt with better if extra columns are provided for dR/dSTD and/or t.a/t.b in the core's .csv file
+* new options depth.unit (default 'cm') and age.unit (default 'yr'), deprecating the previous poorly named option 'unit' which defaulted to 'cm'. So can now also deal with, e.g., 'Ma' and 'km'
+* replaced occurrences of yr with the more generic unit of age (deprecate yr.min, yr.max, MinYr, MaxYr)
+* when Bacon asks for confirmation to run a core (Y/n), the user can now simply press Enter instead of having to type y first. Similarly, by default suggestions to adapt the prior accumulation rate are not accepted (y/N)
+* enhanced drawing of very precise ages (e.g., 1 yr)
 * Bacon now stops if there are less than 2 sections between neighbouring hiatuses
-* A warning is now given if acc.shape <1 (since this results in weirdly shaped gamma prior distributions)
-* An error is thrown when the core's .csv file has 'orphan' commas (can happen if the file was made in a spreadsheet program - check in a plain-text editor)
+* a warning is now given if acc.shape <1 (since this results in weirdly shaped gamma prior distributions)
+* an error is thrown when the core's .csv file has 'orphan' commas (can happen if the file was made in a spreadsheet program - check in a plain-text editor)
 * add.dates now plots better when mirror=FALSE
-* More consistent error messages
+* more consistent error messages
 
 # rbacon 2.3.7
 * adapted cpp code to allow for more than 10 hiatuses/boundaries (now limited to 50)
@@ -206,12 +242,12 @@
 * corrected behaviour of boundary and hiatus (especially if together with slumps)
 * iterations with age reversals across a hiatus are now removed
 * removed closeAllConnections (suggested by Dewey Dunnington)
-* Added option to change the field separator to mix.curves (suggested by Thomas Dye)
+* added option to change the field separator to mix.curves (suggested by Thomas Dye)
 * MinYr now defaults to the current year (1950 - as.integer(format(Sys.time(), "\%Y")))
 * added option in the scissors function to remove a specific range of iterations (e.g., iterations 400 to 800, or the first/last 300)
 * produced separate R files for groups of functions
 * Bacon now stops if it finds 6 columns with unexpected names in the .csv file. If provided with a delta.R column, Bacon expects a delta.STD column as well. 
-* Added an option dates.col to colour sets of dates (suggestion by Greg Cooper)
+* added an option dates.col to colour sets of dates (suggestion by Greg Cooper)
 * enhancements in bacon.h of MCMC calculations and memory usage 
 
 # rbacon 2.3.4
@@ -230,46 +266,46 @@
 * added a commentary after each run, mentioning the proportion of dates that lie within the age-depth model's range (some sort of 'agreement')
 
 # rbacon 2.3.2
-* Added option boundary, which sets hiatus length to (close to) 0. This leaves the hiatus functionality more or less unchanged, and should cause less confusion with setting hiatus.depths even if no hiatus is desired.
-* Enhanced plotting and age calculation of depths close to hiatuses or boundaries.
-* Ensured more predictable behaviour if R is started in a non-writable directory (e.g. plain, non-Rstudio R on Windows). 
-* Added confidence ranges to accrate.age.ghost and accrate.depth.ghost.
-* Enhanced calculation of mean and median (now based on age distribution, not on a derived histogram).
-* Corrected behaviour of title.location.
-* Corrected many sundry bugs related to plotting, especially with hiatuses or with BCAD=TRUE.
-* Added a `NEWS.md` file to track changes to the package.
+* added option boundary, which sets hiatus length to (close to) 0. This leaves the hiatus functionality more or less unchanged, and should cause less confusion with setting hiatus.depths even if no hiatus is desired.
+* enhanced plotting and age calculation of depths close to hiatuses or boundaries.
+* ensured more predictable behaviour if R is started in a non-writable directory (e.g. plain, non-Rstudio R on Windows). 
+* added confidence ranges to accrate.age.ghost and accrate.depth.ghost.
+* enhanced calculation of mean and median (now based on age distribution, not on a derived histogram).
+* corrected behaviour of title.location.
+* corrected many sundry bugs related to plotting, especially with hiatuses or with BCAD=TRUE.
+* added a `NEWS.md` file to track changes to the package.
 
 # rbacon 2.3.1.1
-* Now a CRAN R package (not called bacon since that name was already taken).
-* Default core directory now Bacon_runs. Other directories can be given, for more flexibility in workflows of users. 
-* Calibration curves can be put in a user-specified directory ccdir (hidden by default).
-* New function copyCalibrationCurve() to copy calibration curves into an R's session.
-* Renamed several options to be more consistent, d.R and d.STD now named delta.R and delta.STD.
-* Can now provide depths to be calculated as a variable, as alternative to using a file with depths.
-* Added option to not plot x or y axis (xaxt, yaxt).
-* Added option to not plot the date distributions mirrored.
-* New function Baconvergence() to test for good mixing of MCMC runs. 
-* Renamed weighted means of age estimates to means.
-* Updated documentation.
-* Renamed functions flux.age, plot.accrate.age and plot.accrate.depth to flux.age.ghost, accrate.age.ghost and accrate.depth.ghost, respectively. 
+* now a CRAN R package (not called bacon since that name was already taken).
+* default core directory now Bacon_runs. Other directories can be given, for more flexibility in workflows of users. 
+* calibration curves can be put in a user-specified directory ccdir (hidden by default).
+* new function copyCalibrationCurve() to copy calibration curves into an R's session.
+* renamed several options to be more consistent, d.R and d.STD now named delta.R and delta.STD.
+* can now provide depths to be calculated as a variable, as alternative to using a file with depths.
+* added option to not plot x or y axis (xaxt, yaxt).
+* added option to not plot the date distributions mirrored.
+* new function Baconvergence() to test for good mixing of MCMC runs. 
+* renamed weighted means of age estimates to means.
+* updated documentation.
+* renamed functions flux.age, plot.accrate.age and plot.accrate.depth to flux.age.ghost, accrate.age.ghost and accrate.depth.ghost, respectively. 
 * BCAD dealt with more correctly.
-* Repaired many sundry bugs.
+* repaired many sundry bugs.
 
 # Bacon 2.2
-* Updated to 14C calibration curves IntCal13, Marine13 and SHCal13.
-* Changed .hpd to _ages.txt since many users get tricked by the extension.
-* Changed from .dat files to .csv files as these are more documented and easier to open and edit by users.
-* Separator for .csv file can be adapted.
-* Renamed res to hopefully more intuitive thick (thickness of sections)
-* Added d.R and d.STD
+* updated to 14C calibration curves IntCal13, Marine13 and SHCal13.
+* changed .hpd to _ages.txt since many users get tricked by the extension.
+* changed from .dat files to .csv files as these are more documented and easier to open and edit by users.
+* separator for .csv file can be adapted.
+* renamed res to hopefully more intuitive thick (thickness of sections)
+* added d.R and d.STD
 * Bacon.hist gives 95% ranges, mid and wmean, and reads from a file instead of from the command line. 
-* Added options to change axis limits, orientation and rotation. 
+* added options to change axis limits, orientation and rotation. 
 * BCAD introduced, though not yet working entirely as expected.
-* Different prior for acc.mean suggested if initial estimates indicate that this would be beneficial. 
-* Introduced a settings file.
+* different prior for acc.mean suggested if initial estimates indicate that this would be beneficial. 
+* introduced a settings file.
 * removed calc.every (gave problems with long cores).
-* Killed hist bug that assumed integers.
-* Language cleanup of cpp files.
-* Added option to remove unnecessary files after a run.
-* Added option in agedepth to only plot the age-model (so not the upper panels).
-* Many bug fixes in the Bacon.R and underlying C/C++ codes
+* killed hist bug that assumed integers.
+* language cleanup of cpp files.
+* added option to remove unnecessary files after a run.
+* added option in agedepth to only plot the age-model (so not the upper panels).
+* many bug fixes in the Bacon.R and underlying C/C++ codes

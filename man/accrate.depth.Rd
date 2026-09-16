@@ -2,12 +2,13 @@
 % Please edit documentation in R/accrate.R
 \name{accrate.depth}
 \alias{accrate.depth}
-\title{Obtain estimated accumulation rates as for any depth of a core.}
+\title{obtain estimated accumulation rates as for any depth of a core}
 \usage{
 accrate.depth(
   d,
   set = get("info"),
   cmyr = FALSE,
+  remove.hiatuses = TRUE,
   na.rm = FALSE,
   inversion.threshold = 1e-06
 )
@@ -18,6 +19,8 @@ accrate.depth(
 \item{set}{Detailed information of the current run, stored within this session's memory as variable \code{info}.}
 
 \item{cmyr}{Accumulation rates can be calculated in cm/year or year/cm. By default \code{cmyr=FALSE} and accumulation rates are calculated in year per cm.}
+
+\item{remove.hiatuses}{Any hiatuses will affect apparent accumulation rates within sections. Therefore, by default the hiatus jumps will be removed from the accumulation rates within sections containing hiatuses.}
 
 \item{na.rm}{Remove NA entries. These are NOT removed by default, ensuring that always the same amount of iterations is returned.}
 
@@ -30,7 +33,7 @@ all MCMC estimates of accumulation rate of the chosen depth.
 Obtain accumulation rates (in years per cm, so actually sedimentation times) as estimated by the MCMC iterations for any depth of a core.
 }
 \details{
-should take into account hiatuses
+should take into account hiatuses and slumps (I think it does though)
 
 Considering accumulation rates is crucial for age-depth modelling, and even more so if they are subsequently used for calculating proxy
 influx values, or interpreted as proxy for environmental change such as carbon accumulation.

@@ -45,10 +45,90 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+// depths_ageranges
+NumericMatrix depths_ageranges(const NumericVector& depths, const NumericMatrix& out, const NumericVector& elbows, int n_rows, double prob);
+RcppExport SEXP _rbacon_depths_ageranges(SEXP depthsSEXP, SEXP outSEXP, SEXP elbowsSEXP, SEXP n_rowsSEXP, SEXP probSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector& >::type depths(depthsSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type out(outSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type elbows(elbowsSEXP);
+    Rcpp::traits::input_parameter< int >::type n_rows(n_rowsSEXP);
+    Rcpp::traits::input_parameter< double >::type prob(probSEXP);
+    rcpp_result_gen = Rcpp::wrap(depths_ageranges(depths, out, elbows, n_rows, prob));
+    return rcpp_result_gen;
+END_RCPP
+}
+// depths_ageranges_hiatus
+NumericMatrix depths_ageranges_hiatus(const NumericVector& depths, const NumericMatrix& out, const NumericVector& elbows, const NumericVector& hiatus_depths, const NumericMatrix& slopes_above, const NumericMatrix& slopes_below, const NumericMatrix& elbow_above_hiatus, const NumericMatrix& elbow_below_hiatus, int n_rows, double prob);
+RcppExport SEXP _rbacon_depths_ageranges_hiatus(SEXP depthsSEXP, SEXP outSEXP, SEXP elbowsSEXP, SEXP hiatus_depthsSEXP, SEXP slopes_aboveSEXP, SEXP slopes_belowSEXP, SEXP elbow_above_hiatusSEXP, SEXP elbow_below_hiatusSEXP, SEXP n_rowsSEXP, SEXP probSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector& >::type depths(depthsSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type out(outSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type elbows(elbowsSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type hiatus_depths(hiatus_depthsSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type slopes_above(slopes_aboveSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type slopes_below(slopes_belowSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type elbow_above_hiatus(elbow_above_hiatusSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type elbow_below_hiatus(elbow_below_hiatusSEXP);
+    Rcpp::traits::input_parameter< int >::type n_rows(n_rowsSEXP);
+    Rcpp::traits::input_parameter< double >::type prob(probSEXP);
+    rcpp_result_gen = Rcpp::wrap(depths_ageranges_hiatus(depths, out, elbows, hiatus_depths, slopes_above, slopes_below, elbow_above_hiatus, elbow_below_hiatus, n_rows, prob));
+    return rcpp_result_gen;
+END_RCPP
+}
+// depths_agegrid
+List depths_agegrid(const NumericVector& depths, const NumericMatrix& out, const NumericVector& elbows, int hist_n, double min_age, double max_age, int n_rows, double prob);
+RcppExport SEXP _rbacon_depths_agegrid(SEXP depthsSEXP, SEXP outSEXP, SEXP elbowsSEXP, SEXP hist_nSEXP, SEXP min_ageSEXP, SEXP max_ageSEXP, SEXP n_rowsSEXP, SEXP probSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector& >::type depths(depthsSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type out(outSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type elbows(elbowsSEXP);
+    Rcpp::traits::input_parameter< int >::type hist_n(hist_nSEXP);
+    Rcpp::traits::input_parameter< double >::type min_age(min_ageSEXP);
+    Rcpp::traits::input_parameter< double >::type max_age(max_ageSEXP);
+    Rcpp::traits::input_parameter< int >::type n_rows(n_rowsSEXP);
+    Rcpp::traits::input_parameter< double >::type prob(probSEXP);
+    rcpp_result_gen = Rcpp::wrap(depths_agegrid(depths, out, elbows, hist_n, min_age, max_age, n_rows, prob));
+    return rcpp_result_gen;
+END_RCPP
+}
+// depths_agegrid_hiatus
+List depths_agegrid_hiatus(const NumericVector& depths, const NumericMatrix& out, const NumericVector& elbows, const NumericVector& hiatus_depths, const NumericMatrix& slopes_above, const NumericMatrix& slopes_below, const NumericMatrix& elbow_above_hiatus, const NumericMatrix& elbow_below_hiatus, int hist_n, double min_age, double max_age, int n_rows, double prob);
+RcppExport SEXP _rbacon_depths_agegrid_hiatus(SEXP depthsSEXP, SEXP outSEXP, SEXP elbowsSEXP, SEXP hiatus_depthsSEXP, SEXP slopes_aboveSEXP, SEXP slopes_belowSEXP, SEXP elbow_above_hiatusSEXP, SEXP elbow_below_hiatusSEXP, SEXP hist_nSEXP, SEXP min_ageSEXP, SEXP max_ageSEXP, SEXP n_rowsSEXP, SEXP probSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector& >::type depths(depthsSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type out(outSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type elbows(elbowsSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type hiatus_depths(hiatus_depthsSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type slopes_above(slopes_aboveSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type slopes_below(slopes_belowSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type elbow_above_hiatus(elbow_above_hiatusSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type elbow_below_hiatus(elbow_below_hiatusSEXP);
+    Rcpp::traits::input_parameter< int >::type hist_n(hist_nSEXP);
+    Rcpp::traits::input_parameter< double >::type min_age(min_ageSEXP);
+    Rcpp::traits::input_parameter< double >::type max_age(max_ageSEXP);
+    Rcpp::traits::input_parameter< int >::type n_rows(n_rowsSEXP);
+    Rcpp::traits::input_parameter< double >::type prob(probSEXP);
+    rcpp_result_gen = Rcpp::wrap(depths_agegrid_hiatus(depths, out, elbows, hiatus_depths, slopes_above, slopes_below, elbow_above_hiatus, elbow_below_hiatus, hist_n, min_age, max_age, n_rows, prob));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_rbacon_bacon", (DL_FUNC) &_rbacon_bacon, 4},
     {"_rbacon_events", (DL_FUNC) &_rbacon_events, 12},
+    {"_rbacon_depths_ageranges", (DL_FUNC) &_rbacon_depths_ageranges, 5},
+    {"_rbacon_depths_ageranges_hiatus", (DL_FUNC) &_rbacon_depths_ageranges_hiatus, 10},
+    {"_rbacon_depths_agegrid", (DL_FUNC) &_rbacon_depths_agegrid, 8},
+    {"_rbacon_depths_agegrid_hiatus", (DL_FUNC) &_rbacon_depths_agegrid_hiatus, 13},
     {NULL, NULL, 0}
 };
 

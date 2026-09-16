@@ -9,3 +9,19 @@ events <- function(th1, th2, th_shift, window, outputfname1, MCMCsamplesfname1, 
     invisible(.Call(`_rbacon_events`, th1, th2, th_shift, window, outputfname1, MCMCsamplesfname1, samplesize, K, c0, Dc, eventprobsfname1, depths_size))
 }
 
+depths_ageranges <- function(depths, out, elbows, n_rows = 4000L, prob = 0.95) {
+    .Call(`_rbacon_depths_ageranges`, depths, out, elbows, n_rows, prob)
+}
+
+depths_ageranges_hiatus <- function(depths, out, elbows, hiatus_depths, slopes_above, slopes_below, elbow_above_hiatus, elbow_below_hiatus, n_rows = 4000L, prob = 0.95) {
+    .Call(`_rbacon_depths_ageranges_hiatus`, depths, out, elbows, hiatus_depths, slopes_above, slopes_below, elbow_above_hiatus, elbow_below_hiatus, n_rows, prob)
+}
+
+depths_agegrid <- function(depths, out, elbows, hist_n = 512L, min_age = 0.0, max_age = 55000.0, n_rows = 4000L, prob = 0.95) {
+    .Call(`_rbacon_depths_agegrid`, depths, out, elbows, hist_n, min_age, max_age, n_rows, prob)
+}
+
+depths_agegrid_hiatus <- function(depths, out, elbows, hiatus_depths, slopes_above, slopes_below, elbow_above_hiatus, elbow_below_hiatus, hist_n = 512L, min_age = 0.0, max_age = 55000.0, n_rows = 4000L, prob = 0.95) {
+    .Call(`_rbacon_depths_agegrid_hiatus`, depths, out, elbows, hiatus_depths, slopes_above, slopes_below, elbow_above_hiatus, elbow_below_hiatus, hist_n, min_age, max_age, n_rows, prob)
+}
+

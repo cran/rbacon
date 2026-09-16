@@ -2,7 +2,7 @@
 % Please edit documentation in R/MCMC.R
 \name{thinner}
 \alias{thinner}
-\title{Thin iterations.}
+\title{thin iterations}
 \usage{
 thinner(
   proportion = 0.1,

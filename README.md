@@ -2,4 +2,10 @@
 
 Software for Bayesian age-depth modelling.
 
-For tutorials, check out the vignettes at the [CRAN](https://cran.r-project.org/package=rbacon) version.
+## Bacon Manual
+
+The **Bacon Manual** (maintained and authoritative) is available as a vignette in the CRAN version of the package:
+
+https://cran.r-project.org/package=rbacon
+
+This documentation supersedes earlier (pre‑2019) versions of the Bacon manual formerly hosted on a decommissioned university server, which are obsolete and unmaintained.

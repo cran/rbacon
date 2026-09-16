@@ -7,6 +7,7 @@ export(Bacon.Age.d)
 export(Bacon.cleanup)
 export(Bacon.d.Age)
 export(Bacon.hist)
+export(Bacon_runs)
 export(Baconvergence)
 export(MCMC.diagnostics)
 export(accrate.age)
@@ -35,69 +36,90 @@ export(stretch)
 export(thinner)
 export(tofu)
 importFrom(Rcpp,evalCpp)
-importFrom(coda,as.mcmc)
-importFrom(coda,effectiveSize)
-importFrom(coda,gelman.diag)
-importFrom(coda,geweke.diag)
-importFrom(coda,mcmc.list)
-importFrom(data.table,fread)
-importFrom(data.table,fwrite)
-importFrom(grDevices,cairo_pdf)
-importFrom(grDevices,dev.copy)
-importFrom(grDevices,dev.copy2pdf)
-importFrom(grDevices,dev.cur)
-importFrom(grDevices,dev.interactive)
-importFrom(grDevices,dev.list)
-importFrom(grDevices,dev.off)
-importFrom(grDevices,extendrange)
-importFrom(grDevices,grey)
-importFrom(grDevices,pdf)
-importFrom(grDevices,rgb)
-importFrom(graphics,abline)
-importFrom(graphics,axis)
-importFrom(graphics,box)
-importFrom(graphics,curve)
-importFrom(graphics,hist)
-importFrom(graphics,image)
-importFrom(graphics,layout)
-importFrom(graphics,legend)
-importFrom(graphics,lines)
-importFrom(graphics,locator)
-importFrom(graphics,mtext)
-importFrom(graphics,par)
-importFrom(graphics,plot)
-importFrom(graphics,points)
-importFrom(graphics,polygon)
-importFrom(graphics,rect)
-importFrom(graphics,segments)
-importFrom(graphics,text)
-importFrom(rice,BCADtocalBP)
-importFrom(rice,F14CtoC14)
-importFrom(rice,calBPtoBCAD)
-importFrom(rice,draw.dates)
-importFrom(rice,pMCtoC14)
-importFrom(rintcal,ccurve)
-importFrom(rintcal,mix.ccurves)
-importFrom(rintcal,new.ccdir)
-importFrom(stats,approx)
-importFrom(stats,approxfun)
-importFrom(stats,coef)
-importFrom(stats,dbeta)
-importFrom(stats,density)
-importFrom(stats,dgamma)
-importFrom(stats,dnorm)
-importFrom(stats,dunif)
-importFrom(stats,lm)
-importFrom(stats,median)
-importFrom(stats,quantile)
-importFrom(stats,rnorm)
-importFrom(stats,setNames)
-importFrom(stats,var)
-importFrom(stats,weighted.mean)
-importFrom(utils,packageName)
-importFrom(utils,read.csv)
-importFrom(utils,read.table)
-importFrom(utils,setTxtProgressBar)
-importFrom(utils,txtProgressBar)
-importFrom(utils,write.table)
+importFrom(coda,
+  as.mcmc,
+  effectiveSize,
+  gelman.diag,
+  geweke.diag,
+  mcmc.list
+)
+importFrom(data.table,
+  fread,
+  fwrite
+)
+importFrom(grDevices,
+  cairo_pdf,
+  colorRampPalette,
+  colours,
+  dev.copy,
+  dev.cur,
+  dev.interactive,
+  dev.list,
+  dev.off,
+  extendrange,
+  grey,
+  pdf,
+  rgb
+)
+importFrom(graphics,
+  abline,
+  axis,
+  box,
+  curve,
+  hist,
+  image,
+  layout,
+  legend,
+  lines,
+  locator,
+  mtext,
+  par,
+  plot,
+  points,
+  polygon,
+  rect,
+  segments,
+  text
+)
+importFrom(rice,
+  BCADtocalBP,
+  F14CtoC14,
+  calBPtoBCAD,
+  draw.dates,
+  hpd.overlap,
+  pMCtoC14
+)
+importFrom(rintcal,
+  ccurve,
+  mix.ccurves,
+  new.ccdir
+)
+importFrom(stats,
+  approx,
+  approxfun,
+  coef,
+  dbeta,
+  density,
+  dgamma,
+  dnorm,
+  dunif,
+  lm,
+  median,
+  na.omit,
+  quantile,
+  rnorm,
+  sd,
+  setNames,
+  var,
+  weighted.mean
+)
+importFrom(utils,
+  head,
+  packageName,
+  read.csv,
+  read.table,
+  setTxtProgressBar,
+  txtProgressBar,
+  write.table
+)
 useDynLib(rbacon, .registration=TRUE)

@@ -2,7 +2,7 @@
 % Please edit documentation in R/read_write.R
 \name{bacon2clam}
 \alias{bacon2clam}
-\title{Translate Bacon .csv files to clam .csv files.}
+\title{translate Bacon .csv files to clam .csv files}
 \usage{
 bacon2clam(core, bacondir = "Bacon_runs", clamdir = "clam_runs", sep = ",")
 }

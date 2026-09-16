@@ -2,7 +2,7 @@
 % Please edit documentation in R/forplum.R
 \name{draw.pbmeasured}
 \alias{draw.pbmeasured}
-\title{Plot the 210Pb data}
+\title{plot the 210Pb data}
 \usage{
 draw.pbmeasured(
   set = get("info"),

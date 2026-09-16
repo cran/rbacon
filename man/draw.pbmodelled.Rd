@@ -2,7 +2,7 @@
 % Please edit documentation in R/forplum.R
 \name{draw.pbmodelled}
 \alias{draw.pbmodelled}
-\title{Plot the 210Pb data}
+\title{plot the 210Pb data}
 \usage{
 draw.pbmodelled(
   set = get("info"),
@@ -20,7 +20,8 @@ draw.pbmodelled(
   plot.measured = TRUE,
   age.lim = c(),
   mgp = mgp,
-  pb.lty = 1
+  pb.lty = 1,
+  save.info = TRUE
 )
 }
 \arguments{
@@ -55,6 +56,8 @@ draw.pbmodelled(
 \item{mgp}{Axis text margins (where should titles, labels and tick marks be plotted). Defaults to \code{mgp=c(1.7, .7, .0)}.}
 
 \item{pb.lty}{Line type of measured Pb-210 data.}
+
+\item{save.info}{By default, a variable called `info' with relevant information about the run (e.g., core name, priors, settings, ages, output) is saved into the working directory. Note that this will overwrite any existing variable with the same name.}
 }
 \value{
 A plot of the modelled (and optionally the measured) 210Pb values

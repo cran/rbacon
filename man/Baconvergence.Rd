@@ -2,7 +2,7 @@
 % Please edit documentation in R/MCMC.R
 \name{Baconvergence}
 \alias{Baconvergence}
-\title{Test to identify poorly mixed MCMC runs.}
+\title{test to identify poorly mixed MCMC runs}
 \usage{
 Baconvergence(core = "MSB2K", runs = 5, suggest = FALSE, verbose = TRUE, ...)
 }

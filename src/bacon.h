@@ -26,13 +26,14 @@ Bacon
 //This is my traditional farewell, may be changed to something more "serious"
 #define FAREWELL "Eso es to...eso es to...eso es to...eso es toooodo amigos!\n"\
 
-//if(Un01() < 0.5)
-//    #define FAREWELL "Ats us nai!\n";
+
 
 //#include <stdio.h>
 #include <math.h>
 //#include <unistd.h>
 #include <string.h>
+#include <cstdio>
+#include <R_ext/Print.h>
 
 #include "cal.h"
 #include "ranfun.h"
@@ -70,24 +71,24 @@ class BaconFix: public Bacon {
 
 			int m, K; //m number of dets, K number of sections
 			int H; //number of hiatuses
-			double *h; //location of the hiatuses
+			double *h; //locations of the hiatuses
 
 			int useT; //=1 to use the t model, =0 to use the normal model
 
             //unsigned long int seed; // MB Oct 2020
 
-			double w, w0, wp0;
+			double w, w0, wp0; // memory
 
-			double *x, *X0, *Xp0, *theta;
+			double *x, *X0, *Xp0, *theta; // accrates, age
 
 			double MinYr, MaxYr;
 			double MaxYrTheta0Plum;
 
 			//Based on depth and increment between depths
-			double c0, Dc;
-			virtual double c(int i) { return c0 + i*Dc; }
+			double c0, Dc; // minimum/starting depth, thickness of sections of the piece-wise linear model
+			virtual double c(int i) { return c0 + i*Dc; } // starting depth of section i
 
-			double U, Uprior, Uli;
+			double U, Uprior, Uli; // accumulation rates
             void AccPars(int prime) { /*fprintf( F, "%f  %f  %f\n", Uprior, Uli, U);*/
             prime=0;}
 
@@ -128,17 +129,16 @@ class BaconFix: public Bacon {
 
 				//rsc = ds/Dc = 1/[(cm-c0)/K]
 				//( ((1./by)-1.)*log(w)- log(by)+  ((1./by)*(shape1_m-1.))*log(w) +
-				//(shape2_m - 1.)*log(1.-w^(1./by) ) )# prior for w	#
+				//(shape2_m - 1.)*log(1.-w^(1./by) ) )# prior for w
 
 				//the last term (1.0-rsc)*logw - logrsc was missing,
 				//see f(w), p.461, of the paper, jac: changed 22OCT2018
 			}
 			//here ds = 1.0 (in your depth units), it could be changed to a parameter
 
-
-			double *ha, *hb; //a priori pars for the uniform prior on hiatus jumps in each inter hiatus.
-//H Change			double priorHU(int i, const double x) { return (1.0-ha[i])*log(x) + hb[i]*Dc*x; }
-			double priorHU(int i, const double x) { return 1.0; } //Uniform
+			double *ha, *hb; //a priori pars (ha hiatus.shape, hb hiatus.shape/hiatus.mean = rate) for the gamma prior on hiatus jumps in each inter hiatus.
+			double priorHU(int i, const double x) { return (1.0-ha[i])*log(x) + hb[i]*Dc*x; } // old prior, back 8 Aug 2025
+			//double priorHU(int i, const double x) { return 1.0; } //Uniform. Commented June 2025. And uncommented again. commented out 8 Aug 2025. MB Activated again March 2026. And commented out again
 
 			int WarnBeyondLimits;
 			//Sets the thetas and verifies correct limits
@@ -308,18 +308,14 @@ class BaconFix: public Bacon {
 						Xp0[k] = GammaSim( alpha[0], mult/beta[0]);
 
 					}
-				} else {//initial values for the acc. rates, with hiatus
+				} else { //initial values for the acc. rates, with hiatus. Does not include checking with dates yet
 
 					//we go backwards until we find the hiatus
 					int l=0;
 					for (int k=K-1; k>0; k--) {
-						if ((fcmp( c(k-1), h[l]) == -1) && (fcmp( h[l], c(k)) != 1)) { //if c_{k-1} < h_l & h_l !> c_k, forgets
-                        //printf("\nha is %f, hb is %f\n", ha[l], hb[l]); // MB April 2025, but should model accrate, not jump
-						    X0[k]  = GammaSim( ha[l], 1.0/(hb[l]*Dc) ); // this is the original one
-							//X0[k]  = GammaSim( alpha[l], mult/beta[l]) + (UnifSim(0, hb[l])/Dc); // MB April 2025
-							//printf("Valor de hb %lf\n",hb[l]);
-							//x0[k]  = GammaSim( alpha[l], mult/(beta[l]) ); // MB May 2019
-							//x[k] = X0[k];
+						if ((fcmp( c(k-1), h[l]) == -1) && (fcmp( h[l], c(k)) != 1)) { // c_{k-1} < h_l <= c_k, forgets
+						  X0[k] = GammaSim( ha[l], 1.0/(hb[l]*Dc) ); // this is the original one
+							
 							l++; //jump to next hiatus, but max one hiatus in each section.
 						} else { //continue with the memory
 							X0[k]  = GammaSim( alpha[l], mult/beta[l]);
@@ -332,7 +328,6 @@ class BaconFix: public Bacon {
 					for (int k=K-1; k>0; k--) {
 						if ((fcmp( c(k-1), h[l]) == -1) && (fcmp( h[l], c(k)) != 1)) { //forgets
 							Xp0[k]  = GammaSim( ha[l], 1.0/(hb[l]*Dc) );
-							//xp0[k]  = GammaSim( alpha[l], mult/(beta[l]) ); // MB Apr 2019
 							l++; //jump to next hiatus, but max one hiatus in each section.
 						} else{ //continue with the memory
 							Xp0[k]  = GammaSim( alpha[l], mult/beta[l]);
@@ -405,7 +400,6 @@ class BaconFix: public Bacon {
 			//x[K+3] ... x[K+nPS] is PS for support data in plum
 	    int insupport(double *X) {
 
-
 				//NOTE: Check the support for PS and phi
 				if (plumUsed == 1) {
 
@@ -425,8 +419,6 @@ class BaconFix: public Bacon {
 					}
 
 				} //endif of plumUsed
-
-
 
 				w = X[K+1];
 				if   ((fcmp( w, 0.0) != 1) || (fcmp( w, 1.0) != -1)){  //w out of support, should be <0, 1>
@@ -469,10 +461,11 @@ class BaconFix: public Bacon {
 						//printf("B: %d  %f  %f\n", k, x[k], (x[k]-w*x[k+1])/(1.0-w));
 						if ((fcmp( c(k-1), h[l]) == -1) && (fcmp( h[l], c(k)) != 1)) { //forgets
 //H Change
-							if ((fcmp( x[k], 0.0) != 1) || (fcmp( hb[l], x[k]) != 1)){ //we require 0.0 < x[k] < hb[l]
-								//Rprintf("we require 0.0 < x[k] < hb[l], %.2lf < %.2lf < %.2lf\n", 0.0, x[k], hb[l]);
-								return 0;
-							}
+							//if ((fcmp( x[k], 0.0) != 1) || (fcmp( hb[l], x[k]) != 1)){ //we require 0.0 < x[k] < hb[l]
+						//	if ((fcmp( x[k], 0.0) != 1) || (fcmp( 0.0, x[k]) != 1)){
+						//		Rprintf("we require 0.0 < x[k] < hb[l], %.2lf < %.2lf < %.2lf\n", 0.0, x[k], hb[l]);
+						//		return 0;
+						//	}
 							l++; //jump to next hiatus, but max one hiatus in each section.
 						} else if (fcmp( (x[k]-w*x[k+1])/(1.0-w), 0.0) != 1) { //e_k <= 0
 							//Rprintf("e_k <= 0 %.2lf <= 0\n", (x[k]-w*x[k+1])/(1.0-w));
@@ -481,14 +474,10 @@ class BaconFix: public Bacon {
 					}
 				}
 
-
-
 				if (plumUsed == 1) { //Check the chronology limit
 					phi = x[K+2];
 
 					double plumchronolim = (1.0/LA_CONST)*log( phi / (plumobj->GetAl()*LA_CONST) );
-
-
 
 					//printf("PLUM %lf %lf\n",  G( dets->d(last210Pb), x), plumchronolim);
 					//fflush(stdout);
@@ -616,6 +605,7 @@ class BaconFix: public Bacon {
 				Uprior += priorwU(w); //prior for w
 				//printf(" priorw=%f", Uprior);
 
+				int first_sec_after_hiatus = 0; // jac sep 2026
 
 				//Set the prior for all accumulation rates
 				Uprior += prioracU( 0, x[K]); //prior for alpha_K
@@ -624,6 +614,7 @@ class BaconFix: public Bacon {
 					for (int k=1; k<K; k++) {
 						Uprior += prioracU( 0, (x[k]-w*x[k+1])/(1.0-w)); //prior for e_k
 						//printf("%f %f\n", (x[k]-w*x[k+1])/(1.0-w), U);
+
 					}
 				}
 				else {
@@ -632,13 +623,20 @@ class BaconFix: public Bacon {
 					int l=0;
 
 					for (int k=K-1; k>0; k--) {
-						if ((fcmp( c(k-1), h[l]) == -1) && (fcmp( h[l], c(k)) != 1)) { //forgets
-							//Uprior += priorHU( l, hb[k]); //MB April 2025
-							Uprior += priorHU( l, x[k]); //prior for the hiatus jump in hiatus l
+						if ((fcmp( c(k-1), h[l]) == -1) && (fcmp( h[l], c(k)) != 1)) { // within hiatus, forgets
+							//printf("hb= %f", ha[l]/hb[l]);
+							Uprior += priorHU( l, x[k]);
+							
 							l++; //jump to next hiatus, but max one hiatus in each section.
+							first_sec_after_hiatus = 1; // Sep 2026
 						}
 						else
-							Uprior += prioracU( l, (x[k]-w*x[k+1])/(1.0-w)); //prior for e_k in section l
+							if (first_sec_after_hiatus == 1) { // Sep 2026
+								Uprior += prioracU( l, x[k]); // prior for first section after hiatus
+								first_sec_after_hiatus = 0; // Sep 2026
+							}
+							else
+								Uprior += prioracU( l, (x[k]-w*x[k+1])/(1.0-w)); //prior for e_k in section l
 					}
 
 				}
@@ -653,7 +651,6 @@ class BaconFix: public Bacon {
 				//Rprintf("Memory %.8lf\n", x[K+1]);
 
 				U = Uprior + Uli;
-
 
 				return U;
 			}

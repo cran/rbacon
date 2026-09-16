@@ -1,5 +1,5 @@
 ---
-title: rbacon
+title: "rbacon"
 output:
   html_vignette:
     toc: true
@@ -12,11 +12,13 @@ vignette: >
 
 # Introduction
 
-Bacon is an age-depth modelling tool which divides a sediment core up into equally-sized sections of (by default) 5 cm thickness, and assumes a linear accumulation within each section. Accumulation rates can change between the sections, and this variability is constrained by prior information (see below). Bacon can use radiocarbon dates (calibrating them as it runs) or dates that are already on the calendar scale. 
+This document is the maintained and authoritative manual for the Bacon package. Bacon is an age-depth modelling tool which divides a sediment core up into equally-sized sections of (by default) 5 cm thickness, and assumes a linear accumulation within each section. Accumulation rates can change between the sections, and this variability is constrained by prior information (see below). Bacon can use radiocarbon dates (calibrating them as it runs) or dates that are already on the calendar scale (such as pollen markers).
+
+This manual supersedes earlier pre‑2019 versions hosted at chrono.qub.ac.uk/blaauw/, which are obsolete and unmaintained.
 
 # Installation and loading
 
-Bacon works through R (or Rstudio), and requires a recent version of R (at least 4.0.1). The first time you are using Bacon on your computer, you will have to install its R package (named `rbacon`, all lowercase), by typing within the terminal of R:
+Bacon works through `R` (or Rstudio), and requires a recent version of `R` (at least 4.0.0). The first time you are using Bacon on your computer, you will have to install its `R` package (named `rbacon`, all lowercase), by typing within the terminal of `R`:
 
 ```{r, eval=FALSE}
 install.packages('rbacon')
@@ -30,7 +32,7 @@ library(rbacon)
 
 # Running rbacon
 
-The package comes with two pre-loaded datasets, MSB2K and RLGH3. Start by running the default core, MSB2K. Note R's comments about where the files are going to be placed, as we will need this information later. Press 'y' and/or Enter to accept any suggestions.
+The package comes with two pre-loaded datasets, MSB2K and RLGH3. Start by running the default core, MSB2K. Note `R`'s comments about where the files are going to be placed, as we will need this information later. Press 'y' and/or Enter to accept any suggestions.
 
 ```{r, eval=FALSE}
 Bacon()
@@ -42,15 +44,15 @@ Bacon will calibrate any C-14 dates, do the MCMC run, calculate age ranges, prod
 
 * The second panel at the top shows the accumulation rate (in yr/cm, so actually sedimentation time). The prior (green) is a gamma distribution with two parameters: acc.mean and acc.shape. The values of gamma distributions are always >0, ensuring positive accumulation rates. Larger values of shape will result in more peaked prior distributions. The grey shape shows the posterior distribution (its mean and shape are also provided in the terminal output).
 
-* Then we have the prior (green) and posterior (grey) for the memory, or how much accumulation rates can change from one depth to the other. This is a beta distribution, which allows values between 0 and 1. A very low memory prior would allow for a high variability of accumulation rate, while a very high memory prior would result in a nearly straight age-depth model. Also shown is the section thickness of the piece-wise linear model, and the resulting amounts of sections. The mean and strength of the posterior distribution are provided in the terminal output.
+* Then we have the prior (green) and posterior (grey) for the memory, or how much accumulation rates can change from one depth to the other. This is a beta distribution, which allows values between 0 and 1. A very low memory prior would allow for a high variability of accumulation rate, while a very high memory prior would result in a nearly straight age-depth model. Also shown is the section thickness of the piece-wise linear model, and the resulting amounts of sections. The mean and strength of the posterior distribution are provided in the terminal output, as well as a 'learning ratio'. 
 
-* If you have set a hiatus, then the rightmost top-panel will show the prior (green) and posterior (grey) distributions for this. The prior for this is a uniform distribution (but always >0; the maximum is set at 10,000 years by default but this can be changed). Again, the mean and shape of the posterior are provide in the terminal output. 
+* If you have set a hiatus, then the rightmost top-panel will show the prior (green) and posterior (grey) distributions for this. The prior for this is a uniform distribution (but always >0; the mean is set at 1000 years by default but this can be changed). Again, the mean and shape of the posterior are provide in the terminal output. 
 
 * Finally there is the main panel, which shows the distribution of the dates in blue (calibrated C-14 dates) or greenish (cal BP dates). More precise dates will peak higher (on the depth scale) than less precise, wider dates. The age-depth model is shown in grey-scale, where darker hues indicate more certain areas. The red dashed curve shows the mean model, and the dashed grey curves the 95% confidence intervals.
   
 ![Bacon output plot](./images/Bacon_output.png)
 
-Besides the graph, Bacon also produces files containing age estimates (95% ranges and the mean) for each depth (by default every cm from the top to the bottom core depth). This file can be found in the core's folder (see '6 Folders and Files'). Also reported are how well the MCMC run went, and summaries of the confidence ranges, the overlap between the dates and the age-depth model, and the posterior values for the accumulation rate and memory.
+Besides the graph, Bacon also produces files containing age estimates (95% ranges and the mean) for each depth (by default every cm from the top to the bottom core depth). This file can be found in the core's folder (see '6 Folders and Files'). Also reported are how well the MCMC run went, and summaries of the confidence ranges, the overlap between the dates and the age-depth model, and a comparison of the prior and posterior values for the accumulation rate and memory (including a 'learning ratio'). A file ending in `_summary.txt`, containing the above information, is written to the core's folder.
 
 To see all options and settings, ask for help:
 
@@ -90,7 +92,7 @@ Bacon('RLGH3')
 
 ![age-depth model of RLGH3 using suggested settings](./images/RLGH3_50yrcm.png)
 
-With the adapted prior for the accumulation rate, now the lowermost date *is* taken into account. Now, what if someone you trusted told you that they had some very strong information from other nearby lakes that sedimentation times are very likely to be 50 yr/cm? Then we can set the prior to be much more restrictive/stronger than the default - we let the green curve peak higher so that the accumulation rates are 'forced' to values around 50 yr/cm:
+With the adapted prior for the accumulation rate, now the lowermost date *is* taken into account. Now, what if someone you trusted told you that they had some very strong information from other nearby lakes that sedimentation times are very likely to be 50 yr/cm? Then we can set the prior to be much more restrictive/stronger than the default - we let the green curve peak higher (larger acc.shape value) so that the accumulation rates are 'forced' to values around 50 yr/cm:
 
 ```{R, eval=FALSE}
 Bacon('RLGH3', acc.mean=50, acc.shape=100)
@@ -98,7 +100,7 @@ Bacon('RLGH3', acc.mean=50, acc.shape=100)
 
 ![age-depth model of RLGH3 using a much stronger accumulation rate prior](./images/RLGH3_50yrcm_strong.png)
 
-Bacon did what it was told to do. The posterior accumulation rates fit very well with the prior's mean of 50 yr/cm. The age-depth model itself however is very straight and isn't very realistic, and most of the dates don't fit with the model. Note also the top-left panel which shows the MCMC run; the first thousand or so iterations are still sub-optimal and should really be removed using the `scissors` function. In all, not a good age-depth model, and it's probably a good idea to talk to your expert again, or find another one with more realistic prior information.
+Bacon did what it was told to do. The posterior accumulation rates fit very well with the prior's mean of 50 yr/cm. The age-depth model itself however is very straight and isn't very realistic, and most of the dates don't fit with the model. Note also the top-left panel which shows the MCMC run; the first thousand or so iterations are still sub-optimal and should really be removed using the `scissors` function. In all, not a good age-depth model, and it's probably a good idea to talk to your expert again, or find someone else with more realistic prior information.
 
 When comparing the prior (green) and posterior (grey) distributions of the accumulation rate and the memory, it can be helpful to consider that the Bayesian approach aims to combine prior information with new data in order to 'learn' about the process, in other words to update its information about the parameters involved. The default priors were chosen to be sufficiently broad to allow the data to inform us about the accumulation rate and its variability.
 
@@ -108,11 +110,13 @@ Besides the prior for accumulation rates, the other prior is that of the memory,
 
 ## Hiatuses and slumps
 
-If your site has hiatuses (gaps in accumulation), these can be set by providing their depths. By default, the maximum length of hiatuses is 10,000 years, but this can be adapted, for example:
+If your site has hiatuses (gaps in accumulation), these can be set by providing their depths. By default, the prior mean length of hiatuses is 1000 years, but this can be adapted, for example:
 
 ```{r, eval=FALSE}
-Bacon("RLGH3", acc.mean=50, hiatus.depths=125, hiatus.max=1000)
+Bacon("RLGH3", acc.mean=50, hiatus.depths=125, hiatus.mean=100)
 ```
+
+Note that the shape for the hiatus prior is set to be very permissive - in other words, the data will steer most of the posterior distribution.   
 
 ![age-depth model of RLGH3 assuming a hiatus at 125 cm depth](./images/RLGH3_hiatus.png)
 
@@ -126,7 +130,7 @@ Bacon("RLGH3", acc.mean=50, slump=c(180, 120, 40, 30))
 
 ## Section thickness
 
-The model underlying Bacon is made up of piece-wise linear sections, and for each section the accumulation rate is modelled as constrained by the priors for accumulation rate and memory. The sections, are 5 cm thick by default (`thick=5`). However, for very short cores this would result in a very 'elbowy' model. For very long cores, the default section thickness could result in too many parameters and the model losing itself. Therefore, for very short or long cores, different values for will be suggested for `thick`.
+The model underlying Bacon is made up of piece-wise linear sections, and for each section the accumulation rate is modelled as constrained by the priors for accumulation rate and memory. The sections are 5 cm thick by default (`thick=5`). However, for very short cores this would result in a very 'elbowy' model. For very long cores, the default section thickness could result in too many parameters and the model losing itself. Therefore, for very short or long cores, different values for will be suggested for `thick`.
 
 Sometimes for difficult cores it can be a good idea to first run it with fewer, thicker sections in order to find useful combinations of priors and settings, and then running it again with more, thinner sections to obtain an age-depth model that looks 'smooth enough'. Each time, also check that the MCMC run looks fine and stable, and please check and show all panels of the age-model plot.
 
@@ -198,8 +202,7 @@ Bacon(accept.suggestions=TRUE)
 This can be used to run all cores in a directory while you make yourself some breakfast:
 
 ```{r, eval=FALSE}
-allcores <- list.files("Bacon_runs")
-for(i in allcores)
+for(i in Bacon_runs())
   try(Bacon(i, accept.suggestions=TRUE))
 ```
 
@@ -397,7 +400,7 @@ These age ranges can also be saved to a file - please see `?ageranges'.
 
 ## Can Bacon take into account a hiatus or a slump?
 
-Yes. If your core's stratigraphy indicates a hiatus at say 30 cm core depth, put this as `Bacon(hiatus.depths=30)`. With multiple hiatuses, concatenate the values as, e.g., `Bacon(hiatus.depths=c(30,52))`. Going across a hiatus or boundary, Bacon will lose its memory of the accumulation rate.
+Yes. If your core's stratigraphy indicates a hiatus at say 30 cm core depth, put this as `Bacon(hiatus.depths=30)`. With multiple hiatuses, combine or concatenate the values as, e.g., `Bacon(hiatus.depths=c(30,52))`. Going across a hiatus or boundary, Bacon will lose its memory of the accumulation rate.
 
 If you expect a boundary instead of a hiatus, so just an abrupt change in sedimentation regime without an accompanying gap in time, then use `boundary`, as in `Bacon(boundary=30)` or `Bacon(boundary=c(30,52))`.
 
@@ -426,11 +429,11 @@ Bacon("MyCore", 1)
 
 ## Why does my age-model look like a trumpet?
 
-Perhaps the model got lost as too many parameters had to be estimated. Does the model follow some of the dated depths, but then it diverges and runs away from the rest of the dates? Try running it with fewer sections (larger value of `thick`).
+Perhaps the model got lost as too many parameters had to be estimated. Does the model follow some of the dated depths, but after that starts to diverge and run away from the rest of the dates? Try running it with fewer sections (larger value of `thick`).
 
 ## Should I adapt the priors to exactly match my core's accumulation rate?
 
-No. In most cases, the default or suggested values for acc.mean should work fine. The default shape parameter `acc.shape=1.5` is set such that a large range of accumulation rates is allowed and the data will allow Bacon to update our information about the most likely accumulation rate values. The same holds for memory's strength parameter `mem.strength=10`. It is thus quite allright for the prior distributions to be much wider than the posterior distributions - then you have learned more about the values of the parameters that make up the age-depth model of your site.
+No. In most cases, the default or suggested values for acc.mean should work fine. The default shape parameter `acc.shape=1.5` is set such that a large range of accumulation rates is allowed and the data will allow Bacon to update our information about the most likely accumulation rate values. The same holds for memory's strength parameter `mem.strength=10`. It is thus quite allright for the prior distributions to be much wider than the posterior distributions - then you have learned more about the values of the parameters that make up the age-depth model of your site. Check the output of the terminal, which compares the prior and posterior values, and also reports a 'learning ratio' (i.e., the precision of the posterior divided by that of the prior).  
 
 If however you have additional information about a site's accumulation history, this can be included by setting 'stronger', more informative priors. For example, a site might be known to have accumulated without major swings in accumulation rates, and then the memory prior can be set to be close to 1 (e.g., `mem.strength=50, mem.mean=0.9`). On the other hand, sites which are assumed to have experienced wide fluctuations in sedimentations could be modelled by setting the memory prior to very low values (`mem.strength=50, mem.mean=0.1`).
 
@@ -488,9 +491,15 @@ my_fancy_colours <- sample(colours(), nrow(info$dets))
 agedepth(dates.col=my_fancy_colours)
 ```
 
+Or play with the colours of the age-depth ghost graph itself:
+
+```{r, eval=FALSE}
+agedepth(from.col="papayawhip", to.col="saddlebrown")`
+```
+
 ## What indicates a good age-depth model?
 
-First of all, check that the MCMC run (top-left panel) looks stable, like white noise with no major structure where iterations seem 'stuck'. Ensure that there is no burn-in remaining. If the MCMC looks bad, try a longer run by specifying a different value for `ssize` (default 4000). You can always run the `scissors` or `thinner` commands to trim the MCMC run to something nice and manageable after the run.
+First of all, check that the MCMC run (top-left panel) looks stable, like stationary noise with no major structure where iterations seem 'stuck'. Ensure that there is no burn-in remaining. If the MCMC looks bad, try a longer run by specifying a different value for `ssize` (default 4000). You can always run the `scissors` or `thinner` commands to trim the MCMC run to something nice and manageable after the run.
 
 Bacon will provide some indicators of how well the MCMC run went - first the `effective sample size (ess)` which informs us of how well the MCMC is mixed, and then `z` which gives an indication of how stationary the MCMC run was (higher values of `z` indicate drifts). Low `ess` or high `z` will result in warnings.
 

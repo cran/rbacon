@@ -2,7 +2,7 @@
 % Please edit documentation in R/accrate.R
 \name{accrate.depth.ghost}
 \alias{accrate.depth.ghost}
-\title{Plot modelled accumulation rates against the depths of a core.}
+\title{plot modelled accumulation rates against the depths of a core}
 \usage{
 accrate.depth.ghost(
   set = get("info"),
@@ -13,7 +13,10 @@ accrate.depth.ghost(
   cmyr = FALSE,
   acc.lab = c(),
   dark = 1,
+  darkest = 0.8,
   cutoff = 0.001,
+  zero.col = "white",
+  max.col = "black",
   rgb.scale = c(0, 0, 0),
   rgb.res = 100,
   prob = 0.95,
@@ -34,7 +37,8 @@ accrate.depth.ghost(
   bty = "l",
   remove.laststep = TRUE,
   use.raster = FALSE,
-  flip.acc = FALSE
+  flip.acc = FALSE,
+  remove.hiatuses = TRUE
 )
 }
 \arguments{
@@ -52,9 +56,15 @@ accrate.depth.ghost(
 
 \item{acc.lab}{Axis label for the accumulation rate.}
 
-\item{dark}{The darkest grey value is dark=1 by default; lower values will result in lighter grey but values >1 are not advised.}
+\item{dark}{The value beyond which any higher values will be clipped. Set to 1 by default. This can be set to lower values if for example only a very small area in the plot obtains the darkest values - then lowering the `dark` value will darker a larger area.}
+
+\item{darkest}{The darkest grey value is darkest=1 by default; lower values will result in lighter maximum colours; values >1 are not advised.}
 
 \item{cutoff}{Point below which colours will no longer be printed. Default \code{cutoff=0.001}.}
+
+\item{zero.col}{The colour where the ghost is 0. Defaults to \code{zero.col="white"}, which together with \code{max.col="black"} results in a greyscale. More creative colour gradients can be implemented by checking the 600+ colours in \code{colours()}.}
+
+\item{max.col}{The colour where the ghost is at its maximum. Defaults to \code{max.col="black"}, which together with \code{zero.col="white"} results in a greyscale. More creative colour gradients can be implemented by checking the 600+ colours in \code{colours()}.}
 
 \item{rgb.scale}{The function to produce a coloured representation of all age-models. Needs 3 values for the intensity of red, green and blue. Defaults to grey-scales: \code{rgb.scale=c(0,0,0)}, but could also be, say, scales of red (\code{rgb.scale=c(1,0,0)}).}
 
@@ -97,6 +107,8 @@ accrate.depth.ghost(
 \item{use.raster}{Rasters can be aligned or not in the underlying image function. Setting \code{use.raster=FALSE, default} takes a bit longer to draw and sometimes causes strange lines owing to anti-aliasing. However, the alternative of \code{use.raster=TRUE} causes greyscales on some devices (e.g., OSX quartz) to 'flip'. If this is the case, use 'flip.acc=TRUE'.}
 
 \item{flip.acc}{When using \code{use.raster=TRUE}, sometimes greyscales are flipped. If this is the case, see if setting \code{flip.acc=TRUE} solves this.}
+
+\item{remove.hiatuses}{Any hiatuses will affect apparent accumulation rates within sections. Therefore, by default the hiatus jumps will be removed from the accumulation rates within sections containing hiatuses.}
 }
 \value{
 A grey-scale plot of accumulation rate against core depth, and (invisibly) the list of depths and their accumulation rates (ranges, medians, means).

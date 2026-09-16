@@ -79,18 +79,36 @@ int bacon( std::string inputfile1, std::string outputfile1, int ssize, std::stri
 
   Rprintf("bacon: burn in (initial iterations which will be removed): %d\n", All.Dim() * EVERY_MULT * BURN_IN_MULT);
 
-if (Un01() < 0.5) {
-	Rprintf(FAREWELL);} else
-		if(Un01() < 0.5) {
-			Rprintf("Ats us nai!\n");} else
-				if(Un01() < 0.2) {
-					Rprintf("... sizzle spatter sizzle...\n");} else
-						if(Un01() < 0.2) {
-							Rprintf("... adding maple...\n");} else
-								if(Un01() < 0.5) {
-						 			Rprintf("Looking good, turning off the fire\n\n");} else
-										{Rprintf("Remember, never pour grease down the drain!\n");};
+  double blurt = Un01();
 
+  if (blurt < 0.4) {
+      Rprintf(FAREWELL);
+  } else if (blurt < 0.45) {
+      Rprintf("Ats us nai!\n");
+  } else if (blurt < 0.5) {
+      Rprintf("That's me!\n");  
+  } else if (blurt < 0.55) {
+      Rprintf("... sizzle spatter sizzle...\n");
+  } else if (blurt < 0.6) {
+      Rprintf("... adding maple...\n");
+  } else if (blurt < 0.65) {
+      Rprintf("Looking good, turning off the fire\n");
+  } else if (blurt < 0.7) {
+      Rprintf("Awk, that does look lovely, so it does, like!\n");
+  } else if(blurt < 0.75) {
+      Rprintf("\"Knowledge is power\" — Francis Bacon (AD 1597)\n");
+  } else if(blurt < 0.8) {
+      Rprintf("Buen provecho!\n");
+  } else if(blurt < 0.85) {
+      Rprintf("Eet smakelijk!\n");
+  } else if (blurt < 0.9) {
+     Rprintf("That bacon would go well in a soda, so it would!\n");
+  } else if (blurt < 0.95) {
+     Rprintf("Is maith liom bag\u00FAn\n");      	
+  } else if(blurt < 1.0) {
+     Rprintf("Remember, never pour grease down the drain!\n");
+  }
+  
 //  printf("bacon: suggested burn in= %d\n", All.Dim() * EVERY_MULT * BURN_IN_MULT);
  // printf(FAREWELL);
 

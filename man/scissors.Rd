@@ -2,7 +2,7 @@
 % Please edit documentation in R/MCMC.R
 \name{scissors}
 \alias{scissors}
-\title{Remove the first n iterations.}
+\title{remove the first n iterations}
 \usage{
 scissors(burnin, set = get("info"), write = TRUE, save.info = set$save.info)
 }

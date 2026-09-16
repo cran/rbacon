@@ -2,7 +2,7 @@
 % Please edit documentation in R/accrate.R
 \name{accrate.age.summary}
 \alias{accrate.age.summary}
-\title{Provide a summary of the estimated accumulation rates for any age of a core.}
+\title{provide a summary of the estimated accumulation rates for any age of a core}
 \usage{
 accrate.age.summary(
   age,

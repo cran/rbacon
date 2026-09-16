@@ -2,7 +2,7 @@
 % Please edit documentation in R/calc.R
 \name{stretch}
 \alias{stretch}
-\title{Stretch some depths of a core}
+\title{stretch some depths of a core}
 \usage{
 stretch(d, boundary, times)
 }

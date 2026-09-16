@@ -1,7 +1,7 @@
 ### functions which are for running Plum, but are looked for by generic agedepth() function, so are included in the rbacon code
 
 #' @name draw.pbmeasured
-#' @title Plot the 210Pb data
+#' @title plot the 210Pb data
 #' @description Produce a plot of the 210Pb data and their depths
 #' @details This function is generally called internally to produce the age-depth graph.
 #' It can be used to produce custom-built graphs.
@@ -26,11 +26,11 @@
 #' @export
 draw.pbmeasured <- function(set=get('info'), rotate.axes=FALSE, rev.d=FALSE, rev.age=FALSE, BCAD=set$BCAD, pb.lim=c(), age.lim=c(), d.lim=c(), d.lab=c(), pb.lab=c(), pbmeasured.col="blue", pbmeasured.lty=2, pb.log=FALSE, supp.col="purple", newplot=TRUE, on.agescale=FALSE) {
   depths <- set$detsOrig[,2]
-  dns <- set$detsOrig[,3]
+  # dns <- set$detsOrig[,3]
   Pb <- set$detsOrig[,4]
   err <- set$detsOrig[,5]
   thickness <- set$detsOrig[,6]
-  n <- nrow(set$detsOrig)
+  # n <- nrow(set$detsOrig)
 
   if(length(pb.lim) == 0)
     pb.lim <- extendrange(c(0, Pb+2*err), f=c(0,0.05))
@@ -85,7 +85,7 @@ draw.pbmeasured <- function(set=get('info'), rotate.axes=FALSE, rev.d=FALSE, rev
 
 
 #' @name draw.pbmodelled
-#' @title Plot the 210Pb data
+#' @title plot the 210Pb data
 #' @description Produce a plot of the 210Pb data and their depths
 #' @details This function is generally called internally to produce the age-depth graph.
 #' It can be used to produce custom-built graphs.
@@ -105,10 +105,11 @@ draw.pbmeasured <- function(set=get('info'), rotate.axes=FALSE, rev.d=FALSE, rev
 #' @param age.lim values of the age axis. Used to calculate where to plot the pb values on the secondary axis
 #' @param mgp Axis text margins (where should titles, labels and tick marks be plotted). Defaults to \code{mgp=c(1.7, .7, .0)}.
 #' @param pb.lty Line type of measured Pb-210 data.
+#' @param save.info By default, a variable called `info' with relevant information about the run (e.g., core name, priors, settings, ages, output) is saved into the working directory. Note that this will overwrite any existing variable with the same name.
 #' @author Maarten Blaauw, J. Andres Christen, Marco Aquino-Lopez
 #' @return A plot of the modelled (and optionally the measured) 210Pb values
 #' @export
-draw.pbmodelled <- function(set=get('info'), BCAD=set$BCAD, rotate.axes=FALSE, rev.d=FALSE, rev.age=FALSE, pb.lim=c(), d.lim=c(), d.lab=c(), pb.lab=c(), pbmodelled.col=function(x) rgb(0,0,1,x), pbmeasured.col="blue", supp.col="purple", plot.measured=TRUE, age.lim=c(), mgp=mgp, pb.lty=1) {
+draw.pbmodelled <- function(set=get('info'), BCAD=set$BCAD, rotate.axes=FALSE, rev.d=FALSE, rev.age=FALSE, pb.lim=c(), d.lim=c(), d.lab=c(), pb.lab=c(), pbmodelled.col=function(x) rgb(0,0,1,x), pbmeasured.col="blue", supp.col="purple", plot.measured=TRUE, age.lim=c(), mgp=mgp, pb.lty=1, save.info=TRUE) {
 
   pb <- set$dets[set$dets[,9] == 5,]
   depths <- pb[,4] # set$detsOrig[,2]
@@ -118,15 +119,15 @@ draw.pbmodelled <- function(set=get('info'), BCAD=set$BCAD, rotate.axes=FALSE, r
   thickness <- pb[,5] # set$detsOrig[,6]
   n <- nrow(pb)
 
-  if(ncol(pb) > 6) {
-    supp <- pb[,7] # set$detsOrig[,7]
-    supperr <- pb[,8] # set$detsOrig[,8]
-  } else {
-    supp <- set$supportedData[,1]
-    supperr <- set$supportedData[,2]
-    suppd <- set$supportedData[,3]
-    suppthick <- set$supportedData[,4]
-  }
+  #if(ncol(pb) > 6) {
+  #  supp <- pb[,7] # set$detsOrig[,7]
+    # supperr <- pb[,8] # set$detsOrig[,8]
+  #} else {
+   # supp <- set$supportedData[,1]
+    # supperr <- set$supportedData[,2]
+    #suppd <- set$supportedData[,3]
+    #suppthick <- set$supportedData[,4]
+  #}
 
   if(length(d.lab) == 0)
     d.lab <- paste0("depth (", set$depth.unit, ")")
@@ -172,6 +173,9 @@ draw.pbmodelled <- function(set=get('info'), BCAD=set$BCAD, rotate.axes=FALSE, r
     set$Ai <- Ai
     set$A.rng <- A.rng
 
+    if(save.info)
+      assign_to_global("info", set)
+
     this <- ifelse(rotate.axes, 3, 4)
     pretty.pb <- pretty(pb.lim)
     onbp <- pb2bp(pretty.pb)
@@ -182,28 +186,31 @@ draw.pbmodelled <- function(set=get('info'), BCAD=set$BCAD, rotate.axes=FALSE, r
     mtext(pb.lab, this, 2.5, col=pbmeasured.col, cex=.8)
 
     for(i in 1:length(depths)) {
+    #for(i in 1:min(length(depths), length(Ai$x), na.rm=TRUE)) {
       ages <- pb2bp(Ai$x[[i]], AD=BCAD)
       if(BCAD) 
-		ages <- rev(ages)
+        ages <- rev(ages)
       z <- matrix(Ai$y[[i]]/hght, nrow=1)
       d_slice <- c(depths[i]-thickness[i], depths[i])
-      modelled_col <- pbmodelled.col(seq(0, 1-max(z), length=50))
-	  
-	  # we're not using ghost.mirror, because of BC/AD axis reversal issues
+
+      # keeping rgb approach with alpha here, since the bluescales overlap with agedepth.ghost
+      modelled_col <- pbmodelled.col(seq(0, 1-max(z), length=50)) 
+
+      # we're not using ghost.mirror, because of BC/AD axis reversal issues
       if(rotate.axes) {
-        if(BCAD)	  
+        if(BCAD)
           image(ages, d_slice, z, add=TRUE, col=modelled_col, useRaster=FALSE) else
             image(ages, d_slice, z, add=TRUE, col=modelled_col, useRaster=FALSE)
         } else {
-	     if(BCAD)  
-  	       image(d_slice, ages, z, add=TRUE, col=modelled_col, useRaster=FALSE) else
-	         image(d_slice, ages, z, add=TRUE, col=modelled_col, useRaster=FALSE)
-        }	  
+          if(BCAD)
+            image(d_slice, ages, z, add=TRUE, col=modelled_col, useRaster=FALSE) else
+              image(d_slice, ages, z, add=TRUE, col=modelled_col, useRaster=FALSE)
+        }
     }
   }
 
   if(plot.measured)
-    draw.pbmeasured(set=set, newplot=FALSE, rotate.axes=rotate.axes, BCAD=BCAD, on.agescale=TRUE, pb.lim=pb.lim, age.lim=age.lim, supp.col=supp.col)	
+    draw.pbmeasured(set=set, newplot=FALSE, rotate.axes=rotate.axes, BCAD=BCAD, on.agescale=TRUE, pb.lim=pb.lim, age.lim=age.lim, supp.col=supp.col)
   
   invisible(set)
 }
@@ -211,7 +218,7 @@ draw.pbmodelled <- function(set=get('info'), BCAD=set$BCAD, rotate.axes=FALSE, r
 
 
 #' @name A.modelled
-#' @title Calculate modelled 210Pb
+#' @title calculate modelled 210Pb
 #' @description Calculate modelled 210Pb values of a sample slice, based on the parameters of the age-model (i.e., time passed since deposition of the bottom and top of the slice), supported and influx
 #' @param d.top top depth of the slice
 #' @param d.bottom bottom depth of the slice
